@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:quran_app_android/core/design/gallery/design_gallery_view.dart';
+import 'package:quran_app_android/core/design/components/app_button.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:quran_app_android/core/design/app_colors.dart';
@@ -58,6 +60,14 @@ class SettingsView extends StatelessWidget {
                     await NativeAzkarBridge.cancelAzkar();
                   },
                   child: const Text('إلغاء تنبيهات الأذكار المجدولة'),
+                ),
+                AppSpacing.verticalLg,
+                AppButton.secondary(
+                  label: 'معرض مكونات التصميم (Design Gallery)',
+                  icon: const Icon(Icons.palette_outlined, size: 20),
+                  onPressed: () {
+                    Get.to(() => const DesignGalleryView());
+                  },
                 ),
                 AppSpacing.verticalXl,
               ],
