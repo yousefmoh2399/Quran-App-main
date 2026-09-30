@@ -1,13 +1,14 @@
 // ignore_for_file: file_names
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:quran_app_android/core/util/app_url.dart';
+import 'package:quran_app_android/core/data/data.dart';
 import 'package:quran_app_android/features/nameOfAllah/data/models/Names_Of_Allah_model.dart';
 
 class NamesOfAllahViewModel extends GetxController {
-  NamesOfAllahViewModel() {
+  final NamesRepository _namesRepository;
+
+  NamesOfAllahViewModel({NamesRepository? namesRepository})
+      : _namesRepository = namesRepository ?? NamesRepository() {
     readJson();
   }
 
@@ -37,13 +38,12 @@ class NamesOfAllahViewModel extends GetxController {
     try {
       isLoading = true;
       update();
-      final String response = await rootBundle.loadString(AppUrl.nameOfAllahUrl);
-      final data = await json.decode(response);
-      items = data;
-      nameOfAllah.clear();
-      for (int i = 0; i < items.length; i++) {
-        nameOfAllah.add(NamesOfAllahModel.fromJson(items[i]));
-      }
+
+      final names = await _namesRepository.getNames();
+      nameOfAllah = names
+          .map((n) => NamesOfAllahModel(name: n.name, text: n.text))
+          .toList();
+      items = nameOfAllah;
     } catch (e, st) {
       if (kDebugMode) {
         debugPrint('NamesOfAllah error: $e\n$st');

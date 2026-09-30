@@ -1,13 +1,11 @@
 // ignore_for_file: non_constant_identifier_names
 
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:quran_app_android/core/data/data.dart';
 import 'package:quran_app_android/core/service/database/local_storage_data.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
-import 'package:quran_app_android/core/util/app_url.dart';
 import 'package:quran_app_android/features/quran/data/models/details_model.dart';
 
 class QuranScreenViewModel extends GetxController {
@@ -70,19 +68,45 @@ class QuranScreenViewModel extends GetxController {
     update();
   }
 
+  final QuranRepository _quranRepository = QuranRepository();
+
   Future<void> readJson() async {
     try {
       isLoading.value = true;
-      final String response = await rootBundle.loadString(AppUrl.quranUrl);
-      final List<dynamic> data = json.decode(response) as List<dynamic>;
-      items = data;
-      ayah_Model
-        ..clear()
-        ..addAll(
-          items.map<AyahModel>(
-            (item) => AyahModel.fromJson(item as Map<String, dynamic>),
+      final rawSurahsWithAyahs =
+          await _quranRepository.getAllSurahsWithAyahsRaw();
+      final List<AyahModel> loaded = [];
+
+      for (final item in rawSurahsWithAyahs) {
+        final SurahEntity s = item['surah'] as SurahEntity;
+        final List<Map<String, dynamic>> versesRaw =
+            item['ayahs'] as List<Map<String, dynamic>>;
+
+        final List<VersesModel> verses = versesRaw.map((v) {
+          return VersesModel(
+            id: v['ayah_number'] as int,
+            text: v['text_ar'] as String,
+            translation: v['text_en'] as String?,
+          );
+        }).toList();
+
+        loaded.add(
+          AyahModel(
+            id: s.id,
+            name: s.nameAr,
+            total_verses: s.totalVerses,
+            transliteration: s.transliteration,
+            type: s.type,
+            translation: s.nameEn,
+            verses: verses,
           ),
         );
+      }
+
+      items = loaded;
+      ayah_Model
+        ..clear()
+        ..addAll(loaded);
       _invalidatePagesCache();
       if (sharedPref.sharedPref?.getInt('indexQuran') != null) {
         currentIndex4Quran =

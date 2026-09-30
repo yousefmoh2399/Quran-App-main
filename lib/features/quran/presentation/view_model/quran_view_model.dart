@@ -1,12 +1,15 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:quran_app_android/core/data/data.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
-import 'package:quran_app_android/core/util/app_url.dart';
 import 'package:quran_app_android/features/quran/data/models/model.dart';
 
 class QuranViewModel extends GetxController {
+  final QuranRepository _quranRepository;
+
+  QuranViewModel({QuranRepository? quranRepository})
+      : _quranRepository = quranRepository ?? QuranRepository();
+
   final SettingsServices settingsServices = Get.find<SettingsServices>();
   late final PageController pageController;
   int currentPage = 0;
@@ -37,16 +40,22 @@ class QuranViewModel extends GetxController {
     try {
       isLoading = true;
       update();
-      final String response = await rootBundle.loadString(AppUrl.nameQuranUrl);
-      final data = json.decode(response) as List<dynamic>;
-      items = data;
+      final surahs = await _quranRepository.getSurahs();
       nameModel
         ..clear()
         ..addAll(
-          data.map(
-            (item) => NameModel.fromJson(item as Map<String, dynamic>),
+          surahs.map(
+            (s) => NameModel(
+              id: s.id,
+              name: s.nameAr,
+              total_verses: s.totalVerses,
+              transliteration: s.transliteration,
+              type: s.type,
+            ),
           ),
         );
+      items = nameModel;
+
       if (nameModel.isNotEmpty) {
         final int safePage =
             currentPage.clamp(0, nameModel.length - 1);
@@ -74,20 +83,4 @@ class QuranViewModel extends GetxController {
     settingsServices.sharedPref?.setInt('lastVisitedSurahPage', index);
     update();
   }
-
-  // List<NameModel> searchResult = [];
-  // onSearchTextChange(String text) async {
-  //   searchResult.clear();
-  //   if (text.isEmpty) {
-  //     update();
-  //     return;
-  //   }
-  //   for (var element in nameModel) {
-  //     if (element.name!.contains(text.capitalizeFirst!) ||
-  //         element.transliteration!.contains(text.capitalizeFirst!)) {
-  //       searchResult.add(element);
-  //       update();
-  //     }
-  //   }
-  // }
 }

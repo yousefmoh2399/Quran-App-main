@@ -1,18 +1,15 @@
 // ignore_for_file: deprecated_member_use
 
 import 'dart:async';
-import 'dart:convert';
-// import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:quran_app_android/core/data/data.dart';
 import 'package:quran_app_android/core/service/database/local_storage_data.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
-import 'package:quran_app_android/core/util/app_url.dart';
 import 'package:quran_app_android/core/util/constant/constant.dart';
 import 'package:quran_app_android/features/quran/data/models/details_model.dart';
-import 'package:quran_app_android/features/quran/data/models/quran_audio_model.dart';
+import 'package:quran_app_android/features/quran/data/models/quran_audio_model.dart' hide DataModel;
 import 'package:quran_app_android/features/tafsser/data/models/tafaseerModel.dart';
 
 class TafseerDetailsViewModel extends GetxController {
@@ -28,12 +25,37 @@ class TafseerDetailsViewModel extends GetxController {
   Future<void> readJsonTafseer() async {
     try {
       isLoading.value = true;
-      final String response = await rootBundle.loadString(AppUrl.tafseerUrl);
-      final data = await json.decode(response);
-      itemsTafseer = data;
-      for (int i = 0; i < itemsTafseer.length; i++) {
-        tafaseerModel.add(TafaseerModel.fromJson(itemsTafseer[i]));
+      final db = await AppDatabase.instance.database;
+      final rows = await db.query(
+        'ayahs',
+        columns: ['id', 'surah_id', 'ayah_number', 'tafsir_muyassar'],
+        orderBy: 'surah_id ASC, ayah_number ASC',
+      );
+
+      final Map<int, List<DataModel>> grouped = {};
+      for (final r in rows) {
+        final surahId = r['surah_id'] as int;
+        final dataModel = DataModel(
+          id: r['ayah_number'] as int,
+          sura: surahId,
+          aya: r['ayah_number'] as int,
+          text: (r['tafsir_muyassar'] as String?) ?? '',
+        );
+        grouped.putIfAbsent(surahId, () => []).add(dataModel);
       }
+
+      tafaseerModel
+        ..clear()
+        ..addAll(
+          List.generate(114, (index) {
+            final surahId = index + 1;
+            return TafaseerModel(
+              id: surahId,
+              data: grouped[surahId] ?? [],
+            );
+          }),
+        );
+      itemsTafseer = tafaseerModel;
       isLoading.value = false;
       update();
     } catch (e, st) {

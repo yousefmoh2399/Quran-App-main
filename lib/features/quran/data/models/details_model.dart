@@ -6,6 +6,18 @@ class AyahModel {
 
   List<VersesModel> verses = [];
 
+  AyahModel({
+    this.id,
+    this.total_verses,
+    this.name,
+    this.transliteration,
+    this.type,
+    this.translation,
+    List<VersesModel>? verses,
+  }) {
+    if (verses != null) this.verses = verses;
+  }
+
   AyahModel.fromJson(Map<String, dynamic> json) {
     id = json["id"];
     total_verses = json["total_verses"];

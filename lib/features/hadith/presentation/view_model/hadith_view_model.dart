@@ -1,15 +1,16 @@
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:quran_app_android/core/data/data.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
-import 'package:quran_app_android/core/util/app_url.dart';
 import 'package:quran_app_android/features/hadith/data/models/hadith_model.dart';
 import 'package:quran_app_android/features/hadith/data/models/hadith_model_malek.dart';
 
 class HadithViewModel extends GetxController {
-  HadithViewModel() {
+  final HadithRepository _hadithRepository;
+
+  HadithViewModel({HadithRepository? hadithRepository})
+      : _hadithRepository = hadithRepository ?? HadithRepository() {
     hadithRead();
   }
 
@@ -18,8 +19,7 @@ class HadithViewModel extends GetxController {
   List<HadithModel> hadithList = [];
   bool isLoading = true;
 
-  // Backwards compatibility for any legacy code
-  RxBool get isLoadingg => false.obs;
+  RxBool isLoadingg = false.obs;
 
   double fontSize = 20.0;
   int currentIndex = 0;
@@ -84,14 +84,33 @@ class HadithViewModel extends GetxController {
   Future<void> hadithRead() async {
     try {
       isLoading = true;
+      isLoadingg.value = true;
       update();
-      final String response = await rootBundle.loadString(AppUrl.hadithUrl);
-      final data = await json.decode(response);
-      itemsData = data;
-      hadithModelFinal.clear();
-      for (int i = 0; i < itemsData.length; i++) {
-        hadithModelFinal.add(HadithModelFinal.fromJson(itemsData[i]));
-      }
+
+      final sectionsWithHadiths =
+          await _hadithRepository.getAllSectionsWithHadiths();
+
+      hadithModelFinal = sectionsWithHadiths.map((swh) {
+        return HadithModelFinal(
+          id: swh.section.id,
+          data: HadithModelData(
+            metadata: MetaDataModel(
+              name: swh.section.source,
+              section: SectionModel(name: swh.section.name),
+            ),
+            hadiths: swh.hadiths.map((h) {
+              return HadithsModel(
+                hadithnumber: h.hadithNumber,
+                arabicnumber: h.arabicNumber,
+                text: h.textAr,
+              );
+            }).toList(),
+          ),
+        );
+      }).toList();
+
+      itemsData = hadithModelFinal;
+      isLoadingg.value = false;
     } catch (e, st) {
       if (kDebugMode) {
         debugPrint('HadithViewModel error: $e\n$st');
@@ -100,5 +119,11 @@ class HadithViewModel extends GetxController {
       isLoading = false;
       update();
     }
+  }
+
+  @override
+  void onClose() {
+    pageController.dispose();
+    super.onClose();
   }
 }

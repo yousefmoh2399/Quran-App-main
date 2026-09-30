@@ -3,6 +3,8 @@
 class NamesOfAllahModel {
   String? name, text;
 
+  NamesOfAllahModel({this.name, this.text});
+
   NamesOfAllahModel.fromJson(Map<String, dynamic> json) {
     name = json["name"];
     text = json["text"];

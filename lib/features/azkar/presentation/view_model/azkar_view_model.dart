@@ -1,11 +1,13 @@
-import 'dart:convert';
-import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
-import 'package:quran_app_android/core/util/app_url.dart';
+import 'package:quran_app_android/core/data/data.dart';
 import 'package:quran_app_android/features/azkar/data/models/azkar_model.dart';
 
 class AzkarViewModel extends GetxController {
-  AzkarViewModel() {
+  final AzkarRepository _azkarRepository;
+
+  AzkarViewModel({AzkarRepository? azkarRepository})
+      : _azkarRepository = azkarRepository ?? AzkarRepository() {
     readJson();
   }
 
@@ -32,15 +34,24 @@ class AzkarViewModel extends GetxController {
     try {
       isLoading = true;
       update();
-      final String response = await rootBundle.loadString(AppUrl.adhkarUrl);
-      final data = await json.decode(response);
-      items = data;
-      azkarModel.clear();
-      for (int i = 0; i < items.length; i++) {
-        azkarModel.add(AzkarModel.fromJson(items[i]));
-      }
+      final categoriesWithItems =
+          await _azkarRepository.getAllCategoriesWithItems();
+      azkarModel = categoriesWithItems.map((catWithItems) {
+        return AzkarModel(
+          id: catWithItems.category.id,
+          category: catWithItems.category.name,
+          array: catWithItems.items.map((item) {
+            return ArrayAzkarModel(
+              id: item.itemId ?? item.id,
+              count: item.count,
+              text: item.textAr,
+            );
+          }).toList(),
+        );
+      }).toList();
+      items = azkarModel;
     } catch (e) {
-      // Error handling
+      debugPrint('Error loading azkar from repository: $e');
     } finally {
       isLoading = false;
       update();
