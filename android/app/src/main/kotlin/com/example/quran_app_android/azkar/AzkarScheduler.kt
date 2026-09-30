@@ -1,294 +1,145 @@
-// package com.example.quran_app_android.azkar
-
-// import android.app.AlarmManager
-// import android.app.PendingIntent
-// import android.content.Context
-// import android.content.Intent
-// import android.util.Log
-// import java.util.*
-
-// object AzkarScheduler {
-//     fun scheduleAzkar(context: Context, intervalMinutes: Int) {
-//         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-//         val intent = Intent(context, AzkarReceiver::class.java)
-//         val pendingIntent = PendingIntent.getBroadcast(
-//             context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-//         )
-
-//         val intervalMillis = intervalMinutes * 60 * 1000L
-//         val startTime = System.currentTimeMillis() + 10_000L // بعد 10 ثواني للتجربة
-
-//         Log.i("AzkarScheduler", "⏰ Scheduling Azkar every $intervalMinutes minutes")
-
-//         alarmManager.setRepeating(
-//             AlarmManager.RTC_WAKEUP,
-//             startTime,
-//             intervalMillis,
-//             pendingIntent
-//         )
-//     }
-// }
-
-
-
-
-// package com.example.quran_app_android.azkar
-
-// import android.app.AlarmManager
-// import android.app.PendingIntent
-// import android.content.Context
-// import android.content.Intent
-// import android.util.Log
-// import java.util.*
-
-// object AzkarScheduler {
-
-//     fun scheduleDailyAzkar(context: Context, intervalHours: Int) {
-//         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-//         cancelAll(context, alarmManager)
-
-//         val now = Calendar.getInstance()
-//         val start = Calendar.getInstance().apply {
-//             set(Calendar.HOUR_OF_DAY, 10)
-//             set(Calendar.MINUTE, 0)
-//             set(Calendar.SECOND, 0)
-//         }
-
-//         // لو الوقت الحالي بعد 10 مساءً، نبدأ من اليوم اللي بعده
-//         if (now.get(Calendar.HOUR_OF_DAY) >= 22) {
-//             start.add(Calendar.DAY_OF_YEAR, 1)
-//         }
-
-//         val end = Calendar.getInstance().apply {
-//             set(Calendar.HOUR_OF_DAY, 22)
-//             set(Calendar.MINUTE, 0)
-//             set(Calendar.SECOND, 0)
-//         }
-
-//         var triggerTime = start.timeInMillis
-//         var index = 0
-
-//         while (triggerTime <= end.timeInMillis) {
-//             val intent = Intent(context, AzkarReceiver::class.java)
-//             val pendingIntent = PendingIntent.getBroadcast(
-//                 context,
-//                 index++,
-//                 intent,
-//                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-//             )
-
-//             alarmManager.setExactAndAllowWhileIdle(
-//                 AlarmManager.RTC_WAKEUP,
-//                 triggerTime,
-//                 pendingIntent
-//             )
-
-//             Log.i("AzkarScheduler", "⏰ Scheduled azkar at ${Date(triggerTime)}")
-
-//             triggerTime += intervalHours * 60 * 60 * 1000 // بالساعات
-//         }
-
-//         // ✅ إعادة الجدولة كل يوم عند منتصف الليل
-//         scheduleNextDayReset(context)
-//     }
-
-//     private fun scheduleNextDayReset(context: Context) {
-//         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-//         val intent = Intent(context, AzkarResetReceiver::class.java)
-//         val pendingIntent = PendingIntent.getBroadcast(
-//             context,
-//             9999,
-//             intent,
-//             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-//         )
-
-//         val resetTime = Calendar.getInstance().apply {
-//             add(Calendar.DAY_OF_YEAR, 1)
-//             set(Calendar.HOUR_OF_DAY, 0)
-//             set(Calendar.MINUTE, 0)
-//             set(Calendar.SECOND, 5)
-//         }
-
-//         alarmManager.setExactAndAllowWhileIdle(
-//             AlarmManager.RTC_WAKEUP,
-//             resetTime.timeInMillis,
-//             pendingIntent
-//         )
-//     }
-
-//     private fun cancelAll(context: Context, alarmManager: AlarmManager) {
-//         for (i in 0..100) {
-//             val intent = Intent(context, AzkarReceiver::class.java)
-//             val pendingIntent = PendingIntent.getBroadcast(
-//                 context,
-//                 i,
-//                 intent,
-//                 PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
-//             )
-//             if (pendingIntent != null) {
-//                 alarmManager.cancel(pendingIntent)
-//             }
-//         }
-//     }
-// }
 package com.example.quran_app_android.azkar
 
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.util.Log
-import java.util.*
+import java.util.Calendar
+import java.util.Date
 
 object AzkarScheduler {
-
     private const val TAG = "AzkarScheduler"
-    private const val RESET_REQ_CODE = 9999
-    private const val MAX_SLOTS = 200 // احتياطي كبير لو intervalHours صغير
+    const val REQUEST_CODE_CHAINED_AZKAR = 40001
 
     /**
-     * جدول الأذكار يوميًا بين 10:00 صباحًا و 10:00 مساءً بفواصل كل intervalHours ساعة.
-     * - يحترم حالة الآن: قبل 10ص → يبدأ 10ص. بعد 10م → يبدأ غدًا 10ص.
-     * - داخل النافذة: يلتقط أقرب فتحة متوافقة مع intervalHours.
+     * Schedules the next chained Azkar notification alarm based on user settings.
      */
-    fun scheduleDailyAzkar(context: Context, intervalHours: Int) {
+    fun scheduleNext(context: Context) {
+        val settings = AzkarSettingsManager.getSettings(context)
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-        // امسح أي جدول سابق (بما فيهم منبّه إعادة الضبط الليلي)
-        cancelAll(context, alarmManager)
-
-        val now = Calendar.getInstance()
-
-        val start = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 10)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
+        if (!settings.enabled) {
+            cancel(context)
+            Log.i(TAG, "Azkar notifications disabled. Cancelled alarm.")
+            return
         }
 
-        val end = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 22)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
+        val nextTriggerMillis = calculateNextTriggerTime(
+            intervalMinutes = settings.intervalMinutes,
+            fromHour = settings.activeFromHour,
+            fromMinute = settings.activeFromMinute,
+            toHour = settings.activeToHour,
+            toMinute = settings.activeToMinute
+        )
+
+        val intent = Intent(context, AzkarReceiver::class.java).apply {
+            action = AzkarReceiver.ACTION_TRIGGER_AZKAR
         }
 
-        // لو الوقت بعد 10 مساءً: رحّل للغد 10 صباحًا
-        if (now.timeInMillis > end.timeInMillis) {
-            start.add(Calendar.DAY_OF_YEAR, 1)
-            end.add(Calendar.DAY_OF_YEAR, 1)
-        }
-
-        // لو قبل 10 صباحًا: ابدأ 10 صباحًا. لو جوّا النافذة: التقط أقرب فتحة متوافقة مع intervalHours
-        var firstTrigger = start.clone() as Calendar
-        if (now.timeInMillis in start.timeInMillis..end.timeInMillis) {
-            // احسب أول فتحة متوافقة ≥ الآن
-            val minutesFromStart = ((now.timeInMillis - start.timeInMillis) / (60 * 1000)).toInt()
-            val slotMinutes = intervalHours * 60
-            val nextSlotIndex = Math.ceil(minutesFromStart / slotMinutes.toDouble()).toInt()
-            firstTrigger.timeInMillis = start.timeInMillis + nextSlotIndex * slotMinutes * 60L * 1000L
-
-            // لو عدّت الفتحة المحسوبة نهاية اليوم، رحّل لليوم التالي 10 صباحًا
-            if (firstTrigger.timeInMillis > end.timeInMillis) {
-                firstTrigger = start.clone() as Calendar
-                firstTrigger.add(Calendar.DAY_OF_YEAR, 1) // بكرة 10 صباحًا
-                end.add(Calendar.DAY_OF_YEAR, 1)
-            }
-        }
-
-        // جدولة الفتحات حتى نهاية النافذة
-        val intervalMillis = intervalHours * 60L * 60L * 1000L
-        var triggerTime = firstTrigger.timeInMillis
-        var index = 0
-
-        while (triggerTime <= end.timeInMillis && index < MAX_SLOTS) {
-            val intent = Intent(context, AzkarReceiver::class.java)
-            val pendingIntent = PendingIntent.getBroadcast(
-                context,
-                index, // requestCode فريد لكل فتحة
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-
-            // أفضل دقة ممكنة مع الحفاظ على وصوله أثناء Doze
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                triggerTime,
-                pendingIntent
-            )
-
-            Log.i(TAG, "⏰ Scheduled azkar at ${Date(triggerTime)} (slot #$index, every $intervalHours h)")
-            index++
-            triggerTime += intervalMillis
-        }
-
-        // إعادة الجدولة يوميًا بعد منتصف الليل بثوانٍ قليلة
-        scheduleNextDayReset(context)
-    }
-
-    /**
-     * منبّه لضبط جدول اليوم التالي عند منتصف الليل (00:00:05)
-     */
-    private fun scheduleNextDayReset(context: Context) {
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(context, AzkarResetReceiver::class.java)
         val pendingIntent = PendingIntent.getBroadcast(
             context,
-            RESET_REQ_CODE,
+            REQUEST_CODE_CHAINED_AZKAR,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val resetTime = Calendar.getInstance().apply {
-            add(Calendar.DAY_OF_YEAR, 1)
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 5)
-            set(Calendar.MILLISECOND, 0)
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    nextTriggerMillis,
+                    pendingIntent
+                )
+            } else {
+                alarmManager.set(
+                    AlarmManager.RTC_WAKEUP,
+                    nextTriggerMillis,
+                    pendingIntent
+                )
+            }
+            Log.i(TAG, "⏰ Scheduled next chained Azkar alarm at ${Date(nextTriggerMillis)} (in ${settings.intervalMinutes} min intervals)")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to schedule chained azkar alarm: ${e.message}", e)
         }
-
-        alarmManager.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            resetTime.timeInMillis,
-            pendingIntent
-        )
-        Log.i(TAG, "🔁 Scheduled midnight reset at ${Date(resetTime.timeInMillis)}")
     }
 
     /**
-     * إلغاء كل منبّهات الأذكار + منبّه إعادة الضبط الليلي
+     * Calculates the next timestamp within the active hours window.
      */
-    fun cancelAzkar(context: Context) {
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        cancelAll(context, alarmManager)
-        Log.i(TAG, "🛑 All azkar alarms cancelled")
+    fun calculateNextTriggerTime(
+        intervalMinutes: Int,
+        fromHour: Int,
+        fromMinute: Int,
+        toHour: Int,
+        toMinute: Int,
+        currentTimeMillis: Long = System.currentTimeMillis()
+    ): Long {
+        val nowCal = Calendar.getInstance().apply {
+            timeInMillis = currentTimeMillis
+        }
+
+        val startCal = Calendar.getInstance().apply {
+            timeInMillis = currentTimeMillis
+            set(Calendar.HOUR_OF_DAY, fromHour)
+            set(Calendar.MINUTE, fromMinute)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+
+        val endCal = Calendar.getInstance().apply {
+            timeInMillis = currentTimeMillis
+            set(Calendar.HOUR_OF_DAY, toHour)
+            set(Calendar.MINUTE, toMinute)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+
+        val now = nowCal.timeInMillis
+        val start = startCal.timeInMillis
+        val end = endCal.timeInMillis
+
+        // If from == to, assume 24-hour operation
+        if (fromHour == toHour && fromMinute == toMinute) {
+            return now + intervalMinutes * 60 * 1000L
+        }
+
+        return if (now < start) {
+            // Before active window: trigger at window start today
+            start
+        } else if (now in start..end) {
+            val candidate = now + intervalMinutes * 60 * 1000L
+            if (candidate <= end) {
+                candidate
+            } else {
+                // Past end window: schedule for window start tomorrow
+                startCal.apply { add(Calendar.DAY_OF_YEAR, 1) }.timeInMillis
+            }
+        } else {
+            // Past end window: schedule for window start tomorrow
+            startCal.apply { add(Calendar.DAY_OF_YEAR, 1) }.timeInMillis
+        }
     }
 
-    private fun cancelAll(context: Context, alarmManager: AlarmManager) {
-        // ألغِ فتحات اليوم (نفس الـ requestCode النطاقي المستخدم في الجدولة)
-        for (i in 0 until MAX_SLOTS) {
-            val intent = Intent(context, AzkarReceiver::class.java)
-            val pendingIntent = PendingIntent.getBroadcast(
-                context,
-                i,
-                intent,
-                PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
-            )
-            if (pendingIntent != null) {
-                alarmManager.cancel(pendingIntent)
-            }
+    /**
+     * Cancels any pending azkar alarm.
+     */
+    fun cancel(context: Context) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(context, AzkarReceiver::class.java).apply {
+            action = AzkarReceiver.ACTION_TRIGGER_AZKAR
         }
-
-        // ألغِ منبّه إعادة الضبط الليلي
-        val resetIntent = Intent(context, AzkarResetReceiver::class.java)
-        val resetPI = PendingIntent.getBroadcast(
+        val pendingIntent = PendingIntent.getBroadcast(
             context,
-            RESET_REQ_CODE,
-            resetIntent,
+            REQUEST_CODE_CHAINED_AZKAR,
+            intent,
             PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
         )
-        if (resetPI != null) {
-            alarmManager.cancel(resetPI)
+        if (pendingIntent != null) {
+            alarmManager.cancel(pendingIntent)
+            pendingIntent.cancel()
         }
+        Log.i(TAG, "Cancelled chained azkar alarm")
     }
 }

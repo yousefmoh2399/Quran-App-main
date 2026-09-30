@@ -7,6 +7,7 @@ import 'package:quran_app_android/features/adhan/presentation/views/adhan_view.d
 import 'package:quran_app_android/features/adhan/presentation/views/adhan_settings_view.dart';
 import 'package:quran_app_android/features/adhan/presentation/views/adhan_debug_view.dart';
 import 'package:quran_app_android/features/azkar/presentation/views/azkar_details_view.dart';
+import 'package:quran_app_android/features/azkar/presentation/views/azkar_notifications_settings_view.dart';
 import 'package:quran_app_android/features/azkar/presentation/views/azkar_view.dart';
 import 'package:quran_app_android/features/bookmarks/presentation/views/bookmarks_view.dart';
 import 'package:quran_app_android/features/hadith/presentation/views/hadith__view.dart';
@@ -166,6 +167,12 @@ class AppRoutes {
       transition: Transition.cupertino,
       transitionDuration: kTransitionDuration,
     ),
+    GetPage(
+      name: azkarNotificationsSettings,
+      page: () => const AzkarNotificationsSettingsView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
     if (kDebugMode)
       GetPage(
         name: adhanDebug,
@@ -186,6 +193,7 @@ class AppRoutes {
   static String pngTree = '/pngTree';
   static String azkar = '/azkar';
   static String azkarDetails = '/azkarDetails';
+  static String azkarNotificationsSettings = '/azkarNotificationsSettings';
   static String adhan = '/adhan';
   static String adhanSettings = '/adhanSettings';
   static String adhanDebug = '/adhanDebug';

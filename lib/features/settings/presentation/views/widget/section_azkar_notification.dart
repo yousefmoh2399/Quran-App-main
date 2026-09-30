@@ -89,24 +89,12 @@ class _SectionAzkarNotificationState extends State<SectionAzkarNotification> {
 
         // Periodic Azkar Reminder Switch
         SettingsTile(
-          icon: Icons.repeat_rounded,
-          title: 'التنبيهات الدورية للأذكار',
-          subtitle: 'تذكير بأذكار واستغفار متفرقة خلال اليوم',
-          trailing: Switch.adaptive(
-            value: isPeriodicEnabled,
-            activeColor: colors.primary,
-            activeTrackColor: colors.primary.withOpacity(0.5),
-            onChanged: (value) async {
-              controller.toggleSwitchStopNoti(value);
-              if (value) {
-                defaultToast(text: 'تم تفعيل التنبيهات الدورية للأذكار');
-              } else {
-                defaultToast(text: 'تم إيقاف التنبيهات الدورية للأذكار');
-                await NotifyHelper().flutterLocalNotificationsPlugin.cancel(20);
-              }
-              setState(() {});
-            },
-          ),
+          icon: Icons.tune_rounded,
+          title: 'تخصيص التنبيهات الدورية (Native)',
+          subtitle: 'الفترة، ساعات التشغيل، كتم وقت الصلاة، وتحديد الفئات',
+          onTap: () {
+            Get.toNamed(AppRoutes.azkarNotificationsSettings);
+          },
         ),
 
         // Cancel All Scheduled Notifications
