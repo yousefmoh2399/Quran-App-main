@@ -43,6 +43,7 @@ class BookmarksView extends StatelessWidget {
             ),
             child: TabBar(
               controller: controller.tabController,
+              labelPadding: const EdgeInsets.symmetric(horizontal: 2.0),
               indicator: BoxDecoration(
                 color: colors.primary,
                 borderRadius: AppRadius.borderSm,
@@ -53,42 +54,54 @@ class BookmarksView extends StatelessWidget {
               labelStyle: const TextStyle(
                 fontFamily: AppTypography.uiFont,
                 fontWeight: FontWeight.bold,
-                fontSize: 13.0,
+                fontSize: 12.5,
               ),
               unselectedLabelStyle: const TextStyle(
                 fontFamily: AppTypography.uiFont,
                 fontWeight: FontWeight.normal,
-                fontSize: 13.0,
+                fontSize: 12.5,
               ),
               tabs: const [
                 Tab(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.bookmark_rounded, size: 16.0),
-                      SizedBox(width: 6.0),
-                      Text('علامات'),
-                    ],
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.bookmark_rounded, size: 15.0),
+                        SizedBox(width: 4.0),
+                        Text('علامات'),
+                      ],
+                    ),
                   ),
                 ),
                 Tab(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.workspace_premium_rounded, size: 16.0),
-                      SizedBox(width: 6.0),
-                      Text('محفوظاتي'),
-                    ],
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.workspace_premium_rounded, size: 15.0),
+                        SizedBox(width: 4.0),
+                        Text('محفوظاتي'),
+                      ],
+                    ),
                   ),
                 ),
                 Tab(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.history_edu_rounded, size: 16.0),
-                      SizedBox(width: 6.0),
-                      Text('سجل القراءة'),
-                    ],
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.history_edu_rounded, size: 15.0),
+                        SizedBox(width: 4.0),
+                        Text('سجل القراءة'),
+                      ],
+                    ),
                   ),
                 ),
               ],

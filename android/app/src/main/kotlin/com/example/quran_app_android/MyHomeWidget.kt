@@ -15,7 +15,7 @@ import org.json.JSONArray
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
-class MyHomeWidget : AppWidgetProvider() {
+open class MyHomeWidget : AppWidgetProvider() {
 
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {
         super.onUpdate(context, manager, ids)
