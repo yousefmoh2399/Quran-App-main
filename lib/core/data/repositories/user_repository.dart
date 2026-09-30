@@ -366,9 +366,14 @@ class UserRepository {
     if (plan.lastCompletedDate != null) {
       final lastDate = DateTime.tryParse(plan.lastCompletedDate!);
       if (lastDate != null) {
-        final diff = DateTime.now().difference(lastDate).inDays;
-        if (diff <= 1) {
+        final now = DateTime.now();
+        final todayDateOnly = DateTime(now.year, now.month, now.day);
+        final lastDateOnly = DateTime(lastDate.year, lastDate.month, lastDate.day);
+        final diff = todayDateOnly.difference(lastDateOnly).inDays;
+        if (diff == 1) {
           newStreak += 1;
+        } else if (diff == 0) {
+          // Same day completion (already handled earlier, but safe guard)
         } else {
           newStreak = 1; // Streak broken, restart
         }

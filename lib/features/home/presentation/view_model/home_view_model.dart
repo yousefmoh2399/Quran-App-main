@@ -7,6 +7,7 @@ import 'package:quran_app_android/core/data/repositories/user_repository.dart';
 import 'package:quran_app_android/core/native/native_adhan_bridge.dart';
 import 'package:quran_app_android/core/native/native_azkar_bridge.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
+import 'package:quran_app_android/core/service/settings/notifications_services.dart';
 import 'package:quran_app_android/core/util/assets.dart';
 import 'package:quran_app_android/core/util/constant/static_vars.dart';
 import 'package:quran_app_android/core/util/routes/routes.dart';
@@ -63,6 +64,10 @@ class HomeViewModel extends GetxController {
       final todayLog = await _userRepo.getTodayReadingLog();
       todayPagesRead.value = todayLog?.pagesRead ?? 0;
 
+      if (plan != null && plan.enabled) {
+        await NotifyHelper().scheduleDailyWirdNotification();
+      }
+
       await getLastRead();
       update();
     } catch (e) {
@@ -74,6 +79,7 @@ class HomeViewModel extends GetxController {
     final updated = await _userRepo.markTodayWirdCompleted();
     if (updated != null) {
       currentWirdPlan.value = updated;
+      await NotifyHelper().cancelWirdNotifications();
       update();
     }
   }
@@ -81,6 +87,11 @@ class HomeViewModel extends GetxController {
   Future<void> saveWirdPlan(WirdPlan plan) async {
     await _userRepo.saveWirdPlan(plan);
     currentWirdPlan.value = plan;
+    if (plan.enabled) {
+      await NotifyHelper().scheduleDailyWirdNotification();
+    } else {
+      await NotifyHelper().cancelWirdNotifications();
+    }
     update();
   }
 
