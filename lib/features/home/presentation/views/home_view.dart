@@ -1,61 +1,60 @@
-// ignore_for_file: non_constant_identifier_names, must_be_immutable
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
-import 'package:quran_app_android/core/util/color.dart';
-import 'package:quran_app_android/core/util/icon_broken.dart';
-import 'package:quran_app_android/core/util/routes/routes.dart';
-import 'package:quran_app_android/core/util/widgets/custom_appBar.dart';
-import 'package:quran_app_android/core/util/widgets/my_text.dart';
+import 'package:quran_app_android/core/design/app_colors.dart';
+import 'package:quran_app_android/core/design/app_spacing.dart';
+import 'package:quran_app_android/core/design/components/app_scaffold.dart';
 import 'package:quran_app_android/features/adhan/presentation/view_model/adhan_view_model.dart';
 import 'package:quran_app_android/features/home/presentation/view_model/home_view_model.dart';
-import 'package:quran_app_android/features/home/presentation/views/widget/container_last_read.dart';
-import 'package:quran_app_android/features/home/presentation/views/widget/home_grid_view.dart';
-import 'package:quran_app_android/features/home/presentation/views/widget/horizontal_list_view.dart';
+import 'package:quran_app_android/features/home/presentation/views/widget/daily_zekr_card.dart';
+import 'package:quran_app_android/features/home/presentation/views/widget/home_header.dart';
+import 'package:quran_app_android/features/home/presentation/views/widget/home_nav_bar.dart';
+import 'package:quran_app_android/features/home/presentation/views/widget/home_sections_grid.dart';
+import 'package:quran_app_android/features/home/presentation/views/widget/last_read_card.dart';
+import 'package:quran_app_android/features/home/presentation/views/widget/next_prayer_card.dart';
 
+class HomeView extends StatelessWidget {
+  const HomeView({super.key});
 
-class HomeView extends GetWidget<HomeViewModel> {
-
-
-  SettingsServices settingsServices = Get.find<SettingsServices>();
-  AdhanViewModel adhanViewModel = Get.put(AdhanViewModel());
-
-  HomeView({super.key});
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.kbackGroundColor,
-      appBar: CustomAppBar(
-        loading: IconButton(
-          onPressed: () async {
-            // Get.bottomSheet(BottomsheetBody(
-            //     controller: controller, settingsServices: settingsServices));
-            Get.toNamed(AppRoutes.settings);
-          },
-          icon: const Icon(IconBroken.Setting),
-        ),
-        color: AppColors.kbackGroundColor,
-        title: MyText(
-          text: 'الصفحة الرئيسية',
-          textStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                fontFamily: 'BalooBhaijaan2',
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
-        ),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        child: SizedBox(
-          width: double.infinity,
-          height: MediaQuery.sizeOf(context).height * 1.06,
+    // Ensure controllers are registered safely
+    if (!Get.isRegistered<HomeViewModel>()) {
+      Get.put(HomeViewModel());
+    }
+    if (!Get.isRegistered<AdhanViewModel>()) {
+      Get.put(AdhanViewModel());
+    }
+
+    return AppScaffold(
+      useSafeArea: true,
+      constrainContentWidth: true,
+      bottomNavigationBar: const HomeNavBar(currentIndex: 0),
+      body: RefreshIndicator(
+        color: context.appColors.primary,
+        onRefresh: () async {
+          final adhanVM = Get.find<AdhanViewModel>();
+          await adhanVM.initializeAdhan();
+          final homeVM = Get.find<HomeViewModel>();
+          await homeVM.getLastRead();
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              HorizontalListView(controller: controller),
-              ContainerLastReadView(settingsServices: settingsServices),
-              HomeGridView(controller: controller),
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: const [
+              AppSpacing.verticalMd,
+              HomeHeader(),
+              AppSpacing.verticalLg,
+              NextPrayerCard(),
+              AppSpacing.verticalLg,
+              LastReadCard(),
+              AppSpacing.verticalLg,
+              HomeSectionsGrid(),
+              AppSpacing.verticalLg,
+              DailyZekrCard(),
+              AppSpacing.verticalXxl,
             ],
           ),
         ),
@@ -63,4 +62,3 @@ class HomeView extends GetWidget<HomeViewModel> {
     );
   }
 }
-
