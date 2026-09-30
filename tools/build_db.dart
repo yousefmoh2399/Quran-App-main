@@ -2,7 +2,7 @@
 
 import 'dart:convert';
 import 'dart:io';
-import 'package:sqlite3/sqlite3.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 String normalizeArabic(String text) {
   return text
@@ -23,11 +23,14 @@ String normalizeArabic(String text) {
       .trim();
 }
 
-void main() {
+void main() async {
   final stopwatch = Stopwatch()..start();
   print('========================================');
   print('Building SQLite database: app_data.db');
   print('========================================');
+
+  sqfliteFfiInit();
+  final dbFactory = databaseFactoryFfi;
 
   final dbDir = Directory('assets/db');
   if (!dbDir.existsSync()) {
@@ -40,21 +43,23 @@ void main() {
     print('Deleted existing app_data.db');
   }
 
-  final db = sqlite3.open(dbFile.path);
+  final db = await dbFactory.openDatabase(dbFile.absolute.path);
 
   // Configure pragmas for performance
-  db.execute('PRAGMA journal_mode = WAL;');
-  db.execute('PRAGMA synchronous = NORMAL;');
-  db.execute('PRAGMA encoding = "UTF-8";');
+  await db.execute('PRAGMA journal_mode = WAL;');
+  await db.execute('PRAGMA synchronous = NORMAL;');
+  await db.execute('PRAGMA encoding = "UTF-8";');
 
   // 1. Create Tables
   print('Creating tables and indexes...');
-  db.execute('''
+  await db.execute('''
     CREATE TABLE metadata (
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL
     );
+  ''');
 
+  await db.execute('''
     CREATE TABLE surahs (
       id INTEGER PRIMARY KEY,
       name_ar TEXT NOT NULL,
@@ -63,7 +68,9 @@ void main() {
       type TEXT NOT NULL,
       total_verses INTEGER NOT NULL
     );
+  ''');
 
+  await db.execute('''
     CREATE TABLE ayahs (
       id INTEGER PRIMARY KEY,
       surah_id INTEGER NOT NULL,
@@ -75,13 +82,17 @@ void main() {
       text_search TEXT NOT NULL,
       FOREIGN KEY (surah_id) REFERENCES surahs (id)
     );
+  ''');
 
+  await db.execute('''
     CREATE TABLE hadith_sections (
       id INTEGER PRIMARY KEY,
       source TEXT NOT NULL,
       name TEXT NOT NULL
     );
+  ''');
 
+  await db.execute('''
     CREATE TABLE hadiths (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       section_id INTEGER NOT NULL,
@@ -94,14 +105,18 @@ void main() {
       text_search TEXT NOT NULL,
       FOREIGN KEY (section_id) REFERENCES hadith_sections (id)
     );
+  ''');
 
+  await db.execute('''
     CREATE TABLE azkar_categories (
       id INTEGER PRIMARY KEY,
       name TEXT NOT NULL,
       audio TEXT,
       filename TEXT
     );
+  ''');
 
+  await db.execute('''
     CREATE TABLE azkar (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       category_id INTEGER NOT NULL,
@@ -114,32 +129,40 @@ void main() {
       text_search TEXT NOT NULL,
       FOREIGN KEY (category_id) REFERENCES azkar_categories (id)
     );
+  ''');
 
+  await db.execute('''
     CREATE TABLE names_of_allah (
       id INTEGER PRIMARY KEY,
       name TEXT NOT NULL,
       text TEXT NOT NULL
     );
+  ''');
 
-    -- Standard Indexes
-    CREATE INDEX idx_ayahs_surah_ayah ON ayahs(surah_id, ayah_number);
-    CREATE INDEX idx_ayahs_surah ON ayahs(surah_id);
-    CREATE INDEX idx_hadiths_section ON hadiths(section_id);
-    CREATE INDEX idx_azkar_category ON azkar(category_id);
+  // Standard Indexes
+  await db.execute('CREATE INDEX idx_ayahs_surah_ayah ON ayahs(surah_id, ayah_number);');
+  await db.execute('CREATE INDEX idx_ayahs_surah ON ayahs(surah_id);');
+  await db.execute('CREATE INDEX idx_hadiths_section ON hadiths(section_id);');
+  await db.execute('CREATE INDEX idx_azkar_category ON azkar(category_id);');
 
-    -- FTS5 Full-Text Search Virtual Tables
+  // FTS5 Full-Text Search Virtual Tables
+  await db.execute('''
     CREATE VIRTUAL TABLE ayahs_fts USING fts5(
       text_search,
       content='ayahs',
       content_rowid='id'
     );
+  ''');
 
+  await db.execute('''
     CREATE VIRTUAL TABLE hadiths_fts USING fts5(
       text_search,
       content='hadiths',
       content_rowid='id'
     );
+  ''');
 
+  await db.execute('''
     CREATE VIRTUAL TABLE azkar_fts USING fts5(
       text_search,
       content='azkar',
@@ -148,10 +171,10 @@ void main() {
   ''');
 
   // Insert metadata
-  db.execute("INSERT INTO metadata (key, value) VALUES ('version', '1');");
-  db.execute("INSERT INTO metadata (key, value) VALUES ('schema_created_at', '${DateTime.now().toIso8601String()}');");
+  await db.rawInsert("INSERT INTO metadata (key, value) VALUES ('version', '1');");
+  await db.rawInsert("INSERT INTO metadata (key, value) VALUES ('schema_created_at', '${DateTime.now().toIso8601String()}');");
 
-  // Determine source paths (whether still in assets/ or in tools/source/)
+  // Determine source paths (whether in assets/ or in tools/source/)
   String resolveSource(String filename) {
     if (File('tools/source/$filename').existsSync()) {
       return 'tools/source/$filename';
@@ -164,23 +187,18 @@ void main() {
   final surahsJsonStr = File(resolveSource('name_quran.json')).readAsStringSync(encoding: utf8);
   final List<dynamic> surahsList = json.decode(surahsJsonStr);
 
-  db.execute('BEGIN TRANSACTION;');
-  final insertSurahStmt = db.prepare('''
-    INSERT INTO surahs (id, name_ar, name_en, transliteration, type, total_verses)
-    VALUES (?, ?, ?, ?, ?, ?);
-  ''');
+  var batch = db.batch();
   for (final s in surahsList) {
-    insertSurahStmt.execute([
-      s['id'],
-      s['name'],
-      s['translation'] ?? '',
-      s['transliteration'] ?? '',
-      s['type'] ?? '',
-      s['total_verses'],
-    ]);
+    batch.insert('surahs', {
+      'id': s['id'],
+      'name_ar': s['name'],
+      'name_en': s['translation'] ?? '',
+      'transliteration': s['transliteration'] ?? '',
+      'type': s['type'] ?? '',
+      'total_verses': s['total_verses'],
+    });
   }
-  insertSurahStmt.dispose();
-  db.execute('COMMIT;');
+  await batch.commit(noResult: true);
   print('Loaded ${surahsList.length} surahs.');
 
   // 3. Populate Ayahs (from quran_en.json and ar_muyassar.json)
@@ -203,16 +221,7 @@ void main() {
     }
   }
 
-  db.execute('BEGIN TRANSACTION;');
-  final insertAyahStmt = db.prepare('''
-    INSERT INTO ayahs (id, surah_id, ayah_number, page_number, text_ar, text_en, tafsir_muyassar, text_search)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?);
-  ''');
-  final insertAyahFtsStmt = db.prepare('''
-    INSERT INTO ayahs_fts (rowid, text_search)
-    VALUES (?, ?);
-  ''');
-
+  batch = db.batch();
   int globalAyahId = 0;
   for (final surahObj in quranEnList) {
     final int surahId = surahObj['id'];
@@ -226,23 +235,21 @@ void main() {
       final String tafsir = tafsirMap['$surahId:$ayahNum'] ?? '';
       final String textSearch = normalizeArabic(textAr);
 
-      insertAyahStmt.execute([
-        globalAyahId,
-        surahId,
-        ayahNum,
-        null, // page_number left NULL for Quran mushaf phase
-        textAr,
-        textEn,
-        tafsir,
-        textSearch,
-      ]);
+      batch.insert('ayahs', {
+        'id': globalAyahId,
+        'surah_id': surahId,
+        'ayah_number': ayahNum,
+        'page_number': null,
+        'text_ar': textAr,
+        'text_en': textEn,
+        'tafsir_muyassar': tafsir,
+        'text_search': textSearch,
+      });
 
-      insertAyahFtsStmt.execute([globalAyahId, textSearch]);
+      batch.rawInsert('INSERT INTO ayahs_fts (rowid, text_search) VALUES (?, ?);', [globalAyahId, textSearch]);
     }
   }
-  insertAyahStmt.dispose();
-  insertAyahFtsStmt.dispose();
-  db.execute('COMMIT;');
+  await batch.commit(noResult: true);
   print('Loaded $globalAyahId ayahs (Total verses).');
 
   // 4. Populate Hadiths
@@ -259,22 +266,24 @@ void main() {
   final hadithJsonStr = File(hadithPath).readAsStringSync(encoding: utf8);
   final List<dynamic> hadithSections = json.decode(hadithJsonStr);
 
-  db.execute('BEGIN TRANSACTION;');
-  final insertHadithSectionStmt = db.prepare('''
-    INSERT INTO hadith_sections (id, source, name)
-    VALUES (?, ?, ?);
-  ''');
+  batch = db.batch();
+  for (final sectionObj in hadithSections) {
+    final int secId = sectionObj['id'];
+    final Map<String, dynamic> data = sectionObj['data'] ?? {};
+    final Map<String, dynamic> metadata = data['metadata'] ?? {};
+    final String source = metadata['name'] ?? 'Muwatta Malik';
+    final Map<String, dynamic> sectionMeta = metadata['section'] ?? {};
+    final String chapterName = sectionMeta['name'] ?? '';
 
-  final insertHadithStmt = db.prepare('''
-    INSERT INTO hadiths (section_id, source, chapter, hadith_number, arabic_number, text_ar, grade, text_search)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?);
-  ''');
+    batch.insert('hadith_sections', {
+      'id': secId,
+      'source': source,
+      'name': chapterName,
+    });
+  }
+  await batch.commit(noResult: true);
 
-  final insertHadithFtsStmt = db.prepare('''
-    INSERT INTO hadiths_fts (rowid, text_search)
-    VALUES (?, ?);
-  ''');
-
+  batch = db.batch();
   int totalHadiths = 0;
   for (final sectionObj in hadithSections) {
     final int secId = sectionObj['id'];
@@ -284,14 +293,13 @@ void main() {
     final Map<String, dynamic> sectionMeta = metadata['section'] ?? {};
     final String chapterName = sectionMeta['name'] ?? '';
 
-    insertHadithSectionStmt.execute([secId, source, chapterName]);
-
     final List<dynamic> hadithsList = data['hadiths'] ?? [];
     for (final h in hadithsList) {
+      totalHadiths++;
       final int? hadithNum = h['hadithnumber'];
       final int? arabicNum = h['arabicnumber'];
       final String textAr = h['text'] ?? '';
-      
+
       String? gradeStr;
       if (h['grades'] is List && (h['grades'] as List).isNotEmpty) {
         final gradesList = h['grades'] as List;
@@ -300,26 +308,22 @@ void main() {
 
       final String textSearch = normalizeArabic(textAr);
 
-      insertHadithStmt.execute([
-        secId,
-        source,
-        chapterName,
-        hadithNum,
-        arabicNum,
-        textAr,
-        gradeStr,
-        textSearch,
-      ]);
+      batch.insert('hadiths', {
+        'id': totalHadiths,
+        'section_id': secId,
+        'source': source,
+        'chapter': chapterName,
+        'hadith_number': hadithNum,
+        'arabic_number': arabicNum,
+        'text_ar': textAr,
+        'grade': gradeStr,
+        'text_search': textSearch,
+      });
 
-      totalHadiths++;
-      final lastRowId = db.lastInsertRowId;
-      insertHadithFtsStmt.execute([lastRowId, textSearch]);
+      batch.rawInsert('INSERT INTO hadiths_fts (rowid, text_search) VALUES (?, ?);', [totalHadiths, textSearch]);
     }
   }
-  insertHadithSectionStmt.dispose();
-  insertHadithStmt.dispose();
-  insertHadithFtsStmt.dispose();
-  db.execute('COMMIT;');
+  await batch.commit(noResult: true);
   print('Loaded ${hadithSections.length} hadith sections and $totalHadiths hadiths.');
 
   // 5. Populate Azkar
@@ -327,22 +331,18 @@ void main() {
   final azkarJsonStr = File(resolveSource('azkar.json')).readAsStringSync(encoding: utf8);
   final List<dynamic> azkarCategories = json.decode(azkarJsonStr);
 
-  db.execute('BEGIN TRANSACTION;');
-  final insertAzkarCategoryStmt = db.prepare('''
-    INSERT INTO azkar_categories (id, name, audio, filename)
-    VALUES (?, ?, ?, ?);
-  ''');
+  batch = db.batch();
+  for (final cat in azkarCategories) {
+    batch.insert('azkar_categories', {
+      'id': cat['id'],
+      'name': cat['category'] ?? '',
+      'audio': cat['audio'],
+      'filename': cat['filename'],
+    });
+  }
+  await batch.commit(noResult: true);
 
-  final insertAzkarStmt = db.prepare('''
-    INSERT INTO azkar (category_id, category_name, item_id, text_ar, count, audio, filename, text_search)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?);
-  ''');
-
-  final insertAzkarFtsStmt = db.prepare('''
-    INSERT INTO azkar_fts (rowid, text_search)
-    VALUES (?, ?);
-  ''');
-
+  batch = db.batch();
   int totalAzkarItems = 0;
   for (final cat in azkarCategories) {
     final int catId = cat['id'];
@@ -350,10 +350,9 @@ void main() {
     final String? catAudio = cat['audio'];
     final String? catFilename = cat['filename'];
 
-    insertAzkarCategoryStmt.execute([catId, catName, catAudio, catFilename]);
-
     final List<dynamic> items = cat['array'] ?? [];
     for (final item in items) {
+      totalAzkarItems++;
       final int? itemId = item['id'];
       final String textAr = item['text'] ?? '';
       final int count = item['count'] is int ? item['count'] : int.tryParse(item['count']?.toString() ?? '1') ?? 1;
@@ -361,29 +360,25 @@ void main() {
       final String? itemFilename = item['filename'] ?? catFilename;
       final String textSearch = normalizeArabic(textAr);
 
-      insertAzkarStmt.execute([
-        catId,
-        catName,
-        itemId,
-        textAr,
-        count,
-        itemAudio,
-        itemFilename,
-        textSearch,
-      ]);
+      batch.insert('azkar', {
+        'id': totalAzkarItems,
+        'category_id': catId,
+        'category_name': catName,
+        'item_id': itemId,
+        'text_ar': textAr,
+        'count': count,
+        'audio': itemAudio,
+        'filename': itemFilename,
+        'text_search': textSearch,
+      });
 
-      totalAzkarItems++;
-      final lastRowId = db.lastInsertRowId;
-      insertAzkarFtsStmt.execute([lastRowId, textSearch]);
+      batch.rawInsert('INSERT INTO azkar_fts (rowid, text_search) VALUES (?, ?);', [totalAzkarItems, textSearch]);
     }
   }
-  insertAzkarCategoryStmt.dispose();
-  insertAzkarStmt.dispose();
-  insertAzkarFtsStmt.dispose();
-  db.execute('COMMIT;');
+  await batch.commit(noResult: true);
   print('Loaded ${azkarCategories.length} azkar categories and $totalAzkarItems azkar items.');
 
-  // 6. Populate Names of Allah (with split of 'المعطي المانع' and 'الضار النافع')
+  // 6. Populate Names of Allah (with split of 'المعطي المانع' and 'الضار النافع' -> exactly 99 names)
   print('Loading Names of Allah from Names_Of_Allah.json...');
   final namesJsonStr = File(resolveSource('Names_Of_Allah.json')).readAsStringSync(encoding: utf8);
   final List<dynamic> rawNamesList = json.decode(namesJsonStr);
@@ -392,9 +387,15 @@ void main() {
   for (final item in rawNamesList) {
     final String name = (item['name'] ?? '').toString().trim();
     final String text = (item['text'] ?? '').toString().trim();
+    final String normName = normalizeArabic(name);
 
-    if (name.contains('المانع') && name.contains('المعطي')) {
-      // Split 'المعطي المانع'
+    if (normName == 'الله') {
+      await db.rawInsert("INSERT OR REPLACE INTO metadata (key, value) VALUES ('supreme_name', ?);", [name]);
+      await db.rawInsert("INSERT OR REPLACE INTO metadata (key, value) VALUES ('supreme_name_text', ?);", [text]);
+      continue;
+    }
+
+    if (normName.contains('المانع') && normName.contains('المعطي')) {
       processedNames.add({
         'name': 'الْمُعْطِي',
         'text': 'هو الذي أعطى كل شيء خلقه، ويجزل العطاء لمن يشاء من عباده تفضلاً وكرماً وإحساناً.',
@@ -403,8 +404,7 @@ void main() {
         'name': 'الْمَانِعُ',
         'text': 'هو الذي يمنع العطاء عمن يشاء ابتلاءً أو حمايةً، يمنع ما يشاء عمن يشاء بحكمته وعدله.',
       });
-    } else if (name.contains('الضار') && name.contains('النافع')) {
-      // Split 'الضار النافع'
+    } else if (normName.contains('الضار') && normName.contains('النافع')) {
       processedNames.add({
         'name': 'الضَّارُّ',
         'text': 'هو المقدر للضر على من أراد كيف أراد ابتلاءً أو عقوبةً بمقتضى حكمته وعدله سبحانه.',
@@ -421,27 +421,27 @@ void main() {
     }
   }
 
-  db.execute('BEGIN TRANSACTION;');
-  final insertNameStmt = db.prepare('''
-    INSERT INTO names_of_allah (id, name, text)
-    VALUES (?, ?, ?);
-  ''');
-
+  batch = db.batch();
   int nameId = 0;
   for (final n in processedNames) {
     nameId++;
-    insertNameStmt.execute([nameId, n['name'], n['text']]);
+    batch.insert('names_of_allah', {
+      'id': nameId,
+      'name': n['name']!,
+      'text': n['text']!,
+    });
   }
-  insertNameStmt.dispose();
-  db.execute('COMMIT;');
+  await batch.commit(noResult: true);
   print('Loaded $nameId Names of Allah (Target was 99).');
 
   // Verify and optimize
-  print('Running OPTIMIZE and VACUUM...');
-  db.execute('PRAGMA optimize;');
-  db.execute('VACUUM;');
+  print('Running OPTIMIZE, WAL Checkpoint, and VACUUM...');
+  await db.execute('PRAGMA wal_checkpoint(TRUNCATE);');
+  await db.execute('PRAGMA journal_mode = DELETE;');
+  await db.execute('PRAGMA optimize;');
+  await db.execute('VACUUM;');
 
-  db.dispose();
+  await db.close();
   stopwatch.stop();
 
   final finalDbSize = dbFile.lengthSync();
