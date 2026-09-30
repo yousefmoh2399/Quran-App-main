@@ -4,6 +4,10 @@ class AzkarModel {
 
   List<ArrayAzkarModel> array = [];
 
+  AzkarModel({this.id, this.category, List<ArrayAzkarModel>? array}) {
+    if (array != null) this.array = array;
+  }
+
   AzkarModel.fromJson(Map<String, dynamic> json) {
     id = json["id"];
     category = json["category"];
@@ -16,6 +20,8 @@ class AzkarModel {
 class ArrayAzkarModel {
   int? id, count;
   String? text;
+
+  ArrayAzkarModel({this.id, this.count, this.text});
 
   ArrayAzkarModel.fromJson(Map<String, dynamic> json) {
     id = json["id"];

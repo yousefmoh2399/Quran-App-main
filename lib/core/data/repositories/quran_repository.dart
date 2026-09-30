@@ -95,4 +95,27 @@ class QuranRepository {
     );
     return likeResults.map((m) => AyahEntity.fromMap(m)).toList();
   }
+
+  /// Retrieves all Surahs paired with their Ayahs.
+  Future<List<Map<String, dynamic>>> getAllSurahsWithAyahsRaw() async {
+    final db = await _db;
+    final surahs = await getSurahs();
+    final ayahs = await db.query(
+      'ayahs',
+      orderBy: 'surah_id ASC, ayah_number ASC',
+    );
+
+    final Map<int, List<Map<String, dynamic>>> groupedAyahs = {};
+    for (final a in ayahs) {
+      final surahId = a['surah_id'] as int;
+      groupedAyahs.putIfAbsent(surahId, () => []).add(a);
+    }
+
+    return surahs.map((s) {
+      return {
+        'surah': s,
+        'ayahs': groupedAyahs[s.id] ?? [],
+      };
+    }).toList();
+  }
 }

@@ -1,17 +1,17 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:quran_app_android/core/data/data.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
-import 'package:quran_app_android/core/util/app_url.dart';
 import 'package:quran_app_android/core/util/widgets/custom_toast.dart';
 import 'package:quran_app_android/features/hadith/data/models/hadith_model.dart';
 import 'package:quran_app_android/features/hadith/data/models/hadith_model_malek.dart';
 
 class HadithViewModel extends GetxController {
-  HadithViewModel() {
+  final HadithRepository _hadithRepository;
+
+  HadithViewModel({HadithRepository? hadithRepository})
+      : _hadithRepository = hadithRepository ?? HadithRepository() {
     hadithRead();
   }
 
@@ -19,8 +19,6 @@ class HadithViewModel extends GetxController {
   List<dynamic> items = [];
   List<HadithModel> hadithList = [];
   RxBool isLoading = false.obs;
-
-
 
   double fontSize = 20;
   void increaseFont() {
@@ -63,18 +61,33 @@ class HadithViewModel extends GetxController {
   List<dynamic> itemsData = [];
   List<HadithModelFinal> hadithModelFinal = [];
   RxBool isLoadingg = false.obs;
+
   Future<void> hadithRead() async {
     try {
       isLoadingg.value = true;
-      final String response =
-          await rootBundle.loadString(AppUrl.hadithUrl);
-      final data = await json.decode(response);
+      final sectionsWithHadiths =
+          await _hadithRepository.getAllSectionsWithHadiths();
 
-      itemsData = data;
-      update();
-      for (int i = 0; i < itemsData.length; i++) {
-        hadithModelFinal.add(HadithModelFinal.fromJson(itemsData[i]));
-      }
+      hadithModelFinal = sectionsWithHadiths.map((swh) {
+        return HadithModelFinal(
+          id: swh.section.id,
+          data: HadithModelData(
+            metadata: MetaDataModel(
+              name: swh.section.source,
+              section: SectionModel(name: swh.section.name),
+            ),
+            hadiths: swh.hadiths.map((h) {
+              return HadithsModel(
+                hadithnumber: h.hadithNumber,
+                arabicnumber: h.arabicNumber,
+                text: h.textAr,
+              );
+            }).toList(),
+          ),
+        );
+      }).toList();
+
+      itemsData = hadithModelFinal;
       isLoadingg.value = false;
       update();
     } catch (e, st) {
@@ -85,4 +98,3 @@ class HadithViewModel extends GetxController {
     }
   }
 }
-

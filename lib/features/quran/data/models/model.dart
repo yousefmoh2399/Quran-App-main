@@ -5,6 +5,8 @@ class NameModel {
   String? name, transliteration;
   String? type;
 
+  NameModel({this.id, this.total_verses, this.name, this.transliteration, this.type});
+
   NameModel.fromJson(Map<String, dynamic> json) {
     id = json["id"];
     total_verses = json["total_verses"];
