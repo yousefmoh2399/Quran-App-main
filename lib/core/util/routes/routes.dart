@@ -6,6 +6,7 @@ import 'package:quran_app_android/core/util/constant/constant.dart';
 import 'package:quran_app_android/features/adhan/presentation/views/adhan_view.dart';
 import 'package:quran_app_android/features/azkar/presentation/views/azkar_details_view.dart';
 import 'package:quran_app_android/features/azkar/presentation/views/azkar_view.dart';
+import 'package:quran_app_android/features/bookmarks/presentation/views/bookmarks_view.dart';
 import 'package:quran_app_android/features/hadith/presentation/views/hadith__view.dart';
 import 'package:quran_app_android/features/hadith/presentation/views/hadith_details_view.dart';
 import 'package:quran_app_android/features/home/presentation/views/home_view.dart';
@@ -151,9 +152,16 @@ class AppRoutes {
       transition: Transition.cupertino,
       transitionDuration: kTransitionDuration,
     ),
+    GetPage(
+      name: bookmarks,
+      page: () => const BookmarksView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
   ];
 
   static String home = '/home';
+  static String bookmarks = '/bookmarks';
   static String settings = '/settings';
   static String permissionsStatus = '/permissionsStatus';
   static String tafsser = '/tafsser';
