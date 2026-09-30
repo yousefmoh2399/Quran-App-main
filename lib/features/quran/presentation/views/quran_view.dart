@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:quran_app_android/core/data/repositories/mushaf_repository.dart';
 import 'package:quran_app_android/core/design/app_colors.dart';
 import 'package:quran_app_android/core/design/app_radius.dart';
 import 'package:quran_app_android/core/design/app_spacing.dart';
@@ -47,34 +48,31 @@ class _QuranScreenState extends State<QuranScreen>
     required QuranScreenViewModel quranScreenVM,
   }) async {
     final prefs = settings.sharedPref;
-    prefs?.setInt('indexQuran', index);
-
-    if (quranScreenVM.ayah_Model.isEmpty) {
-      await quranScreenVM.readJson();
-    }
-
-    final int? currentSurahId = index >= 0 &&
-            index < quranScreenVM.ayah_Model.length
-        ? quranScreenVM.ayah_Model[index].id
-        : null;
-    final int? savedSurahId = prefs?.getInt('currentIndex4Quran');
-    final int? savedPageIndex = prefs?.getInt('detailsPageIndex');
-    final int? bookmarkPage = quranScreenVM.bookmarkPageIndexFor(index);
-    final bool sameSurahAsSaved =
-        savedSurahId != null && currentSurahId != null && savedSurahId == currentSurahId;
-    final int initialPage = bookmarkPage ??
-        (sameSurahAsSaved && savedPageIndex != null ? savedPageIndex : 0);
-
-    prefs?.setInt('detailsPageIndex', initialPage);
-    quranScreenVM.resetDetailsPaging(initialPage: initialPage);
+    final surahId = model.id ?? (index + 1);
+    final mushafRepo = MushafRepository();
+    final targetPage = await mushafRepo.getSurahStart(surahId) ?? 1;
 
     // Update last read
-    prefs?.setString('lastRead', 'سورة ${model.name}');
+    prefs?.setInt('mushaf_last_page', targetPage);
+    prefs?.setInt('mushaf_last_surah', surahId);
+    prefs?.setString('mushaf_last_surah_name', model.name ?? '');
+    prefs?.setString('lastRead', 'سورة ${model.name} - صفحة $targetPage');
     if (Get.isRegistered<HomeViewModel>()) {
       Get.find<HomeViewModel>().getLastRead();
     }
 
-    await Get.toNamed(AppRoutes.detailsScreen);
+    await Get.toNamed(AppRoutes.mushaf, arguments: {'pageNumber': targetPage});
+  }
+
+  Future<void> _openJuz(JuzModel juz) async {
+    final mushafRepo = MushafRepository();
+    final targetPage = await mushafRepo.getJuzStart(juz.number) ?? 1;
+    final prefs = Get.find<SettingsServices>().sharedPref;
+    prefs?.setInt('mushaf_last_page', targetPage);
+    if (Get.isRegistered<HomeViewModel>()) {
+      Get.find<HomeViewModel>().getLastRead();
+    }
+    await Get.toNamed(AppRoutes.mushaf, arguments: {'pageNumber': targetPage});
   }
 
   @override
@@ -331,11 +329,6 @@ class _QuranScreenState extends State<QuranScreen>
                             separatorBuilder: (_, __) => AppSpacing.verticalSm,
                             itemBuilder: (context, index) {
                               final juz = filteredJuz[index];
-                              final targetSurahIndex = juz.startSurahIndex;
-                              final NameModel? targetModel =
-                                  targetSurahIndex < allSurahs.length
-                                      ? allSurahs[targetSurahIndex]
-                                      : null;
 
                               return AppCard(
                                 variant: AppCardVariant.elevated,
@@ -343,16 +336,7 @@ class _QuranScreenState extends State<QuranScreen>
                                   horizontal: AppSpacing.md,
                                   vertical: AppSpacing.md,
                                 ),
-                                onTap: () {
-                                  if (targetModel != null) {
-                                    _openSurah(
-                                      index: targetSurahIndex,
-                                      model: targetModel,
-                                      settings: settings,
-                                      quranScreenVM: quranScreenVM,
-                                    );
-                                  }
-                                },
+                                onTap: () => _openJuz(juz),
                                 child: Row(
                                   children: [
                                     // Juz number badge

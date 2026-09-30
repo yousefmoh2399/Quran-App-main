@@ -28,7 +28,7 @@ class LastReadCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       padding: AppSpacing.paddingLg,
       backgroundColor: colors.surface,
-      onTap: () => Get.toNamed(AppRoutes.quranScreen),
+      onTap: () => Get.toNamed(AppRoutes.mushaf),
       child: Row(
         children: [
           // Quran icon in themed circle

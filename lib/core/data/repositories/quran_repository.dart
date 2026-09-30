@@ -61,6 +61,19 @@ class QuranRepository {
     return results.first['tafsir_muyassar'] as String?;
   }
 
+  /// Retrieves a specific Ayah by its Surah ID and Ayah number.
+  Future<AyahEntity?> getAyah(int surahId, int ayahNumber) async {
+    final db = await _db;
+    final results = await db.query(
+      'ayahs',
+      where: 'surah_id = ? AND ayah_number = ?',
+      whereArgs: [surahId, ayahNumber],
+      limit: 1,
+    );
+    if (results.isEmpty) return null;
+    return AyahEntity.fromMap(results.first);
+  }
+
   /// Searches Ayahs by query using FTS5 with fallback to LIKE on normalized text.
   Future<List<AyahEntity>> searchAyahs(String query) async {
     final normalized = ArabicNormalizer.normalize(query);

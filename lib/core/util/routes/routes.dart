@@ -1,4 +1,4 @@
-﻿import 'package:get/get.dart';
+import 'package:get/get.dart';
 import 'package:quran_app_android/core/middleware/middleware.dart';
 import 'package:quran_app_android/core/util/binding.dart';
 import 'package:quran_app_android/core/util/constant/constant.dart';
@@ -12,9 +12,9 @@ import 'package:quran_app_android/features/nameOfAllah/presentation/views/name_o
 import 'package:quran_app_android/features/notifications/views/adhan_overlay_view.dart';
 import 'package:quran_app_android/features/notifications/views/notify_view.dart';
 import 'package:quran_app_android/features/onboarding/presentation/views/onboarding_screen.dart';
+import 'package:quran_app_android/features/mushaf/presentation/views/mushaf_view.dart';
 import 'package:quran_app_android/features/pngtree/presentation/views/pngTreeView.dart';
 import 'package:quran_app_android/features/qiblah/presentation/views/qiblah_view.dart';
-import 'package:quran_app_android/features/quran/presentation/views/quran_details_view.dart';
 import 'package:quran_app_android/features/quran/presentation/views/quran_view.dart';
 import 'package:quran_app_android/features/settings/presentation/views/settings_view.dart';
 import 'package:quran_app_android/features/tafsser/presentation/views/tafseer_details_view.dart';
@@ -106,7 +106,13 @@ class AppRoutes {
     ),
     GetPage(
       name: detailsScreen,
-      page: () => DetailsScreen(),
+      page: () => const MushafView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: mushaf,
+      page: () => const MushafView(),
       transition: Transition.cupertino,
       transitionDuration: kTransitionDuration,
     ),
@@ -146,6 +152,7 @@ class AppRoutes {
   static String qiblah = '/qiblah';
   static String quranScreen = '/quranScreen';
   static String detailsScreen = '/detailsScreen';
+  static String mushaf = '/mushaf';
   static String onboarding = '/onboarding';
   static String sectionHadith = '/sectionHadith';
 }
