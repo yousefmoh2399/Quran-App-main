@@ -12,11 +12,20 @@ class MushafFontManager {
   final Set<int> _loadedPages = {};
   final Map<int, Future<void>> _loadingFutures = {};
 
+  final Set<int> _loadedPagesV1 = {};
+  final Map<int, Future<void>> _loadingFuturesV1 = {};
+
   /// Font family name for a given mushaf page (1..604).
   static String pageFontFamily(int pageNumber) => 'QPC_V2_P$pageNumber';
 
-  /// Check whether a page font is already loaded in memory.
+  /// Font family name for QPC V1 for a given mushaf page (1..604).
+  static String pageFontFamilyV1(int pageNumber) => 'QPC_V1_P$pageNumber';
+
+  /// Check whether a page font (V2) is already loaded in memory.
   bool isPageLoaded(int pageNumber) => _loadedPages.contains(pageNumber);
+
+  /// Check whether a page font (V1) is already loaded in memory.
+  bool isPageLoadedV1(int pageNumber) => _loadedPagesV1.contains(pageNumber);
 
   /// Ensure font for [pageNumber] is loaded in memory.
   Future<void> ensurePageLoaded(int pageNumber) async {
@@ -33,6 +42,24 @@ class MushafFontManager {
       await future;
     } finally {
       _loadingFutures.remove(pageNumber);
+    }
+  }
+
+  /// Ensure QPC V1 font for [pageNumber] is loaded in memory.
+  Future<void> ensurePageLoadedV1(int pageNumber) async {
+    if (pageNumber < 1 || pageNumber > 604) return;
+    if (_loadedPagesV1.contains(pageNumber)) return;
+
+    if (_loadingFuturesV1.containsKey(pageNumber)) {
+      return _loadingFuturesV1[pageNumber];
+    }
+
+    final future = _loadPageFontV1(pageNumber);
+    _loadingFuturesV1[pageNumber] = future;
+    try {
+      await future;
+    } finally {
+      _loadingFuturesV1.remove(pageNumber);
     }
   }
 
@@ -58,4 +85,17 @@ class MushafFontManager {
 
     _loadedPages.add(pageNumber);
   }
+
+  Future<void> _loadPageFontV1(int pageNumber) async {
+    final fontName = pageFontFamilyV1(pageNumber);
+    final assetPath = 'assets/fonts/qpc_v1/p$pageNumber.ttf';
+
+    final fontLoader = FontLoader(fontName);
+    final fontData = rootBundle.load(assetPath);
+    fontLoader.addFont(fontData);
+    await fontLoader.load();
+
+    _loadedPagesV1.add(pageNumber);
+  }
 }
+
