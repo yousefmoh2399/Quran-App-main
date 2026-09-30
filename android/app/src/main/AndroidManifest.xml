@@ -156,6 +156,26 @@
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
                 <action android:name="android.intent.action.TIME_CHANGED" />
                 <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.TIME_SET" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Unified Reminders Engine Receivers -->
+        <receiver
+            android:name=".reminders.UnifiedReminderReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.example.quran_app_android.reminders.ACTION_UNIFIED_ALARM" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".reminders.SadaqahActionReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.example.quran_app_android.reminders.ACTION_SADAQAH_DONATED" />
             </intent-filter>
         </receiver>
 

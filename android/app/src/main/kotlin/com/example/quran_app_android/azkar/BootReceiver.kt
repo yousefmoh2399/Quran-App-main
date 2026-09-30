@@ -23,6 +23,7 @@ class BootReceiver : BroadcastReceiver() {
                 // Asynchronously initialize azkar repo cache and schedule next alarm
                 AzkarDataRepository.initAsync(context)
                 AzkarScheduler.scheduleNext(context)
+                com.example.quran_app_android.reminders.UnifiedReminderScheduler.scheduleNext(context)
             }
         } catch (e: Exception) {
             Log.e(TAG, "❌ Error in Azkar BootReceiver: ${e.message}", e)

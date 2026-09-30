@@ -23,6 +23,8 @@ class MainActivity : FlutterActivity() {
             PrayerScheduler.scheduleRollingWindow(this)
         }
         com.example.quran_app_android.widgets.WidgetUpdateManager.updateAll(this)
+        com.example.quran_app_android.reminders.ReminderChannels.createChannels(this)
+        com.example.quran_app_android.reminders.UnifiedReminderScheduler.scheduleNext(this)
     }
 
     private fun createAdhanNotificationChannel() {
@@ -46,6 +48,7 @@ class MainActivity : FlutterActivity() {
         NativeAdhanBridge.register(flutterEngine, this)
         PermissionsBridge.register(flutterEngine, this)
         NativeAzkarBridge.register(flutterEngine, this)
+        com.example.quran_app_android.reminders.NativeRemindersBridge.registerWith(flutterEngine.dartExecutor.binaryMessenger, this)
         super.configureFlutterEngine(flutterEngine)
     }
 }
