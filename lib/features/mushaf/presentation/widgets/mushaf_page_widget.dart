@@ -1,7 +1,7 @@
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import '../../../../core/data/models/mushaf_models.dart';
+import '../../../../core/data/models/user_models.dart';
 import '../../../../core/design/app_typography.dart';
 import '../../../../core/mushaf/mushaf_font_manager.dart';
 import '../../../../core/mushaf/mushaf_raster_cache.dart';
@@ -9,14 +9,15 @@ import '../models/mushaf_theme_model.dart';
 import '../utils/mushaf_utils.dart';
 import 'mushaf_frame_painter.dart';
 import 'mushaf_line_widget.dart';
+import 'page_ribbon_widget.dart';
 
 /// Renders a complete 15-line page of the Madinah Mushaf.
 ///
-/// Supports high-performance raster image caching:
-/// - Captures rendered layout via [RepaintBoundary.toImage].
-/// - When swiping/turning ([isMoving] is true), renders the cached [ui.Image] directly
-///   via [RawImage], bypassing all text layout and frame painting for 60fps/120fps performance.
-/// - Settled page displays interactive live widgets for verse selection and Tafseer.
+/// Features:
+/// - Silk corner ribbon indicator on bookmarked or memorized pages.
+/// - Persistent tinting on bookmarked and memorized verses.
+/// - Mini progress bar at footer showing progress towards Khatma (Page X of 604).
+/// - 60fps/120fps raster image caching via [MushafRasterCache] when moving.
 class MushafPageWidget extends StatefulWidget {
   final MushafPage page;
   final MushafThemeConfig theme;
@@ -24,6 +25,10 @@ class MushafPageWidget extends StatefulWidget {
   final int? selectedAyah;
   final bool isRightPage;
   final bool isMoving;
+  final BookmarkColor? pageBookmarkColor;
+  final MemorizeStatus? pageMemorizeStatus;
+  final Map<String, BookmarkColor>? bookmarkedAyahs;
+  final Map<String, MemorizeStatus>? memorizedAyahs;
   final void Function(int surahNumber, int ayahNumber)? onAyahTapped;
   final VoidCallback? onTapPage;
 
@@ -35,6 +40,10 @@ class MushafPageWidget extends StatefulWidget {
     this.selectedAyah,
     this.isRightPage = true,
     this.isMoving = false,
+    this.pageBookmarkColor,
+    this.pageMemorizeStatus,
+    this.bookmarkedAyahs,
+    this.memorizedAyahs,
     this.onAyahTapped,
     this.onTapPage,
   });
@@ -57,7 +66,9 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
   void didUpdateWidget(covariant MushafPageWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.page.pageNumber != widget.page.pageNumber ||
-        oldWidget.theme.mode != widget.theme.mode) {
+        oldWidget.theme.mode != widget.theme.mode ||
+        oldWidget.pageBookmarkColor != widget.pageBookmarkColor ||
+        oldWidget.pageMemorizeStatus != widget.pageMemorizeStatus) {
       _scheduleCapture();
     }
   }
@@ -124,9 +135,29 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
         behavior: HitTestBehavior.opaque,
         child: Container(
           color: widget.theme.pageBg,
-          child: RawImage(
-            image: cachedImage,
-            fit: BoxFit.fill,
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: RawImage(
+                  image: cachedImage,
+                  fit: BoxFit.fill,
+                ),
+              ),
+              if (widget.pageBookmarkColor != null || widget.pageMemorizeStatus != null)
+                Positioned(
+                  top: 0.0,
+                  right: widget.isRightPage ? 36.0 : null,
+                  left: widget.isRightPage ? null : 36.0,
+                  child: PageRibbonWidget(
+                    color: widget.pageBookmarkColor?.color ??
+                        widget.pageMemorizeStatus?.badgeColor ??
+                        Colors.amber,
+                    icon: widget.pageBookmarkColor != null
+                        ? Icons.bookmark_rounded
+                        : Icons.check_circle_rounded,
+                  ),
+                ),
+            ],
           ),
         ),
       );
@@ -145,35 +176,55 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
             behavior: HitTestBehavior.opaque,
             child: Container(
               color: widget.theme.pageBg,
-              child: CustomPaint(
-                painter: MushafFramePainter(
-                  theme: widget.theme,
-                  isRightPage: widget.isRightPage,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                    left: 20.0,
-                    right: 20.0,
-                    top: 18.0,
-                    bottom: 16.0,
-                  ),
-                  child: Column(
-                    children: [
-                      // Top Header
-                      _buildHeader(context),
-                      const SizedBox(height: 6.0),
-                      // Lines Area
-                      Expanded(
-                        child: fontReady
-                            ? _buildLinesList(context)
-                            : _buildFontLoadingIndicator(context),
+              child: Stack(
+                children: [
+                  CustomPaint(
+                    painter: MushafFramePainter(
+                      theme: widget.theme,
+                      isRightPage: widget.isRightPage,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        left: 20.0,
+                        right: 20.0,
+                        top: 18.0,
+                        bottom: 14.0,
                       ),
-                      const SizedBox(height: 4.0),
-                      // Bottom Footer
-                      _buildFooter(context),
-                    ],
+                      child: Column(
+                        children: [
+                          // Top Header
+                          _buildHeader(context),
+                          const SizedBox(height: 6.0),
+                          // Lines Area
+                          Expanded(
+                            child: fontReady
+                                ? _buildLinesList(context)
+                                : _buildFontLoadingIndicator(context),
+                          ),
+                          const SizedBox(height: 4.0),
+                          // Bottom Footer
+                          _buildFooter(context),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
+
+                  // Corner Silk Ribbon (Bookmarked or Memorized)
+                  if (widget.pageBookmarkColor != null || widget.pageMemorizeStatus != null)
+                    Positioned(
+                      top: 0.0,
+                      right: widget.isRightPage ? 36.0 : null,
+                      left: widget.isRightPage ? null : 36.0,
+                      child: PageRibbonWidget(
+                        color: widget.pageBookmarkColor?.color ??
+                            widget.pageMemorizeStatus?.badgeColor ??
+                            Colors.amber,
+                        icon: widget.pageBookmarkColor != null
+                            ? Icons.bookmark_rounded
+                            : Icons.check_circle_rounded,
+                      ),
+                    ),
+                ],
               ),
             ),
           );
@@ -246,6 +297,8 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
                 theme: widget.theme,
                 selectedSurah: widget.selectedSurah,
                 selectedAyah: widget.selectedAyah,
+                bookmarkedAyahs: widget.bookmarkedAyahs,
+                memorizedAyahs: widget.memorizedAyahs,
                 onAyahTapped: widget.onAyahTapped,
               ),
             );
@@ -266,6 +319,8 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
               theme: widget.theme,
               selectedSurah: widget.selectedSurah,
               selectedAyah: widget.selectedAyah,
+              bookmarkedAyahs: widget.bookmarkedAyahs,
+              memorizedAyahs: widget.memorizedAyahs,
               onAyahTapped: widget.onAyahTapped,
             ),
           ),
@@ -274,22 +329,67 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
     );
   }
 
-  /// Builds the bottom footer: Page number in authentic Arabic numerals
+  /// Builds the bottom footer:
+  /// - Ornamental page number
+  /// - Reading progress percentage (Page X of 604)
+  /// - Sleek mini progress bar line
   Widget _buildFooter(BuildContext context) {
-    return SizedBox(
-      height: 24.0,
-      child: Center(
-        child: Text(
-          'ـ ${toArabicDigits(widget.page.pageNumber)} ـ',
-          style: TextStyle(
-            fontFamily: AppTypography.decorativeFont,
-            fontSize: 14.5,
-            fontWeight: FontWeight.bold,
-            color: widget.theme.headerFooterColor,
-            letterSpacing: 1.0,
+    final progress = (widget.page.pageNumber / 604.0).clamp(0.0, 1.0);
+    final percentStr = (progress * 100).toStringAsFixed(1);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Page progress label
+            Text(
+              'صفحة ${toArabicDigits(widget.page.pageNumber)} من ٦٠٤ ($percentStr%)',
+              style: TextStyle(
+                fontFamily: AppTypography.uiFont,
+                fontSize: 10.5,
+                color: widget.theme.headerFooterColor.withOpacity(0.75),
+              ),
+            ),
+            // Page number ornamental
+            Text(
+              'ـ ${toArabicDigits(widget.page.pageNumber)} ـ',
+              style: TextStyle(
+                fontFamily: AppTypography.decorativeFont,
+                fontSize: 14.5,
+                fontWeight: FontWeight.bold,
+                color: widget.theme.headerFooterColor,
+                letterSpacing: 1.0,
+              ),
+            ),
+            // Juz counter
+            Text(
+              'الجزء ${toArabicDigits(widget.page.juzNumber)}',
+              style: TextStyle(
+                fontFamily: AppTypography.uiFont,
+                fontSize: 10.5,
+                color: widget.theme.headerFooterColor.withOpacity(0.75),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 3.0),
+        // Mini progress indicator
+        ClipRRect(
+          borderRadius: BorderRadius.circular(1.5),
+          child: SizedBox(
+            height: 2.5,
+            child: LinearProgressIndicator(
+              value: progress,
+              backgroundColor: widget.theme.frameBorderInner.withOpacity(0.12),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                widget.theme.frameBorderOuter.withOpacity(0.85),
+              ),
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 

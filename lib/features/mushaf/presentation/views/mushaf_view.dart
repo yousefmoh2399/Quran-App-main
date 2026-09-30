@@ -12,6 +12,7 @@ import '../widgets/ayah_action_bottom_sheet.dart';
 import '../widgets/mushaf_dual_page_view.dart';
 import '../widgets/mushaf_jump_dialog.dart';
 import '../widgets/mushaf_page_widget.dart';
+import '../widgets/page_bookmark_bottom_sheet.dart';
 
 /// The authentic 604-page, 15-line Madinah Mushaf reader screen.
 class MushafView extends StatelessWidget {
@@ -92,6 +93,7 @@ class MushafView extends StatelessWidget {
                 child: AyahActionBottomSheet(
                   surahNumber: controller.selectedSurah.value!,
                   ayahNumber: controller.selectedAyah.value!,
+                  pageNumber: currentPage,
                   surahName: surahName,
                   ayahEntity: controller.selectedAyahEntity.value,
                   theme: themeConfig,
@@ -164,6 +166,11 @@ class MushafView extends StatelessWidget {
               page: cached,
               theme: themeConfig,
               isMoving: isMoving,
+              isRightPage: pageNum % 2 != 0,
+              pageBookmarkColor: controller.getPageBookmarkColor(pageNum),
+              pageMemorizeStatus: controller.getPageMemorizeStatus(pageNum),
+              bookmarkedAyahs: controller.getAyahBookmarkColors(),
+              memorizedAyahs: controller.getAyahMemorizeStatuses(),
               selectedSurah: controller.selectedSurah.value,
               selectedAyah: controller.selectedAyah.value,
               onAyahTapped: (s, a) => controller.selectAyah(s, a),
@@ -179,6 +186,11 @@ class MushafView extends StatelessWidget {
                   page: snapshot.data!,
                   theme: themeConfig,
                   isMoving: isMoving,
+                  isRightPage: pageNum % 2 != 0,
+                  pageBookmarkColor: controller.getPageBookmarkColor(pageNum),
+                  pageMemorizeStatus: controller.getPageMemorizeStatus(pageNum),
+                  bookmarkedAyahs: controller.getAyahBookmarkColors(),
+                  memorizedAyahs: controller.getAyahMemorizeStatuses(),
                   selectedSurah: controller.selectedSurah.value,
                   selectedAyah: controller.selectedAyah.value,
                   onAyahTapped: (s, a) => controller.selectAyah(s, a),
@@ -263,10 +275,12 @@ class MushafView extends StatelessWidget {
               IconButton(
                 icon: Icon(
                   isBookmarked ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
-                  color: isBookmarked ? colors.accent : colors.text,
+                  color: isBookmarked
+                      ? (controller.getPageBookmarkColor(currentPage)?.color ?? colors.accent)
+                      : colors.text,
                 ),
-                tooltip: 'حفظ الصفحة',
-                onPressed: () => controller.togglePageBookmark(currentPage),
+                tooltip: 'علامة الصفحة وخيارات الحفظ',
+                onPressed: () => PageBookmarkBottomSheet.show(context, currentPage, surahName),
               ),
 
               // Theme Switcher Menu

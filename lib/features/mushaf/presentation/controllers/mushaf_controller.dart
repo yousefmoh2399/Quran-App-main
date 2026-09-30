@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/data/models/ayah_entity.dart';
 import '../../../../core/data/models/mushaf_models.dart';
+import '../../../../core/data/models/user_models.dart';
 import '../../../../core/data/repositories/mushaf_repository.dart';
 import '../../../../core/data/repositories/quran_repository.dart';
+import '../../../../core/data/repositories/user_repository.dart';
 import '../../../../core/mushaf/mushaf_font_manager.dart';
 import '../../../../core/mushaf/mushaf_raster_cache.dart';
 import '../../../../core/service/settings/SettingsServices.dart';
@@ -14,6 +17,7 @@ import '../models/mushaf_theme_model.dart';
 class MushafController extends GetxController {
   final MushafRepository _mushafRepo = MushafRepository();
   final QuranRepository _quranRepo = QuranRepository();
+  final UserRepository _userRepo = UserRepository();
   final SettingsServices _settings = Get.find<SettingsServices>();
 
   // State Observables
@@ -29,8 +33,15 @@ class MushafController extends GetxController {
   final RxnInt selectedAyah = RxnInt();
   final Rxn<AyahEntity> selectedAyahEntity = Rxn<AyahEntity>();
 
-  // Bookmarks
+  // Bookmarks & Memorization Maps
   final RxSet<int> bookmarkedPages = <int>{}.obs;
+  final RxMap<int, BookmarkItem> pageBookmarksMap = <int, BookmarkItem>{}.obs;
+  final RxMap<int, MemorizedItem> pageMemorizedMap = <int, MemorizedItem>{}.obs;
+  final RxMap<String, BookmarkItem> ayahBookmarksMap = <String, BookmarkItem>{}.obs;
+  final RxMap<String, MemorizedItem> ayahMemorizedMap = <String, MemorizedItem>{}.obs;
+
+  // Reading dwell timer (5 seconds dwell triggers reading log)
+  Timer? _dwellTimer;
 
   // In-memory Pages Cache
   final Map<int, MushafPage> pagesCache = {};
@@ -46,6 +57,7 @@ class MushafController extends GetxController {
   void onInit() {
     super.onInit();
     _loadPreferences();
+    loadUserData();
 
     // Determine initial page from route arguments or saved state
     final int initialPage = _resolveInitialPage();
@@ -55,10 +67,13 @@ class MushafController extends GetxController {
     _loadPage(initialPage).then((_) {
       _preloadAdjacentPages(initialPage);
     });
+
+    _startDwellTimer(initialPage);
   }
 
   @override
   void onClose() {
+    _dwellTimer?.cancel();
     MushafRasterCache.instance.clear();
     pageController.dispose();
     super.dispose();
@@ -120,21 +135,6 @@ class MushafController extends GetxController {
     }
   }
 
-  /// Called whenever the user swipes to a new page.
-  void onPageChanged(int newPage) {
-    final clamped = newPage.clamp(1, 604);
-    if (currentPage.value == clamped) {
-      _preloadAdjacentPages(clamped);
-      return;
-    }
-
-    currentPage.value = clamped;
-    clearAyahSelection();
-    _saveLastRead(clamped);
-
-    _preloadAdjacentPages(clamped);
-  }
-
   void _preloadAdjacentPages(int pageNumber) {
     final targets = <int>[];
     if (pageNumber > 1) targets.add(pageNumber - 1);
@@ -174,24 +174,217 @@ class MushafController extends GetxController {
     }
   }
 
-  /// Toggles bookmark on a given page.
-  Future<void> togglePageBookmark(int pageNumber) async {
-    final prefs = _settings.sharedPref;
-    if (prefs == null) return;
-
-    if (bookmarkedPages.contains(pageNumber)) {
-      bookmarkedPages.remove(pageNumber);
-    } else {
-      bookmarkedPages.add(pageNumber);
+  /// Called whenever the user swipes to a new page.
+  void onPageChanged(int newPage) {
+    final clamped = newPage.clamp(1, 604);
+    if (currentPage.value == clamped) {
+      _preloadAdjacentPages(clamped);
+      return;
     }
 
-    final strList = bookmarkedPages.map((p) => p.toString()).toList();
-    await prefs.setStringList(_prefBookmarks, strList);
+    currentPage.value = clamped;
+    clearAyahSelection();
+    _saveLastRead(clamped);
+    _startDwellTimer(clamped);
+
+    _preloadAdjacentPages(clamped);
+  }
+
+  void _startDwellTimer(int page) {
+    _dwellTimer?.cancel();
+    _dwellTimer = Timer(const Duration(seconds: 5), () async {
+      if (currentPage.value == page) {
+        await _userRepo.logPageRead(page);
+      }
+    });
+  }
+
+  Future<void> loadUserData() async {
+    try {
+      final bookmarks = await _userRepo.getAllBookmarks();
+      final memorized = await _userRepo.getAllMemorized();
+
+      pageBookmarksMap.clear();
+      ayahBookmarksMap.clear();
+      bookmarkedPages.clear();
+
+      for (final b in bookmarks) {
+        if (b.type == BookmarkType.page) {
+          pageBookmarksMap[b.page] = b;
+          bookmarkedPages.add(b.page);
+        } else if (b.surah != null && b.ayah != null) {
+          ayahBookmarksMap['${b.surah}:${b.ayah}'] = b;
+        }
+      }
+
+      pageMemorizedMap.clear();
+      ayahMemorizedMap.clear();
+
+      for (final m in memorized) {
+        if (m.type == BookmarkType.page) {
+          pageMemorizedMap[m.page] = m;
+        } else if (m.surah != null && m.ayah != null) {
+          ayahMemorizedMap['${m.surah}:${m.ayah}'] = m;
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading user data in mushaf controller: $e');
+    }
+  }
+
+  Map<String, BookmarkColor> getAyahBookmarkColors() {
+    return ayahBookmarksMap.map((key, item) => MapEntry(key, item.color));
+  }
+
+  Map<String, MemorizeStatus> getAyahMemorizeStatuses() {
+    return ayahMemorizedMap.map((key, item) => MapEntry(key, item.status));
+  }
+
+  BookmarkColor? getPageBookmarkColor(int page) => pageBookmarksMap[page]?.color;
+  MemorizeStatus? getPageMemorizeStatus(int page) => pageMemorizedMap[page]?.status;
+  BookmarkItem? getPageBookmark(int page) => pageBookmarksMap[page];
+  MemorizedItem? getPageMemorized(int page) => pageMemorizedMap[page];
+  BookmarkItem? getAyahBookmark(int surah, int ayah) => ayahBookmarksMap['$surah:$ayah'];
+  MemorizedItem? getAyahMemorized(int surah, int ayah) => ayahMemorizedMap['$surah:$ayah'];
+
+  /// Toggles bookmark on a given page.
+  Future<void> togglePageBookmark(
+    int pageNumber, {
+    BookmarkColor color = BookmarkColor.gold,
+    String? note,
+  }) async {
+    if (pageBookmarksMap.containsKey(pageNumber)) {
+      final item = pageBookmarksMap[pageNumber];
+      if (item?.id != null) {
+        await _userRepo.deleteBookmark(item!.id!);
+      } else {
+        await _userRepo.deleteBookmarkByPage(pageNumber);
+      }
+      pageBookmarksMap.remove(pageNumber);
+      bookmarkedPages.remove(pageNumber);
+    } else {
+      final page = pagesCache[pageNumber];
+      final item = BookmarkItem(
+        type: BookmarkType.page,
+        page: pageNumber,
+        surah: page?.surahNumber,
+        ayah: 1,
+        color: color,
+        note: note,
+      );
+      final id = await _userRepo.addBookmark(item);
+      pageBookmarksMap[pageNumber] = item.copyWith(id: id);
+      bookmarkedPages.add(pageNumber);
+    }
+    MushafRasterCache.instance.removePage(pageNumber);
+    update();
+  }
+
+  Future<void> setPageBookmark({
+    required int pageNumber,
+    required BookmarkColor color,
+    String? note,
+  }) async {
+    final page = pagesCache[pageNumber];
+    final item = BookmarkItem(
+      type: BookmarkType.page,
+      page: pageNumber,
+      surah: page?.surahNumber,
+      ayah: 1,
+      color: color,
+      note: note,
+    );
+    final id = await _userRepo.addBookmark(item);
+    pageBookmarksMap[pageNumber] = item.copyWith(id: id);
+    bookmarkedPages.add(pageNumber);
+    MushafRasterCache.instance.removePage(pageNumber);
+    update();
+  }
+
+  Future<void> removePageBookmark(int pageNumber) async {
+    final item = pageBookmarksMap[pageNumber];
+    if (item?.id != null) {
+      await _userRepo.deleteBookmark(item!.id!);
+    } else {
+      await _userRepo.deleteBookmarkByPage(pageNumber);
+    }
+    pageBookmarksMap.remove(pageNumber);
+    bookmarkedPages.remove(pageNumber);
+    MushafRasterCache.instance.removePage(pageNumber);
+    update();
+  }
+
+  Future<void> setPageMemorizeStatus(int pageNumber, MemorizeStatus? status) async {
+    if (status == null) {
+      await _userRepo.deleteMemorizedByPage(pageNumber);
+      pageMemorizedMap.remove(pageNumber);
+    } else {
+      final item = MemorizedItem(
+        type: BookmarkType.page,
+        page: pageNumber,
+        status: status,
+      );
+      final id = await _userRepo.setMemorized(item);
+      pageMemorizedMap[pageNumber] = item.copyWith(id: id);
+    }
+    MushafRasterCache.instance.removePage(pageNumber);
+    update();
+  }
+
+  Future<void> setAyahBookmark({
+    required int surah,
+    required int ayah,
+    required int page,
+    required BookmarkColor color,
+    String? note,
+  }) async {
+    final item = BookmarkItem(
+      type: BookmarkType.ayah,
+      page: page,
+      surah: surah,
+      ayah: ayah,
+      color: color,
+      note: note,
+    );
+    final id = await _userRepo.addBookmark(item);
+    ayahBookmarksMap['$surah:$ayah'] = item.copyWith(id: id);
+    MushafRasterCache.instance.removePage(page);
+    update();
+  }
+
+  Future<void> removeAyahBookmark(int surah, int ayah, int page) async {
+    await _userRepo.deleteBookmarkByAyah(surah, ayah);
+    ayahBookmarksMap.remove('$surah:$ayah');
+    MushafRasterCache.instance.removePage(page);
+    update();
+  }
+
+  Future<void> setAyahMemorizeStatus({
+    required int surah,
+    required int ayah,
+    required int page,
+    required MemorizeStatus? status,
+  }) async {
+    if (status == null) {
+      await _userRepo.deleteMemorizedByAyah(surah, ayah);
+      ayahMemorizedMap.remove('$surah:$ayah');
+    } else {
+      final item = MemorizedItem(
+        type: BookmarkType.ayah,
+        page: page,
+        surah: surah,
+        ayah: ayah,
+        status: status,
+      );
+      final id = await _userRepo.setMemorized(item);
+      ayahMemorizedMap['$surah:$ayah'] = item.copyWith(id: id);
+    }
+    MushafRasterCache.instance.removePage(page);
     update();
   }
 
   bool isPageBookmarked(int pageNumber) {
-    return bookmarkedPages.contains(pageNumber);
+    return pageBookmarksMap.containsKey(pageNumber);
   }
 
   /// Selects an ayah for highlighting and loads its Tafseer.

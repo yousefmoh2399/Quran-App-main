@@ -198,8 +198,9 @@ void main() {
 
       // Verify Surah name in header
       expect(find.textContaining('البقرة'), findsOneWidget);
-      // Verify Footer contains Arabic page number (٣)
-      expect(find.textContaining('٣'), findsOneWidget);
+      // Verify Footer contains Arabic page number and Khatma progress
+      expect(find.textContaining('ـ ٣ ـ'), findsOneWidget);
+      expect(find.textContaining('صفحة ٣ من ٦٠٤'), findsOneWidget);
     });
   });
 }

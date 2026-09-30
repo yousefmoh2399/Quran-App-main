@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/data/models/mushaf_models.dart';
+import '../../../../core/data/models/user_models.dart';
 import '../../../../core/design/app_typography.dart';
 import '../../../../core/mushaf/mushaf_font_manager.dart';
 import '../models/mushaf_theme_model.dart';
@@ -14,6 +15,8 @@ class MushafLineWidget extends StatelessWidget {
   final MushafThemeConfig theme;
   final int? selectedSurah;
   final int? selectedAyah;
+  final Map<String, BookmarkColor>? bookmarkedAyahs;
+  final Map<String, MemorizeStatus>? memorizedAyahs;
   final void Function(int surahNumber, int ayahNumber)? onAyahTapped;
 
   const MushafLineWidget({
@@ -23,6 +26,8 @@ class MushafLineWidget extends StatelessWidget {
     required this.theme,
     this.selectedSurah,
     this.selectedAyah,
+    this.bookmarkedAyahs,
+    this.memorizedAyahs,
     this.onAyahTapped,
   });
 
@@ -151,6 +156,24 @@ class MushafLineWidget extends StatelessWidget {
                 word.surahNumber == selectedSurah &&
                 word.ayahNumber == selectedAyah;
 
+            final verseKey = '${word.surahNumber}:${word.ayahNumber}';
+            final bookmarkColor = bookmarkedAyahs?[verseKey];
+            final memorizeStatus = memorizedAyahs?[verseKey];
+
+            Color bgColor = Colors.transparent;
+            Border? border;
+
+            if (isHighlighted) {
+              bgColor = theme.ayahHighlight;
+              border = Border.all(color: theme.surahHeaderBorder, width: 0.8);
+            } else if (bookmarkColor != null) {
+              bgColor = bookmarkColor.color.withOpacity(0.20);
+              border = Border.all(color: bookmarkColor.color.withOpacity(0.60), width: 0.7);
+            } else if (memorizeStatus != null) {
+              bgColor = memorizeStatus.badgeColor.withOpacity(0.18);
+              border = Border.all(color: memorizeStatus.badgeColor.withOpacity(0.50), width: 0.6);
+            }
+
             return GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () {
@@ -162,11 +185,9 @@ class MushafLineWidget extends StatelessWidget {
                 margin: const EdgeInsets.symmetric(horizontal: 0.8),
                 padding: const EdgeInsets.symmetric(horizontal: 1.5, vertical: 1.0),
                 decoration: BoxDecoration(
-                  color: isHighlighted ? theme.ayahHighlight : Colors.transparent,
+                  color: bgColor,
                   borderRadius: BorderRadius.circular(4.0),
-                  border: isHighlighted
-                      ? Border.all(color: theme.surahHeaderBorder, width: 0.6)
-                      : null,
+                  border: border,
                 ),
                 child: Text(
                   word.glyphCode,

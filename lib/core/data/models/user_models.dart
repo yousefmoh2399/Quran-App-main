@@ -43,7 +43,7 @@ class BookmarkItem {
   final String? note;
   final DateTime createdAt;
 
-  const BookmarkItem({
+  BookmarkItem({
     this.id,
     required this.type,
     required this.page,
@@ -51,8 +51,30 @@ class BookmarkItem {
     this.ayah,
     this.color = BookmarkColor.gold,
     this.note,
-    required this.createdAt,
-  });
+    DateTime? createdAt,
+  }) : createdAt = createdAt ?? DateTime.now();
+
+  BookmarkItem copyWith({
+    int? id,
+    BookmarkType? type,
+    int? page,
+    int? surah,
+    int? ayah,
+    BookmarkColor? color,
+    String? note,
+    DateTime? createdAt,
+  }) {
+    return BookmarkItem(
+      id: id ?? this.id,
+      type: type ?? this.type,
+      page: page ?? this.page,
+      surah: surah ?? this.surah,
+      ayah: ayah ?? this.ayah,
+      color: color ?? this.color,
+      note: note ?? this.note,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
 
   Map<String, dynamic> toMap() {
     return {
@@ -111,15 +133,35 @@ class MemorizedItem {
   final MemorizeStatus status;
   final DateTime updatedAt;
 
-  const MemorizedItem({
+  MemorizedItem({
     this.id,
     required this.type,
     required this.page,
     this.surah,
     this.ayah,
     required this.status,
-    required this.updatedAt,
-  });
+    DateTime? updatedAt,
+  }) : updatedAt = updatedAt ?? DateTime.now();
+
+  MemorizedItem copyWith({
+    int? id,
+    BookmarkType? type,
+    int? page,
+    int? surah,
+    int? ayah,
+    MemorizeStatus? status,
+    DateTime? updatedAt,
+  }) {
+    return MemorizedItem(
+      id: id ?? this.id,
+      type: type ?? this.type,
+      page: page ?? this.page,
+      surah: surah ?? this.surah,
+      ayah: ayah ?? this.ayah,
+      status: status ?? this.status,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
 
   Map<String, dynamic> toMap() {
     return {

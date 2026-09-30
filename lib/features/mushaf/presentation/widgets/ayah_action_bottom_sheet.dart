@@ -3,11 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/data/models/ayah_entity.dart';
+import '../../../../core/data/models/user_models.dart';
 import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_radius.dart';
 import '../../../../core/design/app_spacing.dart';
 import '../../../../core/design/app_typography.dart';
-import '../../../../core/service/settings/SettingsServices.dart';
+import '../controllers/mushaf_controller.dart';
 import '../models/mushaf_theme_model.dart';
 import '../utils/mushaf_utils.dart';
 
@@ -16,12 +17,13 @@ import '../utils/mushaf_utils.dart';
 /// Provides:
 /// - Verse reference and Arabic text.
 /// - Tafseer Al-Muyassar.
-/// - Copy verse to clipboard.
-/// - Share verse.
-/// - Bookmark verse.
+/// - Memorization status tracking (بيحفظ / محفوظ / يحتاج مراجعة).
+/// - Verse bookmarking with customizable color (ذهبي، زمردي، أزرق، ياقوتي، عنبري) and personal note.
+/// - Copy verse to clipboard and share verse.
 class AyahActionBottomSheet extends StatefulWidget {
   final int surahNumber;
   final int ayahNumber;
+  final int pageNumber;
   final String surahName;
   final AyahEntity? ayahEntity;
   final MushafThemeConfig theme;
@@ -31,6 +33,7 @@ class AyahActionBottomSheet extends StatefulWidget {
     super.key,
     required this.surahNumber,
     required this.ayahNumber,
+    required this.pageNumber,
     required this.surahName,
     required this.ayahEntity,
     required this.theme,
@@ -42,39 +45,95 @@ class AyahActionBottomSheet extends StatefulWidget {
 }
 
 class _AyahActionBottomSheetState extends State<AyahActionBottomSheet> {
+  final MushafController _controller = Get.find<MushafController>();
+  late TextEditingController _noteController;
+
   bool _isBookmarked = false;
-  final SettingsServices _settings = Get.find<SettingsServices>();
+  BookmarkColor _selectedColor = BookmarkColor.gold;
+  MemorizeStatus? _selectedStatus;
+  bool _showNotesInput = false;
 
   @override
   void initState() {
     super.initState();
-    _checkBookmark();
+    final bookmark = _controller.getAyahBookmark(widget.surahNumber, widget.ayahNumber);
+    final memorized = _controller.getAyahMemorized(widget.surahNumber, widget.ayahNumber);
+
+    _isBookmarked = bookmark != null;
+    _selectedColor = bookmark?.color ?? BookmarkColor.gold;
+    _selectedStatus = memorized?.status;
+    _noteController = TextEditingController(text: bookmark?.note ?? '');
+    _showNotesInput = bookmark?.note != null && bookmark!.note!.isNotEmpty;
   }
 
-  void _checkBookmark() {
-    final prefs = _settings.sharedPref;
-    final bSurah = prefs?.getInt('mushaf_bookmarked_surah');
-    final bAyah = prefs?.getInt('mushaf_bookmarked_ayah');
-    setState(() {
-      _isBookmarked = bSurah == widget.surahNumber && bAyah == widget.ayahNumber;
-    });
+  @override
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
   }
 
   Future<void> _toggleBookmark() async {
-    final prefs = _settings.sharedPref;
-    if (prefs == null) return;
-
+    final note = _noteController.text.trim();
     if (_isBookmarked) {
-      await prefs.remove('mushaf_bookmarked_surah');
-      await prefs.remove('mushaf_bookmarked_ayah');
+      await _controller.removeAyahBookmark(
+        widget.surahNumber,
+        widget.ayahNumber,
+        widget.pageNumber,
+      );
       setState(() => _isBookmarked = false);
-      _showFeedback('تمت إزالة العلامة المرجعية');
+      _showFeedback('تمت إزالة العلامة المرجعية للآية');
     } else {
-      await prefs.setInt('mushaf_bookmarked_surah', widget.surahNumber);
-      await prefs.setInt('mushaf_bookmarked_ayah', widget.ayahNumber);
-      await prefs.setString('mushaf_bookmarked_surah_name', widget.surahName);
+      await _controller.setAyahBookmark(
+        surah: widget.surahNumber,
+        ayah: widget.ayahNumber,
+        page: widget.pageNumber,
+        color: _selectedColor,
+        note: note.isNotEmpty ? note : null,
+      );
       setState(() => _isBookmarked = true);
-      _showFeedback('تم حفظ العلامة المرجعية عند الآية ${widget.ayahNumber}');
+      _showFeedback('تم حفظ العلامة المرجعية للآية بنجاح');
+    }
+  }
+
+  Future<void> _updateColor(BookmarkColor color) async {
+    setState(() => _selectedColor = color);
+    if (_isBookmarked) {
+      final note = _noteController.text.trim();
+      await _controller.setAyahBookmark(
+        surah: widget.surahNumber,
+        ayah: widget.ayahNumber,
+        page: widget.pageNumber,
+        color: color,
+        note: note.isNotEmpty ? note : null,
+      );
+    }
+  }
+
+  Future<void> _updateMemorizeStatus(MemorizeStatus? status) async {
+    setState(() => _selectedStatus = status);
+    await _controller.setAyahMemorizeStatus(
+      surah: widget.surahNumber,
+      ayah: widget.ayahNumber,
+      page: widget.pageNumber,
+      status: status,
+    );
+    final msg = status == null
+        ? 'تم إلغاء حالة الحفظ للآية'
+        : 'تم تحديد الآية: ${status.labelAr}';
+    _showFeedback(msg);
+  }
+
+  Future<void> _saveNote() async {
+    final note = _noteController.text.trim();
+    if (_isBookmarked) {
+      await _controller.setAyahBookmark(
+        surah: widget.surahNumber,
+        ayah: widget.ayahNumber,
+        page: widget.pageNumber,
+        color: _selectedColor,
+        note: note.isNotEmpty ? note : null,
+      );
+      _showFeedback('تم حفظ الملاحظة');
     }
   }
 
@@ -125,15 +184,15 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet> {
 
     return Container(
       constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.65,
+        maxHeight: MediaQuery.of(context).size.height * 0.75,
       ),
       decoration: BoxDecoration(
         color: colors.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24.0)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 16.0,
+            color: Colors.black.withOpacity(0.18),
+            blurRadius: 18.0,
             offset: const Offset(0, -4),
           ),
         ],
@@ -160,24 +219,20 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
-                      decoration: BoxDecoration(
-                        color: colors.primary.withOpacity(0.12),
-                        borderRadius: AppRadius.borderSm,
-                        border: Border.all(color: colors.primary.withOpacity(0.3)),
-                      ),
-                      child: Text(
-                        'سورة ${widget.surahName}  •  آية ${toArabicDigits(widget.ayahNumber)}',
-                        style: textTheme.labelLarge?.copyWith(
-                          color: colors.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+                  decoration: BoxDecoration(
+                    color: colors.primary.withOpacity(0.12),
+                    borderRadius: AppRadius.borderSm,
+                    border: Border.all(color: colors.primary.withOpacity(0.3)),
+                  ),
+                  child: Text(
+                    'سورة ${widget.surahName}  •  آية ${toArabicDigits(widget.ayahNumber)}  •  صـ ${toArabicDigits(widget.pageNumber)}',
+                    style: textTheme.labelLarge?.copyWith(
+                      color: colors.primary,
+                      fontWeight: FontWeight.bold,
                     ),
-                  ],
+                  ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close_rounded, size: 22.0),
@@ -190,10 +245,10 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet> {
 
           const Divider(height: 1.0),
 
-          // Scrollable Content (Ayah text & Tafseer)
+          // Scrollable Content
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 14.0),
+              padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 12.0),
               physics: const BouncingScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -219,6 +274,184 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet> {
                       ),
                     ),
                   ),
+
+                  AppSpacing.verticalMd,
+
+                  // Memorization Status Section
+                  Row(
+                    children: [
+                      Icon(Icons.workspace_premium_rounded, size: 18.0, color: colors.primary),
+                      AppSpacing.horizontalXs,
+                      Text(
+                        'حالة الحفظ',
+                        style: textTheme.titleSmall?.copyWith(
+                          color: colors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  AppSpacing.verticalXs,
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        ChoiceChip(
+                          label: const Text('غير محدد'),
+                          selected: _selectedStatus == null,
+                          onSelected: (selected) {
+                            if (selected) _updateMemorizeStatus(null);
+                          },
+                        ),
+                        ...MemorizeStatus.values.map((status) {
+                          final isSelected = _selectedStatus == status;
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 6.0),
+                            child: ChoiceChip(
+                              label: Text(
+                                status.labelAr,
+                                style: TextStyle(
+                                  fontFamily: AppTypography.uiFont,
+                                  color: isSelected ? Colors.white : colors.text,
+                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                ),
+                              ),
+                              selected: isSelected,
+                              selectedColor: status.badgeColor,
+                              backgroundColor: colors.bg,
+                              avatar: CircleAvatar(
+                                backgroundColor: status.badgeColor,
+                                radius: 7.0,
+                              ),
+                              onSelected: (selected) {
+                                if (selected) _updateMemorizeStatus(status);
+                              },
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
+                  ),
+
+                  AppSpacing.verticalMd,
+
+                  // Bookmark & Color Section
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.bookmark_rounded, size: 18.0, color: colors.accent),
+                          AppSpacing.horizontalXs,
+                          Text(
+                            'علامة مرجعية بلون مخصص',
+                            style: textTheme.titleSmall?.copyWith(
+                              color: colors.accent,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          _showNotesInput ? Icons.note_rounded : Icons.note_add_outlined,
+                          size: 20.0,
+                          color: colors.accent,
+                        ),
+                        tooltip: 'ملاحظة',
+                        onPressed: () {
+                          setState(() => _showNotesInput = !_showNotesInput);
+                        },
+                      ),
+                    ],
+                  ),
+                  AppSpacing.verticalXs,
+                  Wrap(
+                    spacing: 8.0,
+                    children: BookmarkColor.values.map((col) {
+                      final isSelected = _isBookmarked && _selectedColor == col;
+                      return GestureDetector(
+                        onTap: () {
+                          _updateColor(col);
+                          if (!_isBookmarked) {
+                            _toggleBookmark();
+                          }
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+                          decoration: BoxDecoration(
+                            color: col.color.withOpacity(isSelected ? 0.25 : 0.08),
+                            borderRadius: AppRadius.borderSm,
+                            border: Border.all(
+                              color: isSelected ? col.color : col.color.withOpacity(0.3),
+                              width: isSelected ? 2.0 : 1.0,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CircleAvatar(
+                                backgroundColor: col.color,
+                                radius: 6.0,
+                              ),
+                              AppSpacing.horizontalXs,
+                              Text(
+                                col.labelAr,
+                                style: TextStyle(
+                                  fontFamily: AppTypography.uiFont,
+                                  fontSize: 12.0,
+                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                  color: colors.text,
+                                ),
+                              ),
+                              if (isSelected) ...[
+                                AppSpacing.horizontalXs,
+                                Icon(Icons.check_rounded, size: 14.0, color: col.color),
+                              ],
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+
+                  // Note input
+                  if (_showNotesInput || _isBookmarked) ...[
+                    AppSpacing.verticalSm,
+                    TextField(
+                      controller: _noteController,
+                      maxLines: 2,
+                      style: TextStyle(
+                        fontFamily: AppTypography.uiFont,
+                        color: colors.text,
+                        fontSize: 13.5,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'ملاحظة أو تدبر على هذه الآية...',
+                        hintStyle: TextStyle(color: colors.textMuted, fontSize: 12.5),
+                        filled: true,
+                        fillColor: colors.bg,
+                        contentPadding: const EdgeInsets.all(10.0),
+                        border: OutlineInputBorder(
+                          borderRadius: AppRadius.borderMd,
+                          borderSide: BorderSide(color: colors.divider),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: AppRadius.borderMd,
+                          borderSide: BorderSide(color: colors.divider),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: AppRadius.borderMd,
+                          borderSide: BorderSide(color: colors.primary, width: 1.5),
+                        ),
+                        suffixIcon: IconButton(
+                          icon: Icon(Icons.save_rounded, size: 18.0, color: colors.primary),
+                          onPressed: _saveNote,
+                        ),
+                      ),
+                    ),
+                  ],
 
                   AppSpacing.verticalMd,
 

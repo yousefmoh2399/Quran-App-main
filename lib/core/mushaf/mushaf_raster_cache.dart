@@ -55,6 +55,13 @@ class MushafRasterCache {
     image?.dispose();
   }
 
+  /// Removes and disposes cached images across all themes for a specific page.
+  void removePage(int pageNumber) {
+    for (final mode in MushafThemeMode.values) {
+      remove(pageNumber, mode);
+    }
+  }
+
   /// Clears the entire cache and disposes all native image textures.
   void clear() {
     for (final image in _cache.values) {

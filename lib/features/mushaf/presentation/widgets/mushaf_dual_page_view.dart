@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../../../core/data/models/mushaf_models.dart';
+import '../controllers/mushaf_controller.dart';
 import '../models/mushaf_theme_model.dart';
 import 'mushaf_page_widget.dart';
 
@@ -120,12 +122,22 @@ class _MushafDualPageViewState extends State<MushafDualPageView> {
   }
 
   Widget _buildPageSlot(int pageNum, {required bool isRight}) {
+    final controller = Get.isRegistered<MushafController>() ? Get.find<MushafController>() : null;
+    final bookmarkColor = controller?.getPageBookmarkColor(pageNum);
+    final memorizeStatus = controller?.getPageMemorizeStatus(pageNum);
+    final ayahBookmarks = controller?.getAyahBookmarkColors();
+    final ayahMemorized = controller?.getAyahMemorizeStatuses();
+
     final cached = widget.pagesCache[pageNum];
     if (cached != null) {
       return MushafPageWidget(
         page: cached,
         theme: widget.theme,
         isRightPage: isRight,
+        pageBookmarkColor: bookmarkColor,
+        pageMemorizeStatus: memorizeStatus,
+        bookmarkedAyahs: ayahBookmarks,
+        memorizedAyahs: ayahMemorized,
         selectedSurah: widget.selectedSurah,
         selectedAyah: widget.selectedAyah,
         onAyahTapped: widget.onAyahTapped,
@@ -141,6 +153,10 @@ class _MushafDualPageViewState extends State<MushafDualPageView> {
             page: snapshot.data!,
             theme: widget.theme,
             isRightPage: isRight,
+            pageBookmarkColor: bookmarkColor,
+            pageMemorizeStatus: memorizeStatus,
+            bookmarkedAyahs: ayahBookmarks,
+            memorizedAyahs: ayahMemorized,
             selectedSurah: widget.selectedSurah,
             selectedAyah: widget.selectedAyah,
             onAyahTapped: widget.onAyahTapped,
