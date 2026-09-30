@@ -22,6 +22,7 @@ class MainActivity : FlutterActivity() {
         if (NativePrayerManager.hasValidLocation(this)) {
             PrayerScheduler.scheduleRollingWindow(this)
         }
+        com.example.quran_app_android.widgets.WidgetUpdateManager.updateAll(this)
     }
 
     private fun createAdhanNotificationChannel() {

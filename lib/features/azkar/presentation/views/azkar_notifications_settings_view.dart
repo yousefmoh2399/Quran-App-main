@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:quran_app_android/core/design/app_colors.dart';
 import 'package:quran_app_android/core/design/app_radius.dart';
 import 'package:quran_app_android/core/design/app_spacing.dart';
@@ -211,17 +210,17 @@ class _AzkarNotificationsSettingsViewState
                           Container(
                             padding: const EdgeInsets.all(AppSpacing.sm),
                             decoration: BoxDecoration(
-                              color: colors.warning.withOpacity(0.12),
+                              color: colors.accent.withOpacity(0.12),
                               borderRadius: BorderRadius.circular(AppRadius.md),
                               border: Border.all(
-                                color: colors.warning.withOpacity(0.4),
+                                color: colors.accent.withOpacity(0.4),
                               ),
                             ),
                             child: Row(
                               children: [
                                 Icon(
                                   Icons.battery_alert_rounded,
-                                  color: colors.warning,
+                                  color: colors.accent,
                                   size: 22,
                                 ),
                                 AppSpacing.horizontalSm,
@@ -231,7 +230,7 @@ class _AzkarNotificationsSettingsViewState
                                     style: TextStyle(
                                       fontFamily: AppTypography.uiFont,
                                       fontSize: 12,
-                                      color: colors.warning,
+                                      color: colors.accent,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -268,7 +267,7 @@ class _AzkarNotificationsSettingsViewState
                             child: Container(
                               padding: const EdgeInsets.all(AppSpacing.sm),
                               decoration: BoxDecoration(
-                                color: colors.surfaceVariant.withOpacity(0.4),
+                                color: colors.surface.withOpacity(0.6),
                                 borderRadius:
                                     BorderRadius.circular(AppRadius.md),
                               ),
@@ -306,7 +305,7 @@ class _AzkarNotificationsSettingsViewState
                             child: Container(
                               padding: const EdgeInsets.all(AppSpacing.sm),
                               decoration: BoxDecoration(
-                                color: colors.surfaceVariant.withOpacity(0.4),
+                                color: colors.surface.withOpacity(0.6),
                                 borderRadius:
                                     BorderRadius.circular(AppRadius.md),
                               ),
@@ -469,7 +468,7 @@ class _AzkarNotificationsSettingsViewState
                             _saveSettings();
                           },
                         ),
-                        Divider(height: 1, color: colors.border),
+                        Divider(height: 1, color: colors.divider),
                         SwitchListTile.adaptive(
                           contentPadding: EdgeInsets.zero,
                           value: _vibrationEnabled,
@@ -541,7 +540,7 @@ class _AzkarNotificationsSettingsViewState
       ),
       selected: isSelected,
       selectedColor: colors.primary,
-      backgroundColor: colors.surfaceVariant.withOpacity(0.5),
+      backgroundColor: colors.surface.withOpacity(0.8),
       onSelected: (selected) {
         if (selected) {
           setState(() => _intervalMinutes = minutes);
@@ -572,7 +571,7 @@ class _AzkarNotificationsSettingsViewState
         fontWeight: isCustom ? FontWeight.bold : FontWeight.normal,
       ),
       backgroundColor:
-          isCustom ? colors.primary : colors.surfaceVariant.withOpacity(0.5),
+          isCustom ? colors.primary : colors.surface.withOpacity(0.8),
       onPressed: _showCustomIntervalDialog,
     );
   }
@@ -646,7 +645,8 @@ class _AzkarNotificationsSettingsViewState
   String _formatTimeOfDay(TimeOfDay time) {
     final period = time.period == DayPeriod.am ? 'ص' : 'م';
     final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
-    final minuteStr = time.minute.toString().padLeft(2, '0');
-    return '${toArabicDigits(hour)}:${toArabicDigits(minuteStr)} $period';
+    final minuteTens = time.minute ~/ 10;
+    final minuteUnits = time.minute % 10;
+    return '${toArabicDigits(hour)}:${toArabicDigits(minuteTens)}${toArabicDigits(minuteUnits)} $period';
   }
 }

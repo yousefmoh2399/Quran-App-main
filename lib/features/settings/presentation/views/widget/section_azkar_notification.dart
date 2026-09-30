@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:quran_app_android/core/design/app_colors.dart';
 import 'package:quran_app_android/core/design/app_radius.dart';
 import 'package:quran_app_android/core/design/app_spacing.dart';
 import 'package:quran_app_android/core/design/app_typography.dart';
 import 'package:quran_app_android/core/native/native_azkar_bridge.dart';
 import 'package:quran_app_android/core/service/settings/notifications_services.dart';
+import 'package:quran_app_android/core/util/routes/routes.dart';
 import 'package:quran_app_android/core/util/widgets/custom_toast.dart';
 import 'package:quran_app_android/features/settings/presentation/view_model/settins_view_model.dart';
 import 'package:quran_app_android/features/settings/presentation/views/widget/settings_group_card.dart';
@@ -30,8 +32,6 @@ class _SectionAzkarNotificationState extends State<SectionAzkarNotification> {
     final controller = widget.controller;
     final isMorningEnabled =
         controller.settingsServices.sharedPref!.getBool('enable') ?? true;
-    final isPeriodicEnabled =
-        controller.settingsServices.sharedPref!.getBool('stop_noti') ?? true;
 
     final formattedMorningTime = controller.timeOfDay != null
         ? controller.timeOfDay!.format(context)

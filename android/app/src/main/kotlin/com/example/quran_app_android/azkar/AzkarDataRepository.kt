@@ -26,8 +26,9 @@ object AzkarDataRepository {
     private val executor = Executors.newSingleThreadExecutor()
 
     fun initAsync(context: Context, onLoaded: ((List<AzkarItem>) -> Unit)? = null) {
-        if (cachedAzkar != null) {
-            onLoaded?.invoke(cachedAzkar!)
+        val current = cachedAzkar
+        if (current != null) {
+            onLoaded?.invoke(current)
             return
         }
         executor.execute {
