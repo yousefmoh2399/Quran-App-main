@@ -11,6 +11,7 @@ import '../../../../core/mushaf/mushaf_font_manager.dart';
 import '../../../../core/mushaf/mushaf_raster_cache.dart';
 import '../../../../core/service/settings/SettingsServices.dart';
 import '../../../home/presentation/view_model/home_view_model.dart';
+import 'package:quran_app_android/features/reminders/data/commute_wird_repository.dart';
 import '../models/mushaf_theme_model.dart';
 
 /// Central controller for the 604-page Madinah Mushaf experience.
@@ -39,6 +40,17 @@ class MushafController extends GetxController {
   final RxMap<int, MemorizedItem> pageMemorizedMap = <int, MemorizedItem>{}.obs;
   final RxMap<String, BookmarkItem> ayahBookmarksMap = <String, BookmarkItem>{}.obs;
   final RxMap<String, MemorizedItem> ayahMemorizedMap = <String, MemorizedItem>{}.obs;
+
+  // Commute Mode Observables
+  final RxBool isCommuteMode = false.obs;
+  final RxDouble commuteZoomScale = 1.12.obs;
+  final RxBool commuteHighContrast = false.obs;
+  final RxBool commuteKeepScreenOn = true.obs;
+  final RxInt commuteTargetPages = 3.obs;
+  final RxInt commuteStartPage = 1.obs;
+  final RxInt commutePagesRead = 1.obs;
+  final RxString commuteSlotId = 'commute'.obs;
+  final RxBool commuteCountTowardsMain = true.obs;
 
   // Reading dwell timer (5 seconds dwell triggers reading log)
   Timer? _dwellTimer;
@@ -96,6 +108,17 @@ class MushafController extends GetxController {
     // 1. Check Get.arguments
     final args = Get.arguments;
     if (args is Map<String, dynamic>) {
+      if (args['commute_mode'] == true) {
+        isCommuteMode.value = true;
+        if (args.containsKey('target_pages')) {
+          commuteTargetPages.value = (args['target_pages'] as num).toInt();
+        }
+        if (args.containsKey('page')) {
+          final p = (args['page'] as num).toInt().clamp(1, 604);
+          commuteStartPage.value = p;
+          return p;
+        }
+      }
       if (args.containsKey('pageNumber')) {
         return (args['pageNumber'] as int).clamp(1, 604);
       }
@@ -446,5 +469,60 @@ class MushafController extends GetxController {
     final page = await _mushafRepo.getPageOfAyah(surahNumber, ayahNumber) ?? 1;
     goToPage(page);
     await selectAyah(surahNumber, ayahNumber);
+  }
+
+  // Commute Mode Handlers
+  void toggleCommuteZoom() {
+    if (commuteZoomScale.value < 1.1) {
+      commuteZoomScale.value = 1.15;
+    } else if (commuteZoomScale.value < 1.2) {
+      commuteZoomScale.value = 1.25;
+    } else {
+      commuteZoomScale.value = 1.0;
+    }
+  }
+
+  void toggleCommuteContrast() {
+    commuteHighContrast.value = !commuteHighContrast.value;
+    if (commuteHighContrast.value) {
+      setThemeMode(MushafThemeMode.dark);
+    } else {
+      setThemeMode(MushafThemeMode.light);
+    }
+  }
+
+  void nextCommutePage() {
+    if (currentPage.value < 604) {
+      goToPage(currentPage.value + 1);
+    }
+  }
+
+  void prevCommutePage() {
+    if (currentPage.value > 1) {
+      goToPage(currentPage.value - 1);
+    }
+  }
+
+  Future<void> completeCommuteWird() async {
+    try {
+      final repo = CommuteWirdRepository();
+      final count = (currentPage.value - commuteStartPage.value).abs() + 1;
+      await repo.recordProgress(
+        pagesRead: count,
+        toPage: currentPage.value,
+        slotId: commuteSlotId.value,
+        countTowardsMain: commuteCountTowardsMain.value,
+      );
+      Get.snackbar(
+        'مبارك إتمام ورد المواصلات! 🎉',
+        'تم تسجيل $count صفحات وزيادة سلسلة التلاوة بنجاح 🤲',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: const Color(0xFF1B4D3E),
+        colorText: Colors.white,
+        duration: const Duration(seconds: 4),
+      );
+    } catch (e) {
+      debugPrint('Error completing commute wird: $e');
+    }
   }
 }

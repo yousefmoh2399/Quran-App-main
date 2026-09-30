@@ -112,6 +112,34 @@ class UserDatabase {
         last_completed_date TEXT
       )
     ''');
+
+    // 5. Commute Wird Log table (separate streak & log)
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS commute_wird_log (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        date TEXT NOT NULL,
+        slot_id TEXT NOT NULL,
+        pages_read INTEGER NOT NULL,
+        completed INTEGER NOT NULL,
+        created_at TEXT NOT NULL
+      )
+    ''');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_commute_log_date ON commute_wird_log(date)');
+
+    // 6. Commute Wird State table (position & streak)
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS commute_wird_state (
+        id INTEGER PRIMARY KEY,
+        current_page INTEGER NOT NULL DEFAULT 1,
+        streak INTEGER NOT NULL DEFAULT 0,
+        last_completed_date TEXT
+      )
+    ''');
+    // Ensure default initial state exists
+    await db.execute('''
+      INSERT OR IGNORE INTO commute_wird_state (id, current_page, streak, last_completed_date)
+      VALUES (1, 1, 0, NULL)
+    ''');
   }
 
   /// Exposed for testing in-memory databases
