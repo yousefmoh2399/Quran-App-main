@@ -1,0 +1,403 @@
+import 'package:sqflite/sqflite.dart';
+import '../models/user_models.dart';
+import '../user_database.dart';
+
+/// Repository managing user personal data:
+/// - Bookmarks (Pages and Verses with custom colors and notes)
+/// - Memorization tracking (Learning, Memorized, Needs Review)
+/// - Reading log and statistics
+/// - Daily Wird planning, progress, and streak tracking
+class UserRepository {
+  final UserDatabase _userDatabase;
+
+  UserRepository({UserDatabase? userDatabase})
+      : _userDatabase = userDatabase ?? UserDatabase.instance;
+
+  Future<Database> get _db => _userDatabase.database;
+
+  // ==========================================
+  // BOOKMARKS
+  // ==========================================
+
+  Future<int> addBookmark(BookmarkItem item) async {
+    final db = await _db;
+    return await db.insert(
+      'bookmarks',
+      item.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<int> deleteBookmark(int id) async {
+    final db = await _db;
+    return await db.delete('bookmarks', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<int> deleteBookmarkByPage(int page) async {
+    final db = await _db;
+    return await db.delete(
+      'bookmarks',
+      where: "type = 'page' AND page = ?",
+      whereArgs: [page],
+    );
+  }
+
+  Future<int> deleteBookmarkByAyah(int surah, int ayah) async {
+    final db = await _db;
+    return await db.delete(
+      'bookmarks',
+      where: "type = 'ayah' AND surah = ? AND ayah = ?",
+      whereArgs: [surah, ayah],
+    );
+  }
+
+  Future<List<BookmarkItem>> getAllBookmarks() async {
+    final db = await _db;
+    final rows = await db.query('bookmarks', orderBy: 'created_at DESC');
+    return rows.map((r) => BookmarkItem.fromMap(r)).toList();
+  }
+
+  Future<List<BookmarkItem>> getBookmarksForPage(int page) async {
+    final db = await _db;
+    final rows = await db.query(
+      'bookmarks',
+      where: 'page = ?',
+      whereArgs: [page],
+    );
+    return rows.map((r) => BookmarkItem.fromMap(r)).toList();
+  }
+
+  Future<BookmarkItem?> getBookmarkForAyah(int surah, int ayah) async {
+    final db = await _db;
+    final rows = await db.query(
+      'bookmarks',
+      where: "type = 'ayah' AND surah = ? AND ayah = ?",
+      whereArgs: [surah, ayah],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return BookmarkItem.fromMap(rows.first);
+  }
+
+  Future<BookmarkItem?> getLatestBookmark() async {
+    final db = await _db;
+    final rows = await db.query(
+      'bookmarks',
+      orderBy: 'created_at DESC',
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return BookmarkItem.fromMap(rows.first);
+  }
+
+  Future<bool> hasPageBookmark(int page) async {
+    final db = await _db;
+    final count = Sqflite.firstIntValue(await db.rawQuery(
+      "SELECT COUNT(*) FROM bookmarks WHERE type = 'page' AND page = ?",
+      [page],
+    ));
+    return (count ?? 0) > 0;
+  }
+
+  // ==========================================
+  // MEMORIZATION
+  // ==========================================
+
+  Future<int> setMemorized(MemorizedItem item) async {
+    final db = await _db;
+    // Check if existing record exists
+    if (item.type == BookmarkType.page) {
+      await db.delete(
+        'memorized',
+        where: "type = 'page' AND page = ?",
+        whereArgs: [item.page],
+      );
+    } else {
+      await db.delete(
+        'memorized',
+        where: "type = 'ayah' AND surah = ? AND ayah = ?",
+        whereArgs: [item.surah, item.ayah],
+      );
+    }
+    return await db.insert('memorized', item.toMap());
+  }
+
+  Future<int> deleteMemorized(int id) async {
+    final db = await _db;
+    return await db.delete('memorized', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<int> deleteMemorizedByPage(int page) async {
+    final db = await _db;
+    return await db.delete(
+      'memorized',
+      where: "type = 'page' AND page = ?",
+      whereArgs: [page],
+    );
+  }
+
+  Future<int> deleteMemorizedByAyah(int surah, int ayah) async {
+    final db = await _db;
+    return await db.delete(
+      'memorized',
+      where: "type = 'ayah' AND surah = ? AND ayah = ?",
+      whereArgs: [surah, ayah],
+    );
+  }
+
+  Future<List<MemorizedItem>> getAllMemorized() async {
+    final db = await _db;
+    final rows = await db.query('memorized', orderBy: 'updated_at DESC');
+    return rows.map((r) => MemorizedItem.fromMap(r)).toList();
+  }
+
+  Future<List<MemorizedItem>> getMemorizedForPage(int page) async {
+    final db = await _db;
+    final rows = await db.query(
+      'memorized',
+      where: 'page = ?',
+      whereArgs: [page],
+    );
+    return rows.map((r) => MemorizedItem.fromMap(r)).toList();
+  }
+
+  Future<MemorizedItem?> getMemorizedForAyah(int surah, int ayah) async {
+    final db = await _db;
+    final rows = await db.query(
+      'memorized',
+      where: "type = 'ayah' AND surah = ? AND ayah = ?",
+      whereArgs: [surah, ayah],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return MemorizedItem.fromMap(rows.first);
+  }
+
+  /// Calculates statistics of memorization:
+  /// - memorizedPages: total pages marked fully memorized
+  /// - learningPages: total pages in progress
+  /// - reviewPages: total pages needing review
+  /// - totalMemorizedAyahs: individual ayahs memorized
+  /// - percentageOfQuran: fraction of 604 pages
+  Future<Map<String, dynamic>> getMemorizationStats() async {
+    final db = await _db;
+    final pageRows = await db.rawQuery('''
+      SELECT status, COUNT(*) as cnt 
+      FROM memorized 
+      WHERE type = 'page' 
+      GROUP BY status
+    ''');
+
+    int memorizedPages = 0;
+    int learningPages = 0;
+    int reviewPages = 0;
+
+    for (final r in pageRows) {
+      final st = r['status'] as String?;
+      final cnt = (r['cnt'] as int?) ?? 0;
+      if (st == MemorizeStatus.memorized.key) {
+        memorizedPages = cnt;
+      } else if (st == MemorizeStatus.learning.key) {
+        learningPages = cnt;
+      } else if (st == MemorizeStatus.needsReview.key) {
+        reviewPages = cnt;
+      }
+    }
+
+    final ayahCount = Sqflite.firstIntValue(await db.rawQuery('''
+      SELECT COUNT(*) 
+      FROM memorized 
+      WHERE type = 'ayah' AND status = 'memorized'
+    ''')) ?? 0;
+
+    final double percentage = (memorizedPages / 604.0) * 100.0;
+    final double juzCount = memorizedPages / 20.0; // Approx 20 pages per Juz
+
+    return {
+      'memorizedPages': memorizedPages,
+      'learningPages': learningPages,
+      'reviewPages': reviewPages,
+      'memorizedAyahs': ayahCount,
+      'juzCount': juzCount,
+      'percentage': percentage,
+    };
+  }
+
+  // ==========================================
+  // READING LOG
+  // ==========================================
+
+  String _formatDate(DateTime dt) {
+    return dt.toIso8601String().substring(0, 10); // YYYY-MM-DD
+  }
+
+  Future<void> logPageRead(int pageNumber, {DateTime? date}) async {
+    final db = await _db;
+    final dateStr = _formatDate(date ?? DateTime.now());
+
+    final existing = await db.query(
+      'reading_log',
+      where: 'date = ?',
+      whereArgs: [dateStr],
+      limit: 1,
+    );
+
+    if (existing.isEmpty) {
+      await db.insert('reading_log', {
+        'date': dateStr,
+        'pages_read': 1,
+        'last_page': pageNumber,
+      });
+    } else {
+      final currentRead = existing.first['pages_read'] as int? ?? 0;
+      await db.update(
+        'reading_log',
+        {
+          'pages_read': currentRead + 1,
+          'last_page': pageNumber,
+        },
+        where: 'date = ?',
+        whereArgs: [dateStr],
+      );
+    }
+  }
+
+  Future<ReadingLogEntry?> getTodayReadingLog() async {
+    final db = await _db;
+    final dateStr = _formatDate(DateTime.now());
+    final rows = await db.query(
+      'reading_log',
+      where: 'date = ?',
+      whereArgs: [dateStr],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return ReadingLogEntry.fromMap(rows.first);
+  }
+
+  Future<List<ReadingLogEntry>> getReadingLog({int limit = 30}) async {
+    final db = await _db;
+    final rows = await db.query(
+      'reading_log',
+      orderBy: 'date DESC',
+      limit: limit,
+    );
+    return rows.map((r) => ReadingLogEntry.fromMap(r)).toList();
+  }
+
+  Future<int?> getLastReadPage() async {
+    final db = await _db;
+    final rows = await db.query(
+      'reading_log',
+      orderBy: 'date DESC, id DESC',
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return rows.first['last_page'] as int?;
+  }
+
+  // ==========================================
+  // WIRD PLAN & STREAK
+  // ==========================================
+
+  Future<WirdPlan?> getWirdPlan() async {
+    final db = await _db;
+    final rows = await db.query('wird_plan', limit: 1);
+    if (rows.isEmpty) return null;
+    return WirdPlan.fromMap(rows.first);
+  }
+
+  Future<int> saveWirdPlan(WirdPlan plan) async {
+    final db = await _db;
+    final existing = await getWirdPlan();
+    if (existing == null) {
+      return await db.insert('wird_plan', plan.toMap());
+    } else {
+      return await db.update(
+        'wird_plan',
+        plan.toMap(),
+        where: 'id = ?',
+        whereArgs: [existing.id],
+      );
+    }
+  }
+
+  /// Calculates target start and end pages for a given plan starting from [fromPage].
+  static Map<String, int> calculateWirdRange({
+    required WirdType type,
+    required int target,
+    required int fromPage,
+  }) {
+    int start = fromPage.clamp(1, 604);
+    int pagesCount = 10;
+
+    switch (type) {
+      case WirdType.pagesPerDay:
+        pagesCount = target.clamp(1, 604);
+        break;
+      case WirdType.khatmaInDays:
+        // 604 pages / target days (e.g. 30 days -> 20 pages/day)
+        final days = target.clamp(1, 365);
+        pagesCount = (604 / days).ceil().clamp(1, 604);
+        break;
+      case WirdType.juzPerDay:
+        // 1 juz approx 20 pages
+        final juzCount = target.clamp(1, 30);
+        pagesCount = (juzCount * 20).clamp(1, 604);
+        break;
+    }
+
+    int end = (start + pagesCount - 1).clamp(1, 604);
+    return {'startPage': start, 'endPage': end, 'pagesCount': pagesCount};
+  }
+
+  /// Marks today's wird completed, increments streak, and advances wird range to next pages.
+  Future<WirdPlan?> markTodayWirdCompleted() async {
+    final plan = await getWirdPlan();
+    if (plan == null) return null;
+
+    final today = _formatDate(DateTime.now());
+    if (plan.lastCompletedDate == today) {
+      return plan; // Already marked today
+    }
+
+    // Check if streak is continuous (yesterday or today)
+    int newStreak = plan.streak;
+    if (plan.lastCompletedDate != null) {
+      final lastDate = DateTime.tryParse(plan.lastCompletedDate!);
+      if (lastDate != null) {
+        final diff = DateTime.now().difference(lastDate).inDays;
+        if (diff <= 1) {
+          newStreak += 1;
+        } else {
+          newStreak = 1; // Streak broken, restart
+        }
+      } else {
+        newStreak = 1;
+      }
+    } else {
+      newStreak = 1;
+    }
+
+    // Advance next wird starting page
+    int nextStart = (plan.endPage + 1);
+    if (nextStart > 604) {
+      nextStart = 1; // Completed Khatma! Loop back to Al-Fatihah
+    }
+    final range = calculateWirdRange(
+      type: plan.type,
+      target: plan.target,
+      fromPage: nextStart,
+    );
+
+    final updated = plan.copyWith(
+      streak: newStreak,
+      lastCompletedDate: today,
+      startPage: range['startPage']!,
+      endPage: range['endPage']!,
+    );
+
+    await saveWirdPlan(updated);
+    return updated;
+  }
+}
