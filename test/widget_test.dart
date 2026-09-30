@@ -18,7 +18,7 @@ void main() {
     test('onboardingData list contains expected items', () {
       expect(onboardingData, isNotEmpty);
       expect(onboardingData.length, greaterThanOrEqualTo(3));
-      expect(onboardingData.first.title, contains('تقرّب'));
+      expect(onboardingData.first.title, contains('تلاوة'));
     });
   });
 
