@@ -4,6 +4,8 @@ import 'package:quran_app_android/core/middleware/middleware.dart';
 import 'package:quran_app_android/core/util/binding.dart';
 import 'package:quran_app_android/core/util/constant/constant.dart';
 import 'package:quran_app_android/features/adhan/presentation/views/adhan_view.dart';
+import 'package:quran_app_android/features/adhan/presentation/views/adhan_settings_view.dart';
+import 'package:quran_app_android/features/adhan/presentation/views/adhan_debug_view.dart';
 import 'package:quran_app_android/features/azkar/presentation/views/azkar_details_view.dart';
 import 'package:quran_app_android/features/azkar/presentation/views/azkar_view.dart';
 import 'package:quran_app_android/features/bookmarks/presentation/views/bookmarks_view.dart';
@@ -158,6 +160,19 @@ class AppRoutes {
       transition: Transition.cupertino,
       transitionDuration: kTransitionDuration,
     ),
+    GetPage(
+      name: adhanSettings,
+      page: () => const AdhanSettingsView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    if (kDebugMode)
+      GetPage(
+        name: adhanDebug,
+        page: () => const AdhanDebugView(),
+        transition: Transition.cupertino,
+        transitionDuration: kTransitionDuration,
+      ),
   ];
 
   static String home = '/home';
@@ -172,6 +187,8 @@ class AppRoutes {
   static String azkar = '/azkar';
   static String azkarDetails = '/azkarDetails';
   static String adhan = '/adhan';
+  static String adhanSettings = '/adhanSettings';
+  static String adhanDebug = '/adhanDebug';
   static String notify = '/notify';
   static String adhanAlert = '/adhanAlert';
   static String qiblah = '/qiblah';

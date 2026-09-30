@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quran_app_android/core/design/app_colors.dart';
@@ -50,15 +51,14 @@ class SettingsView extends StatelessWidget {
                   title: 'مواقيت الصلاة والأذان',
                   icon: Icons.access_time_filled_rounded,
                   children: [
-                    const SettingsTile(
-                      icon: Icons.calculate_outlined,
-                      title: 'طريقة الحساب المعتمدة',
-                      subtitle: 'الهيئة المصرية العامة للمساحة',
-                    ),
-                    const SettingsTile(
-                      icon: Icons.menu_book_outlined,
-                      title: 'المذهب الفقهي لحساب العصر',
-                      subtitle: 'الشافعي / الحنبلي / المالكي',
+                    SettingsTile(
+                      icon: Icons.tune_rounded,
+                      title: 'إعدادات الأذان والمؤذن والمواقيت',
+                      subtitle:
+                          'طريقة الحساب، المذهب، أصوات المؤذنين، وتعديل الدقائق',
+                      onTap: () {
+                        Get.toNamed(AppRoutes.adhanSettings);
+                      },
                     ),
                     SettingsTile(
                       icon: Icons.mosque_outlined,
@@ -71,11 +71,22 @@ class SettingsView extends StatelessWidget {
                     SettingsTile(
                       icon: Icons.security_rounded,
                       title: 'حالة الصلاحيات والتنبيهات',
-                      subtitle: 'فحص أذونات الموقع، الإشعارات، المنبهات والبطارية',
+                      subtitle:
+                          'فحص أذونات الموقع، الإشعارات، المنبهات والبطارية',
                       onTap: () {
                         Get.toNamed(AppRoutes.permissionsStatus);
                       },
                     ),
+                    if (kDebugMode)
+                      SettingsTile(
+                        icon: Icons.bug_report_outlined,
+                        title: 'تشخيص محرك الأذان (Debug)',
+                        subtitle:
+                            'جدول الـ 7 أيام واختبار التنبيه بعد 10 ثوانٍ',
+                        onTap: () {
+                          Get.toNamed(AppRoutes.adhanDebug);
+                        },
+                      ),
                   ],
                 ),
 

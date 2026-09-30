@@ -11,11 +11,17 @@ import com.example.quran_app_android.permissions.PermissionsBridge
 import com.example.quran_app_android.adhan.NativeAdhanBridge
 import com.example.quran_app_android.azkar.NativeAzkarBridge
 
+import com.example.quran_app_android.adhan.PrayerScheduler
+import com.example.quran_app_android.adhan.NativePrayerManager
+
 class MainActivity : FlutterActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         createAdhanNotificationChannel()
+        if (NativePrayerManager.hasValidLocation(this)) {
+            PrayerScheduler.scheduleRollingWindow(this)
+        }
     }
 
     private fun createAdhanNotificationChannel() {

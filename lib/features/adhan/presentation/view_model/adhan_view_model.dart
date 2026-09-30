@@ -1,117 +1,4 @@
-// // ignore_for_file: prefer_typing_uninitialized_variables
-
-// import 'dart:async';
-// import 'dart:convert';
-// import 'package:adhan/adhan.dart';
-// import 'package:flutter/foundation.dart';
-// import 'package:geolocator/geolocator.dart';
-// import 'package:get/get.dart';
-// import 'package:permission_handler/permission_handler.dart';
-// import 'package:quran_app_android/core/native/native_adhan_bridge.dart';
-// import 'package:quran_app_android/core/service/database/database_helper.dart';
-// import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
-// import 'package:quran_app_android/features/quran/presentation/view_model/quran_screen_model_details.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
-
-// class AdhanViewModel extends GetxController {
-//   double? latitude, longitude;
-//   RxBool isLoading = false.obs;
-//   SettingsServices settingsServices = Get.find<SettingsServices>();
-//   LocalStorageAdhanData localData = Get.find<LocalStorageAdhanData>();
-//   QuranScreenViewModel quranScreenViewModel = Get.find<QuranScreenViewModel>();
-
-//   @override
-//   void onInit() {
-//     super.onInit();
-//     requestLocationPermission();
-
-//   }
-//   Future<void> requestLocationPermission() async {
-//     var status = await Permission.location.status;
-//     if (!status.isGranted) {
-//       status = await Permission.location.request();
-//     }
-//     if (status.isGranted) {
-//       debugPrint('Location permission granted');
-//       await getCurrentLocation();
-//       isLoading.value = true;
-//       update();
-//     } else if (status.isDenied) {
-//       debugPrint('Location permission denied');
-//       isLoading.value = false;
-//       update();
-//     } else if (status.isPermanentlyDenied) {
-//       debugPrint('Location permission permanently denied');
-//       isLoading.value = false;
-//       update();
-//     }
-//   }
-
-//   Future<void> getCurrentLocation() async {
-//     try {
-//       isLoading.value = true;
-//       Position position = await Geolocator.getCurrentPosition(
-//         desiredAccuracy: LocationAccuracy.high,
-//       );
-//       latitude = position.latitude;
-//       longitude = position.longitude;
-//       isLoading.value = false;
-//       adhan();
-//       saveLocation(latitude!, longitude!);
-//       update();
-//     } catch (e) {
-//       isLoading.value = false;
-//       if (kDebugMode) {
-//         print("Error getting location: $e");
-//       }
-//       update();
-//     }
-//   }
-
-// PrayerTimes? prayerTimes;
-
-//   void adhan() async {
-//     if (latitude != null && longitude != null) {
-//       final myCoordinates = Coordinates(latitude!, longitude!);
-//       final param = CalculationMethod.egyptian.getParameters();
-//       param.madhab = Madhab.shafi;
-
-//       prayerTimes = PrayerTimes.today(myCoordinates, param);
-//       update();
-
-//       // نحول مواعيد الصلاة إلى خريطة Map<String, int>
-//       final timesMap = {
-//         'fajr': prayerTimes!.fajr.millisecondsSinceEpoch,
-//         'dhuhr': prayerTimes!.dhuhr.millisecondsSinceEpoch,
-//         'asr': prayerTimes!.asr.millisecondsSinceEpoch,
-//         'maghrib': prayerTimes!.maghrib.millisecondsSinceEpoch,
-//         'isha': prayerTimes!.isha.millisecondsSinceEpoch,
-//       };
-//       final prefs = await SharedPreferences.getInstance();
-//       await prefs.setString('last_prayer_times', jsonEncode(timesMap));
-//       // نرسلها إلى كوتلن
-//       try {
-//         await NativeAdhanBridge.schedulePrayerTimes(timesMap);
-//         debugPrint('✅ Prayer times scheduled successfully');
-//       } catch (e) {
-//         debugPrint('⚠️ Failed to schedule in Kotlin: $e');
-//       }
-//     }
-//   }
-
-//   Future<void> saveLocation(double lat, double lng) async {
-//     final prefs = await SharedPreferences.getInstance();
-//     await prefs.setDouble('lat', lat);
-//     await prefs.setDouble('lng', lng);
-//     await NativeAdhanBridge.saveLocationToNative(lat, lng);
-//     debugPrint('✅ Location saved for Adhan service: $lat, $lng');
-//   }
-// }
-
-// ignore_for_file: prefer_typing_uninitialized_variables
-
 import 'dart:async';
-import 'dart:convert';
 import 'package:adhan/adhan.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -120,199 +7,233 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:quran_app_android/core/native/native_adhan_bridge.dart';
 import 'package:quran_app_android/core/service/database/database_helper.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
+import 'package:quran_app_android/features/adhan/data/models/adhan_settings_model.dart';
 import 'package:quran_app_android/features/quran/presentation/view_model/quran_screen_model_details.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AdhanViewModel extends GetxController {
   double? latitude, longitude;
+  String cityName = '';
   RxBool isLoading = false.obs;
+  RxBool isLocationRequired = false.obs;
+
   SettingsServices settingsServices = Get.find<SettingsServices>();
   LocalStorageAdhanData localData = Get.find<LocalStorageAdhanData>();
   QuranScreenViewModel quranScreenViewModel = Get.find<QuranScreenViewModel>();
 
   PrayerTimes? prayerTimes;
-  bool isDefaultLocation = false; // ✅ نعرف إذا كنا بنستخدم موقع افتراضي
+  AdhanSettingsModel? currentSettings;
+
+  bool get isDefaultLocation => isLocationRequired.value;
+
+  Future<void> getCurrentLocation() async {
+    isLoading.value = true;
+    update();
+    await checkAndRefreshLocation();
+    isLoading.value = false;
+    update();
+  }
 
   @override
   void onInit() async {
     super.onInit();
     try {
       await initializeAdhan();
-      debugPrint('💥 initializeAdhan true: ');
     } catch (e) {
-      debugPrint('💥 initializeAdhan failed: $e');
-      await useCairoFallback();
+      debugPrint('AdhanViewModel init error: $e');
+      isLocationRequired.value = true;
     }
   }
 
-  /// 🔹 تهيئة النظام بالكامل
+  /// Initializes Adhan system: loads native settings or requests GPS location.
   Future<void> initializeAdhan() async {
     isLoading.value = true;
     update();
 
-    var status = await Permission.location.status;
-    if (!status.isGranted) {
-      status = await Permission.location.request();
-    }
-
-    if (status.isGranted) {
-      final prefs = await SharedPreferences.getInstance();
-      final savedLat = prefs.getDouble('lat');
-      final savedLng = prefs.getDouble('lng');
-
-      if (savedLat != null &&
-          savedLng != null &&
-          savedLat != 0 &&
-          savedLng != 0) {
-        latitude = savedLat;
-        longitude = savedLng;
-        isDefaultLocation = prefs.getBool('isDefaultLocation') ?? false;
-        debugPrint("✅ Loaded saved location: $latitude, $longitude");
-        await adhan();
-      } else {
-        await getCurrentLocation();
+    final nativeMap = await NativeAdhanBridge.getSettings();
+    if (nativeMap != null) {
+      currentSettings = AdhanSettingsModel.fromMap(nativeMap);
+      if (currentSettings!.latitude != 0.0 && currentSettings!.longitude != 0.0) {
+        latitude = currentSettings!.latitude;
+        longitude = currentSettings!.longitude;
+        cityName = currentSettings!.cityName;
+        isLocationRequired.value = false;
+        await recalculatePrayerTimes();
       }
-    } else {
-      debugPrint('❌ Location permission not granted');
-      await useCairoFallback();
     }
+
+    // Try refreshing GPS position and check if user moved > 50 km
+    await checkAndRefreshLocation();
 
     isLoading.value = false;
     update();
   }
 
-  /// 🔹 محاولة تحديد الموقع الحقيقي
-  Future<void> getCurrentLocation() async {
-    debugPrint('📡 Starting location request...');
-    isDefaultLocation = false;
-    Get.snackbar(
-      "جارٍ تحديد الموقع...",
-      "برجاء الانتظار لحساب مواقيت الصلاة 🕌",
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.blueAccent.withOpacity(0.9),
-      colorText: Colors.white,
-      duration: const Duration(seconds: 4),
-    );
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      debugPrint('❌ Location service is disabled on the device.');
-      await useCairoFallback();
-      return;
-    }
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        debugPrint('🚫 Location permission denied by user.');
-        await useCairoFallback();
+  /// Checks device location and if user moved > 50km, recalculates prayer times.
+  Future<void> checkAndRefreshLocation() async {
+    final status = await Permission.location.status;
+    if (!status.isGranted) {
+      final req = await Permission.location.request();
+      if (!req.isGranted) {
+        if (latitude == null || longitude == null) {
+          isLocationRequired.value = true;
+        }
         return;
       }
     }
 
-    if (permission == LocationPermission.deniedForever) {
-      debugPrint('⛔ Permission permanently denied.');
-      await useCairoFallback();
+    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      if (latitude == null || longitude == null) {
+        isLocationRequired.value = true;
+      }
       return;
     }
 
     try {
-      // نحاول أول مرة بوقت انتظار أطول شوية
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-        timeLimit: const Duration(seconds: 25),
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.medium,
+        timeLimit: const Duration(seconds: 15),
       );
+
+      final prevLat = latitude;
+      final prevLng = longitude;
 
       latitude = position.latitude;
       longitude = position.longitude;
-      isDefaultLocation = false;
-      debugPrint('✅ Got new location: $latitude, $longitude');
-    } catch (e) {
-      debugPrint('⚠️ Failed to get location: $e');
-      debugPrint('🔁 Trying last known position...');
+      isLocationRequired.value = false;
 
-      try {
-        Position? lastPos = await Geolocator.getLastKnownPosition();
-        if (lastPos != null) {
-          latitude = lastPos.latitude;
-          longitude = lastPos.longitude;
-          isDefaultLocation = false;
-          debugPrint('✅ Using last known position: $latitude, $longitude');
-        } else {
-          debugPrint('❌ No last known position found, fallback to Cairo');
-          await useCairoFallback();
-          return;
+      // Check distance moved (> 50 km = 50,000 meters)
+      if (prevLat != null && prevLng != null && prevLat != 0.0 && prevLng != 0.0) {
+        final distance = Geolocator.distanceBetween(prevLat, prevLng, position.latitude, position.longitude);
+        if (distance > 50000) {
+          debugPrint('User moved > 50km ($distance m). Updating location and rolling window!');
+          Get.snackbar(
+            'تحديث الموقع',
+            'تم رصد انتقال جغرافي جديد وتحديث مواقيت الصلاة تلقائياً 🕌',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: const Color(0xFF0F5C4A),
+            colorText: Colors.white,
+            duration: const Duration(seconds: 3),
+          );
         }
-      } catch (e2) {
-        debugPrint('💥 Second attempt failed: $e2');
-        await useCairoFallback();
-        return;
+      }
+
+      await saveLocation(latitude!, longitude!, cityName);
+    } catch (e) {
+      debugPrint('Failed to get updated location: $e');
+      if (latitude == null || longitude == null) {
+        // Try last known position
+        try {
+          final last = await Geolocator.getLastKnownPosition();
+          if (last != null) {
+            latitude = last.latitude;
+            longitude = last.longitude;
+            isLocationRequired.value = false;
+            await saveLocation(latitude!, longitude!, cityName);
+          } else {
+            isLocationRequired.value = true;
+          }
+        } catch (_) {
+          isLocationRequired.value = true;
+        }
       }
     }
+  }
 
-    // لو وصلنا هنا يبقى الإحداثيات جاهزة
-    if (latitude != null && longitude != null) {
-      await saveLocation(latitude!, longitude!, isDefaultLocation);
-      await adhan();
-    } else {
-      debugPrint('❌ Coordinates still null, using Cairo fallback');
-      await useCairoFallback();
-    }
-
+  /// Sets location manually (e.g. from user city picker) without silent fallback.
+  Future<void> setManualCity(String name, double lat, double lng) async {
+    cityName = name;
+    latitude = lat;
+    longitude = lng;
+    isLocationRequired.value = false;
+    await saveLocation(lat, lng, name);
     update();
   }
 
-  /// 🔹 استخدام القاهرة كخطة احتياطية
-  Future<void> useCairoFallback() async {
-    latitude = 30.0444;
-    longitude = 31.2357;
-    isDefaultLocation = true;
-    debugPrint('🟡 Using default Cairo coordinates');
-    await saveLocation(latitude!, longitude!, isDefaultLocation);
-    await adhan();
-  }
-
-  /// 🔹 حساب المواقيت وإرسالها إلى كوتلن
-  Future<void> adhan() async {
-    if (latitude == null || longitude == null) {
-      await useCairoFallback();
-    }
-
-    final myCoordinates = Coordinates(latitude!, longitude!);
-    final param = CalculationMethod.egyptian.getParameters();
-    param.madhab = Madhab.shafi;
-
-    prayerTimes = PrayerTimes.today(myCoordinates, param);
-    update();
-
-    final timesMap = {
-      'fajr': prayerTimes!.fajr.millisecondsSinceEpoch,
-      'dhuhr': prayerTimes!.dhuhr.millisecondsSinceEpoch,
-      'asr': prayerTimes!.asr.millisecondsSinceEpoch,
-      'maghrib': prayerTimes!.maghrib.millisecondsSinceEpoch,
-      'isha': prayerTimes!.isha.millisecondsSinceEpoch,
-    };
-
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('last_prayer_times', jsonEncode(timesMap));
-
-    try {
-      await NativeAdhanBridge.schedulePrayerTimes(timesMap);
-      debugPrint('✅ Prayer times scheduled successfully');
-    } catch (e) {
-      debugPrint('⚠️ Failed to schedule in Kotlin: $e');
-    }
-  }
-
-  /// 🔹 حفظ الموقع
-  Future<void> saveLocation(double lat, double lng, bool isDefault) async {
+  Future<void> saveLocation(double lat, double lng, String city) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble('lat', lat);
     await prefs.setDouble('lng', lng);
-    await prefs.setBool('isDefaultLocation', isDefault);
-    await NativeAdhanBridge.saveLocationToNative(lat, lng);
-    debugPrint(
-      '✅ Location saved: $lat, $lng | Default: ${isDefault ? "Yes" : "No"}',
+    await prefs.setString('cityName', city);
+
+    final updated = (currentSettings ?? const AdhanSettingsModel(latitude: 0, longitude: 0)).copyWith(
+      latitude: lat,
+      longitude: lng,
+      cityName: city,
     );
+    currentSettings = updated;
+
+    await NativeAdhanBridge.saveSettings(updated.toMap());
+    await recalculatePrayerTimes();
+  }
+
+  Future<void> recalculateWithSettings(AdhanSettingsModel settings) async {
+    currentSettings = settings;
+    latitude = settings.latitude;
+    longitude = settings.longitude;
+    cityName = settings.cityName;
+    await recalculatePrayerTimes();
+  }
+
+  Future<void> recalculatePrayerTimes() async {
+    if (latitude == null || longitude == null || (latitude == 0.0 && longitude == 0.0)) {
+      isLocationRequired.value = true;
+      return;
+    }
+
+    final coords = Coordinates(latitude!, longitude!);
+    final settings = currentSettings ?? const AdhanSettingsModel(latitude: 0, longitude: 0);
+
+    CalculationParameters params;
+    switch (settings.calculationMethod.toUpperCase()) {
+      case 'UMM_AL_QURA':
+      case 'UMMALQURA':
+        params = CalculationMethod.umm_al_qura.getParameters();
+        break;
+      case 'MUSLIM_WORLD_LEAGUE':
+      case 'MWL':
+        params = CalculationMethod.muslim_world_league.getParameters();
+        break;
+      case 'KARACHI':
+        params = CalculationMethod.karachi.getParameters();
+        break;
+      case 'NORTH_AMERICA':
+      case 'ISNA':
+        params = CalculationMethod.north_america.getParameters();
+        break;
+      case 'DUBAI':
+        params = CalculationMethod.dubai.getParameters();
+        break;
+      case 'KUWAIT':
+        params = CalculationMethod.kuwait.getParameters();
+        break;
+      case 'QATAR':
+        params = CalculationMethod.qatar.getParameters();
+        break;
+      case 'SINGAPORE':
+        params = CalculationMethod.singapore.getParameters();
+        break;
+      case 'MOON_SIGHTING_COMMITTEE':
+        params = CalculationMethod.moon_sighting_committee.getParameters();
+        break;
+      case 'EGYPTIAN':
+      default:
+        params = CalculationMethod.egyptian.getParameters();
+        break;
+    }
+
+    params.madhab = settings.madhab.toUpperCase() == 'HANAFI' ? Madhab.hanafi : Madhab.shafi;
+
+    // Apply manual minute adjustments
+    params.adjustments.fajr = settings.fajrOffset;
+    params.adjustments.sunrise = settings.sunriseOffset;
+    params.adjustments.dhuhr = settings.dhuhrOffset;
+    params.adjustments.asr = settings.asrOffset;
+    params.adjustments.maghrib = settings.maghribOffset;
+    params.adjustments.isha = settings.ishaOffset;
+
+    prayerTimes = PrayerTimes.today(coords, params);
+    update();
   }
 }
