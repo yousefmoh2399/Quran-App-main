@@ -110,36 +110,29 @@ class LatestBookmarkCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 1.5),
-                        decoration: BoxDecoration(
-                          color: badgeColor.withOpacity(0.12),
-                          borderRadius: AppRadius.borderSm,
-                        ),
+                      Icon(
+                        Icons.bookmark_added_rounded,
+                        size: 14,
+                        color: badgeColor,
+                      ),
+                      AppSpacing.horizontalXs,
+                      Expanded(
                         child: Text(
-                          bookmark.color.labelAr,
-                          style: TextStyle(
-                            fontFamily: AppTypography.uiFont,
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.bold,
+                          'علامتك (${bookmark.color.labelAr})',
+                          style: textTheme.labelMedium?.copyWith(
                             color: badgeColor,
+                            fontWeight: FontWeight.bold,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       AppSpacing.horizontalXs,
                       Text(
-                        'علامتك المحفوظة',
-                        style: textTheme.labelMedium?.copyWith(
-                          color: colors.accent,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
                         'صـ ${toArabicDigits(bookmark.page)}',
                         style: TextStyle(
                           fontFamily: AppTypography.uiFont,
-                          fontSize: 12.0,
+                          fontSize: 11.5,
                           fontWeight: FontWeight.bold,
                           color: colors.textMuted,
                         ),

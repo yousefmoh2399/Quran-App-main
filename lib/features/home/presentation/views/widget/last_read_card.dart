@@ -72,19 +72,23 @@ class LastReadCard extends StatelessWidget {
                         color: colors.accent,
                       ),
                       AppSpacing.horizontalXs,
-                      Text(
-                        'تابع القراءة',
-                        style: textTheme.labelMedium?.copyWith(
-                          color: colors.accent,
-                          fontWeight: FontWeight.bold,
+                      Expanded(
+                        child: Text(
+                          'تابع القراءة',
+                          style: textTheme.labelMedium?.copyWith(
+                            color: colors.accent,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      const Spacer(),
+                      AppSpacing.horizontalXs,
                       Text(
                         'صـ ${toArabicDigits(lastPage)}',
                         style: TextStyle(
                           fontFamily: AppTypography.uiFont,
-                          fontSize: 12.0,
+                          fontSize: 11.5,
                           fontWeight: FontWeight.bold,
                           color: colors.textMuted,
                         ),
