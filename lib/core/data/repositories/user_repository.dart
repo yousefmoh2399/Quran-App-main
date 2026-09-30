@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:sqflite/sqflite.dart';
+import '../../native/native_reminders_bridge.dart';
 import '../models/user_models.dart';
 import '../user_database.dart';
 
@@ -310,16 +312,44 @@ class UserRepository {
   Future<int> saveWirdPlan(WirdPlan plan) async {
     final db = await _db;
     final existing = await getWirdPlan();
+    int res;
     if (existing == null) {
-      return await db.insert('wird_plan', plan.toMap());
+      res = await db.insert('wird_plan', plan.toMap());
     } else {
-      return await db.update(
+      res = await db.update(
         'wird_plan',
         plan.toMap(),
         where: 'id = ?',
         whereArgs: [existing.id],
       );
     }
+
+    // Sync with Native Reminders Engine
+    try {
+      int hour = 20;
+      int minute = 0;
+      if (plan.reminderTime.isNotEmpty) {
+        final parts = plan.reminderTime.split(':');
+        if (parts.length >= 2) {
+          hour = int.tryParse(parts[0]) ?? 20;
+          minute = int.tryParse(parts[1]) ?? 0;
+        }
+      }
+      NativeRemindersBridge.saveReminder({
+        'id': 'wird_daily',
+        'type': 'wird_daily',
+        'schedule_json': jsonEncode({'hour': hour, 'minute': minute}),
+        'payload_json': jsonEncode({
+          'title': 'وردك القرآني اليومي',
+          'body': 'حان وقت وردك القرآني (صـ ${plan.startPage} إلى ${plan.endPage})',
+          'start_page': plan.startPage,
+        }),
+        'enabled': plan.enabled ? 1 : 0,
+        'last_triggered': 0,
+      });
+    } catch (_) {}
+
+    return res;
   }
 
   /// Calculates target start and end pages for a given plan starting from [fromPage].
@@ -403,6 +433,11 @@ class UserRepository {
     );
 
     await saveWirdPlan(updated);
+
+    try {
+      await NativeRemindersBridge.markWirdCompleted(date: today);
+    } catch (_) {}
+
     return updated;
   }
 }
