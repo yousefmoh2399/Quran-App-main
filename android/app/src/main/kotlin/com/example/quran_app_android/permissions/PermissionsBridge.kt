@@ -50,10 +50,10 @@ object PermissionsBridge {
                         result.success(true)
                     }
 
-                    // ===== OVERLAY =====
-                    "canDrawOverlays" -> result.success(canDrawOverlays(hostActivity))
-                    "openOverlaySettings" -> {
-                        openOverlaySettings(hostActivity)
+                    // ===== FULL SCREEN INTENT (ANDROID 14+) =====
+                    "canUseFullScreenIntent" -> result.success(canUseFullScreenIntent(hostActivity))
+                    "openFullScreenIntentSettings" -> {
+                        openFullScreenIntentSettings(hostActivity)
                         result.success(true)
                     }
 
@@ -135,16 +135,25 @@ object PermissionsBridge {
         }
     }
 
-    // -------- OVERLAY ----------
-    private fun canDrawOverlays(ctx: Context): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) Settings.canDrawOverlays(ctx) else true
+    // -------- FULL SCREEN INTENT (ANDROID 14+) ----------
+    private fun canUseFullScreenIntent(ctx: Context): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            val nm = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            nm.canUseFullScreenIntent()
+        } else true
     }
 
-    private fun openOverlaySettings(ctx: Context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${ctx.packageName}"))
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            ctx.startActivity(intent)
+    private fun openFullScreenIntentSettings(ctx: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            try {
+                val intent = Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT).apply {
+                    data = Uri.parse("package:${ctx.packageName}")
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                ctx.startActivity(intent)
+            } catch (_: Exception) {
+                openAppDetails(ctx)
+            }
         } else {
             openAppDetails(ctx)
         }

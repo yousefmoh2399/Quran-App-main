@@ -65,19 +65,32 @@ object PrayerScheduler {
             )
 
             try {
+                val canExact = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    alarmManager.canScheduleExactAlarms()
+                } else true
+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    alarmManager.setExactAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP,
-                        millis,
-                        pendingIntent
-                    )
+                    if (canExact) {
+                        alarmManager.setExactAndAllowWhileIdle(
+                            AlarmManager.RTC_WAKEUP,
+                            millis,
+                            pendingIntent
+                        )
+                    } else {
+                        Log.w("PrayerScheduler", "⚠️ صلاحية المنبهات الدقيقة غير مفعلة، استخدام setAndAllowWhileIdle لصلاة $name")
+                        alarmManager.setAndAllowWhileIdle(
+                            AlarmManager.RTC_WAKEUP,
+                            millis,
+                            pendingIntent
+                        )
+                    }
                 } else {
                     alarmManager.setExact(AlarmManager.RTC_WAKEUP, millis, pendingIntent)
                 }
                 scheduledCount++
                 Log.i(
                     "PrayerScheduler",
-                    "🕌 تم جدولة صلاة $name عند ${timeFmt.format(millis)} (setExact${if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) "+AllowWhileIdle" else ""})"
+                    "🕌 تم جدولة صلاة $name عند ${timeFmt.format(millis)} (canExact=$canExact)"
                 )
             } catch (e: Exception) {
                 Log.e("PrayerScheduler", "❌ فشل في جدولة صلاة $name: ${e.message}")
@@ -152,12 +165,24 @@ object PrayerScheduler {
                 if (timeInMillis <= System.currentTimeMillis()) add(Calendar.DAY_OF_YEAR, 1)
             }
 
+            val canExact = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                alarmManager.canScheduleExactAlarms()
+            } else true
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmManager.setExactAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    next.timeInMillis,
-                    pendingIntent
-                )
+                if (canExact) {
+                    alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        next.timeInMillis,
+                        pendingIntent
+                    )
+                } else {
+                    alarmManager.setAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        next.timeInMillis,
+                        pendingIntent
+                    )
+                }
             } else {
                 alarmManager.setExact(
                     AlarmManager.RTC_WAKEUP,

@@ -68,6 +68,14 @@ class SettingsView extends StatelessWidget {
                         Get.toNamed(AppRoutes.adhan);
                       },
                     ),
+                    SettingsTile(
+                      icon: Icons.security_rounded,
+                      title: 'حالة الصلاحيات والتنبيهات',
+                      subtitle: 'فحص أذونات الموقع، الإشعارات، المنبهات والبطارية',
+                      onTap: () {
+                        Get.toNamed(AppRoutes.permissionsStatus);
+                      },
+                    ),
                   ],
                 ),
 

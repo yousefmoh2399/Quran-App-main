@@ -2,15 +2,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:home_widget/home_widget.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:quran_app_android/core/native/native_adhan_bridge.dart';
 import 'package:quran_app_android/core/native/native_azkar_bridge.dart';
-import 'package:quran_app_android/core/native/permissions_helper.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
 import 'package:quran_app_android/core/util/assets.dart';
 import 'package:quran_app_android/core/util/constant/static_vars.dart';
 import 'package:quran_app_android/core/util/routes/routes.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeViewModel extends GetxController {
   HomeViewModel() {
@@ -28,44 +25,10 @@ class HomeViewModel extends GetxController {
   String dataKey = 'currentZekr';
 
   Future<void> _init() async {
-    await requestBasicPermissions();
     await getLastRead();
     await _setupHomeWidget();
     await NativeAzkarBridge.scheduleDailyAzkar(2);
     await NativeAdhanBridge.scheduleDailyReset();
-
-    // ✅ إظهار نافذة الأذونات لمرة واحدة فقط
-    final prefs = await SharedPreferences.getInstance();
-    final shown = prefs.getBool('permissions_shown') ?? false;
-    if (!shown) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        PermissionsController.showPermissionsDialog();
-      });
-    }
-  }
-
-  // 🔹 طلب الأذونات الأساسية (الموقع + الإشعارات)
-  Future<void> requestBasicPermissions() async {
-    try {
-      // الموقع
-      if (await Permission.location.isDenied) {
-        await Permission.location.request();
-      }
-
-      // الإشعارات
-      if (await Permission.notification.isDenied) {
-        await Permission.notification.request();
-      }
-
-      // exact alarm
-      if (await Permission.scheduleExactAlarm.isDenied) {
-        await Permission.scheduleExactAlarm.request();
-      }
-
-      debugPrint('✅ Basic permissions handled.');
-    } catch (e) {
-      debugPrint('⚠️ Permission error: $e');
-    }
   }
 
   Future<void> getLastRead() async {

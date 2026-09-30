@@ -17,6 +17,7 @@ import 'package:quran_app_android/features/mushaf/presentation/views/mushaf_view
 import 'package:quran_app_android/features/pngtree/presentation/views/pngTreeView.dart';
 import 'package:quran_app_android/features/qiblah/presentation/views/qiblah_view.dart';
 import 'package:quran_app_android/features/quran/presentation/views/quran_view.dart';
+import 'package:quran_app_android/features/settings/presentation/views/permissions_status_view.dart';
 import 'package:quran_app_android/features/settings/presentation/views/settings_view.dart';
 import 'package:quran_app_android/features/tafsser/presentation/views/tafseer_details_view.dart';
 import 'package:quran_app_android/features/tafsser/presentation/views/tafseer_view.dart';
@@ -142,10 +143,17 @@ class AppRoutes {
       transition: Transition.cupertino,
       transitionDuration: kTransitionDuration,
     ),
+    GetPage(
+      name: permissionsStatus,
+      page: () => const PermissionsStatusView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
   ];
 
   static String home = '/home';
   static String settings = '/settings';
+  static String permissionsStatus = '/permissionsStatus';
   static String tafsser = '/tafsser';
   static String hadith = '/hadith';
   static String nameofAllah = '/nameofAllah';
