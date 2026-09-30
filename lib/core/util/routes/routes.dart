@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:quran_app_android/core/middleware/middleware.dart';
 import 'package:quran_app_android/core/util/binding.dart';
@@ -118,12 +119,13 @@ class AppRoutes {
       transition: Transition.cupertino,
       transitionDuration: kTransitionDuration,
     ),
-    GetPage(
-      name: mushafDebug,
-      page: () => const MushafFontDebugView(),
-      transition: Transition.cupertino,
-      transitionDuration: kTransitionDuration,
-    ),
+    if (kDebugMode)
+      GetPage(
+        name: mushafDebug,
+        page: () => const MushafFontDebugView(),
+        transition: Transition.cupertino,
+        transitionDuration: kTransitionDuration,
+      ),
     GetPage(
       name: onboarding,
       page: () => OnBoardingScreen(),

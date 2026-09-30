@@ -46,9 +46,9 @@ class NotifyHelper {
         enableVibration: true,
       );
 
-  final String soundAzkar1 = 'azkar_1.wav';
-  final String soundAzkar2 = 'azkar_2.wav';
-  final String soundAdhan = 'adhan.wav';
+  final String soundAzkar1 = 'azkar_1.ogg';
+  final String soundAzkar2 = 'azkar_2.ogg';
+  final String soundAdhan = 'adhan.ogg';
 
   bool _initialized = false;
 

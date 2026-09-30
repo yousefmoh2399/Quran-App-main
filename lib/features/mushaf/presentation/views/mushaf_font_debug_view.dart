@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/data/models/mushaf_models.dart';
 import '../../../../core/data/repositories/mushaf_repository.dart';
@@ -71,6 +72,12 @@ class _MushafFontDebugViewState extends State<MushafFontDebugView> {
 
   @override
   Widget build(BuildContext context) {
+    if (!kDebugMode) {
+      return const Scaffold(
+        body: Center(child: Text('Debug screen disabled in release mode.')),
+      );
+    }
+
     final colors = context.appColors;
     final theme = MushafThemeConfig.light;
 
