@@ -56,8 +56,8 @@ void main() {
       final baqarahAyahs = await quranRepo.getAyahs(2);
       expect(baqarahAyahs.length, 286);
 
-      // Verify page_number column exists and is nullable (empty for now)
-      expect(fatihahAyahs.first.pageNumber, isNull);
+      // Verify page_number column is now populated with valid page numbers (Al-Fatihah v1 is on page 1)
+      expect(fatihahAyahs.first.pageNumber, 1);
     });
 
     test('QuranRepository: verify Tafsir retrieval', () async {
