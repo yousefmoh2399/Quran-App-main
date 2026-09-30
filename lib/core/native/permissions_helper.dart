@@ -160,8 +160,9 @@ class PermissionsController extends GetxController {
       final ignoring =
           await _ch.invokeMethod<bool>('isIgnoringBatteryOptimizations') ??
           false;
-      if (!ignoring)
+      if (!ignoring) {
         await _ch.invokeMethod('requestIgnoreBatteryOptimizations');
+      }
 
       final exact =
           await _ch.invokeMethod<bool>('canScheduleExactAlarms') ?? true;
@@ -193,7 +194,8 @@ class PermissionsController extends GetxController {
           await _ch.invokeMethod<bool>('isLocationServiceEnabled') ?? true;
 
       return canOverlay && ignoring && notif && gpsOn;
-    } catch (_) {
+    } catch (e, st) {
+      debugPrint("⚠️ Permission check error: $e\n$st");
       return false;
     }
   }

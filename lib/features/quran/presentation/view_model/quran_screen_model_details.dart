@@ -88,9 +88,9 @@ class QuranScreenViewModel extends GetxController {
         currentIndex4Quran =
             sharedPref.sharedPref!.getInt('currentIndex4Quran');
       }
-    } catch (e) {
+    } catch (e, st) {
       if (kDebugMode) {
-        print(e.toString());
+        debugPrint('QuranScreenModel error: $e\n$st');
       }
     } finally {
       isLoading.value = false;

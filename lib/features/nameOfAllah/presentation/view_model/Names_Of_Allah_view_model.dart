@@ -29,10 +29,10 @@ class NamesOfAllahViewModel extends GetxController {
       }
       isLoading.value = false;
       update();
-    } catch (e) {
+    } catch (e, st) {
       isLoading.value = false;
       if (kDebugMode) {
-        print(e.toString());
+        debugPrint('NamesOfAllah error: $e\n$st');
       }
     }
   }

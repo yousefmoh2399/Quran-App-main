@@ -77,10 +77,10 @@ class HadithViewModel extends GetxController {
       }
       isLoadingg.value = false;
       update();
-    } catch (e) {
+    } catch (e, st) {
       isLoadingg.value = false;
       if (kDebugMode) {
-        print(e.toString());
+        debugPrint('HadithViewModel error: $e\n$st');
       }
     }
   }

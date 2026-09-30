@@ -88,7 +88,8 @@ class NotifyHelper {
       final TimezoneInfo timeZoneInfo =
           await FlutterTimezone.getLocalTimezone();
       tz.setLocalLocation(tz.getLocation(timeZoneInfo.identifier));
-    } catch (_) {
+    } catch (e, st) {
+      debugPrint("⚠️ Could not load local timezone, defaulting to UTC: $e\n$st");
       tz.setLocalLocation(tz.getLocation('UTC'));
     }
   }

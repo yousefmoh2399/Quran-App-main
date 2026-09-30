@@ -16,9 +16,9 @@ class LocalStorageAdhanData extends GetxController {
         return null;
       }
       return userModel;
-    } catch (e) {
+    } catch (e, st) {
       if (kDebugMode) {
-        print(e.toString());
+        debugPrint('LocalStorageAdhanData error: $e\n$st');
       }
     }
     return null;

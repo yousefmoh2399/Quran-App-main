@@ -90,17 +90,19 @@ class _SectionAzkarNotificationState extends State<SectionAzkarNotification> {
       }
 
       controller.timeOfDay = selectedTime;
+      if (!context.mounted) return;
+      final formattedTime = selectedTime.format(context);
 
       if (controller.settingsServices.sharedPref!.getBool('enable') == true) {
         await NotifyHelper().scheduleAzkar(timeOfDay: selectedTime);
         defaultToast(
-          text:
-              'تم ضبط إشعار ذكر الصباح على ${selectedTime.format(context)}',
+          text: 'تم ضبط إشعار ذكر الصباح على $formattedTime',
         );
       } else {
         defaultToast(text: 'الإشعارات غير مفعلة حاليًا');
       }
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('Error setting azkar notification time: $e\n$st');
       defaultToast(text: 'حدث خطأ أثناء تحديد الوقت');
     }
   }

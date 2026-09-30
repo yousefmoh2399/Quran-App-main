@@ -1,33 +1,4 @@
-// // import 'package:flutter/material.dart';
-// // import 'package:flutter/services.dart';
-
-// // class NativeAzkarBridge {
-// //   static const _channel = MethodChannel('native_azkar_bridge');
-
-// //   static Future<void> startAzkar() async {
-// //     try {
-// //       await _channel.invokeMethod('startAzkar');
-// //     } catch (e) {
-// //       debugPrint("❌ Error starting Azkar service: $e");
-// //     }
-// //   }
-// // }
-// import 'package:flutter/services.dart';
-
-// class NativeAzkarBridge {
-//   static const _channel = MethodChannel('native_azkar_bridge');
-
-//   static Future<void> startAzkar() async {
-//     try {
-//       final result = await _channel.invokeMethod('scheduleAzkar', {
-//         'interval': 1,
-//       });
-//       print('✅ $result');
-//     } catch (e) {
-//       print("⚠️ Error sending azkar schedule: $e");
-//     }
-//   }
-// }
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 class NativeAzkarBridge {
@@ -37,9 +8,9 @@ class NativeAzkarBridge {
   static Future<void> scheduleDailyAzkar(int intervalHours) async {
     try {
       await _channel.invokeMethod('scheduleAzkar', {'interval': intervalHours});
-      print("✅ Azkar scheduled every $intervalHours hour(s)");
-    } catch (e) {
-      print("❌ Error sending azkar schedule: $e");
+      debugPrint("✅ Azkar scheduled every $intervalHours hour(s)");
+    } catch (e, st) {
+      debugPrint("❌ Error sending azkar schedule: $e\n$st");
     }
   }
 
@@ -47,9 +18,9 @@ class NativeAzkarBridge {
   static Future<void> cancelAzkar() async {
     try {
       await _channel.invokeMethod('cancelAzkar');
-      print("🛑 Azkar schedule cancelled");
-    } catch (e) {
-      print("❌ Error cancelling azkar: $e");
+      debugPrint("🛑 Azkar schedule cancelled");
+    } catch (e, st) {
+      debugPrint("❌ Error cancelling azkar: $e\n$st");
     }
   }
 }

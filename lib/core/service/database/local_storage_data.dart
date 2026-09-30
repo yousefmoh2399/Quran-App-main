@@ -11,9 +11,9 @@ class LocalStorageData extends GetxController {
     try {
       VersesModel? ayahModel = await _getUserData();
       return ayahModel; // إرجاع القيمة حتى لو كانت null
-    } catch (e) {
+    } catch (e, st) {
       if (kDebugMode) {
-        print(e.toString());
+        debugPrint('LocalStorageData error: $e\n$st');
       }
     }
     return null; // إرجاع null في حالة حدوث خطأ

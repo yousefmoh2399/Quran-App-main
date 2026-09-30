@@ -36,11 +36,11 @@ class TafseerDetailsViewModel extends GetxController {
       }
       isLoading.value = false;
       update();
-    } catch (e) {
+    } catch (e, st) {
       isLoading.value = false;
       update();
       if (kDebugMode) {
-        print(e.toString());
+        debugPrint('TafseerDetails error: $e\n$st');
       }
     }
   }
@@ -100,9 +100,9 @@ class TafseerDetailsViewModel extends GetxController {
     await localStorageData.getUser.then(( value) {
       _ayahModel = value;
       update();
-    }).catchError((error) {
+    }).catchError((error, st) {
       if (kDebugMode) {
-        print(error.toString());
+        debugPrint('TafseerDetails mark error: $error\n$st');
       }
     });
     update();
