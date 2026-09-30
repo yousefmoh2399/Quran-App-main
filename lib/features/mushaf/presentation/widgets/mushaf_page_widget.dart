@@ -1,7 +1,10 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import '../../../../core/data/models/mushaf_models.dart';
 import '../../../../core/design/app_typography.dart';
 import '../../../../core/mushaf/mushaf_font_manager.dart';
+import '../../../../core/mushaf/mushaf_raster_cache.dart';
 import '../models/mushaf_theme_model.dart';
 import '../utils/mushaf_utils.dart';
 import 'mushaf_frame_painter.dart';
@@ -9,18 +12,18 @@ import 'mushaf_line_widget.dart';
 
 /// Renders a complete 15-line page of the Madinah Mushaf.
 ///
-/// Includes:
-/// - Parchment / themed background.
-/// - Decorative Islamic double-border frame with arabesque corners.
-/// - Top header: Surah name (right), Juz and Hizb (left).
-/// - 15 full-width scaled text lines with ayah highlight support.
-/// - Bottom footer: Page number in authentic Arabic numerals.
-class MushafPageWidget extends StatelessWidget {
+/// Supports high-performance raster image caching:
+/// - Captures rendered layout via [RepaintBoundary.toImage].
+/// - When swiping/turning ([isMoving] is true), renders the cached [ui.Image] directly
+///   via [RawImage], bypassing all text layout and frame painting for 60fps/120fps performance.
+/// - Settled page displays interactive live widgets for verse selection and Tafseer.
+class MushafPageWidget extends StatefulWidget {
   final MushafPage page;
   final MushafThemeConfig theme;
   final int? selectedSurah;
   final int? selectedAyah;
   final bool isRightPage;
+  final bool isMoving;
   final void Function(int surahNumber, int ayahNumber)? onAyahTapped;
   final VoidCallback? onTapPage;
 
@@ -31,9 +34,68 @@ class MushafPageWidget extends StatelessWidget {
     this.selectedSurah,
     this.selectedAyah,
     this.isRightPage = true,
+    this.isMoving = false,
     this.onAyahTapped,
     this.onTapPage,
   });
+
+  @override
+  State<MushafPageWidget> createState() => _MushafPageWidgetState();
+}
+
+class _MushafPageWidgetState extends State<MushafPageWidget> {
+  final GlobalKey _boundaryKey = GlobalKey();
+  bool _isCapturing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleCapture();
+  }
+
+  @override
+  void didUpdateWidget(covariant MushafPageWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.page.pageNumber != widget.page.pageNumber ||
+        oldWidget.theme.mode != widget.theme.mode) {
+      _scheduleCapture();
+    }
+  }
+
+  void _scheduleCapture() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _captureRasterImage();
+    });
+  }
+
+  Future<void> _captureRasterImage() async {
+    if (!mounted || _isCapturing) return;
+    if (widget.selectedAyah != null) return;
+    if (MushafRasterCache.instance.has(widget.page.pageNumber, widget.theme.mode)) {
+      return;
+    }
+
+    _isCapturing = true;
+    try {
+      final boundary =
+          _boundaryKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      if (boundary != null &&
+          boundary.hasSize &&
+          boundary.size.width > 0 &&
+          !boundary.debugNeedsPaint) {
+        final pixelRatio = View.of(context).devicePixelRatio.clamp(1.0, 2.0);
+        final image = await boundary.toImage(pixelRatio: pixelRatio);
+        MushafRasterCache.instance.put(widget.page.pageNumber, widget.theme.mode, image);
+        if (mounted) {
+          setState(() {});
+        }
+      }
+    } catch (_) {
+      // Boundary not ready or in teardown; ignore silently
+    } finally {
+      _isCapturing = false;
+    }
+  }
 
   Future<void> _ensurePageFonts(MushafPage page) async {
     final pageNums = <int>{page.pageNumber};
@@ -49,57 +111,82 @@ class MushafPageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<void>(
-      future: _ensurePageFonts(page),
-      builder: (context, snapshot) {
-        final fontReady = snapshot.connectionState == ConnectionState.done;
+    final cachedImage = MushafRasterCache.instance.get(
+      widget.page.pageNumber,
+      widget.theme.mode,
+    );
 
-        return GestureDetector(
-          onTap: onTapPage,
-          behavior: HitTestBehavior.opaque,
-          child: Container(
-            color: theme.pageBg,
-            child: CustomPaint(
-              painter: MushafFramePainter(
-                theme: theme,
-                isRightPage: isRightPage,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  left: 20.0,
-                  right: 20.0,
-                  top: 18.0,
-                  bottom: 16.0,
+    // When the page is swiping or turning, and a pre-rendered raster image is available,
+    // display only the lightweight 2D texture (RawImage) for butter-smooth 60fps scrolling.
+    if (widget.isMoving && cachedImage != null && widget.selectedAyah == null) {
+      return GestureDetector(
+        onTap: widget.onTapPage,
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          color: widget.theme.pageBg,
+          child: RawImage(
+            image: cachedImage,
+            fit: BoxFit.fill,
+          ),
+        ),
+      );
+    }
+
+    // Settled page: render live interactive widgets inside RepaintBoundary
+    return RepaintBoundary(
+      key: _boundaryKey,
+      child: FutureBuilder<void>(
+        future: _ensurePageFonts(widget.page),
+        builder: (context, snapshot) {
+          final fontReady = snapshot.connectionState == ConnectionState.done;
+
+          return GestureDetector(
+            onTap: widget.onTapPage,
+            behavior: HitTestBehavior.opaque,
+            child: Container(
+              color: widget.theme.pageBg,
+              child: CustomPaint(
+                painter: MushafFramePainter(
+                  theme: widget.theme,
+                  isRightPage: widget.isRightPage,
                 ),
-                child: Column(
-                  children: [
-                    // Top Header
-                    _buildHeader(context),
-                    const SizedBox(height: 6.0),
-                    // Lines Area
-                    Expanded(
-                      child: fontReady
-                          ? _buildLinesList(context)
-                          : _buildFontLoadingIndicator(context),
-                    ),
-                    const SizedBox(height: 4.0),
-                    // Bottom Footer
-                    _buildFooter(context),
-                  ],
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    left: 20.0,
+                    right: 20.0,
+                    top: 18.0,
+                    bottom: 16.0,
+                  ),
+                  child: Column(
+                    children: [
+                      // Top Header
+                      _buildHeader(context),
+                      const SizedBox(height: 6.0),
+                      // Lines Area
+                      Expanded(
+                        child: fontReady
+                            ? _buildLinesList(context)
+                            : _buildFontLoadingIndicator(context),
+                      ),
+                      const SizedBox(height: 4.0),
+                      // Bottom Footer
+                      _buildFooter(context),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
   /// Builds the top header row:
   /// Right: Surah Name | Left: Juz and Hizb
   Widget _buildHeader(BuildContext context) {
-    final hizbNumber = calculateHizbNumber(page.pageNumber, page.juzNumber);
-    final juzName = getJuzNameArabic(page.juzNumber);
+    final hizbNumber = calculateHizbNumber(widget.page.pageNumber, widget.page.juzNumber);
+    final juzName = getJuzNameArabic(widget.page.juzNumber);
 
     return SizedBox(
       height: 28.0,
@@ -107,23 +194,33 @@ class MushafPageWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // Surah Name (Right in RTL)
-          Text(
-            'سُورَةُ ${page.surahNameAr}',
-            style: TextStyle(
-              fontFamily: AppTypography.decorativeFont,
-              fontSize: 14.5,
-              fontWeight: FontWeight.bold,
-              color: theme.headerFooterColor,
+          Flexible(
+            child: Text(
+              'سُورَةُ ${widget.page.surahNameAr}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontFamily: AppTypography.decorativeFont,
+                fontSize: 14.5,
+                fontWeight: FontWeight.bold,
+                color: widget.theme.headerFooterColor,
+              ),
             ),
           ),
+          const SizedBox(width: 8),
           // Juz & Hizb (Left in RTL)
-          Text(
-            'الجزء $juzName  •  الحزب ${toArabicDigits(hizbNumber)}',
-            style: TextStyle(
-              fontFamily: AppTypography.decorativeFont,
-              fontSize: 13.0,
-              fontWeight: FontWeight.w600,
-              color: theme.headerFooterColor,
+          Flexible(
+            child: Text(
+              'الجزء $juzName  •  الحزب ${toArabicDigits(hizbNumber)}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.end,
+              style: TextStyle(
+                fontFamily: AppTypography.decorativeFont,
+                fontSize: 13.0,
+                fontWeight: FontWeight.w600,
+                color: widget.theme.headerFooterColor,
+              ),
             ),
           ),
         ],
@@ -133,10 +230,10 @@ class MushafPageWidget extends StatelessWidget {
 
   /// Builds the 15 lines of the page evenly distributed.
   Widget _buildLinesList(BuildContext context) {
-    final lines = page.lines;
+    final lines = widget.page.lines;
 
     // Pages 1 and 2 have fewer lines (7-8 lines) centered vertically
-    if (page.pageNumber <= 2 && lines.length < 15) {
+    if (widget.page.pageNumber <= 2 && lines.length < 15) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -145,11 +242,11 @@ class MushafPageWidget extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 4.0),
               child: MushafLineWidget(
                 line: line,
-                pageNumber: page.pageNumber,
-                theme: theme,
-                selectedSurah: selectedSurah,
-                selectedAyah: selectedAyah,
-                onAyahTapped: onAyahTapped,
+                pageNumber: widget.page.pageNumber,
+                theme: widget.theme,
+                selectedSurah: widget.selectedSurah,
+                selectedAyah: widget.selectedAyah,
+                onAyahTapped: widget.onAyahTapped,
               ),
             );
           }).toList(),
@@ -165,11 +262,11 @@ class MushafPageWidget extends StatelessWidget {
           child: Center(
             child: MushafLineWidget(
               line: line,
-              pageNumber: page.pageNumber,
-              theme: theme,
-              selectedSurah: selectedSurah,
-              selectedAyah: selectedAyah,
-              onAyahTapped: onAyahTapped,
+              pageNumber: widget.page.pageNumber,
+              theme: widget.theme,
+              selectedSurah: widget.selectedSurah,
+              selectedAyah: widget.selectedAyah,
+              onAyahTapped: widget.onAyahTapped,
             ),
           ),
         );
@@ -183,12 +280,12 @@ class MushafPageWidget extends StatelessWidget {
       height: 24.0,
       child: Center(
         child: Text(
-          'ـ ${toArabicDigits(page.pageNumber)} ـ',
+          'ـ ${toArabicDigits(widget.page.pageNumber)} ـ',
           style: TextStyle(
             fontFamily: AppTypography.decorativeFont,
             fontSize: 14.5,
             fontWeight: FontWeight.bold,
-            color: theme.headerFooterColor,
+            color: widget.theme.headerFooterColor,
             letterSpacing: 1.0,
           ),
         ),
@@ -203,7 +300,7 @@ class MushafPageWidget extends StatelessWidget {
         height: 24.0,
         child: CircularProgressIndicator(
           strokeWidth: 2.0,
-          color: theme.frameBorderInner,
+          color: widget.theme.frameBorderInner,
         ),
       ),
     );

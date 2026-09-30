@@ -5,6 +5,7 @@ import '../../../../core/data/models/mushaf_models.dart';
 import '../../../../core/data/repositories/mushaf_repository.dart';
 import '../../../../core/data/repositories/quran_repository.dart';
 import '../../../../core/mushaf/mushaf_font_manager.dart';
+import '../../../../core/mushaf/mushaf_raster_cache.dart';
 import '../../../../core/service/settings/SettingsServices.dart';
 import '../../../home/presentation/view_model/home_view_model.dart';
 import '../models/mushaf_theme_model.dart';
@@ -20,6 +21,8 @@ class MushafController extends GetxController {
   final Rx<MushafThemeMode> currentTheme = MushafThemeMode.light.obs;
   final RxBool isOverlayVisible = true.obs;
   final RxBool isLoading = false.obs;
+  final RxBool isPageTurning = false.obs;
+  final RxList<int> pagesToPreload = <int>[].obs;
 
   // Selected Ayah (for highlighting and action sheet)
   final RxnInt selectedSurah = RxnInt();
@@ -49,11 +52,14 @@ class MushafController extends GetxController {
     currentPage.value = initialPage;
     pageController = PageController(initialPage: initialPage - 1);
 
-    _loadPage(initialPage);
+    _loadPage(initialPage).then((_) {
+      _preloadAdjacentPages(initialPage);
+    });
   }
 
   @override
   void onClose() {
+    MushafRasterCache.instance.clear();
     pageController.dispose();
     super.dispose();
   }
@@ -117,16 +123,34 @@ class MushafController extends GetxController {
   /// Called whenever the user swipes to a new page.
   void onPageChanged(int newPage) {
     final clamped = newPage.clamp(1, 604);
-    if (currentPage.value == clamped) return;
+    if (currentPage.value == clamped) {
+      _preloadAdjacentPages(clamped);
+      return;
+    }
 
     currentPage.value = clamped;
     clearAyahSelection();
     _saveLastRead(clamped);
 
-    // Preload neighbors
-    _loadPage(clamped);
-    if (clamped > 1) _loadPage(clamped - 1);
-    if (clamped < 604) _loadPage(clamped + 1);
+    _preloadAdjacentPages(clamped);
+  }
+
+  void _preloadAdjacentPages(int pageNumber) {
+    final targets = <int>[];
+    if (pageNumber > 1) targets.add(pageNumber - 1);
+    if (pageNumber < 604) targets.add(pageNumber + 1);
+    if (pageNumber > 2) targets.add(pageNumber - 2);
+    if (pageNumber < 603) targets.add(pageNumber + 2);
+
+    for (final target in targets) {
+      _loadPage(target);
+    }
+
+    // Queue adjacent pages that need rasterization
+    final needingRaster = targets.take(2).where(
+      (p) => !MushafRasterCache.instance.has(p, currentTheme.value),
+    ).toList();
+    pagesToPreload.assignAll(needingRaster);
   }
 
   /// Automatically persists last read position.
@@ -196,8 +220,10 @@ class MushafController extends GetxController {
 
   /// Updates reading theme.
   Future<void> setThemeMode(MushafThemeMode mode) async {
+    MushafRasterCache.instance.clear();
     currentTheme.value = mode;
     await _settings.sharedPref?.setString(_prefThemeMode, mode.toPrefString());
+    _preloadAdjacentPages(currentPage.value);
   }
 
   /// Navigates to a specific page.

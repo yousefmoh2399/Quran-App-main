@@ -98,6 +98,35 @@ class MushafView extends StatelessWidget {
                   onClose: controller.clearAyahSelection,
                 ),
               ),
+
+            // Offscreen raster preloader for adjacent pages
+            Obx(() {
+              final toPreload = controller.pagesToPreload;
+              if (toPreload.isEmpty) return const SizedBox.shrink();
+
+              final mediaSize = MediaQuery.of(context).size;
+              return Positioned(
+                left: -10000.0,
+                top: -10000.0,
+                width: mediaSize.width,
+                height: mediaSize.height,
+                child: Stack(
+                  children: toPreload.map((p) {
+                    final pageModel = controller.pagesCache[p];
+                    if (pageModel == null) return const SizedBox.shrink();
+                    return SizedBox(
+                      width: mediaSize.width,
+                      height: mediaSize.height,
+                      child: MushafPageWidget(
+                        page: pageModel,
+                        theme: themeConfig,
+                        isMoving: false,
+                      ),
+                    );
+                  }).toList(),
+                ),
+              );
+            }),
           ],
         ),
       );
@@ -108,55 +137,68 @@ class MushafView extends StatelessWidget {
     MushafController controller,
     MushafThemeConfig themeConfig,
   ) {
-    return PageView.builder(
-      controller: controller.pageController,
-      reverse: true, // Authentic RTL reading order
-      physics: const BouncingScrollPhysics(),
-      itemCount: 604,
-      onPageChanged: (pageIndex) {
-        controller.onPageChanged(pageIndex + 1);
-      },
-      itemBuilder: (context, pageIndex) {
-        final pageNum = pageIndex + 1;
-        final cached = controller.pagesCache[pageNum];
-
-        if (cached != null) {
-          return MushafPageWidget(
-            page: cached,
-            theme: themeConfig,
-            selectedSurah: controller.selectedSurah.value,
-            selectedAyah: controller.selectedAyah.value,
-            onAyahTapped: (s, a) => controller.selectAyah(s, a),
-            onTapPage: controller.toggleOverlay,
-          );
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        if (notification is ScrollStartNotification) {
+          controller.isPageTurning.value = true;
+        } else if (notification is ScrollEndNotification) {
+          controller.isPageTurning.value = false;
         }
-
-        return FutureBuilder<MushafPage?>(
-          future: controller.getPage(pageNum),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done && snapshot.data != null) {
-              return MushafPageWidget(
-                page: snapshot.data!,
-                theme: themeConfig,
-                selectedSurah: controller.selectedSurah.value,
-                selectedAyah: controller.selectedAyah.value,
-                onAyahTapped: (s, a) => controller.selectAyah(s, a),
-                onTapPage: controller.toggleOverlay,
-              );
-            }
-
-            return Container(
-              color: themeConfig.pageBg,
-              child: Center(
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.0,
-                  color: themeConfig.frameBorderInner,
-                ),
-              ),
-            );
-          },
-        );
+        return false;
       },
+      child: PageView.builder(
+        controller: controller.pageController,
+        reverse: true, // Authentic RTL reading order
+        physics: const BouncingScrollPhysics(),
+        itemCount: 604,
+        onPageChanged: (pageIndex) {
+          controller.onPageChanged(pageIndex + 1);
+        },
+        itemBuilder: (context, pageIndex) {
+          final pageNum = pageIndex + 1;
+          final cached = controller.pagesCache[pageNum];
+          final isMoving = controller.isPageTurning.value;
+
+          if (cached != null) {
+            return MushafPageWidget(
+              page: cached,
+              theme: themeConfig,
+              isMoving: isMoving,
+              selectedSurah: controller.selectedSurah.value,
+              selectedAyah: controller.selectedAyah.value,
+              onAyahTapped: (s, a) => controller.selectAyah(s, a),
+              onTapPage: controller.toggleOverlay,
+            );
+          }
+
+          return FutureBuilder<MushafPage?>(
+            future: controller.getPage(pageNum),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done && snapshot.data != null) {
+                return MushafPageWidget(
+                  page: snapshot.data!,
+                  theme: themeConfig,
+                  isMoving: isMoving,
+                  selectedSurah: controller.selectedSurah.value,
+                  selectedAyah: controller.selectedAyah.value,
+                  onAyahTapped: (s, a) => controller.selectAyah(s, a),
+                  onTapPage: controller.toggleOverlay,
+                );
+              }
+
+              return Container(
+                color: themeConfig.pageBg,
+                child: Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.0,
+                    color: themeConfig.frameBorderInner,
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 
