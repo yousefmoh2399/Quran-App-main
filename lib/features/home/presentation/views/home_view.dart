@@ -5,6 +5,7 @@ import 'package:quran_app_android/core/design/app_spacing.dart';
 import 'package:quran_app_android/core/design/components/app_scaffold.dart';
 import 'package:quran_app_android/features/adhan/presentation/view_model/adhan_view_model.dart';
 import 'package:quran_app_android/features/home/presentation/view_model/home_view_model.dart';
+import 'package:quran_app_android/features/azkar/presentation/views/widgets/smart_zikr_card.dart';
 import 'package:quran_app_android/features/home/presentation/views/widget/daily_wird_card.dart';
 import 'package:quran_app_android/features/home/presentation/views/widget/daily_zekr_card.dart';
 import 'package:quran_app_android/features/home/presentation/views/widget/home_header.dart';
@@ -58,6 +59,8 @@ class HomeView extends StatelessWidget {
               LatestBookmarkCard(),
               AppSpacing.verticalLg,
               HomeSectionsGrid(),
+              AppSpacing.verticalLg,
+              SmartZikrCard(),
               AppSpacing.verticalLg,
               DailyZekrCard(),
               AppSpacing.verticalXxl,

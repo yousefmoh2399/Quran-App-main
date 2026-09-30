@@ -90,16 +90,96 @@ class SettingsView extends StatelessWidget {
                   ],
                 ),
 
-                // 4. App Info & Sources
+                // 4. Worship Tracking & Calendar
+                SettingsGroupCard(
+                  title: 'العبادات والتقويم الإسلامي',
+                  icon: Icons.calendar_month_rounded,
+                  children: [
+                    SettingsTile(
+                      icon: Icons.fact_check_rounded,
+                      title: 'سجل الصلوات وقضاء الفوائت',
+                      subtitle: 'تسجيل الصلوات اليومية، نسب الالتزام، والصلوات الفائتة',
+                      onTap: () {
+                        Get.toNamed(AppRoutes.prayerTracker);
+                      },
+                    ),
+                    SettingsTile(
+                      icon: Icons.calendar_today_rounded,
+                      title: 'التقويم الهجري والمناسبات',
+                      subtitle: 'تحويل التاريخ، المناسبات الإسلامية، وصيام السنن',
+                      onTap: () {
+                        Get.toNamed(AppRoutes.islamicCalendar);
+                      },
+                    ),
+                    SettingsTile(
+                      icon: Icons.nights_stay_rounded,
+                      title: 'إمساكية شهر رمضان المبارك',
+                      subtitle: 'مواقيت الإمساك والإفطار للشهر الفضيل',
+                      onTap: () {
+                        Get.toNamed(AppRoutes.ramadanImsakia);
+                      },
+                    ),
+                    SettingsTile(
+                      icon: Icons.radio_button_checked_rounded,
+                      title: 'أذكار ما بعد الصلاة المفروضة',
+                      subtitle: 'التسبيح والتحميد والتكبير بعد الفريضة',
+                      onTap: () {
+                        Get.toNamed(AppRoutes.postPrayerAzkar);
+                      },
+                    ),
+                  ],
+                ),
+
+                // 5. Stats & Backup
+                SettingsGroupCard(
+                  title: 'الإنجازات والبيانات',
+                  icon: Icons.emoji_events_rounded,
+                  children: [
+                    SettingsTile(
+                      icon: Icons.military_tech_rounded,
+                      title: 'إحصائيات القراءة والشارات',
+                      subtitle: 'متابعة الختمات، أيام الالتزام، والأوسمة التقديرية',
+                      onTap: () {
+                        Get.toNamed(AppRoutes.achievements);
+                      },
+                    ),
+                    SettingsTile(
+                      icon: Icons.backup_rounded,
+                      title: 'النسخ الاحتياطي واستعادة البيانات',
+                      subtitle: 'تصدير واستيراد العلامات والورد وسجل الصلوات كملف آمن',
+                      onTap: () {
+                        Get.toNamed(AppRoutes.backupRestore);
+                      },
+                    ),
+                  ],
+                ),
+
+                // 6. App Info & Sources
                 SettingsGroupCard(
                   title: 'عن التطبيق والمصادر',
                   icon: Icons.info_outline_rounded,
                   children: [
+                    SettingsTile(
+                      icon: Icons.info_rounded,
+                      title: 'عن التطبيق والمطور',
+                      subtitle: 'معلومات الترخيص، المراجع، ومشاركة الأجر',
+                      onTap: () {
+                        Get.toNamed(AppRoutes.aboutApp);
+                      },
+                    ),
+                    SettingsTile(
+                      icon: Icons.privacy_tip_rounded,
+                      title: 'سياسة الخصوصية والأمان',
+                      subtitle: 'تطبيق محلي 100% بدون تتبع أو جمع بيانات',
+                      onTap: () {
+                        Get.toNamed(AppRoutes.privacyPolicy);
+                      },
+                    ),
                     const SettingsTile(
                       icon: Icons.verified_outlined,
                       title: 'مصادر النصوص والبيانات',
                       subtitle:
-                          'مصحف المدينة (مجمع الملك فهد) • التفسير الميسر • موطأ مالك',
+                          'مصحف المدينة (مجمع الملك فهد) • التفسير الميسر والسعدي • موطأ مالك',
                     ),
                     const SettingsTile(
                       icon: Icons.wifi_off_rounded,
@@ -117,7 +197,7 @@ class SettingsView extends StatelessWidget {
                     const SettingsTile(
                       icon: Icons.phonelink_setup_rounded,
                       title: 'إصدار التطبيق',
-                      subtitle: '1.0.0 (تحديث شامل لواجهة المستخدم)',
+                      subtitle: '1.1.0 (الإصدار الإسلامي الشامل)',
                     ),
                   ],
                 ),

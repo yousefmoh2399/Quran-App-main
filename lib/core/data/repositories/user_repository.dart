@@ -298,6 +298,37 @@ class UserRepository {
     return rows.first['last_page'] as int?;
   }
 
+  Future<Map<String, dynamic>> getReadingStats() async {
+    final db = await _db;
+    final totalPages = Sqflite.firstIntValue(await db.rawQuery('SELECT SUM(pages_read) FROM reading_log')) ?? 0;
+    final totalDays = Sqflite.firstIntValue(await db.rawQuery('SELECT COUNT(*) FROM reading_log WHERE pages_read > 0')) ?? 0;
+    
+    final logs = await getReadingLog(limit: 60);
+    int streak = 0;
+    DateTime checkDate = DateTime.now();
+    final logDates = logs.where((l) => l.pagesRead > 0).map((l) => l.date).toSet();
+    
+    final todayStr = _formatDate(checkDate);
+    final yesterdayStr = _formatDate(checkDate.subtract(const Duration(days: 1)));
+    if (logDates.contains(todayStr)) {
+      streak++;
+      checkDate = checkDate.subtract(const Duration(days: 1));
+    } else if (logDates.contains(yesterdayStr)) {
+      checkDate = checkDate.subtract(const Duration(days: 1));
+    }
+    
+    while (logDates.contains(_formatDate(checkDate))) {
+      streak++;
+      checkDate = checkDate.subtract(const Duration(days: 1));
+    }
+
+    return {
+      'totalPages': totalPages,
+      'totalDays': totalDays,
+      'streak': streak,
+    };
+  }
+
   // ==========================================
   // WIRD PLAN & STREAK
   // ==========================================
@@ -438,6 +469,247 @@ class UserRepository {
       await NativeRemindersBridge.markWirdCompleted(date: today);
     } catch (_) {}
 
+    await evaluateAchievements();
     return updated;
   }
+
+  // ==========================================
+  // PRAYER TRACKING & QADAA
+  // ==========================================
+
+  Future<void> savePrayerLog(PrayerLog log) async {
+    final db = await _db;
+    await db.insert(
+      'prayer_logs',
+      log.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    await evaluateAchievements();
+  }
+
+  Future<Map<String, PrayerLog>> getPrayerLogsForDate(String date) async {
+    final db = await _db;
+    final rows = await db.query(
+      'prayer_logs',
+      where: 'date = ?',
+      whereArgs: [date],
+    );
+    final map = <String, PrayerLog>{};
+    for (final r in rows) {
+      final log = PrayerLog.fromMap(r);
+      map[log.prayer] = log;
+    }
+    return map;
+  }
+
+  Future<List<PrayerLog>> getPrayerLogsBetween(String startDate, String endDate) async {
+    final db = await _db;
+    final rows = await db.query(
+      'prayer_logs',
+      where: 'date >= ? AND date <= ?',
+      whereArgs: [startDate, endDate],
+      orderBy: 'date ASC',
+    );
+    return rows.map((r) => PrayerLog.fromMap(r)).toList();
+  }
+
+  Future<Map<String, int>> getQadaaCounts() async {
+    final db = await _db;
+    final rows = await db.query('qadaa_prayers');
+    final map = <String, int>{'fajr': 0, 'dhuhr': 0, 'asr': 0, 'maghrib': 0, 'isha': 0};
+    for (final r in rows) {
+      final prayer = r['prayer'] as String;
+      final count = r['count'] as int? ?? 0;
+      map[prayer] = count;
+    }
+    return map;
+  }
+
+  Future<void> setQadaaCount(String prayer, int count) async {
+    final db = await _db;
+    await db.insert(
+      'qadaa_prayers',
+      {'prayer': prayer, 'count': count.clamp(0, 99999)},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  // ==========================================
+  // FASTING TRACKING
+  // ==========================================
+
+  Future<void> saveFastingLog(FastingLog log) async {
+    final db = await _db;
+    await db.insert(
+      'fasting_logs',
+      log.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    await evaluateAchievements();
+  }
+
+  Future<void> deleteFastingLog(String date) async {
+    final db = await _db;
+    await db.delete('fasting_logs', where: 'date = ?', whereArgs: [date]);
+  }
+
+  Future<List<FastingLog>> getFastingLogsForMonth(String yearMonthPrefix) async {
+    final db = await _db;
+    final rows = await db.query(
+      'fasting_logs',
+      where: 'date LIKE ?',
+      whereArgs: ['$yearMonthPrefix%'],
+      orderBy: 'date ASC',
+    );
+    return rows.map((r) => FastingLog.fromMap(r)).toList();
+  }
+
+  Future<bool> isDayFasted(String date) async {
+    final db = await _db;
+    final rows = await db.query(
+      'fasting_logs',
+      where: 'date = ? AND completed = 1',
+      whereArgs: [date],
+      limit: 1,
+    );
+    return rows.isNotEmpty;
+  }
+
+  // ==========================================
+  // TAFSIR CACHE
+  // ==========================================
+
+  Future<String?> getCachedTafsir(int surah, int ayah, int tafsirId) async {
+    final db = await _db;
+    final rows = await db.query(
+      'tafsir_cache',
+      columns: ['text'],
+      where: 'surah = ? AND ayah = ? AND tafsir_id = ?',
+      whereArgs: [surah, ayah, tafsirId],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return rows.first['text'] as String?;
+  }
+
+  Future<void> cacheTafsir(int surah, int ayah, int tafsirId, String text) async {
+    final db = await _db;
+    await db.insert(
+      'tafsir_cache',
+      {'surah': surah, 'ayah': ayah, 'tafsir_id': tafsirId, 'text': text},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  // ==========================================
+  // ACHIEVEMENTS & STATS
+  // ==========================================
+
+  Future<Set<String>> getUnlockedAchievements() async {
+    final db = await _db;
+    final rows = await db.query('user_achievements');
+    return rows.map((r) => r['id'] as String).toSet();
+  }
+
+  Future<bool> unlockAchievement(String badgeId) async {
+    final db = await _db;
+    final rows = await db.query('user_achievements', where: 'id = ?', whereArgs: [badgeId], limit: 1);
+    if (rows.isNotEmpty) return false;
+
+    await db.insert('user_achievements', {
+      'id': badgeId,
+      'unlocked_at': DateTime.now().toIso8601String(),
+    });
+    return true;
+  }
+
+  Future<void> evaluateAchievements() async {
+    final stats = await getReadingStats();
+    final totalPages = stats['totalPages'] ?? 0;
+    final totalDays = stats['totalDays'] ?? 0;
+
+    if (totalPages >= 1) await unlockAchievement('first_page');
+    if (totalDays >= 3) await unlockAchievement('streak_3');
+    if (totalDays >= 7) await unlockAchievement('streak_7');
+    if (totalDays >= 30) await unlockAchievement('streak_30');
+
+    // Check prayer achievement
+    final today = _formatDate(DateTime.now());
+    final todayPrayers = await getPrayerLogsForDate(today);
+    if (todayPrayers.length >= 5 && todayPrayers.values.every((p) => p.status == PrayerStatus.onTime || p.status == PrayerStatus.jamaah)) {
+      await unlockAchievement('prayers_day');
+    }
+
+    // Check fasting achievement
+    final db = await _db;
+    final fastingCount = Sqflite.firstIntValue(await db.rawQuery('SELECT COUNT(*) FROM fasting_logs WHERE completed = 1')) ?? 0;
+    if (fastingCount >= 1) await unlockAchievement('fasting_day');
+
+    final plan = await getWirdPlan();
+    if (plan != null && (plan.streak >= 30 || plan.lastCompletedDate != null && plan.startPage == 1 && plan.streak > 10)) {
+      await unlockAchievement('first_khatma');
+    }
+  }
+
+  // ==========================================
+  // BACKUP & RESTORE
+  // ==========================================
+
+  Future<String> exportUserDataJson() async {
+    final db = await _db;
+    final data = <String, dynamic>{
+      'version': 2,
+      'app': 'taqarrab',
+      'exported_at': DateTime.now().toIso8601String(),
+      'bookmarks': await db.query('bookmarks'),
+      'memorized': await db.query('memorized'),
+      'reading_log': await db.query('reading_log'),
+      'wird_plan': await db.query('wird_plan'),
+      'commute_wird_log': await db.query('commute_wird_log'),
+      'commute_wird_state': await db.query('commute_wird_state'),
+      'prayer_logs': await db.query('prayer_logs'),
+      'qadaa_prayers': await db.query('qadaa_prayers'),
+      'fasting_logs': await db.query('fasting_logs'),
+      'user_achievements': await db.query('user_achievements'),
+    };
+    return const JsonEncoder.withIndent('  ').convert(data);
+  }
+
+  Future<bool> importUserDataJson(String jsonStr) async {
+    try {
+      final decoded = json.decode(jsonStr) as Map<String, dynamic>;
+      if (!decoded.containsKey('version')) return false;
+
+      final db = await _db;
+      await db.transaction((txn) async {
+        void safeRestore(String table, String key) async {
+          if (decoded.containsKey(key)) {
+            final list = decoded[key] as List<dynamic>?;
+            if (list != null) {
+              for (final item in list) {
+                if (item is Map<String, dynamic>) {
+                  await txn.insert(table, item, conflictAlgorithm: ConflictAlgorithm.replace);
+                }
+              }
+            }
+          }
+        }
+
+        safeRestore('bookmarks', 'bookmarks');
+        safeRestore('memorized', 'memorized');
+        safeRestore('reading_log', 'reading_log');
+        safeRestore('wird_plan', 'wird_plan');
+        safeRestore('commute_wird_log', 'commute_wird_log');
+        safeRestore('commute_wird_state', 'commute_wird_state');
+        safeRestore('prayer_logs', 'prayer_logs');
+        safeRestore('qadaa_prayers', 'qadaa_prayers');
+        safeRestore('fasting_logs', 'fasting_logs');
+        safeRestore('user_achievements', 'user_achievements');
+      });
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
 }
+

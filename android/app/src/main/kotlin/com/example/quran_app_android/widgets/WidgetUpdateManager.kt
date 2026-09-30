@@ -68,6 +68,9 @@ object WidgetUpdateManager {
             // 4. Prayer Times Widget
             updatePrayerWidgets(context, appWidgetManager, prayerData)
 
+            // 5. Wird & Khatma Widget
+            updateWirdWidgets(context, appWidgetManager)
+
             // Ensure next 10-minute inexact alarm is scheduled
             scheduleNextPeriodicUpdate(context)
 
@@ -185,6 +188,45 @@ object WidgetUpdateManager {
             views.setTextViewText(R.id.pw_time_isha, prayerData.ishaTime)
 
             views.setOnClickPendingIntent(R.id.widget_root_prayer, createOpenAppPendingIntent(context, widgetId))
+
+            manager.updateAppWidget(widgetId, views)
+        }
+    }
+
+    private fun updateWirdWidgets(context: Context, manager: AppWidgetManager) {
+        val ids = manager.getAppWidgetIds(ComponentName(context, WirdKhatmaWidgetProvider::class.java))
+        if (ids.isEmpty()) return
+
+        val prefs = context.getSharedPreferences("wird_widget_prefs", Context.MODE_PRIVATE)
+        val streak = prefs.getInt("wird_streak", 0)
+        val target = prefs.getInt("wird_target", 4)
+        val completed = prefs.getInt("wird_completed", 0)
+        val lastPage = prefs.getInt("wird_last_page", 1)
+        val planTitle = prefs.getString("wird_plan_title", "الورد اليومي") ?: "الورد اليومي"
+
+        val percent = if (target > 0) ((completed.toFloat() / target.toFloat()) * 100).toInt().coerceIn(0, 100) else 0
+
+        for (widgetId in ids) {
+            val views = RemoteViews(context.packageName, R.layout.widget_wird_khatma)
+            views.setTextViewText(R.id.wird_widget_streak, if (streak > 0) "🔥 $streak أيام متتالية" else "✨ ابدأ ورد اليوم")
+            views.setTextViewText(R.id.wird_widget_plan, "$planTitle: $target صفحات")
+            views.setTextViewText(R.id.wird_widget_progress_text, "$completed / $target ($percent%)")
+            views.setProgressBar(R.id.wird_widget_progress_bar, 100, percent, false)
+            views.setTextViewText(R.id.wird_widget_last_page, "آخر قراءة: الصفحة $lastPage")
+
+            val intent = Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                putExtra("open_page", lastPage)
+                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
+            }
+            val pendingIntent = PendingIntent.getActivity(
+                context,
+                widgetId,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            views.setOnClickPendingIntent(R.id.widget_root_wird, pendingIntent)
+            views.setOnClickPendingIntent(R.id.wird_btn_continue, pendingIntent)
 
             manager.updateAppWidget(widgetId, views)
         }

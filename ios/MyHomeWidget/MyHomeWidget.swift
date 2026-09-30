@@ -456,3 +456,146 @@ struct PrayerTimesWidget: Widget {
         .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular])
     }
 }
+
+// MARK: - Wird & Khatma Widget for iOS
+struct WirdKhatmaEntry: TimelineEntry {
+    let date: Date
+    let streakDays: Int
+    let targetPages: Int
+    let completedPages: Int
+    let lastPage: Int
+    let planTitle: String
+}
+
+struct WirdKhatmaTimelineProvider: TimelineProvider {
+    func placeholder(in context: Context) -> WirdKhatmaEntry {
+        WirdKhatmaEntry(date: Date(), streakDays: 3, targetPages: 4, completedPages: 2, lastPage: 42, planTitle: "الورد اليومي")
+    }
+
+    func getSnapshot(in context: Context, completion: @escaping (WirdKhatmaEntry) -> Void) {
+        completion(loadSharedWird())
+    }
+
+    func getTimeline(in context: Context, completion: @escaping (Timeline<WirdKhatmaEntry>) -> Void) {
+        let entry = loadSharedWird()
+        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 30, to: Date()) ?? Date().addingTimeInterval(1800)
+        let timeline = Timeline(entries: [entry], policy: .after(nextUpdate))
+        completion(timeline)
+    }
+
+    private func loadSharedWird() -> WirdKhatmaEntry {
+        let defaults = UserDefaults(suiteName: "group.com.homeScreenApp")
+        let streak = defaults?.integer(forKey: "wird_streak") ?? 0
+        let target = max(1, defaults?.integer(forKey: "wird_target") ?? 4)
+        let completed = defaults?.integer(forKey: "wird_completed") ?? 0
+        let lastPage = max(1, defaults?.integer(forKey: "wird_last_page") ?? 1)
+        let planTitle = defaults?.string(forKey: "wird_plan_title") ?? "الورد القرآني"
+        return WirdKhatmaEntry(
+            date: Date(),
+            streakDays: streak,
+            targetPages: target,
+            completedPages: completed,
+            lastPage: lastPage,
+            planTitle: planTitle
+        )
+    }
+}
+
+struct WirdKhatmaWidgetEntryView: View {
+    var entry: WirdKhatmaTimelineProvider.Entry
+    @Environment(\.widgetFamily) var family
+
+    var progressPercent: Double {
+        guard entry.targetPages > 0 else { return 0.0 }
+        return min(1.0, Double(entry.completedPages) / Double(entry.targetPages))
+    }
+
+    var body: some View {
+        VStack(alignment: .trailing, spacing: 8) {
+            // Header
+            HStack {
+                if entry.streakDays > 0 {
+                    Text("🔥 \(entry.streakDays) أيام")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(Color(red: 0.95, green: 0.65, blue: 0.35))
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color.white.opacity(0.1))
+                        .cornerRadius(6)
+                }
+                Spacer()
+                Text("الورد القرآني 📖")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(Color(red: 0.89, green: 0.75, blue: 0.47))
+            }
+
+            Spacer()
+
+            // Progress Text & Bar
+            VStack(alignment: .trailing, spacing: 4) {
+                HStack {
+                    Text("\(Int(progressPercent * 100))%")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(Color(red: 0.36, green: 0.86, blue: 0.71))
+                    Spacer()
+                    Text("\(entry.completedPages) من \(entry.targetPages) صفحات")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.white)
+                }
+
+                // Custom Progress Bar
+                GeometryReader { geo in
+                    ZStack(alignment: .trailing) {
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(Color.white.opacity(0.15))
+                            .frame(height: 6)
+
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(Color(red: 0.36, green: 0.86, blue: 0.71))
+                            .frame(width: geo.size.width * CGFloat(progressPercent), height: 6)
+                    }
+                }
+                .frame(height: 6)
+            }
+
+            Spacer()
+
+            // Footer / Last Page
+            HStack {
+                Text("متابعة القراءة ✨")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(Color(red: 0.89, green: 0.75, blue: 0.47))
+                Spacer()
+                Text("آخر صفحة: ص \(entry.lastPage)")
+                    .font(.system(size: 11))
+                    .foregroundColor(Color(red: 0.65, green: 0.79, blue: 0.73))
+            }
+        }
+        .padding(14)
+        .background(
+            LinearGradient(
+                colors: [Color(red: 0.06, green: 0.15, blue: 0.11), Color(red: 0.04, green: 0.09, blue: 0.07)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+    }
+}
+
+struct WirdKhatmaWidget: Widget {
+    let kind: String = "WirdKhatmaWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: WirdKhatmaTimelineProvider()) { entry in
+            if #available(iOS 17.0, *) {
+                WirdKhatmaWidgetEntryView(entry: entry)
+                    .containerBackground(.fill.tertiary, for: .widget)
+            } else {
+                WirdKhatmaWidgetEntryView(entry: entry)
+            }
+        }
+        .configurationDisplayName("الورد القرآني والختمة")
+        .description("متابعة إنجاز الورد اليومي وصفحات التلاوة وأيام الالتزام.")
+        .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular])
+    }
+}

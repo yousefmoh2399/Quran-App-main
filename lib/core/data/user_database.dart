@@ -13,7 +13,7 @@ class UserDatabase {
   static final UserDatabase instance = UserDatabase._internal();
 
   static const String dbName = 'user_data.db';
-  static const int currentDbVersion = 1;
+  static const int currentDbVersion = 2;
 
   Database? _db;
 
@@ -49,6 +49,9 @@ class UserDatabase {
       },
       onCreate: (db, version) async {
         await _createTables(db);
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        await _onUpgrade(db, oldVersion, newVersion);
       },
     );
   }
@@ -140,6 +143,120 @@ class UserDatabase {
       INSERT OR IGNORE INTO commute_wird_state (id, current_page, streak, last_completed_date)
       VALUES (1, 1, 0, NULL)
     ''');
+
+    // 7. Prayer logs table
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS prayer_logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        date TEXT NOT NULL,
+        prayer TEXT NOT NULL,
+        status TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        UNIQUE(date, prayer)
+      )
+    ''');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_prayer_logs_date ON prayer_logs(date)');
+
+    // 8. Qadaa prayers counter table
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS qadaa_prayers (
+        prayer TEXT PRIMARY KEY,
+        count INTEGER NOT NULL DEFAULT 0
+      )
+    ''');
+    // Prepopulate 5 daily prayers
+    for (final p in ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha']) {
+      await db.execute('''
+        INSERT OR IGNORE INTO qadaa_prayers (prayer, count) VALUES (?, 0)
+      ''', [p]);
+    }
+
+    // 9. Fasting logs table
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS fasting_logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        date TEXT NOT NULL UNIQUE,
+        type TEXT NOT NULL,
+        completed INTEGER NOT NULL DEFAULT 1,
+        created_at TEXT NOT NULL
+      )
+    ''');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_fasting_logs_date ON fasting_logs(date)');
+
+    // 10. User achievements table
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS user_achievements (
+        id TEXT PRIMARY KEY,
+        unlocked_at TEXT NOT NULL
+      )
+    ''');
+
+    // 11. Tafsir offline cache table (for Saadi & Ibn Kathir)
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS tafsir_cache (
+        surah INTEGER NOT NULL,
+        ayah INTEGER NOT NULL,
+        tafsir_id INTEGER NOT NULL,
+        text TEXT NOT NULL,
+        PRIMARY KEY (surah, ayah, tafsir_id)
+      )
+    ''');
+  }
+
+  static Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS prayer_logs (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          date TEXT NOT NULL,
+          prayer TEXT NOT NULL,
+          status TEXT NOT NULL,
+          created_at TEXT NOT NULL,
+          UNIQUE(date, prayer)
+        )
+      ''');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_prayer_logs_date ON prayer_logs(date)');
+
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS qadaa_prayers (
+          prayer TEXT PRIMARY KEY,
+          count INTEGER NOT NULL DEFAULT 0
+        )
+      ''');
+      for (final p in ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha']) {
+        await db.execute('''
+          INSERT OR IGNORE INTO qadaa_prayers (prayer, count) VALUES (?, 0)
+        ''', [p]);
+      }
+
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS fasting_logs (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          date TEXT NOT NULL UNIQUE,
+          type TEXT NOT NULL,
+          completed INTEGER NOT NULL DEFAULT 1,
+          created_at TEXT NOT NULL
+        )
+      ''');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_fasting_logs_date ON fasting_logs(date)');
+
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS user_achievements (
+          id TEXT PRIMARY KEY,
+          unlocked_at TEXT NOT NULL
+        )
+      ''');
+
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS tafsir_cache (
+          surah INTEGER NOT NULL,
+          ayah INTEGER NOT NULL,
+          tafsir_id INTEGER NOT NULL,
+          text TEXT NOT NULL,
+          PRIMARY KEY (surah, ayah, tafsir_id)
+        )
+      ''');
+    }
   }
 
   /// Exposed for testing in-memory databases

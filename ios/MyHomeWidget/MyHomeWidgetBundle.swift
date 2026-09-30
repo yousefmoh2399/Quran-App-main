@@ -6,5 +6,6 @@ struct MyHomeWidgetBundle: WidgetBundle {
     var body: some Widget {
         MyHomeWidget()
         PrayerTimesWidget()
+        WirdKhatmaWidget()
     }
 }
