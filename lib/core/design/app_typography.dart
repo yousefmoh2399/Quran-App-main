@@ -5,6 +5,7 @@ class AppTypography {
   static const String uiFont = 'Cairo';
   static const String decorativeFont = 'Amiri';
   static const String quranFont = 'uthman';
+  static const String surahNameFont = 'SurahName';
 
   /// Generates a TextTheme respecting system textScaler while maintaining hierarchy.
   static TextTheme createTextTheme(Color textColor, Color textMutedColor) {

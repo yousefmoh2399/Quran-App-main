@@ -51,6 +51,7 @@ flutter:
     - assets/images/
     - assets/images/json/
     - assets/db/
+    - assets/fonts/qpc_v2/
   fonts:
       - family: IconBroken
         fonts:
@@ -75,3 +76,6 @@ flutter:
           - asset: assets/fonts/Amiri-Regular.ttf
           - asset: assets/fonts/Amiri-Bold.ttf
             weight: 700
+      - family: SurahName
+        fonts:
+          - asset: assets/fonts/sura_names.ttf
