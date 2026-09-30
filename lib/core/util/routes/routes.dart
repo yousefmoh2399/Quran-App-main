@@ -1,24 +1,24 @@
-import 'package:get/get.dart';
+﻿import 'package:get/get.dart';
 import 'package:quran_app_android/core/middleware/middleware.dart';
 import 'package:quran_app_android/core/util/binding.dart';
 import 'package:quran_app_android/core/util/constant/constant.dart';
-import 'package:quran_app_android/features/adhan/presentition/views/adhan_view.dart';
-import 'package:quran_app_android/features/azkar/presenition/views/azkar_details_view.dart';
-import 'package:quran_app_android/features/azkar/presenition/views/azkar_view.dart';
-import 'package:quran_app_android/features/hadith/presentition/views/hadith__view.dart';
-import 'package:quran_app_android/features/hadith/presentition/views/hadith_details_view.dart';
-import 'package:quran_app_android/features/home/presentition/views/home_view.dart';
-import 'package:quran_app_android/features/nameOfAllah/presentition/views/name_of_allah_view.dart';
+import 'package:quran_app_android/features/adhan/presentation/views/adhan_view.dart';
+import 'package:quran_app_android/features/azkar/presentation/views/azkar_details_view.dart';
+import 'package:quran_app_android/features/azkar/presentation/views/azkar_view.dart';
+import 'package:quran_app_android/features/hadith/presentation/views/hadith__view.dart';
+import 'package:quran_app_android/features/hadith/presentation/views/hadith_details_view.dart';
+import 'package:quran_app_android/features/home/presentation/views/home_view.dart';
+import 'package:quran_app_android/features/nameOfAllah/presentation/views/name_of_allah_view.dart';
 import 'package:quran_app_android/features/notifications/views/adhan_overlay_view.dart';
 import 'package:quran_app_android/features/notifications/views/notify_view.dart';
-import 'package:quran_app_android/features/onboarding/presentition/views/onboarding_screen.dart';
-import 'package:quran_app_android/features/pngtree/presentition/views/pngTreeView.dart';
-import 'package:quran_app_android/features/qiblah/presentition/views/qiblah_view.dart';
-import 'package:quran_app_android/features/quran/presentition/views/quran_details_view.dart';
-import 'package:quran_app_android/features/quran/presentition/views/quran_view.dart';
-import 'package:quran_app_android/features/settings/presentition/views/settings_view.dart';
-import 'package:quran_app_android/features/tafsser/presentition/views/tafseer_details_view.dart';
-import 'package:quran_app_android/features/tafsser/presentition/views/tafseer_view.dart';
+import 'package:quran_app_android/features/onboarding/presentation/views/onboarding_screen.dart';
+import 'package:quran_app_android/features/pngtree/presentation/views/pngTreeView.dart';
+import 'package:quran_app_android/features/qiblah/presentation/views/qiblah_view.dart';
+import 'package:quran_app_android/features/quran/presentation/views/quran_details_view.dart';
+import 'package:quran_app_android/features/quran/presentation/views/quran_view.dart';
+import 'package:quran_app_android/features/settings/presentation/views/settings_view.dart';
+import 'package:quran_app_android/features/tafsser/presentation/views/tafseer_details_view.dart';
+import 'package:quran_app_android/features/tafsser/presentation/views/tafseer_view.dart';
 
 class AppRoutes {
   static List<GetPage> routes = [
