@@ -1,34 +1,46 @@
-
 import 'package:quran_app_android/core/util/assets.dart';
 
 class OnBoardingModel {
-  String? image, title, description;
+  final String image;
+  final String title;
+  final String description;
+  final String badge;
 
-  OnBoardingModel({this.image, this.title, this.description});
+  const OnBoardingModel({
+    required this.image,
+    required this.title,
+    required this.description,
+    required this.badge,
+  });
 }
 
-List<OnBoardingModel> onboardingData = [
-  OnBoardingModel(
-    title: ' أهلا بك في تطبيق تقرّب ويمكنك استخدام التطبيق بدون انترنت',
+final List<OnBoardingModel> onboardingData = [
+  const OnBoardingModel(
+    badge: 'القرآن والتفسير',
+    title: 'تلاوة عطرة وتدبر لكتاب الله',
     description:
-        'يمكنك قراءة القرآن الكريم والحديث والاذكار بآبسط الطرق والتعامل مع التطبيق بسهوله ',
+        'اقرأ المصحف الشريف بخط واضح مع التفسير الميسر لكل آية، أوفلاين بالكامل دون الحاجة لاتصال بالإنترنت.',
     image: AssetsData.json_5,
   ),
-  OnBoardingModel(
-    title: 'تفسير وتوضيح ما تيسر من القرآن ',
+  const OnBoardingModel(
+    badge: 'الأذكار والحديث',
+    title: 'حصن المسلم والحديث الشريف',
     description:
-        ' تفسير آيات القرآن الكريم كاملة ويوجد ترتيب الاحادث وجميع الاذكار يمكنك حفظ الآيات والصفحات والرجوع اليها في اي وقت',
+        'موسوعة شاملة لأذكار الصباح والمساء، والسبحة الرقمية الذكية، وأحاديث موطأ الإمام مالك.',
     image: AssetsData.json_4,
   ),
-  OnBoardingModel(
-    title: 'اتجاه القبله ومواقيت الصلاه واستخدام السبحة الالكترونية',
+  const OnBoardingModel(
+    badge: 'المواقيت والقبلة',
+    title: 'مواقيت دقيقة وبوصلة القبلة',
     description:
-        'تحديد اتجاه القبله بدقه عاليه وسهوله ومواقيت الصلاه والسبحه الالكترونيه',
+        'حساب دقيق لمواقيت الصلاة حسب موقعك الجغرافي، مع بوصلة حديثة تحدد اتجاه الكعبة المشرفة بدقة.',
     image: AssetsData.location,
   ),
-  OnBoardingModel(
-    title: 'الاشعارات وارسال الاذكار ',
-    description: 'ارسال الاشعارات والتحكم في وقت ارسال الاذكار ',
+  const OnBoardingModel(
+    badge: 'التنبيهات والأوراد',
+    title: 'تذكير دائم بطاعة الله',
+    description:
+        'إشعارات ذكية تنبهك لأذكار الصباح والمساء ومواعيد الصلوات لتبقى على صلة دائمة ومستمرة بالله.',
     image: AssetsData.notification,
   ),
 ];

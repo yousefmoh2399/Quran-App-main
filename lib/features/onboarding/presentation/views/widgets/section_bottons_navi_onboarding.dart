@@ -1,63 +1,49 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:quran_app_android/core/design/components/app_button.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
-import 'package:quran_app_android/core/util/color.dart';
-import 'package:quran_app_android/core/util/routes/routes.dart';
 import 'package:quran_app_android/features/onboarding/presentation/view_model/onboarding_view_model.dart';
 
 class SectionsButtonsNavi extends StatelessWidget {
-  const SectionsButtonsNavi({super.key, required this.controller, required this.settingsServices});
   final OnBoardingViewModel controller;
   final SettingsServices settingsServices;
+
+  const SectionsButtonsNavi({
+    super.key,
+    required this.controller,
+    required this.settingsServices,
+  });
+
   @override
   Widget build(BuildContext context) {
+    if (controller.isLast) {
+      return SizedBox(
+        width: double.infinity,
+        child: AppButton.primary(
+          label: 'ابدأ الآن',
+          icon: const Icon(Icons.arrow_back_rounded, size: 20),
+          isFullWidth: true,
+          onPressed: () => controller.finishOnboarding(settingsServices),
+        ),
+      );
+    }
+
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        controller.currentIndex != 0
-            ? TextButton(
-                onPressed: () {
-                  controller.onboardingController.previousPage(
-                    duration: const Duration(
-                      milliseconds: 750,
-                    ),
-                    curve: Curves.fastLinearToSlowEaseIn,
-                  );
-                },
-                child: Text(
-                  'السابق',
-                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                        fontFamily: 'BalooBhaijaan2',
-                        fontSize: 25.0,
-                        color: Colors.grey,
-                      ),
-                ),
-              )
-            : const SizedBox(),
-        const Spacer(),
-        TextButton(
-          onPressed: () {
-            if (controller.isLast) {
-              settingsServices.sharedPref!
-                  .setBool('onboarding', true)
-                  .then((value) {
-                Get.offAllNamed(AppRoutes.home);
-              });
-            } else {
-              controller.onboardingController.nextPage(
-                duration: const Duration(
-                  milliseconds: 750,
-                ),
-                curve: Curves.fastLinearToSlowEaseIn,
-              );
-            }
-          },
-          child: Text(
-            'التالي',
-            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                fontFamily: 'BalooBhaijaan2',
-                fontSize: 25.0,
-                color: AppColors.kPrimaryColor),
-          ),
+        // Previous Button
+        if (controller.currentIndex > 0)
+          AppButton.text(
+            label: 'السابق',
+            onPressed: () => controller.previous(),
+          )
+        else
+          const SizedBox(width: 60),
+
+        // Next Button
+        AppButton.primary(
+          label: 'التالي',
+          icon: const Icon(Icons.arrow_back_rounded, size: 18),
+          onPressed: () => controller.next(settingsServices),
         ),
       ],
     );

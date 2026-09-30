@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:quran_app_android/features/onboarding/data/models/onboarding_model.dart';
 import 'package:quran_app_android/features/onboarding/presentation/view_model/onboarding_view_model.dart';
 import 'package:quran_app_android/features/onboarding/presentation/views/widgets/onboarding_page_view_item.dart';
@@ -15,7 +15,6 @@ class OnBoardingPageView extends StatelessWidget {
         controller: controller.onboardingController,
         onPageChanged: (value) {
           controller.changeSmoothIndicator(value);
-          controller.currentIndex = value;
         },
         itemBuilder: (context, index) =>
             OnBoardingPageViewItems(index: index, model: onboardingData[index]),
