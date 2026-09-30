@@ -1,4 +1,4 @@
-﻿// ignore_for_file: prefer_typing_uninitialized_variables
+// ignore_for_file: prefer_typing_uninitialized_variables
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
@@ -57,7 +57,7 @@ class HadithViewBodyItems extends StatelessWidget {
               MyText(
                 text: '${model.name}',
                 textStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                      fontFamily: 'Rubik',
+                      fontFamily: 'BalooBhaijaan2',
                       color: Colors.black87,
                       fontWeight: FontWeight.bold,
                       fontSize: 18,

@@ -120,7 +120,7 @@ class _AdhanContainerState extends State<AdhanContainer> {
                   color: Colors.black54,
                   fontSize: 24.0,
                   fontWeight: FontWeight.bold,
-                  fontFamily: 'Rubik',
+                  fontFamily: 'BalooBhaijaan2',
                 ),
           ),
           Text(
@@ -129,7 +129,7 @@ class _AdhanContainerState extends State<AdhanContainer> {
                   color: Colors.black54,
                   fontSize: 20.0,
                   fontWeight: FontWeight.bold,
-                  fontFamily: 'Rubik',
+                  fontFamily: 'BalooBhaijaan2',
                 ),
           ),
         ],

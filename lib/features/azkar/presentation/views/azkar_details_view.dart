@@ -1,4 +1,4 @@
-﻿// ignore_for_file: must_be_immutable
+// ignore_for_file: must_be_immutable
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
@@ -19,7 +19,7 @@ class DetailesAzkarView extends GetWidget<AzkarViewModel> {
           loading: const CustomBackButton(),
           title: MyText(
             textStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  fontFamily: 'Rubik',
+                  fontFamily: 'BalooBhaijaan2',
                   color: Colors.black,
                   fontWeight: FontWeight.bold,
                   fontSize: 20,

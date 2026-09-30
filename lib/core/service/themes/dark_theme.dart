@@ -15,16 +15,16 @@ class DarkTheme {
       headlineLarge: TextStyle(
         color: Colors.white70,
         fontWeight: FontWeight.w500,
-        fontFamily: 'SourceSansPro',
+        fontFamily: 'BalooBhaijaan2',
         fontSize: 30.0,
       ),
       bodyLarge: TextStyle(
         fontSize: 14,
         color: Colors.white70,
-        fontFamily: 'SourceSansPro',
+        fontFamily: 'BalooBhaijaan2',
       ),
       bodyMedium: TextStyle(
-        fontFamily: 'Rubik',
+        fontFamily: 'BalooBhaijaan2',
         color: Colors.black,
         fontWeight: FontWeight.bold,
         fontSize: 22,
@@ -32,10 +32,10 @@ class DarkTheme {
       bodySmall: TextStyle(
         fontSize: 15,
         color: Colors.grey,
-        fontFamily: 'SourceSansPro',
+        fontFamily: 'BalooBhaijaan2',
       ),
       labelLarge: TextStyle(
-          fontFamily: 'SourceSansPro',
+          fontFamily: 'BalooBhaijaan2',
           color: Colors.white,
           fontSize: 20.0,
           fontWeight: FontWeight.w600),

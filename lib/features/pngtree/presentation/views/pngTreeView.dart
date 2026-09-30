@@ -1,4 +1,4 @@
-﻿// ignore_for_file: must_be_immutable, file_names
+// ignore_for_file: must_be_immutable, file_names
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -22,7 +22,7 @@ class PngTreeView extends GetWidget<PngTreeViewModel> {
             style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                   color: Colors.black,
                   fontWeight: FontWeight.bold,
-                  fontFamily: 'Rubik',
+                  fontFamily: 'BalooBhaijaan2',
                   fontSize: 22.0,
                 ),
           ),

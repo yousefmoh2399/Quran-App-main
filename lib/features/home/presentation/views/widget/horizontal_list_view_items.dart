@@ -56,7 +56,7 @@ class HorizontalListViewItems extends StatelessWidget {
           "$modelTitle",
           style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                 color: Colors.black,
-                fontFamily: 'Rubik',
+                fontFamily: 'BalooBhaijaan2',
                 fontWeight: FontWeight.w400,
                 fontSize: 15,
               ),

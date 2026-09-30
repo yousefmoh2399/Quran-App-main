@@ -1,4 +1,4 @@
-﻿// ignore_for_file: prefer_typing_uninitialized_variables
+// ignore_for_file: prefer_typing_uninitialized_variables
 import 'package:flutter/material.dart';
 import 'package:quran_app_android/features/azkar/presentation/view_model/azkar_view_model.dart';
 import 'package:quran_app_android/features/azkar/presentation/views/widget/resize_buttons.dart';
@@ -36,7 +36,7 @@ class AzkarListViewBodyDetailsItems extends StatelessWidget {
                     '${model.text.replaceAll('(', '').replaceAll(')', '')}',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                          fontFamily: 'Rubik',
+                          fontFamily: 'BalooBhaijaan2',
                           color: Colors.black,
                           fontSize: controller.fontSize,
                         ),

@@ -1,4 +1,4 @@
-﻿// ignore_for_file: must_be_immutable
+// ignore_for_file: must_be_immutable
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
@@ -31,7 +31,7 @@ class QuranScreen extends GetWidget<QuranViewModel> {
             text: 'القرآن الكريم',
             textStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
                   fontSize: 22,
-                  fontFamily: 'Rubik',
+                  fontFamily: 'BalooBhaijaan2',
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),

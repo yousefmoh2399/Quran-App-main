@@ -1,4 +1,4 @@
-﻿import 'package:flutter/cupertino.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_app_android/core/service/settings/notifications_services.dart';
 import 'package:quran_app_android/core/util/color.dart';
@@ -47,7 +47,7 @@ class _SectionAzkarNotificationState extends State<SectionAzkarNotification> {
               style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                     color: Colors.black87,
                     fontSize: 18,
-                    fontFamily: 'Rubik',
+                    fontFamily: 'BalooBhaijaan2',
                     fontWeight: FontWeight.w600,
                   ),
             ),

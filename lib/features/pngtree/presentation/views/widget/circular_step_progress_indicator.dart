@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:quran_app_android/core/util/color.dart';
 import 'package:quran_app_android/core/util/widgets/my_text.dart';
 import 'package:quran_app_android/features/pngtree/presentation/view_model/pngTree_view_model.dart';
@@ -53,7 +53,7 @@ class CircularStepProgressIndicatorView extends StatelessWidget {
             MyText(
               text: '${controller.counter}',
               textStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                    fontFamily: 'Rubik',
+                    fontFamily: 'BalooBhaijaan2',
                     color: Colors.black,
                     fontWeight: FontWeight.bold,
                     fontSize: 60.0,
@@ -62,7 +62,7 @@ class CircularStepProgressIndicatorView extends StatelessWidget {
             MyText(
               text: '33',
               textStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                    fontFamily: 'Rubik',
+                    fontFamily: 'BalooBhaijaan2',
                     color: Colors.black,
                     fontWeight: FontWeight.w400,
                     fontSize: 15.0,

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
 import 'package:quran_app_android/features/home/presentation/view_model/home_view_model.dart';
 import 'package:quran_app_android/features/home/presentation/views/widget/bottom_sheet/button_bottom_sheet.dart';
@@ -29,7 +29,7 @@ class BottomsheetBody extends StatelessWidget {
                 Text(
                   'اختيار وقت الاذكار يرجي العلم ان اقل وقت هو 15 دقيقة ',
                   style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                        fontFamily: 'Rubik',
+                        fontFamily: 'BalooBhaijaan2',
                         color: Colors.black,
                         fontWeight: FontWeight.bold,
                         fontSize: 16,

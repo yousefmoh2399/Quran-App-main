@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
 import 'package:quran_app_android/core/util/color.dart';
@@ -26,7 +26,7 @@ class SectionsButtonsNavi extends StatelessWidget {
                 child: Text(
                   'السابق',
                   style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                        fontFamily: 'Rubik',
+                        fontFamily: 'BalooBhaijaan2',
                         fontSize: 25.0,
                         color: Colors.grey,
                       ),
@@ -54,7 +54,7 @@ class SectionsButtonsNavi extends StatelessWidget {
           child: Text(
             'التالي',
             style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                fontFamily: 'Rubik',
+                fontFamily: 'BalooBhaijaan2',
                 fontSize: 25.0,
                 color: AppColors.kPrimaryColor),
           ),

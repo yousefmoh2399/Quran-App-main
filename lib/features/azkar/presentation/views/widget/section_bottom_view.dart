@@ -43,7 +43,7 @@ class SectionsBottom extends StatelessWidget {
           child: Text(
             '${model.count}',
             style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  fontFamily: 'Rubik',
+                  fontFamily: 'BalooBhaijaan2',
                   color: Colors.black,
                   fontSize: 27,
                 ),

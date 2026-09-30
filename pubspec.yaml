@@ -64,7 +64,7 @@ flutter:
       - family: Quran
         fonts:
           - asset: assets/fonts/Al-QuranAlKareem.ttf
-      - family: Rubik
+      - family: BalooBhaijaan2
         fonts:
           - asset: assets/fonts/BalooBhaijaan2-VariableFont_wght.ttf
       - family: uthman

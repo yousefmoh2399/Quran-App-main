@@ -23,7 +23,7 @@ class GoSettingsView extends StatelessWidget {
           child: MyText(
             text: 'Access Permissions',
             textStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  fontFamily: 'Rubik',
+                  fontFamily: 'BalooBhaijaan2',
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                   fontSize: 16,

@@ -23,7 +23,7 @@ class OnBoardingPageViewItems extends StatelessWidget {
           model.title,
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                fontFamily: 'Rubik',
+                fontFamily: 'BalooBhaijaan2',
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
                 fontSize: 20.0,
@@ -33,7 +33,7 @@ class OnBoardingPageViewItems extends StatelessWidget {
         Text(
           model.description,
           style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                fontFamily: 'Rubik',
+                fontFamily: 'BalooBhaijaan2',
                 color: Colors.grey.shade700,
                 fontSize: 16.0,
               ),

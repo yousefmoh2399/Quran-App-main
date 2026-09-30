@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:quran_app_android/core/native/native_azkar_bridge.dart';
@@ -22,7 +22,7 @@ class SettingsView extends StatelessWidget {
           'الاعدادات',
           style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                 fontSize: 20,
-                fontFamily: 'Rubik',
+                fontFamily: 'BalooBhaijaan2',
                 fontWeight: FontWeight.bold,
                 color: Colors.black87,
               ),

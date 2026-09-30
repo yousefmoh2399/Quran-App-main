@@ -1,4 +1,4 @@
-﻿// ignore_for_file: file_names
+// ignore_for_file: file_names
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_app_android/core/service/settings/notifications_services.dart';
@@ -31,7 +31,7 @@ class SectionStopNotification extends StatelessWidget {
             style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                 color: Colors.black87,
                 fontSize: 18,
-                fontFamily: 'Rubik',
+                fontFamily: 'BalooBhaijaan2',
                 fontWeight: FontWeight.w600),
           )
         ],

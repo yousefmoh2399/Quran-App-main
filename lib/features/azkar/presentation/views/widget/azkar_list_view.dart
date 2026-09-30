@@ -63,7 +63,7 @@ class AzkarListView extends StatelessWidget {
               child: MyText(
                 text: '${model.category}',
                 textStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                      fontFamily: 'Rubik',
+                      fontFamily: 'BalooBhaijaan2',
                       color: Colors.black87,
                       fontWeight: FontWeight.bold,
                       fontSize: 18,

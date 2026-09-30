@@ -1,4 +1,4 @@
-﻿// ignore_for_file: must_be_immutable, dead_code, deprecated_member_use
+// ignore_for_file: must_be_immutable, dead_code, deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
@@ -37,7 +37,7 @@ class DetailsScreen extends StatelessWidget {
               : '',
           textStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
                 fontSize: 22,
-                fontFamily: 'Rubik',
+                fontFamily: 'BalooBhaijaan2',
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),

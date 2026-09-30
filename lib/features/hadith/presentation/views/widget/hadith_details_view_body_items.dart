@@ -1,4 +1,4 @@
-﻿// ignore_for_file: prefer_typing_uninitialized_variables
+// ignore_for_file: prefer_typing_uninitialized_variables
 import 'package:flutter/material.dart';
 import 'package:quran_app_android/features/hadith/presentation/view_model/hadith_view_model.dart';
 import 'package:quran_app_android/features/hadith/presentation/views/widget/resizer_buttons.dart';
@@ -39,7 +39,7 @@ class HadithDetailsViewBodyItems extends StatelessWidget {
                     '${model.text}',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                          fontFamily: 'Rubik',
+                          fontFamily: 'BalooBhaijaan2',
                           color: Colors.black,
                           fontSize: controller.fontSize,
                         ),

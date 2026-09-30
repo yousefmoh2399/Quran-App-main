@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
@@ -57,7 +57,7 @@ class ContainerLastReadView extends StatelessWidget {
                           text: 'Last Read  آخر قراءة',
                           textStyle:
                               Theme.of(context).textTheme.bodyMedium!.copyWith(
-                                    fontFamily: 'Rubik',
+                                    fontFamily: 'BalooBhaijaan2',
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white,
                                     fontSize: 13.0,
@@ -73,7 +73,7 @@ class ContainerLastReadView extends StatelessWidget {
                                     .bodyMedium!
                                     .copyWith(
                                       color: Colors.white,
-                                      fontFamily: 'Rubik',
+                                      fontFamily: 'BalooBhaijaan2',
                                       fontSize: 20.0,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -131,7 +131,7 @@ class ContainerLastReadView extends StatelessWidget {
                   hijri.hDay.toString(),
                   style: const TextStyle(
                     color: Colors.red,
-                    fontFamily: 'Rubik',
+                    fontFamily: 'BalooBhaijaan2',
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -140,7 +140,7 @@ class ContainerLastReadView extends StatelessWidget {
                   ' - ${hijri.longMonthName.toString()} - ',
                   style: const TextStyle(
                     color: Colors.red,
-                    fontFamily: 'Rubik',
+                    fontFamily: 'BalooBhaijaan2',
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -149,7 +149,7 @@ class ContainerLastReadView extends StatelessWidget {
                   hijri.hYear.toString(),
                   style: const TextStyle(
                     color: Colors.red,
-                    fontFamily: 'Rubik',
+                    fontFamily: 'BalooBhaijaan2',
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),

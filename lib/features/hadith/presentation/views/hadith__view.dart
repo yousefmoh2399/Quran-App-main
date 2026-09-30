@@ -1,4 +1,4 @@
-﻿// ignore_for_file: file_names, must_be_immutable
+// ignore_for_file: file_names, must_be_immutable
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quran_app_android/core/util/widgets/custom_appBar.dart';
@@ -17,7 +17,7 @@ class SectionHadithView extends GetWidget<HadithViewModel> {
         title: MyText(
           text: 'الحديث',
           textStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                fontFamily: 'Rubik',
+                fontFamily: 'BalooBhaijaan2',
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
                 fontSize: 20,

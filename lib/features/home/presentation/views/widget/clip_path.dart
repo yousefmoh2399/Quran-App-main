@@ -44,7 +44,7 @@ class ClipPathWidget extends StatelessWidget {
                 text: list,
                 textStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
                     color: Colors.white,
-                    fontFamily: 'Rubik',
+                    fontFamily: 'BalooBhaijaan2',
                     fontSize: 18.0,
                     fontWeight: FontWeight.w600),
               ),

@@ -25,7 +25,7 @@ class NameOfAllahListViewItems extends StatelessWidget {
               textAlign: TextAlign.justify,
               textDirection: TextDirection.ltr,
               style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                    fontFamily: 'Rubik',
+                    fontFamily: 'BalooBhaijaan2',
                     color: AppColors.kPrimaryColor,
                     fontWeight: FontWeight.bold,
                     fontSize: 20,
@@ -39,7 +39,7 @@ class NameOfAllahListViewItems extends StatelessWidget {
               textAlign: TextAlign.justify,
               textDirection: TextDirection.ltr,
               style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                    fontFamily: 'Rubik',
+                    fontFamily: 'BalooBhaijaan2',
                     color: Colors.black45,
                     fontWeight: FontWeight.bold,
                     fontSize: 18,

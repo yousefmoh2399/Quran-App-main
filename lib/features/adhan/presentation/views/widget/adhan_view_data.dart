@@ -24,7 +24,7 @@ class PrayerTimeItem extends StatelessWidget {
           trailing: Text(
             title,
             style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  fontFamily: 'Rubik',
+                  fontFamily: 'BalooBhaijaan2',
                   color: isCurrent == false ? Colors.black : Colors.white,
                   fontWeight: FontWeight.bold,
                   fontSize: 20,
@@ -33,7 +33,7 @@ class PrayerTimeItem extends StatelessWidget {
           title: Text(
             time,
             style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  fontFamily: 'Rubik',
+                  fontFamily: 'BalooBhaijaan2',
                   color: isCurrent == false ? Colors.black : Colors.white,
                   fontWeight: FontWeight.bold,
                   fontSize: 20,

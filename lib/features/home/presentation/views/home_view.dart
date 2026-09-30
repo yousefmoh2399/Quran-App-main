@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names, must_be_immutable
+// ignore_for_file: non_constant_identifier_names, must_be_immutable
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
@@ -38,7 +38,7 @@ class HomeView extends GetWidget<HomeViewModel> {
         title: MyText(
           text: 'الصفحة الرئيسية',
           textStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                fontFamily: 'Rubik',
+                fontFamily: 'BalooBhaijaan2',
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
                 fontSize: 20,

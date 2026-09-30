@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quran_app_android/core/util/color.dart';
 import 'package:quran_app_android/core/util/widgets/custom_appBar.dart';
@@ -18,7 +18,7 @@ class AdhanView extends GetWidget<AdhanViewModel> {
         title: MyText(
           text: 'مواقيت الصلاة ',
           textStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                fontFamily: 'Rubik',
+                fontFamily: 'BalooBhaijaan2',
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
@@ -74,7 +74,7 @@ class AdhanView extends GetWidget<AdhanViewModel> {
 //         title: MyText(
 //           text: 'مواقيت الصلاة',
 //           textStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
-//             fontFamily: 'Rubik',
+//             fontFamily: 'BalooBhaijaan2',
 //             color: Colors.black,
 //             fontWeight: FontWeight.bold,
 //             fontSize: 20,

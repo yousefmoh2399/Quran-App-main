@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
 import 'package:quran_app_android/core/util/color.dart';
@@ -36,7 +36,7 @@ class ButtonBottomSheet extends StatelessWidget {
         child: MyText(
           text: 'حفظ',
           textStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                fontFamily: 'Rubik',
+                fontFamily: 'BalooBhaijaan2',
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,

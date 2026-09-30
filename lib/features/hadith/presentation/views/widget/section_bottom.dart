@@ -44,7 +44,7 @@ class SectionButtom extends StatelessWidget {
           child: Text(
             '${index + 1}',
             style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  fontFamily: 'Rubik',
+                  fontFamily: 'BalooBhaijaan2',
                   color: Colors.black,
                   fontSize: 27,
                 ),

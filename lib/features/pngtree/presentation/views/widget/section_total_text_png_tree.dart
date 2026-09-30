@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:quran_app_android/core/util/widgets/my_text.dart';
 import 'package:quran_app_android/features/pngtree/presentation/view_model/pngTree_view_model.dart';
 
@@ -17,7 +17,7 @@ class SectionTotalText extends StatelessWidget {
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
                 fontSize: 30.0,
-                fontFamily: 'Rubik',
+                fontFamily: 'BalooBhaijaan2',
               ),
         ),
         MyText(
@@ -26,7 +26,7 @@ class SectionTotalText extends StatelessWidget {
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
                 fontSize: 40.0,
-                fontFamily: 'Rubik',
+                fontFamily: 'BalooBhaijaan2',
               ),
         ),
       ],

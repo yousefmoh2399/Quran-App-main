@@ -1,4 +1,4 @@
-﻿
+
 import 'package:adhan/adhan.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -52,7 +52,7 @@ class _QiblahViewState extends State<QiblahView>
             title: MyText(
               text: 'القبلة',
               textStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                    fontFamily: 'Rubik',
+                    fontFamily: 'BalooBhaijaan2',
                     color: Colors.black,
                     fontWeight: FontWeight.bold,
                     fontSize: 22,

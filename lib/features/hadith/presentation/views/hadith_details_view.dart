@@ -1,4 +1,4 @@
-﻿// ignore_for_file: must_be_immutable, unnecessary_null_comparison
+// ignore_for_file: must_be_immutable, unnecessary_null_comparison
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -23,7 +23,7 @@ class HadithView extends GetWidget<HadithViewModel> {
         title: MyText(
           text: 'حديث',
           textStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                fontFamily: 'Rubik',
+                fontFamily: 'BalooBhaijaan2',
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
                 fontSize: 20,

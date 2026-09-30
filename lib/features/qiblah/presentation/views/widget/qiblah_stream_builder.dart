@@ -70,7 +70,7 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
               Text(
                 '${compassEvent.heading!.toInt()}°',
                 style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                      fontFamily: 'Rubik',
+                      fontFamily: 'BalooBhaijaan2',
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
                       fontSize: 30,
@@ -158,7 +158,7 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
 //               Text(
 //                 '${compassEvent.heading!.toInt()}°',
 //                 style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-//                       fontFamily: 'Rubik',
+//                       fontFamily: 'BalooBhaijaan2',
 //                       color: Colors.black,
 //                       fontWeight: FontWeight.bold,
 //                       fontSize: 30,
