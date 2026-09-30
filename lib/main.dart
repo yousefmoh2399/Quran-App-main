@@ -6,8 +6,8 @@ import 'package:get/get.dart';
 import 'package:quran_app_android/core/native/permissions_helper.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
 import 'package:quran_app_android/core/service/settings/notifications_services.dart';
-import 'package:quran_app_android/core/service/themes/dark_theme.dart';
-import 'package:quran_app_android/core/service/themes/light_theme.dart';
+import 'package:quran_app_android/core/design/app_theme.dart';
+import 'package:quran_app_android/core/service/theme_controller.dart';
 import 'package:quran_app_android/core/util/binding.dart';
 import 'package:quran_app_android/core/util/routes/routes.dart';
 
@@ -39,6 +39,7 @@ void main() {
 
 Future initService() async {
   await Get.putAsync(() => SettingsServices().init());
+  Get.put(ThemeController());
 }
 
 class MyApp extends StatefulWidget {
@@ -111,15 +112,18 @@ class _MyAppState extends State<MyApp> {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-    return GetMaterialApp(
-      debugShowCheckedModeBanner: false,
-      scaffoldMessengerKey: PermissionsController.scaffoldMessengerKey,
-      initialRoute: AppRoutes.onboarding,
-      initialBinding: Binding(),
-      getPages: AppRoutes.routes,
-      theme: LightTheme().customLightTheme,
-      darkTheme: DarkTheme().customDarkTheme,
-      themeMode: ThemeMode.light,
+    final themeController = Get.find<ThemeController>();
+    return Obx(
+      () => GetMaterialApp(
+        debugShowCheckedModeBanner: false,
+        scaffoldMessengerKey: PermissionsController.scaffoldMessengerKey,
+        initialRoute: AppRoutes.onboarding,
+        initialBinding: Binding(),
+        getPages: AppRoutes.routes,
+        theme: AppTheme.light,
+        darkTheme: AppTheme.dark,
+        themeMode: themeController.themeMode,
+      ),
     );
   }
 }
