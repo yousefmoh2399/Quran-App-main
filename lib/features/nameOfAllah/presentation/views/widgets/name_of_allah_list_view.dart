@@ -1,4 +1,4 @@
-﻿import 'package:flutter/cupertino.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:quran_app_android/features/nameOfAllah/presentation/view_model/Names_Of_Allah_view_model.dart';
 import 'package:quran_app_android/features/nameOfAllah/presentation/views/widgets/name_of_allah_list_view_items.dart';
 
@@ -9,7 +9,7 @@ class NameOfAllahListView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 30, left: 20, right: 20),
-      child: contoller.isLoading.value
+      child: contoller.isLoading
           ? const Center(child: CupertinoActivityIndicator())
           : ListView.separated(
               physics: const BouncingScrollPhysics(),
