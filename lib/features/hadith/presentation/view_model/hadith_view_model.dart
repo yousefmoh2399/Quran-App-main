@@ -1,12 +1,10 @@
 import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
 import 'package:quran_app_android/core/util/app_url.dart';
-import 'package:quran_app_android/core/util/widgets/custom_toast.dart';
 import 'package:quran_app_android/features/hadith/data/models/hadith_model.dart';
 import 'package:quran_app_android/features/hadith/data/models/hadith_model_malek.dart';
 
@@ -15,74 +13,92 @@ class HadithViewModel extends GetxController {
     hadithRead();
   }
 
-  SettingsServices c = Get.find<SettingsServices>();
+  final SettingsServices settings = Get.find<SettingsServices>();
   List<dynamic> items = [];
   List<HadithModel> hadithList = [];
-  RxBool isLoading = false.obs;
+  bool isLoading = true;
 
+  // Backwards compatibility for any legacy code
+  RxBool get isLoadingg => false.obs;
 
+  double fontSize = 20.0;
+  int currentIndex = 0;
+  String searchQuery = '';
+  PageController pageController = PageController();
 
-  double fontSize = 20;
-  void increaseFont() {
-    fontSize++;
+  List<dynamic> itemsData = [];
+  List<HadithModelFinal> hadithModelFinal = [];
+
+  List<HadithModelFinal> get filteredChapters {
+    if (searchQuery.trim().isEmpty) {
+      return hadithModelFinal;
+    }
+    final q = searchQuery.trim().toLowerCase();
+    return hadithModelFinal.where((item) {
+      final name = item.data?.metadata?.section?.name?.toLowerCase() ?? '';
+      return name.contains(q);
+    }).toList();
+  }
+
+  void setSearchQuery(String query) {
+    searchQuery = query;
     update();
+  }
+
+  void increaseFont() {
+    if (fontSize < 34) {
+      fontSize += 2;
+      update();
+    }
   }
 
   void decreaseFont() {
-    fontSize--;
-    update();
+    if (fontSize > 16) {
+      fontSize -= 2;
+      update();
+    }
   }
 
-  int currentIndex = 0;
-  void changeIndex(index) {
+  void changeIndex(int index) {
     currentIndex = index;
     update();
   }
 
-  PageController pageController = PageController();
-  void addCurrentIndex(index) {
-    c.sharedPref!.setInt('saveIndex', index);
+  void addCurrentIndex(int index) {
+    settings.sharedPref?.setInt('saveIndex', index);
     update();
   }
 
   void goToPage() {
-    if (c.sharedPref!.getInt('saveIndex') != null) {
-      if (pageController.hasClients) {
-        pageController.animateToPage(
-          c.sharedPref!.getInt('saveIndex')!.toInt(),
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-        );
-        update();
-      }
-    } else {
-      defaultToast(text: 'لا يوجد شئ محفوظ');
+    final saved = settings.sharedPref?.getInt('saveIndex');
+    if (saved != null && pageController.hasClients) {
+      pageController.animateToPage(
+        saved,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+      update();
     }
   }
 
-  List<dynamic> itemsData = [];
-  List<HadithModelFinal> hadithModelFinal = [];
-  RxBool isLoadingg = false.obs;
   Future<void> hadithRead() async {
     try {
-      isLoadingg.value = true;
-      final String response =
-          await rootBundle.loadString(AppUrl.hadithUrl);
-      final data = await json.decode(response);
-
-      itemsData = data;
+      isLoading = true;
       update();
+      final String response = await rootBundle.loadString(AppUrl.hadithUrl);
+      final data = await json.decode(response);
+      itemsData = data;
+      hadithModelFinal.clear();
       for (int i = 0; i < itemsData.length; i++) {
         hadithModelFinal.add(HadithModelFinal.fromJson(itemsData[i]));
       }
-      isLoadingg.value = false;
-      update();
     } catch (e, st) {
-      isLoadingg.value = false;
       if (kDebugMode) {
         debugPrint('HadithViewModel error: $e\n$st');
       }
+    } finally {
+      isLoading = false;
+      update();
     }
   }
 }
-
