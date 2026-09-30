@@ -24,6 +24,7 @@ import 'package:quran_app_android/features/reminders/presentation/views/sadaqah_
 import 'package:quran_app_android/features/reminders/presentation/views/sadaqah_logs_view.dart';
 import 'package:quran_app_android/features/reminders/presentation/views/commute_wird_settings_view.dart';
 import 'package:quran_app_android/features/reminders/presentation/views/wird_reminder_settings_view.dart';
+import 'package:quran_app_android/features/reminders/presentation/views/reminders_debug_view.dart';
 import 'package:quran_app_android/features/pngtree/presentation/views/pngTreeView.dart';
 import 'package:quran_app_android/features/qiblah/presentation/views/qiblah_view.dart';
 import 'package:quran_app_android/features/quran/presentation/views/quran_view.dart';
@@ -208,13 +209,20 @@ class AppRoutes {
       transition: Transition.cupertino,
       transitionDuration: kTransitionDuration,
     ),
-    if (kDebugMode)
+    if (kDebugMode) ...[
       GetPage(
         name: adhanDebug,
         page: () => const AdhanDebugView(),
         transition: Transition.cupertino,
         transitionDuration: kTransitionDuration,
       ),
+      GetPage(
+        name: remindersDebug,
+        page: () => const RemindersDebugView(),
+        transition: Transition.cupertino,
+        transitionDuration: kTransitionDuration,
+      ),
+    ],
   ];
 
   static String home = '/home';
@@ -237,6 +245,7 @@ class AppRoutes {
   static String adhan = '/adhan';
   static String adhanSettings = '/adhanSettings';
   static String adhanDebug = '/adhanDebug';
+  static String remindersDebug = '/remindersDebug';
   static String notify = '/notify';
   static String adhanAlert = '/adhanAlert';
   static String qiblah = '/qiblah';
