@@ -171,7 +171,7 @@ class MushafLineWidget extends StatelessWidget {
                 child: Text(
                   word.glyphCode,
                   style: TextStyle(
-                    fontFamily: MushafFontManager.pageFontFamily(pageNumber),
+                    fontFamily: MushafFontManager.pageFontFamily(word.pageNumber),
                     fontSize: 22.0,
                     color: theme.textColor,
                     height: 1.1,

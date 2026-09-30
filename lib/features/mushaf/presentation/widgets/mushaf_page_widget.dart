@@ -35,10 +35,22 @@ class MushafPageWidget extends StatelessWidget {
     this.onTapPage,
   });
 
+  Future<void> _ensurePageFonts(MushafPage page) async {
+    final pageNums = <int>{page.pageNumber};
+    for (final line in page.lines) {
+      for (final word in line.words) {
+        pageNums.add(word.pageNumber);
+      }
+    }
+    await Future.wait(
+      pageNums.map((p) => MushafFontManager.instance.ensurePageLoaded(p)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<void>(
-      future: MushafFontManager.instance.ensurePageLoaded(page.pageNumber),
+      future: _ensurePageFonts(page),
       builder: (context, snapshot) {
         final fontReady = snapshot.connectionState == ConnectionState.done;
 

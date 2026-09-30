@@ -12,6 +12,7 @@ import 'package:quran_app_android/features/nameOfAllah/presentation/views/name_o
 import 'package:quran_app_android/features/notifications/views/adhan_overlay_view.dart';
 import 'package:quran_app_android/features/notifications/views/notify_view.dart';
 import 'package:quran_app_android/features/onboarding/presentation/views/onboarding_screen.dart';
+import 'package:quran_app_android/features/mushaf/presentation/views/mushaf_font_debug_view.dart';
 import 'package:quran_app_android/features/mushaf/presentation/views/mushaf_view.dart';
 import 'package:quran_app_android/features/pngtree/presentation/views/pngTreeView.dart';
 import 'package:quran_app_android/features/qiblah/presentation/views/qiblah_view.dart';
@@ -117,6 +118,12 @@ class AppRoutes {
       transitionDuration: kTransitionDuration,
     ),
     GetPage(
+      name: mushafDebug,
+      page: () => const MushafFontDebugView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
       name: onboarding,
       page: () => OnBoardingScreen(),
       transition: Transition.cupertino,
@@ -153,6 +160,7 @@ class AppRoutes {
   static String quranScreen = '/quranScreen';
   static String detailsScreen = '/detailsScreen';
   static String mushaf = '/mushaf';
+  static String mushafDebug = '/mushafDebug';
   static String onboarding = '/onboarding';
   static String sectionHadith = '/sectionHadith';
 }

@@ -49,7 +49,7 @@ class MushafFontManager {
 
   Future<void> _loadPageFont(int pageNumber) async {
     final fontName = pageFontFamily(pageNumber);
-    final assetPath = 'assets/fonts/qpc_v2/p$pageNumber.woff2';
+    final assetPath = 'assets/fonts/qpc_v2/p$pageNumber.ttf';
 
     final fontLoader = FontLoader(fontName);
     final fontData = rootBundle.load(assetPath);
