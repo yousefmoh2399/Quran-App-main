@@ -1,28 +1,33 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:permission_handler/permission_handler.dart';
+import '../../../../core/permissions/app_permission_type.dart';
+import '../../../../core/permissions/permission_service.dart';
 
 class QiblahViewModel extends GetxController {
   RxBool isDone = false.obs;
 
-  Future<void> requestLocationPermission() async {
-    var status = await Permission.location.status;
-    if (!status.isGranted) {
-      status = await Permission.location.request();
-    }
-    if (status.isGranted) {
-      debugPrint('Location permission granted');
+  Future<void> requestLocationPermission({BuildContext? context}) async {
+    final service = PermissionService.instance;
+    final currentStatus = service.getStatus(AppPermissionType.location);
+    if (currentStatus.isGranted) {
       isDone.value = true;
       update();
-    } else if (status.isDenied) {
-      debugPrint('Location permission denied');
-      isDone.value = false;
-      update();
-    } else if (status.isPermanentlyDenied) {
-      debugPrint('Location permission permanently denied');
-      await openAppSettings();
-      isDone.value = false;
-      update();
+      return;
     }
+
+    if (context != null) {
+      final granted = await service.requestWithRationale(
+        context,
+        AppPermissionType.location,
+      );
+      isDone.value = granted;
+    } else {
+      final res = await service.requestPermission(AppPermissionType.location);
+      if (res.isPermanentlyDenied) {
+        await service.openSettings(AppPermissionType.location);
+      }
+      isDone.value = res.isGranted;
+    }
+    update();
   }
 }

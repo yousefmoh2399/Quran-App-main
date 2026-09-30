@@ -47,4 +47,5 @@ app.*.map.json
 # Custom ignores
 *.zip
 *.bak
+tools/source/
 

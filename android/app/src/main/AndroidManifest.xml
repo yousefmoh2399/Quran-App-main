@@ -9,9 +9,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
     <application
@@ -60,12 +58,6 @@
             android:exported="false"
             android:foregroundServiceType="mediaPlayback" />
 
-        <!-- Persistent foreground service to keep scheduling alive and listen to time changes -->
-        <service
-            android:name=".adhan.AdhanBackgroundService"
-            android:exported="false"
-            android:foregroundServiceType="dataSync" />
-
         <receiver
             android:name=".adhan.AlarmReceiver"
             android:enabled="true"
@@ -84,7 +76,6 @@
             </intent-filter>
         </receiver>
 
-
         <receiver android:name=".adhan.AdhanResetReceiver" android:enabled="true" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
@@ -96,21 +87,14 @@
             </intent-filter>
         </receiver>
 
-
         <!-- Existing widget and azkar components -->
-<receiver android:name=".MyHomeWidget" android:exported="true">
-    <intent-filter>
-        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-    </intent-filter>
+        <receiver android:name=".MyHomeWidget" android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
 
-    <meta-data android:name="android.appwidget.provider" android:resource="@xml/my_home_widget_info" />
-</receiver>
-
-
-        <service
-            android:name=".azkar.AzkarBubbleService"
-            android:exported="false"
-            android:foregroundServiceType="mediaPlayback" />
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/my_home_widget_info" />
+        </receiver>
 
         <receiver
             android:name=".azkar.AzkarReceiver"
@@ -142,9 +126,6 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT" />
             <data android:mimeType="text/plain" />
-        </intent>
-        <intent>
-            <action android:name="android.settings.action.MANAGE_OVERLAY_PERMISSION" />
         </intent>
     </queries>
 

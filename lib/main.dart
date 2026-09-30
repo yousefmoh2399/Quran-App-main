@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:quran_app_android/core/native/permissions_helper.dart';
+import 'package:quran_app_android/core/permissions/permission_service.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
 import 'package:quran_app_android/core/service/settings/notifications_services.dart';
 import 'package:quran_app_android/core/design/app_theme.dart';
@@ -40,6 +41,7 @@ void main() {
 Future initService() async {
   await Get.putAsync(() => SettingsServices().init());
   Get.put(ThemeController());
+  await PermissionService.instance.init();
 }
 
 class MyApp extends StatefulWidget {
@@ -54,21 +56,16 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    // setupWorkManager();
     _listenToInitialNotification();
-    // Future.delayed(const Duration(seconds: 3), () async {
-    //   await NotifyHelper().displayNotification();
-    // });
     Future.microtask(() async {
       final notify = NotifyHelper();
       await notify.initializeNotification();
-      await Future.delayed(const Duration(seconds: 2));
       final granted = await notify.ensureSchedulingPermissions(
-        requestIfNeeded: true,
+        requestIfNeeded: false,
       );
       if (!granted) {
         debugPrint(
-          'Exact alarms or notification permissions are missing; scheduled notifications will not fire.',
+          'ℹ️ Scheduling permissions not granted yet; will be requested contextually.',
         );
       }
       try {
