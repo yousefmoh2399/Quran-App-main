@@ -1,5 +1,5 @@
 
-import 'package:adhan_dart/adhan_dart.dart';
+import 'package:adhan/adhan.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
@@ -70,7 +70,7 @@ class _QiblahViewState extends State<QiblahView>
                         positionResult.latitude,
                         positionResult.longitude,
                       );
-                      double qiblaDirection = Qibla.qibla(coordinates);
+                      double qiblaDirection = Qibla(coordinates).direction;
                       return QiblahStreamBuilder(
                         animationController: animationController,
                         begin: begin,

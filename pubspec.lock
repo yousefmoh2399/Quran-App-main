@@ -9,14 +9,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0+1"
-  adhan_dart:
-    dependency: "direct main"
-    description:
-      name: adhan_dart
-      sha256: "3510e87a81acd816dfe11df458d236cb33f64a9132d2f5becc57ef6cbfefb565"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.2"
   android_intent_plus:
     dependency: "direct main"
     description:
@@ -49,14 +41,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.12.0"
-  audio_video_progress_bar:
-    dependency: "direct main"
-    description:
-      name: audio_video_progress_bar
-      sha256: "67f3a5ea70d48b48caaf29f5a0606284a6aa3a393736daf9e82bec985d2f9b70"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.1"
   boolean_selector:
     dependency: transitive
     description:
@@ -153,6 +137,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  equatable:
+    dependency: transitive
+    description:
+      name: equatable
+      sha256: "3bce007a596ff8b3119c45d68aaef631272537c03d30e5d4534dd24bf4c5eaa2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   fake_async:
     dependency: transitive
     description:
@@ -238,32 +230,24 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.2.0"
-  flutter_native_timezone_latest:
-    dependency: "direct main"
-    description:
-      name: flutter_native_timezone_latest
-      sha256: "2f3cedd311d6f169652c631307dd33853317df2ff5e5f6812644daec2913439d"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.0"
   flutter_test:
     dependency: "direct dev"
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_timezone:
+    dependency: "direct main"
+    description:
+      name: flutter_timezone
+      sha256: "869677426fde92dbe170fb7d2d4929f2a8343c2f5f62f08b0bb64f908630b073"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.1.0"
   flutter_web_plugins:
     dependency: transitive
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_widgetkit:
-    dependency: "direct main"
-    description:
-      name: flutter_widgetkit
-      sha256: "63844c74c642d5c950d34b17b40038a1ef21d4d0a65abd59a04e860f0981956d"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.3"
   fluttertoast:
     dependency: "direct main"
     description:
@@ -400,30 +384,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.1.1"
-  location:
-    dependency: "direct main"
-    description:
-      name: location
-      sha256: "37ffdadcd4b1498b769824f45ebb4de8ed46663a4a67ac27b33a590ee486579f"
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.0.2"
-  location_platform_interface:
-    dependency: transitive
-    description:
-      name: location_platform_interface
-      sha256: "2ecde6bb0f88032b0bbbde37e18975b4468711dd92619c2235cc0c0ee93b4b8e"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.0.0"
-  location_web:
-    dependency: transitive
-    description:
-      name: location_web
-      sha256: "15ad7b4c8a9f55abee513373755e093a40c04d7e24fc1b4f89676fe99523d034"
-      url: "https://pub.dev"
-    source: hosted
-    version: "5.0.1"
   lottie:
     dependency: "direct main"
     description:
@@ -717,14 +677,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.12.1"
-  staggered_grid_view_flutter:
-    dependency: "direct main"
-    description:
-      name: staggered_grid_view_flutter
-      sha256: d46b27d1b57344945edf9eadbd5ee03a667a6599fd87e79f9a2d5e717e6accf3
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.4"
   step_progress_indicator:
     dependency: "direct main"
     description:
@@ -845,16 +797,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.1"
-  widgetkit:
-    dependency: "direct main"
-    description:
-      name: widgetkit
-      sha256: "3e366efa9d158f52a9a7c764954ed4d43d984f2e20a5fc7ade9d1dc4b400f4bf"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.2"
   win32:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: win32
       sha256: dc6ecaa00a7c708e5b4d10ee7bec8c270e9276dfcab1783f57e9962d7884305f

@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:adhan/adhan.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_native_timezone_latest/flutter_native_timezone_latest.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 
 import 'package:get/get.dart';
 import 'package:quran_app_android/core/util/constant/static_vars.dart';
@@ -85,9 +85,9 @@ class NotifyHelper {
   Future<void> _configureTimeZone() async {
     tz.initializeTimeZones();
     try {
-      final String timeZoneName =
-          await FlutterNativeTimezoneLatest.getLocalTimezone();
-      tz.setLocalLocation(tz.getLocation(timeZoneName));
+      final TimezoneInfo timeZoneInfo =
+          await FlutterTimezone.getLocalTimezone();
+      tz.setLocalLocation(tz.getLocation(timeZoneInfo.identifier));
     } catch (_) {
       tz.setLocalLocation(tz.getLocation('UTC'));
     }
