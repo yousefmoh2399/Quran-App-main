@@ -41,6 +41,18 @@ class _SectionAzkarNotificationState extends State<SectionAzkarNotification> {
       title: 'تنبيهات الأذكار والأوراد',
       icon: Icons.notifications_active_outlined,
       children: [
+        // My Reminders Hub Tile
+        SettingsTile(
+          icon: Icons.alarm_on_rounded,
+          iconColor: colors.primary,
+          title: 'تذكيراتي (مركز التذكيرات الشامل)',
+          subtitle: 'إدارة الورد اليومي، ورد المواصلات، الصدقة الشهرية، والأذكار',
+          trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
+          onTap: () {
+            Get.toNamed(AppRoutes.myReminders);
+          },
+        ),
+
         // Morning Azkar Switch
         SettingsTile(
           icon: Icons.wb_sunny_outlined,
