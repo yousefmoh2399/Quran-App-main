@@ -72,6 +72,12 @@ class HomeSectionsGrid extends StatelessWidget {
       icon: Icons.fingerprint_rounded,
       route: AppRoutes.pngTree,
     ),
+    _SectionItem(
+      title: 'علاماتي',
+      subtitle: 'علامات ومحفوظات',
+      icon: Icons.bookmark_added_rounded,
+      route: AppRoutes.bookmarks,
+    ),
   ];
 
   @override

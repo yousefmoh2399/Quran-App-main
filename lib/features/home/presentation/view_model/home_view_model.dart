@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:quran_app_android/core/data/models/user_models.dart';
+import 'package:quran_app_android/core/data/repositories/user_repository.dart';
 import 'package:quran_app_android/core/native/native_adhan_bridge.dart';
 import 'package:quran_app_android/core/native/native_azkar_bridge.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
@@ -16,8 +18,14 @@ class HomeViewModel extends GetxController {
 
   final SettingsServices settingsServices = Get.find<SettingsServices>();
   final StaticVars staticVars = StaticVars();
+  final UserRepository _userRepo = UserRepository();
 
   RxString lastRead = ''.obs;
+  final RxnInt lastReadPage = RxnInt();
+  final Rxn<BookmarkItem> latestBookmark = Rxn<BookmarkItem>();
+  final Rxn<WirdPlan> currentWirdPlan = Rxn<WirdPlan>();
+  final RxInt todayPagesRead = 0.obs;
+
   String currentZekr = 'سبحان الله';
   String appGroupId = 'group.com.homeScreenApp';
   String iOSWidgetName = 'MyHomeWidget';
@@ -26,6 +34,7 @@ class HomeViewModel extends GetxController {
 
   Future<void> _init() async {
     await getLastRead();
+    await loadUserQuranData();
     await _setupHomeWidget();
     await NativeAzkarBridge.scheduleDailyAzkar(2);
     await NativeAdhanBridge.scheduleDailyReset();
@@ -37,6 +46,42 @@ class HomeViewModel extends GetxController {
       lastRead.value = prefs.getString('lastRead')!;
       update();
     }
+  }
+
+  Future<void> loadUserQuranData() async {
+    try {
+      final savedPage = settingsServices.sharedPref?.getInt('mushaf_last_page');
+      final logLast = await _userRepo.getLastReadPage();
+      lastReadPage.value = savedPage ?? logLast ?? 1;
+
+      final bm = await _userRepo.getLatestBookmark();
+      latestBookmark.value = bm;
+
+      final plan = await _userRepo.getWirdPlan();
+      currentWirdPlan.value = plan;
+
+      final todayLog = await _userRepo.getTodayReadingLog();
+      todayPagesRead.value = todayLog?.pagesRead ?? 0;
+
+      await getLastRead();
+      update();
+    } catch (e) {
+      debugPrint('Error loading user Quran data: $e');
+    }
+  }
+
+  Future<void> markWirdCompleted() async {
+    final updated = await _userRepo.markTodayWirdCompleted();
+    if (updated != null) {
+      currentWirdPlan.value = updated;
+      update();
+    }
+  }
+
+  Future<void> saveWirdPlan(WirdPlan plan) async {
+    await _userRepo.saveWirdPlan(plan);
+    currentWirdPlan.value = plan;
+    update();
   }
 
   Future<void> _setupHomeWidget() async {
