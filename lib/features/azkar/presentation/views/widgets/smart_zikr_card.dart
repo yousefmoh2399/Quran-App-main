@@ -48,26 +48,32 @@ class _SmartZikrCardState extends State<SmartZikrCard> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: colors.primary.withOpacity(0.12),
-                      shape: BoxShape.circle,
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: colors.primary.withOpacity(0.12),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(_currentZikr.type.icon, color: colors.primary, size: 18),
                     ),
-                    child: Icon(_currentZikr.type.icon, color: colors.primary, size: 18),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'ذكر مقترح • ${_currentZikr.type.title}',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
-                      color: colors.primary,
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'ذكر مقترح • ${_currentZikr.type.title}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          color: colors.primary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               Row(
                 mainAxisSize: MainAxisSize.min,
