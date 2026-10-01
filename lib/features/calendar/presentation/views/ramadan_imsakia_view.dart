@@ -53,7 +53,6 @@ class _RamadanImsakiaViewState extends State<RamadanImsakiaView> {
     params.madhab = Madhab.shafi;
 
     final days = <Map<String, dynamic>>[];
-    final timeFormat = DateFormat('hh:mm a', 'ar');
 
     for (int day = 1; day <= 30; day++) {
       final date = _ramadanStartDate.add(Duration(days: day - 1));
@@ -65,13 +64,13 @@ class _RamadanImsakiaViewState extends State<RamadanImsakiaView> {
       days.add({
         'day': day,
         'date': date,
-        'imsak': timeFormat.format(imsakTime),
-        'fajr': timeFormat.format(pt.fajr),
-        'sunrise': timeFormat.format(pt.sunrise),
-        'dhuhr': timeFormat.format(pt.dhuhr),
-        'asr': timeFormat.format(pt.asr),
-        'maghrib': timeFormat.format(pt.maghrib),
-        'isha': timeFormat.format(pt.isha),
+        'imsak': _formatTime(imsakTime),
+        'fajr': _formatTime(pt.fajr),
+        'sunrise': _formatTime(pt.sunrise),
+        'dhuhr': _formatTime(pt.dhuhr),
+        'asr': _formatTime(pt.asr),
+        'maghrib': _formatTime(pt.maghrib),
+        'isha': _formatTime(pt.isha),
         'fajrDateTime': pt.fajr,
         'maghribDateTime': pt.maghrib,
       });
@@ -81,6 +80,20 @@ class _RamadanImsakiaViewState extends State<RamadanImsakiaView> {
       _imsakiaDays = days;
       _isLoading = false;
     });
+  }
+
+  String _formatTime(DateTime dt) {
+    try {
+      return DateFormat('hh:mm a', 'ar').format(dt);
+    } catch (_) {
+      int hour = dt.hour;
+      final minute = dt.minute.toString().padLeft(2, '0');
+      final period = hour >= 12 ? 'م' : 'ص';
+      hour = hour % 12;
+      if (hour == 0) hour = 12;
+      final hourStr = hour.toString().padLeft(2, '0');
+      return '$hourStr:$minute $period';
+    }
   }
 
   @override

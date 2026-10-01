@@ -144,7 +144,12 @@ class _PrayerTrackerViewState extends State<PrayerTrackerView> {
   }
 
   Widget _buildDateSwitcher(AppColorsExtension colors, bool isToday) {
-    final formatted = DateFormat('EEEE، d MMMM yyyy', 'ar').format(_selectedDate);
+    String formatted;
+    try {
+      formatted = DateFormat('EEEE، d MMMM yyyy', 'ar').format(_selectedDate);
+    } catch (_) {
+      formatted = '${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}';
+    }
 
     return AppCard(
       variant: AppCardVariant.flat,
