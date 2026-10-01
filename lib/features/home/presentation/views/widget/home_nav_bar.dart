@@ -30,7 +30,7 @@ class HomeNavBar extends StatelessWidget {
         Get.toNamed(AppRoutes.azkar);
         break;
       case 3:
-        Get.toNamed(AppRoutes.adhan);
+        Get.toNamed(AppRoutes.bookmarks);
         break;
       case 4:
         Get.toNamed(AppRoutes.settings);
@@ -74,14 +74,14 @@ class HomeNavBar extends StatelessWidget {
             label: 'الأذكار',
           ),
           NavigationDestination(
-            icon: Icon(Icons.access_time_outlined, color: colors.textMuted),
-            selectedIcon: Icon(Icons.access_time_filled_rounded, color: colors.primary),
-            label: 'المواقيت',
+            icon: Icon(Icons.bookmark_border_rounded, color: colors.textMuted),
+            selectedIcon: Icon(Icons.bookmark_rounded, color: colors.primary),
+            label: 'علاماتي والورد',
           ),
           NavigationDestination(
-            icon: Icon(Icons.settings_outlined, color: colors.textMuted),
-            selectedIcon: Icon(Icons.settings_rounded, color: colors.primary),
-            label: 'الإعدادات',
+            icon: Icon(Icons.grid_view_outlined, color: colors.textMuted),
+            selectedIcon: Icon(Icons.grid_view_rounded, color: colors.primary),
+            label: 'المزيد',
           ),
         ],
       ),
