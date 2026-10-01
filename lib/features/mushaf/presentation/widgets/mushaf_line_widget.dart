@@ -178,7 +178,7 @@ class MushafLineWidget extends StatelessWidget {
             }
 
             return GestureDetector(
-              behavior: HitTestBehavior.opaque,
+              behavior: HitTestBehavior.translucent,
               onTap: () {
                 if (onAyahTapped != null) {
                   onAyahTapped!(word.surahNumber, word.ayahNumber);
