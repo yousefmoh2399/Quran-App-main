@@ -15,6 +15,7 @@ class MushafDualPageView extends StatefulWidget {
   final Map<int, MushafPage> pagesCache;
   final int? selectedSurah;
   final int? selectedAyah;
+  final bool isMoving;
   final Future<MushafPage?> Function(int pageNumber) getPage;
   final void Function(int newPage) onPageChanged;
   final void Function(int surahNumber, int ayahNumber)? onAyahTapped;
@@ -29,6 +30,7 @@ class MushafDualPageView extends StatefulWidget {
     required this.onPageChanged,
     this.selectedSurah,
     this.selectedAyah,
+    this.isMoving = false,
     this.onAyahTapped,
     this.onTapPage,
   });
@@ -136,6 +138,7 @@ class _MushafDualPageViewState extends State<MushafDualPageView> {
       return MushafPageWidget(
         page: cached,
         theme: widget.theme,
+        isMoving: widget.isMoving,
         isRightPage: isRight,
         pageBookmarkColor: bookmarkColor,
         pageMemorizeStatus: memorizeStatus,
@@ -155,6 +158,7 @@ class _MushafDualPageViewState extends State<MushafDualPageView> {
           return MushafPageWidget(
             page: snapshot.data!,
             theme: widget.theme,
+            isMoving: widget.isMoving,
             isRightPage: isRight,
             pageBookmarkColor: bookmarkColor,
             pageMemorizeStatus: memorizeStatus,

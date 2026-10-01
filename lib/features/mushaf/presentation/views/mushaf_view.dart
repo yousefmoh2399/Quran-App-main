@@ -55,6 +55,7 @@ class MushafView extends StatelessWidget {
                                 getPage: controller.getPage,
                                 selectedSurah: controller.selectedSurah.value,
                                 selectedAyah: controller.selectedAyah.value,
+                                isMoving: controller.isPageTurning.value,
                                 onPageChanged: controller.onPageChanged,
                                 onAyahTapped: (s, a) => controller.selectAyah(s, a),
                                 onTapPage: controller.toggleOverlay,
