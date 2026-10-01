@@ -6,13 +6,10 @@ import 'package:quran_app_android/core/design/components/app_scaffold.dart';
 import 'package:quran_app_android/features/adhan/presentation/view_model/adhan_view_model.dart';
 import 'package:quran_app_android/features/home/presentation/view_model/home_view_model.dart';
 import 'package:quran_app_android/features/azkar/presentation/views/widgets/smart_zikr_card.dart';
-import 'package:quran_app_android/features/home/presentation/views/widget/daily_wird_card.dart';
-import 'package:quran_app_android/features/home/presentation/views/widget/daily_zekr_card.dart';
+import 'package:quran_app_android/features/home/presentation/views/widget/continue_reading_wird_card.dart';
 import 'package:quran_app_android/features/home/presentation/views/widget/home_header.dart';
 import 'package:quran_app_android/features/home/presentation/views/widget/home_nav_bar.dart';
-import 'package:quran_app_android/features/home/presentation/views/widget/home_sections_grid.dart';
-import 'package:quran_app_android/features/home/presentation/views/widget/last_read_card.dart';
-import 'package:quran_app_android/features/home/presentation/views/widget/latest_bookmark_card.dart';
+import 'package:quran_app_android/features/home/presentation/views/widget/home_quick_shortcuts.dart';
 import 'package:quran_app_android/features/home/presentation/views/widget/next_prayer_card.dart';
 
 class HomeView extends StatelessWidget {
@@ -52,17 +49,11 @@ class HomeView extends StatelessWidget {
               AppSpacing.verticalLg,
               NextPrayerCard(),
               AppSpacing.verticalLg,
-              DailyWirdCard(),
+              ContinueReadingWirdCard(),
               AppSpacing.verticalLg,
-              LastReadCard(),
-              AppSpacing.verticalLg,
-              LatestBookmarkCard(),
-              AppSpacing.verticalLg,
-              HomeSectionsGrid(),
+              HomeQuickShortcuts(),
               AppSpacing.verticalLg,
               SmartZikrCard(),
-              AppSpacing.verticalLg,
-              DailyZekrCard(),
               AppSpacing.verticalXxl,
             ],
           ),

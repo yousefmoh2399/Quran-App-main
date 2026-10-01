@@ -39,6 +39,7 @@ class _SmartZikrCardState extends State<SmartZikrCard> {
 
     return AppCard(
       variant: AppCardVariant.elevated,
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       padding: AppSpacing.paddingLg,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -52,10 +53,10 @@ class _SmartZikrCardState extends State<SmartZikrCard> {
                   Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: _currentZikr.type.color.withOpacity(0.12),
+                      color: colors.primary.withOpacity(0.12),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(_currentZikr.type.icon, color: _currentZikr.type.color, size: 18),
+                    child: Icon(_currentZikr.type.icon, color: colors.primary, size: 18),
                   ),
                   const SizedBox(width: 8),
                   Text(
@@ -63,7 +64,7 @@ class _SmartZikrCardState extends State<SmartZikrCard> {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 13,
-                      color: _currentZikr.type.color,
+                      color: colors.primary,
                     ),
                   ),
                 ],
@@ -139,9 +140,20 @@ class _SmartZikrCardState extends State<SmartZikrCard> {
                 return Padding(
                   padding: const EdgeInsets.only(left: 6.0),
                   child: FilterChip(
-                    label: Text(type.title, style: TextStyle(fontSize: 11, color: isSelected ? Colors.white : colors.text)),
+                    label: Text(
+                      type.title,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        color: isSelected ? colors.primary : colors.textMuted,
+                      ),
+                    ),
                     selected: isSelected,
-                    selectedColor: type.color,
+                    selectedColor: colors.primary.withOpacity(0.15),
+                    checkmarkColor: colors.primary,
+                    side: BorderSide(
+                      color: isSelected ? colors.primary : colors.divider.withOpacity(0.6),
+                    ),
                     backgroundColor: colors.surface,
                     onSelected: (_) => _switchContext(type),
                   ),
