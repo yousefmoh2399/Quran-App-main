@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:sqflite/sqflite.dart';
 import '../../native/native_reminders_bridge.dart';
+import '../../../features/quran/data/models/juz_model.dart';
+import '../models/quran_marks_models.dart';
 import '../models/user_models.dart';
 import '../user_database.dart';
 
@@ -223,6 +225,186 @@ class UserRepository {
       'juzCount': juzCount,
       'percentage': percentage,
     };
+  }
+
+  /// Fetches an aggregated summary of bookmarks, memorization, and last-read state
+  /// across all Surahs and Juzs in a single high-performance operation.
+  Future<QuranMarksAggregate> getMarksAggregate({
+    required QuranIndexStructure structure,
+    int? lastReadPage,
+    int? lastReadSurah,
+    String? lastReadSurahName,
+  }) async {
+    final db = await _db;
+
+    // 1. Aggregated query for bookmarks
+    final bookmarkRows = await db.rawQuery('''
+      SELECT type, 
+             COALESCE(page, 0) as page, 
+             COALESCE(surah, 0) as surah, 
+             COALESCE(ayah, 0) as ayah 
+      FROM bookmarks
+    ''');
+
+    // 2. Aggregated query for memorized items
+    final memorizedRows = await db.rawQuery('''
+      SELECT type, 
+             COALESCE(page, 0) as page, 
+             COALESCE(surah, 0) as surah, 
+             COALESCE(ayah, 0) as ayah 
+      FROM memorized 
+      WHERE status = 'memorized'
+    ''');
+
+    final surahBookmarks = <int>{};
+    final juzBookmarks = <int>{};
+    final surahMemorizedAyahs = <int, Set<int>>{};
+    for (final sId in structure.surahs.keys) {
+      surahMemorizedAyahs[sId] = <int>{};
+    }
+
+    // Process Bookmarks
+    for (final row in bookmarkRows) {
+      final type = row['type'] as String?;
+      final page = (row['page'] as int?) ?? 0;
+      final surah = (row['surah'] as int?) ?? 0;
+
+      if (type == BookmarkType.ayah.name) {
+        if (surah > 0) {
+          surahBookmarks.add(surah);
+        }
+      } else {
+        // Page bookmark
+        if (surah > 0) {
+          surahBookmarks.add(surah);
+        }
+        if (page > 0) {
+          // Boundary page: every surah present on this page receives the bookmark flag
+          final surahsOnPage = structure.pageToSurahs[page] ?? const [];
+          surahBookmarks.addAll(surahsOnPage);
+
+          // Juz bookmark
+          for (final entry in structure.juzPages.entries) {
+            final start = entry.value[0];
+            final end = entry.value[1];
+            if (page >= start && page <= end) {
+              juzBookmarks.add(entry.key);
+            }
+          }
+        }
+      }
+    }
+
+    // Process Memorization
+    for (final row in memorizedRows) {
+      final type = row['type'] as String?;
+      final page = (row['page'] as int?) ?? 0;
+      final surah = (row['surah'] as int?) ?? 0;
+      final ayah = (row['ayah'] as int?) ?? 0;
+
+      if (type == BookmarkType.ayah.name) {
+        if (surah > 0 && ayah > 0) {
+          surahMemorizedAyahs[surah]?.add(ayah);
+        }
+      } else {
+        // Page memorized
+        if (page > 0) {
+          final surahsOnPage = structure.pageToSurahs[page] ?? const [];
+          for (final sId in surahsOnPage) {
+            final surahMeta = structure.surahs[sId];
+            final ayahsOnThisPage = surahMeta?.ayahsByPage[page] ?? const [];
+            surahMemorizedAyahs[sId]?.addAll(ayahsOnThisPage);
+          }
+        }
+      }
+    }
+
+    // Boundary page resolution for Last Read:
+    // Exactly ONE active Surah gets the "آخر قراءة" badge.
+    int? resolvedLastReadSurah;
+    if (lastReadPage != null && lastReadPage > 0 && lastReadPage <= 604) {
+      final surahsOnLastPage = structure.pageToSurahs[lastReadPage] ?? const [];
+      if (lastReadSurah != null && surahsOnLastPage.contains(lastReadSurah)) {
+        resolvedLastReadSurah = lastReadSurah;
+      } else if (surahsOnLastPage.isNotEmpty) {
+        resolvedLastReadSurah = surahsOnLastPage.first;
+      }
+    }
+
+    // Build SurahMarksSummary
+    final surahSummaries = <int, SurahMarksSummary>{};
+    for (final entry in structure.surahs.entries) {
+      final sId = entry.key;
+      final meta = entry.value;
+      final memAyahs = surahMemorizedAyahs[sId] ?? const <int>{};
+      final isLastRead = resolvedLastReadSurah == sId;
+
+      surahSummaries[sId] = SurahMarksSummary(
+        surahId: sId,
+        surahName: meta.nameAr,
+        startPage: meta.startPage,
+        endPage: meta.endPage,
+        totalVerses: meta.totalVerses,
+        memorizedAyahsCount: memAyahs.length,
+        hasBookmark: surahBookmarks.contains(sId),
+        isLastRead: isLastRead,
+        lastReadPage: isLastRead ? lastReadPage : null,
+      );
+    }
+
+    // Build JuzMarksSummary
+    final juzSummaries = <int, JuzMarksSummary>{};
+    for (int j = 1; j <= 30; j++) {
+      final bounds = structure.juzPages[j] ?? [1, 20];
+      final startP = bounds[0];
+      final endP = bounds[1];
+      final isLastRead = lastReadPage != null &&
+          lastReadPage >= startP &&
+          lastReadPage <= endP;
+
+      int juzTotalVerses = 0;
+      int juzMemorizedVerses = 0;
+      for (int p = startP; p <= endP; p++) {
+        final surahsOnPage = structure.pageToSurahs[p] ?? const [];
+        for (final sId in surahsOnPage) {
+          final surahMeta = structure.surahs[sId];
+          final ayahsOnPage = surahMeta?.ayahsByPage[p] ?? const [];
+          juzTotalVerses += ayahsOnPage.length;
+          final memSet = surahMemorizedAyahs[sId] ?? const <int>{};
+          for (final a in ayahsOnPage) {
+            if (memSet.contains(a)) {
+              juzMemorizedVerses++;
+            }
+          }
+        }
+      }
+
+      final juzModel = JuzModel.allJuz.firstWhere(
+        (m) => m.number == j,
+        orElse: () => JuzModel.allJuz[j - 1],
+      );
+
+      juzSummaries[j] = JuzMarksSummary(
+        juzNumber: j,
+        title: juzModel.title,
+        startSurahName: juzModel.startSurahName,
+        startPage: startP,
+        endPage: endP,
+        totalVerses: juzTotalVerses,
+        memorizedAyahsCount: juzMemorizedVerses,
+        hasBookmark: juzBookmarks.contains(j),
+        isLastRead: isLastRead,
+        lastReadPage: isLastRead ? lastReadPage : null,
+      );
+    }
+
+    return QuranMarksAggregate(
+      surahs: surahSummaries,
+      juzs: juzSummaries,
+      lastReadPage: lastReadPage,
+      lastReadSurah: resolvedLastReadSurah,
+      lastReadSurahName: lastReadSurahName,
+    );
   }
 
   // ==========================================
