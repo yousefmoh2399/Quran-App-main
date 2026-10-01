@@ -70,11 +70,14 @@ class _MushafDualPageViewState extends State<MushafDualPageView> {
   Widget build(BuildContext context) {
     // 604 pages -> 302 spreads
     const int totalSpreads = 302;
+    final disableAnimations = MediaQuery.of(context).disableAnimations;
 
     return PageView.builder(
       controller: _pageController,
       reverse: true, // RTL page turning
-      physics: const MushafScrollPhysics(),
+      physics: disableAnimations
+          ? const PageScrollPhysics()
+          : const MushafScrollPhysics(),
       itemCount: totalSpreads,
       onPageChanged: (spreadIndex) {
         _currentSpread = spreadIndex;

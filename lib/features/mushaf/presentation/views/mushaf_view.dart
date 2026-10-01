@@ -60,7 +60,7 @@ class MushafView extends StatelessWidget {
                                 onAyahTapped: (s, a) => controller.selectAyah(s, a),
                                 onTapPage: controller.toggleOverlay,
                               )
-                            : _buildSinglePageView(controller, themeConfig),
+                            : _buildSinglePageView(context, controller, themeConfig),
                       ),
                     );
                   });
@@ -202,9 +202,12 @@ class MushafView extends StatelessWidget {
   }
 
   Widget _buildSinglePageView(
+    BuildContext context,
     MushafController controller,
     MushafThemeConfig themeConfig,
   ) {
+    final disableAnimations = MediaQuery.of(context).disableAnimations;
+
     final childView = NotificationListener<ScrollNotification>(
       onNotification: (notification) {
         if (notification is ScrollStartNotification) {
@@ -218,7 +221,9 @@ class MushafView extends StatelessWidget {
       child: PageView.builder(
         controller: controller.pageController,
         reverse: true, // Authentic RTL reading order
-        physics: const MushafScrollPhysics(),
+        physics: disableAnimations
+            ? const PageScrollPhysics()
+            : const MushafScrollPhysics(),
         itemCount: 604,
         onPageChanged: (pageIndex) {
           controller.onPageChanged(pageIndex + 1);

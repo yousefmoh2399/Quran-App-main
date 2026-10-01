@@ -203,6 +203,8 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
               ),
             );
 
+            final disableAnimations = MediaQuery.of(context).disableAnimations;
+
             // Crossfade smoothly between cached texture and live interactive widget
             return AnimatedCrossFade(
               firstChild: cachedView,
@@ -210,7 +212,9 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
               crossFadeState: showLiveInteractive
                   ? CrossFadeState.showSecond
                   : CrossFadeState.showFirst,
-              duration: const Duration(milliseconds: 150),
+              duration: disableAnimations
+                  ? Duration.zero
+                  : const Duration(milliseconds: 150),
               layoutBuilder: (topChild, topChildKey, bottomChild, bottomChildKey) {
                 return Stack(
                   fit: StackFit.expand,
