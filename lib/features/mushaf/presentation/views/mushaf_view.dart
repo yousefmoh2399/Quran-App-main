@@ -22,135 +22,176 @@ class MushafView extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.put(MushafController());
 
-    return Obx(() {
-      final themeConfig = MushafThemeConfig.of(controller.currentTheme.value);
-      final isOverlayVisible = controller.isOverlayVisible.value;
-      final currentPage = controller.currentPage.value;
-      final isBookmarked = controller.isPageBookmarked(currentPage);
-      final isDualMode = MediaQuery.of(context).orientation == Orientation.landscape ||
-          MediaQuery.of(context).size.width >= 720;
+    return Scaffold(
+      body: Stack(
+        children: [
+          // Main Reader Area - Isolated from top/bottom overlay rebuilds
+          Positioned.fill(
+            child: SafeArea(
+              bottom: false,
+              child: OrientationBuilder(
+                builder: (context, orientation) {
+                  final isDualMode = orientation == Orientation.landscape ||
+                      MediaQuery.of(context).size.width >= 720;
 
-      final currentPageModel = controller.pagesCache[currentPage];
-      final surahName = currentPageModel?.surahNameAr ?? '';
+                  return Obx(() {
+                    final themeConfig = MushafThemeConfig.of(controller.currentTheme.value);
+                    final currentPage = controller.currentPage.value;
 
-      return Scaffold(
-        backgroundColor: themeConfig.pageBg,
-        body: Stack(
-          children: [
-            // Main Reader Area
-            Positioned.fill(
-              child: SafeArea(
-                bottom: false,
-                child: isDualMode
-                    ? MushafDualPageView(
-                        currentPage: currentPage,
-                        theme: themeConfig,
-                        pagesCache: controller.pagesCache,
-                        getPage: controller.getPage,
-                        selectedSurah: controller.selectedSurah.value,
-                        selectedAyah: controller.selectedAyah.value,
-                        onPageChanged: controller.onPageChanged,
-                        onAyahTapped: (s, a) => controller.selectAyah(s, a),
-                        onTapPage: controller.toggleOverlay,
-                      )
-                    : _buildSinglePageView(controller, themeConfig),
+                    return RepaintBoundary(
+                      child: Container(
+                        color: themeConfig.pageBg,
+                        child: isDualMode
+                            ? MushafDualPageView(
+                                currentPage: currentPage,
+                                theme: themeConfig,
+                                pagesCache: controller.pagesCache,
+                                getPage: controller.getPage,
+                                selectedSurah: controller.selectedSurah.value,
+                                selectedAyah: controller.selectedAyah.value,
+                                onPageChanged: controller.onPageChanged,
+                                onAyahTapped: (s, a) => controller.selectAyah(s, a),
+                                onTapPage: controller.toggleOverlay,
+                              )
+                            : _buildSinglePageView(controller, themeConfig),
+                      ),
+                    );
+                  });
+                },
               ),
             ),
+          ),
 
-            // Top Overlay Bar
-            AnimatedPositioned(
+          // Top Overlay Bar - Only listens to isOverlayVisible, currentPage, currentTheme
+          Obx(() {
+            final themeConfig = MushafThemeConfig.of(controller.currentTheme.value);
+            final isOverlayVisible = controller.isOverlayVisible.value;
+            final currentPage = controller.currentPage.value;
+            final isBookmarked = controller.isPageBookmarked(currentPage);
+            final currentPageModel = controller.pagesCache[currentPage];
+            final surahName = currentPageModel?.surahNameAr ?? '';
+
+            return AnimatedPositioned(
               duration: const Duration(milliseconds: 250),
               curve: Curves.easeInOut,
               top: isOverlayVisible ? 0.0 : -100.0,
               left: 0.0,
               right: 0.0,
-              child: _buildTopBar(
-                context,
-                controller,
-                themeConfig,
-                surahName,
-                currentPage,
-                isBookmarked,
+              child: RepaintBoundary(
+                child: _buildTopBar(
+                  context,
+                  controller,
+                  themeConfig,
+                  surahName,
+                  currentPage,
+                  isBookmarked,
+                ),
               ),
-            ),
+            );
+          }),
 
-            // Bottom Overlay Bar
-            AnimatedPositioned(
+          // Bottom Overlay Bar - Only listens to isOverlayVisible, currentPage, currentTheme
+          Obx(() {
+            final themeConfig = MushafThemeConfig.of(controller.currentTheme.value);
+            final isOverlayVisible = controller.isOverlayVisible.value;
+            final currentPage = controller.currentPage.value;
+
+            return AnimatedPositioned(
               duration: const Duration(milliseconds: 250),
               curve: Curves.easeInOut,
               bottom: isOverlayVisible ? 0.0 : -120.0,
               left: 0.0,
               right: 0.0,
-              child: _buildBottomBar(context, controller, themeConfig, currentPage),
-            ),
+              child: RepaintBoundary(
+                child: _buildBottomBar(context, controller, themeConfig, currentPage),
+              ),
+            );
+          }),
 
-            // Commute Mode Floating Top Bar
-            if (controller.isCommuteMode.value)
-              Positioned(
-                top: 0.0,
-                left: 0.0,
-                right: 0.0,
+          // Commute Mode Floating Top Bar
+          Obx(() {
+            if (!controller.isCommuteMode.value) return const SizedBox.shrink();
+            final themeConfig = MushafThemeConfig.of(controller.currentTheme.value);
+            return Positioned(
+              top: 0.0,
+              left: 0.0,
+              right: 0.0,
+              child: RepaintBoundary(
                 child: _buildCommuteTopBanner(context, controller, themeConfig),
               ),
+            );
+          }),
 
-            // Commute Mode Ergonomic Bottom Bar (One-handed thumb navigation)
-            if (controller.isCommuteMode.value)
-              Positioned(
-                bottom: 16.0,
-                left: 16.0,
-                right: 16.0,
+          // Commute Mode Ergonomic Bottom Bar (One-handed thumb navigation)
+          Obx(() {
+            if (!controller.isCommuteMode.value) return const SizedBox.shrink();
+            final themeConfig = MushafThemeConfig.of(controller.currentTheme.value);
+            return Positioned(
+              bottom: 16.0,
+              left: 16.0,
+              right: 16.0,
+              child: RepaintBoundary(
                 child: _buildCommuteBottomBar(context, controller, themeConfig),
               ),
+            );
+          }),
 
-            // Ayah Action Sheet (if an ayah is selected)
-            if (controller.selectedAyah.value != null)
-              Positioned(
-                left: 0.0,
-                right: 0.0,
-                bottom: 0.0,
-                child: AyahActionBottomSheet(
-                  surahNumber: controller.selectedSurah.value!,
-                  ayahNumber: controller.selectedAyah.value!,
-                  pageNumber: currentPage,
-                  surahName: surahName,
-                  ayahEntity: controller.selectedAyahEntity.value,
-                  theme: themeConfig,
-                  onClose: controller.clearAyahSelection,
-                ),
+          // Ayah Action Sheet (if an ayah is selected)
+          Obx(() {
+            if (controller.selectedAyah.value == null) return const SizedBox.shrink();
+            final themeConfig = MushafThemeConfig.of(controller.currentTheme.value);
+            final currentPage = controller.currentPage.value;
+            final currentPageModel = controller.pagesCache[currentPage];
+            final surahName = currentPageModel?.surahNameAr ?? '';
+
+            return Positioned(
+              left: 0.0,
+              right: 0.0,
+              bottom: 0.0,
+              child: AyahActionBottomSheet(
+                surahNumber: controller.selectedSurah.value!,
+                ayahNumber: controller.selectedAyah.value!,
+                pageNumber: currentPage,
+                surahName: surahName,
+                ayahEntity: controller.selectedAyahEntity.value,
+                theme: themeConfig,
+                onClose: controller.clearAyahSelection,
               ),
+            );
+          }),
 
-            // Offscreen raster preloader for adjacent pages
-            Obx(() {
-              final toPreload = controller.pagesToPreload;
-              if (toPreload.isEmpty) return const SizedBox.shrink();
+          // Offscreen raster preloader for adjacent pages
+          Obx(() {
+            final toPreload = controller.pagesToPreload;
+            if (toPreload.isEmpty) return const SizedBox.shrink();
 
-              final mediaSize = MediaQuery.of(context).size;
-              return Positioned(
-                left: -10000.0,
-                top: -10000.0,
-                width: mediaSize.width,
-                height: mediaSize.height,
-                child: Stack(
-                  children: toPreload.map((p) {
-                    final pageModel = controller.pagesCache[p];
-                    if (pageModel == null) return const SizedBox.shrink();
-                    return SizedBox(
-                      width: mediaSize.width,
-                      height: mediaSize.height,
-                      child: MushafPageWidget(
-                        page: pageModel,
-                        theme: themeConfig,
-                        isMoving: false,
-                      ),
-                    );
-                  }).toList(),
-                ),
-              );
-            }),
-          ],
-        ),
-      );
-    });
+            final mediaSize = MediaQuery.of(context).size;
+            final themeConfig = MushafThemeConfig.of(controller.currentTheme.value);
+            return Positioned(
+              left: -10000.0,
+              top: -10000.0,
+              width: mediaSize.width,
+              height: mediaSize.height,
+              child: Stack(
+                children: toPreload.map((p) {
+                  final pageModel = controller.pagesCache[p];
+                  if (pageModel == null) return const SizedBox.shrink();
+                  return SizedBox(
+                    width: mediaSize.width,
+                    height: mediaSize.height,
+                    child: MushafPageWidget(
+                      page: pageModel,
+                      theme: themeConfig,
+                      isMoving: false,
+                    ),
+                  );
+                }).toList(),
+              ),
+            );
+          }),
+        ],
+      ),
+    );
   }
 
   Widget _buildSinglePageView(
