@@ -18,7 +18,6 @@ import 'package:quran_app_android/features/notifications/views/adhan_overlay_vie
 import 'package:quran_app_android/features/notifications/views/notify_view.dart';
 import 'package:quran_app_android/features/onboarding/presentation/views/onboarding_screen.dart';
 import 'package:quran_app_android/features/mushaf/presentation/views/mushaf_font_debug_view.dart';
-import 'package:quran_app_android/features/mushaf/presentation/views/mushaf_v1_v2_compare_view.dart';
 import 'package:quran_app_android/features/mushaf/presentation/views/mushaf_view.dart';
 import 'package:quran_app_android/features/reminders/presentation/views/my_reminders_view.dart';
 import 'package:quran_app_android/features/reminders/presentation/views/sadaqah_settings_view.dart';
@@ -138,20 +137,13 @@ class AppRoutes {
       transition: Transition.cupertino,
       transitionDuration: kTransitionDuration,
     ),
-    if (kDebugMode) ...[
+    if (kDebugMode)
       GetPage(
         name: mushafDebug,
         page: () => const MushafFontDebugView(),
         transition: Transition.cupertino,
         transitionDuration: kTransitionDuration,
       ),
-      GetPage(
-        name: mushafCompare,
-        page: () => const MushafV1V2CompareView(),
-        transition: Transition.cupertino,
-        transitionDuration: kTransitionDuration,
-      ),
-    ],
     GetPage(
       name: onboarding,
       page: () => OnBoardingScreen(),
@@ -325,7 +317,6 @@ class AppRoutes {
   static String detailsScreen = '/detailsScreen';
   static String mushaf = '/mushaf';
   static String mushafDebug = '/mushafDebug';
-  static String mushafCompare = '/mushafCompare';
   static String onboarding = '/onboarding';
   static String sectionHadith = '/sectionHadith';
 }
