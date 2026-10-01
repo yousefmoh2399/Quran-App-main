@@ -127,38 +127,18 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
       widget.theme.mode,
     );
 
-    // When the page is swiping or turning, and a pre-rendered raster image is available,
-    // display only the lightweight 2D texture (RawImage) for butter-smooth 60fps scrolling.
-    if (widget.isMoving && cachedImage != null && widget.selectedAyah == null) {
-      return GestureDetector(
-        onTap: widget.onTapPage,
-        behavior: HitTestBehavior.opaque,
-        child: Container(
-          color: widget.theme.pageBg,
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: RawImage(
-                  image: cachedImage,
-                  fit: BoxFit.fill,
-                ),
-              ),
-              ..._buildRibbons(),
-            ],
-          ),
-        ),
-      );
-    }
-
-    // Settled page: render live interactive widgets inside RepaintBoundary
+    // When settled or moving:
+    // If live interactive content is not ready (fonts loading) or moving, display cached image.
+    // When settled and fonts are ready, seamlessly crossfade into live widgets without jumping or flickering.
     return RepaintBoundary(
       key: _boundaryKey,
       child: FutureBuilder<void>(
         future: _ensurePageFonts(widget.page),
         builder: (context, snapshot) {
           final fontReady = snapshot.connectionState == ConnectionState.done;
+          final showLiveInteractive = fontReady && !widget.isMoving;
 
-          return GestureDetector(
+          final liveContent = GestureDetector(
             onTap: widget.onTapPage,
             behavior: HitTestBehavior.opaque,
             child: Container(
@@ -202,6 +182,48 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
               ),
             ),
           );
+
+          if (cachedImage != null && widget.selectedAyah == null) {
+            final cachedView = GestureDetector(
+              onTap: widget.onTapPage,
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                color: widget.theme.pageBg,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: RawImage(
+                        image: cachedImage,
+                        fit: BoxFit.fill,
+                      ),
+                    ),
+                    ..._buildRibbons(),
+                  ],
+                ),
+              ),
+            );
+
+            // Crossfade smoothly between cached texture and live interactive widget
+            return AnimatedCrossFade(
+              firstChild: cachedView,
+              secondChild: liveContent,
+              crossFadeState: showLiveInteractive
+                  ? CrossFadeState.showSecond
+                  : CrossFadeState.showFirst,
+              duration: const Duration(milliseconds: 150),
+              layoutBuilder: (topChild, topChildKey, bottomChild, bottomChildKey) {
+                return Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Positioned.fill(key: bottomChildKey, child: bottomChild),
+                    Positioned.fill(key: topChildKey, child: topChild),
+                  ],
+                );
+              },
+            );
+          }
+
+          return liveContent;
         },
       ),
     );
