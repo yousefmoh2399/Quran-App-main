@@ -18,30 +18,45 @@ import '../widgets/mushaf_page_widget.dart';
 import '../widgets/page_bookmark_bottom_sheet.dart';
 
 /// The authentic 604-page, 15-line Madinah Mushaf reader screen.
-class MushafView extends StatelessWidget {
+class MushafView extends StatefulWidget {
   const MushafView({super.key});
 
   @override
+  State<MushafView> createState() => _MushafViewState();
+}
+
+class _MushafViewState extends State<MushafView> {
+  late final MushafController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.isRegistered<MushafController>()
+        ? Get.find<MushafController>()
+        : Get.put(MushafController());
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final controller = Get.put(MushafController());
+    return Obx(() {
+      final themeConfig = MushafThemeConfig.of(controller.currentTheme.value);
 
-    return Scaffold(
-      body: Stack(
-        children: [
-          // Main Reader Area - Isolated from top/bottom overlay rebuilds
-          Positioned.fill(
-            child: SafeArea(
-              bottom: false,
-              child: OrientationBuilder(
-                builder: (context, orientation) {
-                  // Orientation change: clear raster cache to release memory and recalculate dimensions
-                  MushafRasterCache.instance.clear();
+      return Scaffold(
+        backgroundColor: themeConfig.pageBg,
+        body: Stack(
+          children: [
+            // Main Reader Area - Isolated from top/bottom overlay rebuilds
+            Positioned.fill(
+              child: SafeArea(
+                bottom: false,
+                child: OrientationBuilder(
+                  builder: (context, orientation) {
+                    // Orientation change: clear raster cache to release memory and recalculate dimensions
+                    MushafRasterCache.instance.clear();
 
-                  final isDualMode = orientation == Orientation.landscape ||
-                      MediaQuery.of(context).size.width >= 720;
+                    final isDualMode = orientation == Orientation.landscape ||
+                        MediaQuery.of(context).size.width >= 720;
 
-                  return Obx(() {
-                    final themeConfig = MushafThemeConfig.of(controller.currentTheme.value);
                     final currentPage = controller.currentPage.value;
 
                     return RepaintBoundary(
@@ -63,11 +78,10 @@ class MushafView extends StatelessWidget {
                             : _buildSinglePageView(context, controller, themeConfig),
                       ),
                     );
-                  });
-                },
+                  },
+                ),
               ),
             ),
-          ),
 
           // Top Overlay Bar - Only listens to isOverlayVisible, currentPage, currentTheme
           Obx(() {
@@ -199,6 +213,7 @@ class MushafView extends StatelessWidget {
         ],
       ),
     );
+    });
   }
 
   Widget _buildSinglePageView(
