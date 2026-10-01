@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:quran_app_android/core/design/app_colors.dart';
 import 'package:quran_app_android/core/design/app_radius.dart';
 import 'package:quran_app_android/core/design/app_spacing.dart';
 import 'package:quran_app_android/core/design/app_typography.dart';
 import 'package:quran_app_android/core/native/native_azkar_bridge.dart';
 import 'package:quran_app_android/core/service/settings/notifications_services.dart';
+import 'package:quran_app_android/core/util/routes/routes.dart';
 import 'package:quran_app_android/core/util/widgets/custom_toast.dart';
 import 'package:quran_app_android/features/settings/presentation/view_model/settins_view_model.dart';
 import 'package:quran_app_android/features/settings/presentation/views/widget/settings_group_card.dart';
@@ -30,8 +32,6 @@ class _SectionAzkarNotificationState extends State<SectionAzkarNotification> {
     final controller = widget.controller;
     final isMorningEnabled =
         controller.settingsServices.sharedPref!.getBool('enable') ?? true;
-    final isPeriodicEnabled =
-        controller.settingsServices.sharedPref!.getBool('stop_noti') ?? true;
 
     final formattedMorningTime = controller.timeOfDay != null
         ? controller.timeOfDay!.format(context)
@@ -41,6 +41,18 @@ class _SectionAzkarNotificationState extends State<SectionAzkarNotification> {
       title: 'تنبيهات الأذكار والأوراد',
       icon: Icons.notifications_active_outlined,
       children: [
+        // My Reminders Hub Tile
+        SettingsTile(
+          icon: Icons.alarm_on_rounded,
+          iconColor: colors.primary,
+          title: 'تذكيراتي (مركز التذكيرات الشامل)',
+          subtitle: 'إدارة الورد اليومي، ورد المواصلات، الصدقة الشهرية، والأذكار',
+          trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
+          onTap: () {
+            Get.toNamed(AppRoutes.myReminders);
+          },
+        ),
+
         // Morning Azkar Switch
         SettingsTile(
           icon: Icons.wb_sunny_outlined,
@@ -89,24 +101,12 @@ class _SectionAzkarNotificationState extends State<SectionAzkarNotification> {
 
         // Periodic Azkar Reminder Switch
         SettingsTile(
-          icon: Icons.repeat_rounded,
-          title: 'التنبيهات الدورية للأذكار',
-          subtitle: 'تذكير بأذكار واستغفار متفرقة خلال اليوم',
-          trailing: Switch.adaptive(
-            value: isPeriodicEnabled,
-            activeColor: colors.primary,
-            activeTrackColor: colors.primary.withOpacity(0.5),
-            onChanged: (value) async {
-              controller.toggleSwitchStopNoti(value);
-              if (value) {
-                defaultToast(text: 'تم تفعيل التنبيهات الدورية للأذكار');
-              } else {
-                defaultToast(text: 'تم إيقاف التنبيهات الدورية للأذكار');
-                await NotifyHelper().flutterLocalNotificationsPlugin.cancel(20);
-              }
-              setState(() {});
-            },
-          ),
+          icon: Icons.tune_rounded,
+          title: 'تخصيص التنبيهات الدورية (Native)',
+          subtitle: 'الفترة، ساعات التشغيل، كتم وقت الصلاة، وتحديد الفئات',
+          onTap: () {
+            Get.toNamed(AppRoutes.azkarNotificationsSettings);
+          },
         ),
 
         // Cancel All Scheduled Notifications

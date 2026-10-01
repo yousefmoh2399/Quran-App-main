@@ -1,11 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../../../core/data/models/mushaf_models.dart';
 import '../../../../core/data/repositories/mushaf_repository.dart';
 import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_radius.dart';
 import '../../../../core/design/app_spacing.dart';
 import '../../../../core/mushaf/mushaf_font_manager.dart';
+import '../../../../core/util/routes/routes.dart';
 import '../models/mushaf_theme_model.dart';
 import '../widgets/mushaf_line_widget.dart';
 
@@ -87,6 +89,13 @@ class _MushafFontDebugViewState extends State<MushafFontDebugView> {
         title: const Text('فحص واختبار خطوط المصحف TTF'),
         centerTitle: true,
         backgroundColor: colors.surface,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.compare_arrows),
+            tooltip: 'مقارنة V1 مقابل V2',
+            onPressed: () => Get.toNamed(AppRoutes.mushafCompare),
+          ),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())

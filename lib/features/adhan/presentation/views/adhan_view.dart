@@ -1,4 +1,5 @@
 import 'package:adhan/adhan.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quran_app_android/core/design/app_colors.dart';
@@ -8,6 +9,7 @@ import 'package:quran_app_android/core/design/components/app_card.dart';
 import 'package:quran_app_android/core/design/components/app_scaffold.dart';
 import 'package:quran_app_android/core/design/components/empty_state.dart';
 import 'package:quran_app_android/core/design/components/loading_skeleton.dart';
+import 'package:quran_app_android/core/util/routes/routes.dart';
 import 'package:quran_app_android/features/adhan/presentation/view_model/adhan_view_model.dart';
 import 'package:quran_app_android/features/adhan/presentation/views/widget/adhan_hero_card.dart';
 import 'package:quran_app_android/features/adhan/presentation/views/widget/adhan_location_bar.dart';
@@ -42,6 +44,25 @@ class AdhanView extends StatelessWidget {
     return AppScaffold(
       title: 'مواقيت الصلاة',
       actions: [
+        if (kDebugMode)
+          IconButton(
+            icon: Icon(
+              Icons.bug_report_outlined,
+              color: colors.primary,
+              size: 22,
+            ),
+            tooltip: 'فحص الأذان والجدولة',
+            onPressed: () => Get.toNamed(AppRoutes.adhanDebug),
+          ),
+        IconButton(
+          icon: Icon(
+            Icons.tune_rounded,
+            color: colors.primary,
+            size: 22,
+          ),
+          tooltip: 'إعدادات الأذان والمؤذن',
+          onPressed: () => Get.toNamed(AppRoutes.adhanSettings),
+        ),
         GetBuilder<AdhanViewModel>(
           builder: (controller) => IconButton(
             icon: Icon(
@@ -63,17 +84,28 @@ class AdhanView extends StatelessWidget {
           }
 
           final pt = controller.prayerTimes;
-          if (pt == null) {
+          if (pt == null || controller.isLocationRequired.value) {
             return Center(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(AppSpacing.lg),
-                child: EmptyState(
-                  icon: Icons.location_off_rounded,
-                  title: 'تعذر تحديد مواقيت الصلاة',
-                  message:
-                      'يرجى التأكد من تفعيل خدمة الموقع الجغرافي (GPS) لحساب مواقيت الصلاة بدقة.',
-                  actionLabel: 'تحديد الموقع وحساب المواقيت',
-                  onActionPressed: () => controller.initializeAdhan(),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    EmptyState(
+                      icon: Icons.location_off_rounded,
+                      title: 'مطلوب تحديد الموقع لحساب المواقيت',
+                      message:
+                          'لحساب مواقيت الصلاة بدقة شرعية تامة، يرجى تفعيل الـ GPS أو اختيار مدينتك يدوياً من الإعدادات.',
+                      actionLabel: 'تحديد الموقع تلقائياً (GPS)',
+                      onActionPressed: () => controller.getCurrentLocation(),
+                    ),
+                    AppSpacing.verticalMd,
+                    TextButton.icon(
+                      icon: const Icon(Icons.location_city_rounded),
+                      label: const Text('أو اختر المدينة من إعدادات الأذان'),
+                      onPressed: () => Get.toNamed(AppRoutes.adhanSettings),
+                    ),
+                  ],
                 ),
               ),
             );

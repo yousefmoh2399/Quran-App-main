@@ -7,6 +7,7 @@ class MushafWord {
   final String location;
   final String textUthmani;
   final String glyphCode;
+  final String? glyphCodeV1;
 
   const MushafWord({
     required this.pageNumber,
@@ -17,6 +18,7 @@ class MushafWord {
     required this.location,
     required this.textUthmani,
     required this.glyphCode,
+    this.glyphCodeV1,
   });
 
   factory MushafWord.fromMap(Map<String, dynamic> map) {
@@ -29,6 +31,7 @@ class MushafWord {
       location: map['location'] as String,
       textUthmani: map['text_uthmani'] as String,
       glyphCode: map['glyph_code'] as String,
+      glyphCodeV1: map['glyph_code_v1'] as String?,
     );
   }
 }
@@ -59,6 +62,7 @@ class MushafLine {
   final int? surahNumber;
   final String? text;
   final String? qpcV2;
+  final String? qpcV1;
   final List<MushafWord> words;
 
   const MushafLine({
@@ -69,6 +73,7 @@ class MushafLine {
     this.surahNumber,
     this.text,
     this.qpcV2,
+    this.qpcV1,
     this.words = const [],
   });
 
@@ -81,6 +86,7 @@ class MushafLine {
       surahNumber: map['surah_number'] as int?,
       text: map['text'] as String?,
       qpcV2: map['qpc_v2'] as String?,
+      qpcV1: map['qpc_v1'] as String?,
       words: words,
     );
   }

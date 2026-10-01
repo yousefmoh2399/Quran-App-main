@@ -84,6 +84,24 @@ class MushafView extends StatelessWidget {
               child: _buildBottomBar(context, controller, themeConfig, currentPage),
             ),
 
+            // Commute Mode Floating Top Bar
+            if (controller.isCommuteMode.value)
+              Positioned(
+                top: 0.0,
+                left: 0.0,
+                right: 0.0,
+                child: _buildCommuteTopBanner(context, controller, themeConfig),
+              ),
+
+            // Commute Mode Ergonomic Bottom Bar (One-handed thumb navigation)
+            if (controller.isCommuteMode.value)
+              Positioned(
+                bottom: 16.0,
+                left: 16.0,
+                right: 16.0,
+                child: _buildCommuteBottomBar(context, controller, themeConfig),
+              ),
+
             // Ayah Action Sheet (if an ayah is selected)
             if (controller.selectedAyah.value != null)
               Positioned(
@@ -139,7 +157,7 @@ class MushafView extends StatelessWidget {
     MushafController controller,
     MushafThemeConfig themeConfig,
   ) {
-    return NotificationListener<ScrollNotification>(
+    final childView = NotificationListener<ScrollNotification>(
       onNotification: (notification) {
         if (notification is ScrollStartNotification) {
           controller.isPageTurning.value = true;
@@ -212,6 +230,14 @@ class MushafView extends StatelessWidget {
         },
       ),
     );
+
+    if (controller.isCommuteMode.value) {
+      return Transform.scale(
+        scale: controller.commuteZoomScale.value,
+        child: childView,
+      );
+    }
+    return childView;
   }
 
   Widget _buildTopBar(
@@ -434,6 +460,144 @@ class MushafView extends StatelessWidget {
       builder: (context) => MushafJumpDialog(
         initialPage: currentPage,
         onPageSelected: (target) => controller.goToPage(target),
+      ),
+    );
+  }
+
+  Widget _buildCommuteTopBanner(
+    BuildContext context,
+    MushafController controller,
+    MushafThemeConfig themeConfig,
+  ) {
+    return Container(
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 6,
+        bottom: 8,
+        left: 12,
+        right: 12,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.85),
+        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 8)],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1B4D3E),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.directions_bus_rounded, color: Colors.white, size: 16),
+                SizedBox(width: 4),
+                Text('وضع المواصلات', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+              ],
+            ),
+          ),
+          const Spacer(),
+          // Zoom toggle
+          IconButton(
+            icon: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.zoom_in_rounded, color: Colors.white, size: 18),
+                Text(' ${controller.commuteZoomScale.value.toStringAsFixed(2)}x', style: const TextStyle(color: Colors.white, fontSize: 11)),
+              ],
+            ),
+            tooltip: 'تكبير الخط',
+            onPressed: controller.toggleCommuteZoom,
+          ),
+          // High contrast toggle
+          IconButton(
+            icon: Icon(
+              controller.commuteHighContrast.value ? Icons.contrast_rounded : Icons.brightness_6_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
+            tooltip: 'تباين عالي',
+            onPressed: controller.toggleCommuteContrast,
+          ),
+          // Screen On Badge
+          const Icon(Icons.lightbulb_rounded, color: Colors.amberAccent, size: 18),
+          const SizedBox(width: 8),
+          // Exit commute mode
+          IconButton(
+            icon: const Icon(Icons.close_rounded, color: Colors.white, size: 20),
+            tooltip: 'إغلاق وضع المواصلات',
+            onPressed: () => controller.isCommuteMode.value = false,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCommuteBottomBar(
+    BuildContext context,
+    MushafController controller,
+    MushafThemeConfig themeConfig,
+  ) {
+    final readCount = (controller.currentPage.value - controller.commuteStartPage.value).abs() + 1;
+    final target = controller.commuteTargetPages.value;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.85),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 10)],
+      ),
+      child: Row(
+        children: [
+          // Previous Page Button (Right in RTL, thumb-friendly)
+          IconButton.filled(
+            style: IconButton.styleFrom(
+              backgroundColor: const Color(0xFF1B4D3E),
+              minimumSize: const Size(48, 48),
+            ),
+            icon: const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 20),
+            onPressed: controller.prevCommutePage,
+            tooltip: 'الصفحة السابقة',
+          ),
+          const SizedBox(width: 12),
+          // Center Info & Complete Button
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'المقروء: $readCount من $target صفحات',
+                  style: const TextStyle(color: Colors.white, fontSize: 12.5, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 4),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2E7D32),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    minimumSize: const Size(120, 32),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onPressed: controller.completeCommuteWird,
+                  child: const Text('أتممت الورد ✓', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Next Page Button (Left in RTL, thumb-friendly)
+          IconButton.filled(
+            style: IconButton.styleFrom(
+              backgroundColor: const Color(0xFF1B4D3E),
+              minimumSize: const Size(48, 48),
+            ),
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+            onPressed: controller.nextCommutePage,
+            tooltip: 'الصفحة التالية',
+          ),
+        ],
       ),
     );
   }
