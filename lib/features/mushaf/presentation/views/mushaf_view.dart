@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../../core/data/models/mushaf_models.dart';
 import '../../../../core/design/app_colors.dart';
@@ -7,6 +8,7 @@ import '../../../../core/design/app_spacing.dart';
 import '../../../../core/design/app_typography.dart';
 import '../controllers/mushaf_controller.dart';
 import '../models/mushaf_theme_model.dart';
+import '../utils/mushaf_scroll_physics.dart';
 import '../utils/mushaf_utils.dart';
 import '../widgets/ayah_action_bottom_sheet.dart';
 import '../widgets/mushaf_dual_page_view.dart';
@@ -204,13 +206,14 @@ class MushafView extends StatelessWidget {
           controller.isPageTurning.value = true;
         } else if (notification is ScrollEndNotification) {
           controller.isPageTurning.value = false;
+          HapticFeedback.selectionClick();
         }
         return false;
       },
       child: PageView.builder(
         controller: controller.pageController,
         reverse: true, // Authentic RTL reading order
-        physics: const BouncingScrollPhysics(),
+        physics: const MushafScrollPhysics(),
         itemCount: 604,
         onPageChanged: (pageIndex) {
           controller.onPageChanged(pageIndex + 1);
