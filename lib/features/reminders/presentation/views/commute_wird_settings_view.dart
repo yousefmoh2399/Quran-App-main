@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quran_app_android/core/native/native_reminders_bridge.dart';
+import 'package:quran_app_android/core/util/app_snackbar.dart';
 import 'package:quran_app_android/features/reminders/data/commute_wird_repository.dart';
 
 class CommuteSlot {
@@ -126,13 +127,13 @@ class _CommuteWirdSettingsViewState extends State<CommuteWirdSettingsView> {
 
     await NativeRemindersBridge.saveReminder(item);
 
-    Get.snackbar(
-      'تم الحفظ',
-      'تم تحديث مواعيد ورد المواصلات وجدولتها بنجاح',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: const Color(0xFF1B4D3E),
-      colorText: Colors.white,
-    );
+    if (mounted) {
+      AppSnackbar.show(
+        'تم الحفظ',
+        'تم تحديث مواعيد ورد المواصلات وجدولتها بنجاح',
+        context: context,
+      );
+    }
   }
 
   void _addSlot() {

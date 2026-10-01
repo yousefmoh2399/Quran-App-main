@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:quran_app_android/core/service/settings/notifications_services.dart';
+import 'package:quran_app_android/core/util/arabic_date_formatter.dart';
 import 'package:quran_app_android/core/util/assets.dart';
 import 'package:quran_app_android/core/util/color.dart';
 
@@ -28,7 +28,7 @@ class AdhanOverlayView extends StatelessWidget {
     final String prayerName =
         _prayerNameLookup[prayerKey] ?? 'الصلاة';
     final String formattedTime =
-        DateFormat('hh:mm a', 'ar').format(scheduledAt.toLocal());
+        ArabicDateFormatter.formatTime12h(scheduledAt.toLocal());
 
     return Scaffold(
       backgroundColor: Colors.white,

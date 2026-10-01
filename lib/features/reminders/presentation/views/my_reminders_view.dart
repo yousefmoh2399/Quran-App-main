@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quran_app_android/core/native/native_reminders_bridge.dart';
+import 'package:quran_app_android/core/util/app_snackbar.dart';
 import 'package:quran_app_android/core/util/routes/routes.dart';
 
 class MyRemindersView extends StatefulWidget {
@@ -121,15 +122,13 @@ class _MyRemindersViewState extends State<MyRemindersView> {
   Future<void> _toggleReminder(String id, bool enabled) async {
     await NativeRemindersBridge.toggleReminder(id, enabled);
     await _loadReminders();
-    Get.snackbar(
-      enabled ? 'تم التفعيل' : 'تم التعطيل',
-      enabled ? 'تم تفعيل التذكير بنجاح' : 'تم تعطيل التذكير بنجاح',
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 2),
-      margin: const EdgeInsets.all(16),
-      backgroundColor: const Color(0xFF1B4D3E).withOpacity(0.9),
-      colorText: Colors.white,
-    );
+    if (mounted) {
+      AppSnackbar.show(
+        enabled ? 'تم التفعيل' : 'تم التعطيل',
+        enabled ? 'تم تفعيل التذكير بنجاح' : 'تم تعطيل التذكير بنجاح',
+        context: context,
+      );
+    }
   }
 
   @override
@@ -283,13 +282,13 @@ class _MyRemindersViewState extends State<MyRemindersView> {
                     subtitle: const Text('حساب أقرب تذكير فورياً وضبط المنظومة', style: TextStyle(fontSize: 12)),
                     onTap: () async {
                       await NativeRemindersBridge.rescheduleAll();
-                      Get.snackbar(
-                        'تمت المزامنة',
-                        'تمت إعادة جدولة كافة التذكيرات بدقة',
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: const Color(0xFF1B4D3E),
-                        colorText: Colors.white,
-                      );
+                      if (context.mounted) {
+                        AppSnackbar.show(
+                          'تمت المزامنة',
+                          'تمت إعادة جدولة كافة التذكيرات بدقة',
+                          context: context,
+                        );
+                      }
                     },
                   ),
                 ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quran_app_android/core/native/native_adhan_bridge.dart';
+import 'package:quran_app_android/core/util/app_snackbar.dart';
 import 'package:quran_app_android/features/adhan/data/models/adhan_settings_model.dart';
 import 'package:quran_app_android/features/adhan/presentation/view_model/adhan_view_model.dart';
 
@@ -53,13 +54,10 @@ class AdhanSettingsController extends GetxController {
           final adhanVM = Get.find<AdhanViewModel>();
           await adhanVM.recalculateWithSettings(settings.value);
         }
-        Get.snackbar(
+        AppSnackbar.show(
           'تم حفظ الإعدادات',
           'تم تحديث مواقيت الصلاة وجدولة الـ 7 أيام القادمة بنجاح 🕌',
-          snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFF0F5C4A),
-          colorText: Colors.white,
-          duration: const Duration(seconds: 2),
         );
       }
     } catch (e) {
@@ -171,12 +169,10 @@ class AdhanSettingsController extends GetxController {
       delaySeconds: 1,
       prayerName: prayerName,
     );
-    Get.snackbar(
+    AppSnackbar.show(
       'تشغيل تجريبي للأذان',
       'تم إطلاق الأذان التجريبي لصلاة $prayerName 🕌',
-      snackPosition: SnackPosition.BOTTOM,
       backgroundColor: const Color(0xFF0F5C4A),
-      colorText: Colors.white,
       duration: const Duration(seconds: 3),
     );
   }

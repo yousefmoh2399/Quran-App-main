@@ -8,6 +8,7 @@ import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_radius.dart';
 import '../../../../core/design/app_spacing.dart';
 import '../../../../core/design/components/app_card.dart';
+import '../../../../core/util/arabic_date_formatter.dart';
 import 'post_prayer_azkar_view.dart';
 
 class PrayerTrackerView extends StatefulWidget {
@@ -144,12 +145,7 @@ class _PrayerTrackerViewState extends State<PrayerTrackerView> {
   }
 
   Widget _buildDateSwitcher(AppColorsExtension colors, bool isToday) {
-    String formatted;
-    try {
-      formatted = DateFormat('EEEE، d MMMM yyyy', 'ar').format(_selectedDate);
-    } catch (_) {
-      formatted = '${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}';
-    }
+    final formatted = ArabicDateFormatter.formatFullDate(_selectedDate);
 
     return AppCard(
       variant: AppCardVariant.flat,

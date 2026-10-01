@@ -7,6 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:quran_app_android/core/native/native_adhan_bridge.dart';
 import 'package:quran_app_android/core/service/database/database_helper.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
+import 'package:quran_app_android/core/util/app_snackbar.dart';
 import 'package:quran_app_android/features/adhan/data/models/adhan_settings_model.dart';
 import 'package:quran_app_android/features/quran/presentation/view_model/quran_screen_model_details.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -108,12 +109,10 @@ class AdhanViewModel extends GetxController {
         final distance = Geolocator.distanceBetween(prevLat, prevLng, position.latitude, position.longitude);
         if (distance > 50000) {
           debugPrint('User moved > 50km ($distance m). Updating location and rolling window!');
-          Get.snackbar(
+          AppSnackbar.show(
             'تحديث الموقع',
             'تم رصد انتقال جغرافي جديد وتحديث مواقيت الصلاة تلقائياً 🕌',
-            snackPosition: SnackPosition.BOTTOM,
             backgroundColor: const Color(0xFF0F5C4A),
-            colorText: Colors.white,
             duration: const Duration(seconds: 3),
           );
         }

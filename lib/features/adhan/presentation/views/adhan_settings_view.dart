@@ -142,48 +142,51 @@ class AdhanSettingsView extends StatelessWidget {
                 borderRadius: AppRadius.borderLg,
                 border: Border.all(color: colors.divider),
               ),
-              child: Column(
-                children: [
-                  RadioListTile<String>(
-                    title: Text(
-                      'جمهور الفقهاء (الشافعي، المالكي، الحنبلي)',
-                      style: TextStyle(
-                        fontFamily: AppTypography.uiFont,
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.bold,
-                        color: colors.text,
+              child: Material(
+                color: Colors.transparent,
+                child: Column(
+                  children: [
+                    RadioListTile<String>(
+                      title: Text(
+                        'جمهور الفقهاء (الشافعي، المالكي، الحنبلي)',
+                        style: TextStyle(
+                          fontFamily: AppTypography.uiFont,
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.bold,
+                          color: colors.text,
+                        ),
                       ),
-                    ),
-                    subtitle: Text(
-                      'العصر عند صيرورة ظل الشيء مثله',
-                      style: TextStyle(fontFamily: AppTypography.uiFont, fontSize: 12.0, color: colors.textMuted),
-                    ),
-                    value: 'SHAFI',
-                    groupValue: settings.madhab.toUpperCase(),
-                    activeColor: colors.primary,
-                    onChanged: (val) => controller.updateMadhab(val!),
-                  ),
-                  const Divider(height: 1),
-                  RadioListTile<String>(
-                    title: Text(
-                      'المذهب الحنفي',
-                      style: TextStyle(
-                        fontFamily: AppTypography.uiFont,
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.bold,
-                        color: colors.text,
+                      subtitle: Text(
+                        'العصر عند صيرورة ظل الشيء مثله',
+                        style: TextStyle(fontFamily: AppTypography.uiFont, fontSize: 12.0, color: colors.textMuted),
                       ),
+                      value: 'SHAFI',
+                      groupValue: settings.madhab.toUpperCase(),
+                      activeColor: colors.primary,
+                      onChanged: (val) => controller.updateMadhab(val!),
                     ),
-                    subtitle: Text(
-                      'العصر عند صيرورة ظل الشيء مثليه',
-                      style: TextStyle(fontFamily: AppTypography.uiFont, fontSize: 12.0, color: colors.textMuted),
+                    const Divider(height: 1),
+                    RadioListTile<String>(
+                      title: Text(
+                        'المذهب الحنفي',
+                        style: TextStyle(
+                          fontFamily: AppTypography.uiFont,
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.bold,
+                          color: colors.text,
+                        ),
+                      ),
+                      subtitle: Text(
+                        'العصر عند صيرورة ظل الشيء مثليه',
+                        style: TextStyle(fontFamily: AppTypography.uiFont, fontSize: 12.0, color: colors.textMuted),
+                      ),
+                      value: 'HANAFI',
+                      groupValue: settings.madhab.toUpperCase(),
+                      activeColor: colors.primary,
+                      onChanged: (val) => controller.updateMadhab(val!),
                     ),
-                    value: 'HANAFI',
-                    groupValue: settings.madhab.toUpperCase(),
-                    activeColor: colors.primary,
-                    onChanged: (val) => controller.updateMadhab(val!),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
 

@@ -1,10 +1,10 @@
 import 'package:adhan/adhan.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_spacing.dart';
 import '../../../../core/design/app_typography.dart';
+import '../../../../core/util/arabic_date_formatter.dart';
 import '../../../adhan/presentation/view_model/adhan_view_model.dart';
 import '../../data/islamic_calendar_service.dart';
 
@@ -83,17 +83,7 @@ class _RamadanImsakiaViewState extends State<RamadanImsakiaView> {
   }
 
   String _formatTime(DateTime dt) {
-    try {
-      return DateFormat('hh:mm a', 'ar').format(dt);
-    } catch (_) {
-      int hour = dt.hour;
-      final minute = dt.minute.toString().padLeft(2, '0');
-      final period = hour >= 12 ? 'م' : 'ص';
-      hour = hour % 12;
-      if (hour == 0) hour = 12;
-      final hourStr = hour.toString().padLeft(2, '0');
-      return '$hourStr:$minute $period';
-    }
+    return ArabicDateFormatter.formatTime12h(dt);
   }
 
   @override
