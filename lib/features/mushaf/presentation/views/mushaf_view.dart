@@ -6,6 +6,7 @@ import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_radius.dart';
 import '../../../../core/design/app_spacing.dart';
 import '../../../../core/design/app_typography.dart';
+import '../../../../core/mushaf/mushaf_raster_cache.dart';
 import '../controllers/mushaf_controller.dart';
 import '../models/mushaf_theme_model.dart';
 import '../utils/mushaf_scroll_physics.dart';
@@ -33,6 +34,9 @@ class MushafView extends StatelessWidget {
               bottom: false,
               child: OrientationBuilder(
                 builder: (context, orientation) {
+                  // Orientation change: clear raster cache to release memory and recalculate dimensions
+                  MushafRasterCache.instance.clear();
+
                   final isDualMode = orientation == Orientation.landscape ||
                       MediaQuery.of(context).size.width >= 720;
 
