@@ -14,55 +14,14 @@ object AzkarScheduler {
     const val REQUEST_CODE_CHAINED_AZKAR = 40001
 
     /**
-     * Schedules the next chained Azkar notification alarm based on user settings.
+     * Schedules the next Azkar notification through the UnifiedReminderScheduler.
+     * All reminder scheduling is unified in one engine.
      */
     fun scheduleNext(context: Context) {
-        val settings = AzkarSettingsManager.getSettings(context)
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-        if (!settings.enabled) {
-            cancel(context)
-            Log.i(TAG, "Azkar notifications disabled. Cancelled alarm.")
-            return
-        }
-
-        val nextTriggerMillis = calculateNextTriggerTime(
-            intervalMinutes = settings.intervalMinutes,
-            fromHour = settings.activeFromHour,
-            fromMinute = settings.activeFromMinute,
-            toHour = settings.activeToHour,
-            toMinute = settings.activeToMinute
-        )
-
-        val intent = Intent(context, AzkarReceiver::class.java).apply {
-            action = AzkarReceiver.ACTION_TRIGGER_AZKAR
-        }
-
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            REQUEST_CODE_CHAINED_AZKAR,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmManager.setAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    nextTriggerMillis,
-                    pendingIntent
-                )
-            } else {
-                alarmManager.set(
-                    AlarmManager.RTC_WAKEUP,
-                    nextTriggerMillis,
-                    pendingIntent
-                )
-            }
-            Log.i(TAG, "⏰ Scheduled next chained Azkar alarm at ${Date(nextTriggerMillis)} (in ${settings.intervalMinutes} min intervals)")
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to schedule chained azkar alarm: ${e.message}", e)
-        }
+        // Cancel any legacy separate alarm to ensure no double-firing
+        cancel(context)
+        Log.i(TAG, "Delegating Azkar scheduling to UnifiedReminderScheduler")
+        com.example.quran_app_android.reminders.UnifiedReminderScheduler.scheduleNext(context)
     }
 
     /**

@@ -7,7 +7,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 
 import 'package:get/get.dart';
-import 'package:quran_app_android/core/data/repositories/user_repository.dart';
+import 'package:quran_app_android/core/native/native_reminders_bridge.dart';
 import 'package:quran_app_android/core/util/constant/static_vars.dart';
 import 'package:quran_app_android/core/util/routes/routes.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -159,169 +159,39 @@ class NotifyHelper {
     );
   }
 
+  /// Schedules Azkar notifications via the Unified Native Reminders Engine.
+  /// Legacy zonedSchedule calls have been removed to avoid duplicate alarms.
   Future<void> scheduleAzkar({TimeOfDay? timeOfDay}) async {
-    if (!await ensureSchedulingPermissions()) {
-      debugPrint(
-        'Unable to schedule azkar notification because required permissions are missing.',
-      );
-      return;
+    try {
+      await NativeRemindersBridge.rescheduleAll();
+      debugPrint('Azkar scheduled via Unified Native Reminders Engine.');
+    } catch (e) {
+      debugPrint('Error triggering unified reminder for azkar: $e');
     }
-
-    final List<String> adhkar = StaticVars().smallDo3a2;
-    if (adhkar.isEmpty) {
-      debugPrint('Azkar list is empty, skipping scheduled notification.');
-      return;
-    }
-    final int randomIndex = Random().nextInt(adhkar.length);
-    final TimeOfDay reminderTime =
-        timeOfDay ?? const TimeOfDay(hour: 10, minute: 10);
-
-    final AndroidNotificationDetails androidDetails =
-        AndroidNotificationDetails(
-          _azkarChannel.id,
-          _azkarChannel.name,
-          channelDescription: _azkarChannel.description,
-          importance: Importance.high,
-          priority: Priority.high,
-          playSound: true,
-          enableVibration: true,
-          showWhen: false,
-          sound: RawResourceAndroidNotificationSound(
-            _stripExtension(soundAzkar2),
-          ),
-        );
-    final DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
-      sound: soundAzkar2,
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-      interruptionLevel: InterruptionLevel.timeSensitive,
-    );
-
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-      1,
-      'أذكار الصباح',
-      adhkar[randomIndex],
-      _nextDailyInstance(timeOfDay: reminderTime),
-      NotificationDetails(android: androidDetails, iOS: iosDetails),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      payload: 'adhkar|daily',
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time,
-    );
   }
 
-  tz.TZDateTime _nextDailyInstance({required TimeOfDay timeOfDay}) {
-    final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-    tz.TZDateTime scheduledDate = tz.TZDateTime(
-      tz.local,
-      now.year,
-      now.month,
-      now.day,
-      timeOfDay.hour,
-      timeOfDay.minute,
-    );
-    if (scheduledDate.isBefore(now)) {
-      scheduledDate = scheduledDate.add(const Duration(days: 1));
-    }
-    return scheduledDate;
-  }
-
-  /// Schedules daily Wird reminders (primary reminder + smart late reminder).
+  /// Schedules daily Wird reminders via the Unified Native Reminders Engine.
+  /// Legacy zonedSchedule calls have been removed to prevent duplicate alerts.
   Future<void> scheduleDailyWirdNotification({
     TimeOfDay? reminderTime,
     TimeOfDay? lateReminderTime,
   }) async {
-    if (!await ensureSchedulingPermissions()) {
-      debugPrint('Cannot schedule wird: missing scheduling permissions.');
-      return;
+    try {
+      await NativeRemindersBridge.rescheduleAll();
+      debugPrint('Daily Wird scheduled via Unified Native Reminders Engine.');
+    } catch (e) {
+      debugPrint('Error triggering unified reminder for wird: $e');
     }
-
-    final userRepo = UserRepository();
-    final plan = await userRepo.getWirdPlan();
-    if (plan == null || !plan.enabled) {
-      return;
-    }
-
-    final today = DateTime.now().toIso8601String().substring(0, 10);
-    final isCompletedToday = plan.lastCompletedDate == today;
-    if (isCompletedToday) {
-      debugPrint('Today wird is already completed; skipping reminder notifications.');
-      await cancelWirdNotifications();
-      return;
-    }
-
-    // Parse reminder time from plan string "HH:MM"
-    TimeOfDay primaryTime = const TimeOfDay(hour: 8, minute: 0);
-    if (reminderTime != null) {
-      primaryTime = reminderTime;
-    } else {
-      final parts = plan.reminderTime.split(':');
-      if (parts.length == 2) {
-        final h = int.tryParse(parts[0]) ?? 8;
-        final m = int.tryParse(parts[1]) ?? 0;
-        primaryTime = TimeOfDay(hour: h, minute: m);
-      }
-    }
-
-    final AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-      _wirdChannel.id,
-      _wirdChannel.name,
-      channelDescription: _wirdChannel.description,
-      importance: Importance.high,
-      priority: Priority.high,
-      playSound: true,
-      enableVibration: true,
-    );
-    const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-      interruptionLevel: InterruptionLevel.timeSensitive,
-    );
-
-    // 1. Primary reminder
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-      900,
-      'الورد اليومي للقرآن',
-      'حان موعد وردك اليومي المبارك (من صـ ${plan.startPage} إلى صـ ${plan.endPage})',
-      _nextDailyInstance(timeOfDay: primaryTime),
-      NotificationDetails(android: androidDetails, iOS: iosDetails),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      payload: 'mushaf|wird|${plan.startPage}',
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time,
-    );
-
-    // 2. Smart late reminder: Reminds user if not finished yet
-    final lateTime = lateReminderTime ??
-        TimeOfDay(
-          hour: (primaryTime.hour + 3) % 24,
-          minute: primaryTime.minute,
-        );
-
-    final todayLog = await userRepo.getTodayReadingLog();
-    final readSoFar = todayLog?.pagesRead ?? 0;
-    final target = (plan.endPage - plan.startPage + 1).clamp(1, 604);
-    final remaining = (target - readSoFar).clamp(1, target);
-
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-      901,
-      'تذكير بالورد اليومي',
-      'باقي لك $remaining صفحات من وردك اليومي، داوم على ختمتك المباركة',
-      _nextDailyInstance(timeOfDay: lateTime),
-      NotificationDetails(android: androidDetails, iOS: iosDetails),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      payload: 'mushaf|wird|${plan.startPage}',
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time,
-    );
   }
 
   Future<void> cancelWirdNotifications() async {
-    await flutterLocalNotificationsPlugin.cancel(900);
-    await flutterLocalNotificationsPlugin.cancel(901);
+    try {
+      await flutterLocalNotificationsPlugin.cancel(900);
+      await flutterLocalNotificationsPlugin.cancel(901);
+      await NativeRemindersBridge.markWirdCompleted();
+    } catch (e) {
+      debugPrint('Error cancelling wird notification: $e');
+    }
   }
 
   Future<void> schedulePrayerTimeNotification({
