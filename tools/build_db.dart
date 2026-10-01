@@ -79,6 +79,8 @@ void main() async {
       text_ar TEXT NOT NULL,
       text_en TEXT,
       tafsir_muyassar TEXT,
+      tafsir_saadi TEXT,
+      tafsir_ibn_kathir TEXT,
       text_search TEXT NOT NULL,
       FOREIGN KEY (surah_id) REFERENCES surahs (id)
     );
@@ -221,6 +223,16 @@ void main() async {
     }
   }
 
+  Map<String, dynamic> saadiMap = {};
+  if (File(resolveSource('tafsir_saadi.json')).existsSync()) {
+    saadiMap = json.decode(File(resolveSource('tafsir_saadi.json')).readAsStringSync(encoding: utf8));
+  }
+
+  Map<String, dynamic> ibnKathirMap = {};
+  if (File(resolveSource('tafsir_ibn_kathir.json')).existsSync()) {
+    ibnKathirMap = json.decode(File(resolveSource('tafsir_ibn_kathir.json')).readAsStringSync(encoding: utf8));
+  }
+
   batch = db.batch();
   int globalAyahId = 0;
   for (final surahObj in quranEnList) {
@@ -233,6 +245,8 @@ void main() async {
       final String textAr = v['text'] as String;
       final String textEn = v['translation'] as String? ?? '';
       final String tafsir = tafsirMap['$surahId:$ayahNum'] ?? '';
+      final String saadi = saadiMap['$surahId:$ayahNum'] as String? ?? '';
+      final String ibnKathir = ibnKathirMap['$surahId:$ayahNum'] as String? ?? '';
       final String textSearch = normalizeArabic(textAr);
 
       batch.insert('ayahs', {
@@ -243,6 +257,8 @@ void main() async {
         'text_ar': textAr,
         'text_en': textEn,
         'tafsir_muyassar': tafsir,
+        'tafsir_saadi': saadi,
+        'tafsir_ibn_kathir': ibnKathir,
         'text_search': textSearch,
       });
 

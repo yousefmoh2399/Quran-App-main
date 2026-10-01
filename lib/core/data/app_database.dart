@@ -10,7 +10,7 @@ class AppDatabase {
   static final AppDatabase instance = AppDatabase._internal();
 
   static const String dbName = 'app_data.db';
-  static const int currentDbVersion = 1;
+  static const int currentDbVersion = 2;
 
   Database? _db;
 
