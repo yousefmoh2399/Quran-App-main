@@ -52,6 +52,9 @@ class MushafController extends GetxController {
   final RxString commuteSlotId = 'commute'.obs;
   final RxBool commuteCountTowardsMain = true.obs;
 
+  // Debounced last read timer (2 seconds after page settles)
+  Timer? _lastReadDebounce;
+
   // Reading dwell timer (5 seconds dwell triggers reading log)
   Timer? _dwellTimer;
 
@@ -86,6 +89,8 @@ class MushafController extends GetxController {
   @override
   void onClose() {
     _dwellTimer?.cancel();
+    _lastReadDebounce?.cancel();
+    _saveLastRead(currentPage.value);
     MushafRasterCache.instance.clear();
     pageController.dispose();
     super.dispose();
@@ -207,9 +212,14 @@ class MushafController extends GetxController {
 
     currentPage.value = clamped;
     clearAyahSelection();
-    _saveLastRead(clamped);
-    _startDwellTimer(clamped);
 
+    // 2-second debounce before persisting last read position
+    _lastReadDebounce?.cancel();
+    _lastReadDebounce = Timer(const Duration(seconds: 2), () {
+      _saveLastRead(clamped);
+    });
+
+    _startDwellTimer(clamped);
     _preloadAdjacentPages(clamped);
   }
 

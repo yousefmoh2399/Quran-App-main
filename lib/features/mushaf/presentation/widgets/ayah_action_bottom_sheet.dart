@@ -399,16 +399,34 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet> {
                           ),
                         ],
                       ),
-                      IconButton(
-                        icon: Icon(
-                          _showNotesInput ? Icons.note_rounded : Icons.note_add_outlined,
-                          size: 20.0,
-                          color: colors.accent,
-                        ),
-                        tooltip: 'ملاحظة',
-                        onPressed: () {
-                          setState(() => _showNotesInput = !_showNotesInput);
-                        },
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (_isBookmarked)
+                            TextButton.icon(
+                              onPressed: _toggleBookmark,
+                              icon: Icon(Icons.bookmark_remove_rounded, size: 16.0, color: colors.error),
+                              label: Text(
+                                'حذف',
+                                style: TextStyle(
+                                  fontFamily: AppTypography.uiFont,
+                                  color: colors.error,
+                                  fontSize: 12.0,
+                                ),
+                              ),
+                            ),
+                          IconButton(
+                            icon: Icon(
+                              _showNotesInput ? Icons.note_rounded : Icons.note_add_outlined,
+                              size: 20.0,
+                              color: colors.accent,
+                            ),
+                            tooltip: 'ملاحظة',
+                            onPressed: () {
+                              setState(() => _showNotesInput = !_showNotesInput);
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),

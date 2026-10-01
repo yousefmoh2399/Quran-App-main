@@ -143,20 +143,7 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
                   fit: BoxFit.fill,
                 ),
               ),
-              if (widget.pageBookmarkColor != null || widget.pageMemorizeStatus != null)
-                Positioned(
-                  top: 0.0,
-                  right: widget.isRightPage ? 36.0 : null,
-                  left: widget.isRightPage ? null : 36.0,
-                  child: PageRibbonWidget(
-                    color: widget.pageBookmarkColor?.color ??
-                        widget.pageMemorizeStatus?.badgeColor ??
-                        Colors.amber,
-                    icon: widget.pageBookmarkColor != null
-                        ? Icons.bookmark_rounded
-                        : Icons.check_circle_rounded,
-                  ),
-                ),
+              ..._buildRibbons(),
             ],
           ),
         ),
@@ -209,21 +196,8 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
                     ),
                   ),
 
-                  // Corner Silk Ribbon (Bookmarked or Memorized)
-                  if (widget.pageBookmarkColor != null || widget.pageMemorizeStatus != null)
-                    Positioned(
-                      top: 0.0,
-                      right: widget.isRightPage ? 36.0 : null,
-                      left: widget.isRightPage ? null : 36.0,
-                      child: PageRibbonWidget(
-                        color: widget.pageBookmarkColor?.color ??
-                            widget.pageMemorizeStatus?.badgeColor ??
-                            Colors.amber,
-                        icon: widget.pageBookmarkColor != null
-                            ? Icons.bookmark_rounded
-                            : Icons.check_circle_rounded,
-                      ),
-                    ),
+                  // Corner Silk Ribbons (Bookmarked and/or Memorized)
+                  ..._buildRibbons(),
                 ],
               ),
             ),
@@ -231,6 +205,52 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
         },
       ),
     );
+  }
+
+  /// Builds corner silk ribbons for bookmarked and/or memorized page.
+  List<Widget> _buildRibbons() {
+    final ribbons = <Widget>[];
+
+    final hasBookmark = widget.pageBookmarkColor != null;
+    final hasMemorize = widget.pageMemorizeStatus != null;
+
+    if (hasBookmark) {
+      ribbons.add(
+        Positioned(
+          top: 0.0,
+          right: widget.isRightPage ? 36.0 : null,
+          left: widget.isRightPage ? null : 36.0,
+          child: PageRibbonWidget(
+            color: widget.pageBookmarkColor!.color,
+            icon: Icons.bookmark_rounded,
+          ),
+        ),
+      );
+    }
+
+    if (hasMemorize) {
+      final double offset = hasBookmark ? 66.0 : 36.0;
+      final status = widget.pageMemorizeStatus!;
+      final IconData memIcon = status == MemorizeStatus.memorized
+          ? Icons.check_circle_rounded
+          : (status == MemorizeStatus.needsReview
+              ? Icons.rate_review_rounded
+              : Icons.sync_rounded);
+
+      ribbons.add(
+        Positioned(
+          top: 0.0,
+          right: widget.isRightPage ? offset : null,
+          left: widget.isRightPage ? null : offset,
+          child: PageRibbonWidget(
+            color: status.badgeColor,
+            icon: memIcon,
+          ),
+        ),
+      );
+    }
+
+    return ribbons;
   }
 
   /// Builds the top header row:

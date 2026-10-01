@@ -166,6 +166,9 @@ class MushafLineWidget extends StatelessWidget {
             if (isHighlighted) {
               bgColor = theme.ayahHighlight;
               border = Border.all(color: theme.surahHeaderBorder, width: 0.8);
+            } else if (bookmarkColor != null && memorizeStatus != null) {
+              bgColor = memorizeStatus.badgeColor.withOpacity(0.18);
+              border = Border.all(color: bookmarkColor.color.withOpacity(0.80), width: 1.0);
             } else if (bookmarkColor != null) {
               bgColor = bookmarkColor.color.withOpacity(0.20);
               border = Border.all(color: bookmarkColor.color.withOpacity(0.60), width: 0.7);
