@@ -174,8 +174,8 @@ class MushafController extends GetxController {
       _loadPage(target);
     }
 
-    // Queue adjacent pages that need rasterization
-    final needingRaster = targets.take(2).where(
+    // Queue adjacent +-2 pages that need offscreen rasterization
+    final needingRaster = targets.where(
       (p) => !MushafRasterCache.instance.has(p, currentTheme.value),
     ).toList();
     pagesToPreload.assignAll(needingRaster);
