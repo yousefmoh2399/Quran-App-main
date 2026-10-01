@@ -55,21 +55,19 @@ class MushafPageWidget extends StatefulWidget {
 class _MushafPageWidgetState extends State<MushafPageWidget> {
   final GlobalKey _boundaryKey = GlobalKey();
   bool _isCapturing = false;
+  late Future<void> _fontLoadingFuture;
 
   @override
   void initState() {
     super.initState();
-    _scheduleCapture();
+    _fontLoadingFuture = _ensurePageFonts(widget.page);
   }
 
   @override
   void didUpdateWidget(covariant MushafPageWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.page.pageNumber != widget.page.pageNumber ||
-        oldWidget.theme.mode != widget.theme.mode ||
-        oldWidget.pageBookmarkColor != widget.pageBookmarkColor ||
-        oldWidget.pageMemorizeStatus != widget.pageMemorizeStatus) {
-      _scheduleCapture();
+    if (oldWidget.page.pageNumber != widget.page.pageNumber) {
+      _fontLoadingFuture = _ensurePageFonts(widget.page);
     }
   }
 
@@ -81,7 +79,7 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
 
   Future<void> _captureRasterImage() async {
     if (!mounted || _isCapturing) return;
-    if (widget.selectedAyah != null) return;
+    if (widget.selectedAyah != null || widget.isMoving) return;
     if (MushafRasterCache.instance.has(widget.page.pageNumber, widget.theme.mode)) {
       return;
     }
@@ -127,23 +125,25 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
       widget.theme.mode,
     );
 
-    // When settled or moving:
-    // If live interactive content is not ready (fonts loading) or moving, display cached image.
-    // When settled and fonts are ready, seamlessly crossfade into live widgets without jumping or flickering.
-    return RepaintBoundary(
-      key: _boundaryKey,
-      child: FutureBuilder<void>(
-        future: _ensurePageFonts(widget.page),
-        builder: (context, snapshot) {
-          final fontReady = snapshot.connectionState == ConnectionState.done;
-          final showLiveInteractive = fontReady && !widget.isMoving;
+    return FutureBuilder<void>(
+      future: _fontLoadingFuture,
+      builder: (context, snapshot) {
+        final fontReady = snapshot.connectionState == ConnectionState.done;
+        final showLiveInteractive = fontReady && !widget.isMoving;
 
-          final liveContent = GestureDetector(
+        if (fontReady && !widget.isMoving && widget.selectedAyah == null) {
+          _scheduleCapture();
+        }
+
+        final liveContent = RepaintBoundary(
+          key: _boundaryKey,
+          child: GestureDetector(
             onTap: widget.onTapPage,
             behavior: HitTestBehavior.opaque,
             child: Container(
               color: widget.theme.pageBg,
               child: Stack(
+                fit: StackFit.expand,
                 children: [
                   CustomPaint(
                     painter: MushafFramePainter(
@@ -181,7 +181,8 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
                 ],
               ),
             ),
-          );
+          ),
+        );
 
           if (cachedImage != null && widget.selectedAyah == null) {
             final cachedView = GestureDetector(
@@ -229,8 +230,7 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
 
           return liveContent;
         },
-      ),
-    );
+      );
   }
 
   /// Builds corner silk ribbons for bookmarked and/or memorized page.

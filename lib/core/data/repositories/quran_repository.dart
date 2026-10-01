@@ -192,13 +192,13 @@ class QuranRepository {
     try {
       final juzRows = await db.query(
         'juz_metadata',
-        columns: ['juz_number', 'start_page', 'end_page'],
+        columns: ['juz_number', 'start_page'],
         orderBy: 'juz_number ASC',
       );
       for (final j in juzRows) {
         final jNum = j['juz_number'] as int;
         final startP = j['start_page'] as int;
-        final endP = (j['end_page'] as int?) ?? (startP + 19).clamp(1, 604);
+        final endP = (startP + 19).clamp(1, 604);
         juzPages[jNum] = [startP, endP];
       }
     } catch (_) {
