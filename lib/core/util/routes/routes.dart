@@ -39,11 +39,18 @@ import 'package:quran_app_android/features/prayers_tracker/presentation/views/po
 import 'package:quran_app_android/features/calendar/presentation/views/islamic_calendar_view.dart';
 import 'package:quran_app_android/features/calendar/presentation/views/ramadan_imsakia_view.dart';
 import 'package:quran_app_android/features/stats/presentation/views/achievements_dashboard_view.dart';
+import 'package:quran_app_android/features/splash/presentation/views/splash_screen_view.dart';
 import 'package:quran_app_android/features/tafsser/presentation/views/tafseer_details_view.dart';
 import 'package:quran_app_android/features/tafsser/presentation/views/tafseer_view.dart';
 
 class AppRoutes {
   static List<GetPage> routes = [
+    GetPage(
+      name: splash,
+      page: () => const SplashScreenView(),
+      transition: Transition.fade,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
     GetPage(
       name: home,
       page: () => HomeView(),
@@ -288,6 +295,7 @@ class AppRoutes {
     ],
   ];
 
+  static String splash = '/splash';
   static String home = '/home';
   static String bookmarks = '/bookmarks';
   static String settings = '/settings';

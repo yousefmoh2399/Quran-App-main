@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:quran_app_android/core/design/app_colors.dart';
 import 'package:quran_app_android/core/design/app_radius.dart';
 import 'package:quran_app_android/core/design/app_spacing.dart';
 import 'package:quran_app_android/core/design/app_typography.dart';
 import 'package:quran_app_android/core/design/components/app_card.dart';
 import 'package:quran_app_android/features/azkar/data/smart_azkar_service.dart';
+import 'package:quran_app_android/features/azkar/presentation/views/widgets/zikr_image_share_dialog.dart';
 
 class SmartZikrCard extends StatefulWidget {
   const SmartZikrCard({super.key});
@@ -92,9 +92,14 @@ class _SmartZikrCardState extends State<SmartZikrCard> {
                   IconButton(
                     icon: const Icon(Icons.share_rounded, size: 18),
                     color: colors.textMuted,
-                    tooltip: 'مشاركة',
+                    tooltip: 'مشاركة الذكر كصورة أو نص',
                     onPressed: () {
-                      Share.share('${_currentZikr.text}\n\n— من أذكار تطبيق تقرّب');
+                      ZikrShareHelper.showShareOptions(
+                        context,
+                        zikrText: _currentZikr.text,
+                        virtue: _currentZikr.virture,
+                        categoryTitle: 'ذكر مقترح • ${_currentZikr.type.title}',
+                      );
                     },
                   ),
                 ],

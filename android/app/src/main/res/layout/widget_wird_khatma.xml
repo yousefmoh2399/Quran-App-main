@@ -32,8 +32,10 @@
             android:textColor="#A0B8AD"
             android:textSize="11sp"
             android:background="@drawable/widget_card_inner"
-            android:paddingHorizontal="8dp"
-            android:paddingVertical="3dp" />
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp" />
     </LinearLayout>
 
     <!-- Center Card: Progress and Target -->
@@ -100,7 +102,8 @@
         android:layout_height="wrap_content"
         android:background="@drawable/widget_btn_secondary"
         android:gravity="center"
-        android:paddingVertical="7dp"
+        android:paddingTop="7dp"
+        android:paddingBottom="7dp"
         android:layout_marginTop="8dp"
         android:clickable="true"
         android:focusable="true">

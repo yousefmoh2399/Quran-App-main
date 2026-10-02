@@ -180,8 +180,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/widget_badge_bg"
-            android:paddingHorizontal="8dp"
-            android:paddingVertical="3dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp"
             android:text="تسابيح وتحميد"
             android:textColor="#5CDBB5"
             android:textSize="10sp"
@@ -193,7 +195,8 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:gravity="center"
-            android:paddingVertical="4dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
             android:text="سُبْحَانَ اللهِ وَبِحَمْدِهِ ، سُبْحَانَ اللهِ الْعَظِيمِ"
             android:textColor="#FFFFFF"
             android:textSize="15sp"
@@ -229,24 +232,31 @@
             android:layout_weight="1"
             android:background="@drawable/widget_btn_secondary"
             android:gravity="center"
-            android:paddingVertical="6dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
             android:text="فتح التطبيق 📖"
             android:textColor="#5CDBB5"
             android:textSize="11sp"
             android:textStyle="bold"
-            android:layout_marginEnd="8dp" />
+            android:layout_marginEnd="8dp"
+            android:clickable="true"
+            android:focusable="true" />
 
         <TextView
             android:id="@+id/large_btn_next"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/widget_btn_secondary"
-            android:paddingHorizontal="14dp"
-            android:paddingVertical="6dp"
+            android:paddingLeft="14dp"
+            android:paddingRight="14dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
             android:text="ذكر آخر ↺"
             android:textColor="#FFFFFF"
             android:textSize="11sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:clickable="true"
+            android:focusable="true" />
     </LinearLayout>
 
 </LinearLayout>

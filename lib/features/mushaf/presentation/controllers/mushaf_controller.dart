@@ -202,6 +202,14 @@ class MushafController extends GetxController {
     final page = pagesCache[pageNumber];
     await prefs.setInt(_prefLastPage, pageNumber);
 
+    // Track active Wird position if reading within active plan range
+    try {
+      final wirdPlan = await _userRepo.getWirdPlan();
+      if (wirdPlan != null && wirdPlan.enabled && pageNumber >= wirdPlan.startPage && pageNumber <= wirdPlan.endPage) {
+        await prefs.setInt('wird_last_page', pageNumber);
+      }
+    } catch (_) {}
+
     if (page != null) {
       await prefs.setInt('mushaf_last_surah', page.surahNumber);
       await prefs.setString('mushaf_last_surah_name', page.surahNameAr);

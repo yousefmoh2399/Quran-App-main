@@ -187,6 +187,20 @@ class ContinueReadingWirdCard extends StatelessWidget {
     final progressRatio = (currentRead / targetPages).clamp(0.0, 1.0);
     final isCompleted = progressRatio >= 1.0;
 
+    final settings = Get.find<SettingsServices>();
+    final savedWirdPage = settings.sharedPref?.getInt('wird_last_page');
+    final lastRead = homeVM.lastReadPage.value;
+
+    int resumePage = plan.startPage;
+    if (savedWirdPage != null && savedWirdPage >= plan.startPage && savedWirdPage <= plan.endPage) {
+      resumePage = savedWirdPage;
+    } else if (lastRead != null && lastRead >= plan.startPage && lastRead <= plan.endPage) {
+      resumePage = lastRead;
+    } else if (currentRead > 0) {
+      resumePage = (plan.startPage + currentRead).clamp(plan.startPage, plan.endPage);
+    }
+    final bool hasStartedWird = (resumePage > plan.startPage) || (currentRead > 0);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -286,7 +300,7 @@ class ContinueReadingWirdCard extends StatelessWidget {
                 onTap: () {
                   Get.toNamed(
                     AppRoutes.mushaf,
-                    arguments: {'pageNumber': plan.startPage},
+                    arguments: {'pageNumber': resumePage},
                   )?.then((_) => homeVM.loadUserQuranData());
                 },
                 borderRadius: AppRadius.borderSm,
@@ -296,7 +310,9 @@ class ContinueReadingWirdCard extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'قراءة الورد',
+                        hasStartedWird
+                            ? 'أكمل (صـ ${toArabicDigits(resumePage)})'
+                            : 'قراءة الورد',
                         style: TextStyle(
                           fontFamily: AppTypography.uiFont,
                           fontSize: 11.5,

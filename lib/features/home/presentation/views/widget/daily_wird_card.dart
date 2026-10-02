@@ -7,6 +7,7 @@ import 'package:quran_app_android/core/design/app_radius.dart';
 import 'package:quran_app_android/core/design/app_spacing.dart';
 import 'package:quran_app_android/core/design/app_typography.dart';
 import 'package:quran_app_android/core/design/components/app_card.dart';
+import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
 import 'package:quran_app_android/core/util/routes/routes.dart';
 import 'package:quran_app_android/features/home/presentation/view_model/home_view_model.dart';
 import 'package:quran_app_android/features/mushaf/presentation/utils/mushaf_utils.dart';
@@ -91,6 +92,20 @@ class DailyWirdCard extends StatelessWidget {
       final currentRead = todayPages.clamp(0, targetPages);
       final progressRatio = (currentRead / targetPages).clamp(0.0, 1.0);
       final isCompleted = progressRatio >= 1.0;
+
+      final settings = Get.find<SettingsServices>();
+      final savedWirdPage = settings.sharedPref?.getInt('wird_last_page');
+      final lastRead = homeVM.lastReadPage.value;
+
+      int resumePage = plan.startPage;
+      if (savedWirdPage != null && savedWirdPage >= plan.startPage && savedWirdPage <= plan.endPage) {
+        resumePage = savedWirdPage;
+      } else if (lastRead != null && lastRead >= plan.startPage && lastRead <= plan.endPage) {
+        resumePage = lastRead;
+      } else if (currentRead > 0) {
+        resumePage = (plan.startPage + currentRead).clamp(plan.startPage, plan.endPage);
+      }
+      final bool hasStartedWird = (resumePage > plan.startPage) || (currentRead > 0);
 
       return AppCard(
         variant: AppCardVariant.elevated,
@@ -220,7 +235,7 @@ class DailyWirdCard extends StatelessWidget {
                     ),
                     icon: Icon(Icons.play_arrow_rounded, color: colors.primary, size: 20),
                     label: Text(
-                      'ابدأ الورد',
+                      hasStartedWird ? 'أكمل الورد (صـ ${toArabicDigits(resumePage)})' : 'ابدأ الورد',
                       style: TextStyle(
                         fontFamily: AppTypography.uiFont,
                         color: colors.primary,
@@ -230,7 +245,7 @@ class DailyWirdCard extends StatelessWidget {
                     onPressed: () {
                       Get.toNamed(
                         AppRoutes.mushaf,
-                        arguments: {'pageNumber': plan.startPage},
+                        arguments: {'pageNumber': resumePage},
                       )?.then((_) => homeVM.loadUserQuranData());
                     },
                   ),

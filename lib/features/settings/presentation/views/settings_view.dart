@@ -8,7 +8,10 @@ import 'package:quran_app_android/core/design/app_typography.dart';
 import 'package:quran_app_android/core/design/components/app_card.dart';
 import 'package:quran_app_android/core/design/components/app_scaffold.dart';
 import 'package:quran_app_android/core/design/gallery/design_gallery_view.dart';
+import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
+import 'package:quran_app_android/core/service/settings/notifications_services.dart';
 import 'package:quran_app_android/core/util/routes/routes.dart';
+import 'package:quran_app_android/features/adhan/presentation/view_model/adhan_view_model.dart';
 import 'package:quran_app_android/features/settings/presentation/views/widget/section_theme_mode.dart';
 import 'package:quran_app_android/features/settings/presentation/views/widget/settings_group_card.dart';
 import 'package:quran_app_android/features/settings/presentation/views/widget/settings_tile.dart';
@@ -111,6 +114,35 @@ class SettingsView extends StatelessWidget {
                   title: 'إعدادات الأذان والمؤذن والمواقيت',
                   subtitle: 'طريقة الحساب، المذهب، أصوات المؤذنين، وتعديل الدقائق',
                   onTap: () => Get.toNamed(AppRoutes.adhanSettings),
+                ),
+                StatefulBuilder(
+                  builder: (context, setState) {
+                    final settings = Get.find<SettingsServices>();
+                    final isBannerOn = settings.sharedPref?.getBool('prayer_banner_enabled') ?? true;
+
+                    return SettingsTile(
+                      icon: Icons.view_headline_rounded,
+                      iconColor: colors.primary,
+                      title: 'شريط مواقيت الصلاة في الإشعارات',
+                      subtitle: 'بانر دائم في شريط إشعارات الهاتف يعرض مواقيت اليوم والعد التنازلي',
+                      trailing: Switch.adaptive(
+                        value: isBannerOn,
+                        activeColor: colors.primary,
+                        onChanged: (val) async {
+                          await settings.sharedPref?.setBool('prayer_banner_enabled', val);
+                          setState(() {});
+                          if (Get.isRegistered<AdhanViewModel>()) {
+                            await Get.find<AdhanViewModel>().syncOngoingPrayerBanner();
+                          } else {
+                            final notify = NotifyHelper();
+                            if (!val) {
+                              await notify.cancelOngoingPrayerBanner();
+                            }
+                          }
+                        },
+                      ),
+                    );
+                  },
                 ),
                 SettingsTile(
                   icon: Icons.security_rounded,

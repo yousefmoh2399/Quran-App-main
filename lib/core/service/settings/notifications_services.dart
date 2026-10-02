@@ -26,6 +26,18 @@ class NotifyHelper {
   static const String _azkarChannelId = 'azkar_channel';
   static const String _prayerChannelId = 'prayer_channel';
   static const String _wirdChannelId = 'wird_channel';
+  static const String _prayerBannerChannelId = 'prayer_banner_channel';
+
+  static final AndroidNotificationChannel _prayerBannerChannel =
+      AndroidNotificationChannel(
+        _prayerBannerChannelId,
+        'شريط مواقيت الصلاة الدائم',
+        description: 'عرض مستمر وأنيق لمواقيت الصلاة اليومية والعد التنازلي',
+        importance: Importance.low,
+        playSound: false,
+        enableVibration: false,
+        showBadge: false,
+      );
 
   static final AndroidNotificationChannel _wirdChannel =
       AndroidNotificationChannel(
@@ -115,6 +127,47 @@ class NotifyHelper {
     await androidPlugin.createNotificationChannel(_azkarChannel);
     await androidPlugin.createNotificationChannel(_prayerChannel);
     await androidPlugin.createNotificationChannel(_wirdChannel);
+    await androidPlugin.createNotificationChannel(_prayerBannerChannel);
+  }
+
+  static const int prayerBannerNotificationId = 99901;
+
+  Future<void> showOngoingPrayerBanner({
+    required String nextPrayerName,
+    required String nextPrayerTime,
+    required String countdownStr,
+    required String allPrayersLine,
+    required String cityName,
+  }) async {
+    final androidDetails = AndroidNotificationDetails(
+      _prayerBannerChannel.id,
+      _prayerBannerChannel.name,
+      channelDescription: _prayerBannerChannel.description,
+      importance: Importance.low,
+      priority: Priority.low,
+      ongoing: true,
+      autoCancel: false,
+      showWhen: false,
+      icon: 'icon',
+      styleInformation: BigTextStyleInformation(
+        '$allPrayersLine\n📍 المدينة: $cityName',
+        contentTitle: '🕌 الصلاة القادمة: $nextPrayerName $nextPrayerTime ($countdownStr)',
+        summaryText: 'مواقيت الصلاة',
+      ),
+      color: const Color(0xFF0F5C4A),
+    );
+
+    await flutterLocalNotificationsPlugin.show(
+      prayerBannerNotificationId,
+      '🕌 $nextPrayerName $nextPrayerTime • $countdownStr',
+      allPrayersLine,
+      NotificationDetails(android: androidDetails),
+      payload: 'taqarrab://prayer_times',
+    );
+  }
+
+  Future<void> cancelOngoingPrayerBanner() async {
+    await flutterLocalNotificationsPlugin.cancel(prayerBannerNotificationId);
   }
 
   Future<void> displayNotification() async {

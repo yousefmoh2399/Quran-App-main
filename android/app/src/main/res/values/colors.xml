@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#0F5C4A</color>
+    <color name="ic_launcher_background">#09261E</color>
+    <color name="launch_bg_color">#09261E</color>
     <color name="primary_emerald">#0F5C4A</color>
-    <color name="accent_gold">#B8892B</color>
+    <color name="accent_gold">#D4AF37</color>
 </resources>

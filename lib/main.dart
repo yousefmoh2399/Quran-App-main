@@ -116,7 +116,7 @@ class _MyAppState extends State<MyApp> {
       () => GetMaterialApp(
         debugShowCheckedModeBanner: false,
         scaffoldMessengerKey: PermissionsController.scaffoldMessengerKey,
-        initialRoute: AppRoutes.onboarding,
+        initialRoute: AppRoutes.splash,
         initialBinding: Binding(),
         getPages: AppRoutes.routes,
         theme: AppTheme.light,

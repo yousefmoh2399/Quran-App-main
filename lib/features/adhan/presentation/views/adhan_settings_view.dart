@@ -5,8 +5,11 @@ import 'package:quran_app_android/core/design/app_colors.dart';
 import 'package:quran_app_android/core/design/app_radius.dart';
 import 'package:quran_app_android/core/design/app_spacing.dart';
 import 'package:quran_app_android/core/design/app_typography.dart';
+import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
+import 'package:quran_app_android/core/service/settings/notifications_services.dart';
 import 'package:quran_app_android/core/util/routes/routes.dart';
 import 'package:quran_app_android/features/adhan/presentation/controllers/adhan_settings_controller.dart';
+import 'package:quran_app_android/features/adhan/presentation/view_model/adhan_view_model.dart';
 import 'package:quran_app_android/features/mushaf/presentation/utils/mushaf_utils.dart';
 
 class AdhanSettingsView extends StatelessWidget {
@@ -255,6 +258,71 @@ class AdhanSettingsView extends StatelessWidget {
                     ),
                   ),
                 ],
+              ),
+            ),
+
+            AppSpacing.verticalMd,
+
+            // Prayer Times Notification Banner Toggle
+            _buildSectionHeader('شريط الإشعارات لمواقيت الصلاة', Icons.view_headline_rounded, colors),
+            AppSpacing.verticalXs,
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+              decoration: BoxDecoration(
+                color: colors.surface,
+                borderRadius: AppRadius.borderLg,
+                border: Border.all(color: colors.divider),
+              ),
+              child: StatefulBuilder(
+                builder: (context, setBannerState) {
+                  final settings = Get.find<SettingsServices>();
+                  final isBannerOn = settings.sharedPref?.getBool('prayer_banner_enabled') ?? true;
+
+                  return Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'بانر مواقيت الصلاة الدائم',
+                              style: TextStyle(
+                                fontFamily: AppTypography.uiFont,
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.bold,
+                                color: colors.text,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'عرض دائم في شريط إشعارات الهاتف مع العد التنازلي',
+                              style: TextStyle(
+                                fontFamily: AppTypography.uiFont,
+                                fontSize: 11.5,
+                                color: colors.textMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Switch.adaptive(
+                        value: isBannerOn,
+                        activeColor: colors.primary,
+                        onChanged: (val) async {
+                          await settings.sharedPref?.setBool('prayer_banner_enabled', val);
+                          setBannerState(() {});
+                          if (Get.isRegistered<AdhanViewModel>()) {
+                            await Get.find<AdhanViewModel>().syncOngoingPrayerBanner();
+                          } else {
+                            if (!val) {
+                              await NotifyHelper().cancelOngoingPrayerBanner();
+                            }
+                          }
+                        },
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
 

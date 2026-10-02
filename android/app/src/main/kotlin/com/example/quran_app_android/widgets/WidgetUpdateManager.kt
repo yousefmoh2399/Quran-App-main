@@ -104,7 +104,9 @@ object WidgetUpdateManager {
         dhikr: AzkarItem,
         prayerData: PrayerWidgetData
     ) {
-        val ids = manager.getAppWidgetIds(ComponentName(context, AzkarMediumWidgetProvider::class.java))
+        val mediumIds = manager.getAppWidgetIds(ComponentName(context, AzkarMediumWidgetProvider::class.java))
+        val legacyIds = manager.getAppWidgetIds(ComponentName(context, com.example.quran_app_android.MyHomeWidget::class.java))
+        val ids = mediumIds + legacyIds
         if (ids.isEmpty()) return
 
         for (widgetId in ids) {
@@ -290,6 +292,9 @@ object WidgetUpdateManager {
     private fun createNextDhikrPendingIntent(context: Context): PendingIntent {
         val intent = Intent(context, WidgetActionReceiver::class.java).apply {
             action = ACTION_NEXT_DHIKR
+            setPackage(context.packageName)
+            data = android.net.Uri.parse("taqarrab://widget/next_dhikr?t=${System.currentTimeMillis()}")
+            putExtra("ts", System.currentTimeMillis())
         }
         return PendingIntent.getBroadcast(
             context,
