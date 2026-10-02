@@ -7,7 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:quran_app_android/core/native/native_adhan_bridge.dart';
 import 'package:quran_app_android/core/service/database/database_helper.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
-import 'package:quran_app_android/core/service/settings/notifications_services.dart';
+import 'package:quran_app_android/core/service/settings/lock_screen_banner_service.dart';
 import 'package:quran_app_android/core/util/app_snackbar.dart';
 import 'package:quran_app_android/features/adhan/data/models/adhan_settings_model.dart';
 import 'package:quran_app_android/features/quran/presentation/view_model/quran_screen_model_details.dart';
@@ -239,53 +239,10 @@ class AdhanViewModel extends GetxController {
   }
 
   Future<void> syncOngoingPrayerBanner() async {
-    final prefs = await SharedPreferences.getInstance();
-    final isEnabled = prefs.getBool('prayer_banner_enabled') ?? true;
-    if (!isEnabled) {
-      await NotifyHelper().cancelOngoingPrayerBanner();
-      return;
+    try {
+      await LockScreenBannerService.instance.updateBanner();
+    } catch (e) {
+      debugPrint('⚠️ Error in syncOngoingPrayerBanner: $e');
     }
-
-    if (prayerTimes == null) return;
-
-    final pt = prayerTimes!;
-    final nextPrayer = pt.nextPrayer();
-    final actualNext = nextPrayer == Prayer.none ? Prayer.fajr : nextPrayer;
-    final nextTime = pt.timeForPrayer(actualNext) ?? DateTime.now();
-
-    String pName(Prayer p) {
-      switch (p) {
-        case Prayer.fajr: return 'الفجر';
-        case Prayer.sunrise: return 'الشروق';
-        case Prayer.dhuhr: return 'الظهر';
-        case Prayer.asr: return 'العصر';
-        case Prayer.maghrib: return 'المغرب';
-        case Prayer.isha: return 'العشاء';
-        case Prayer.none: return 'الفجر';
-      }
-    }
-
-    String fTime(DateTime dt) {
-      final hour = dt.hour;
-      final minute = dt.minute.toString().padLeft(2, '0');
-      final isPm = hour >= 12;
-      final displayHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
-      return '$displayHour:$minute ${isPm ? 'م' : 'ص'}';
-    }
-
-    final diff = nextTime.difference(DateTime.now());
-    final hours = diff.inHours;
-    final minutes = diff.inMinutes % 60;
-    final countdownStr = hours > 0 ? 'متبقي $hours س و $minutes د' : 'متبقي $minutes د';
-
-    final prayersSummary = 'الفجر: ${fTime(pt.fajr)} | الظهر: ${fTime(pt.dhuhr)} | العصر: ${fTime(pt.asr)} | المغرب: ${fTime(pt.maghrib)} | العشاء: ${fTime(pt.isha)}';
-
-    await NotifyHelper().showOngoingPrayerBanner(
-      nextPrayerName: pName(actualNext),
-      nextPrayerTime: fTime(nextTime),
-      countdownStr: countdownStr,
-      allPrayersLine: prayersSummary,
-      cityName: cityName.isNotEmpty ? cityName : 'القاهرة',
-    );
   }
 }

@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:quran_app_android/core/service/settings/lock_screen_banner_service.dart';
 import 'package:quran_app_android/features/reminders/data/notification_sounds_service.dart';
+
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  SharedPreferences.setMockInitialValues({});
 
   group('Notification Sounds Service & Model Tests', () {
     test('Default NotificationSoundsSettings initializes with correct spiritual sound defaults', () {
@@ -106,6 +110,57 @@ void main() {
       for (final entry in screenToRoute.entries) {
         expect(entry.value, isNotEmpty);
       }
+    });
+  });
+
+  group('Lock Screen Banner Model & Content Generation Tests', () {
+    test('LockScreenBannerModel initializes with all active components by default', () {
+      final model = LockScreenBannerModel();
+      expect(model.isEnabled, isTrue);
+      expect(model.showNextPrayer, isTrue);
+      expect(model.showAllPrayers, isTrue);
+      expect(model.showWirdProgress, isTrue);
+      expect(model.showDailyZikr, isTrue);
+      expect(model.showHijriDate, isTrue);
+      expect(model.showQuickActions, isTrue);
+    });
+
+    test('LockScreenBannerModel toMap serialization contains all customization toggles', () {
+      final model = LockScreenBannerModel(
+        isEnabled: true,
+        showNextPrayer: false,
+        showAllPrayers: true,
+        showWirdProgress: false,
+        showDailyZikr: true,
+        showHijriDate: true,
+        showQuickActions: false,
+      );
+
+      final map = model.toMap();
+      expect(map['isEnabled'], isTrue);
+      expect(map['showNextPrayer'], isFalse);
+      expect(map['showAllPrayers'], isTrue);
+      expect(map['showWirdProgress'], isFalse);
+      expect(map['showDailyZikr'], isTrue);
+      expect(map['showHijriDate'], isTrue);
+      expect(map['showQuickActions'], isFalse);
+    });
+
+    test('BannerDisplayData correctly populates title and bigContentText from model', () async {
+      final model = LockScreenBannerModel(
+        isEnabled: true,
+        showNextPrayer: true,
+        showAllPrayers: true,
+        showWirdProgress: true,
+        showDailyZikr: true,
+        showHijriDate: true,
+        showQuickActions: true,
+      );
+
+      final data = await LockScreenBannerService.instance.buildDisplayData(model);
+      expect(data.title, isNotEmpty);
+      expect(data.bigContentText, isNotEmpty);
+      expect(data.hijriLine, contains('هـ'));
     });
   });
 }

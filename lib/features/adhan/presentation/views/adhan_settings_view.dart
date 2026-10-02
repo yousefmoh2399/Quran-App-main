@@ -281,28 +281,37 @@ class AdhanSettingsView extends StatelessWidget {
                   return Row(
                     children: [
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'بانر مواقيت الصلاة الدائم',
-                              style: TextStyle(
-                                fontFamily: AppTypography.uiFont,
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.bold,
-                                color: colors.text,
+                        child: InkWell(
+                          onTap: () => Get.toNamed(AppRoutes.lockScreenBannerSettings),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    'بانر مواقيت الصلاة وشاشة القفل',
+                                    style: TextStyle(
+                                      fontFamily: AppTypography.uiFont,
+                                      fontSize: 13.5,
+                                      fontWeight: FontWeight.bold,
+                                      color: colors.text,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: Colors.grey),
+                                ],
                               ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              'عرض دائم في شريط إشعارات الهاتف مع العد التنازلي',
-                              style: TextStyle(
-                                fontFamily: AppTypography.uiFont,
-                                fontSize: 11.5,
-                                color: colors.textMuted,
+                              const SizedBox(height: 2),
+                              Text(
+                                'عرض دائم في شاشة القفل والإشعارات (اضغط للتخصيص)',
+                                style: TextStyle(
+                                  fontFamily: AppTypography.uiFont,
+                                  fontSize: 11.5,
+                                  color: colors.textMuted,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                       Switch.adaptive(

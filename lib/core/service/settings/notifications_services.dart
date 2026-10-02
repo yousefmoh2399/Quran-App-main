@@ -8,6 +8,7 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 
 import 'package:get/get.dart';
 import 'package:quran_app_android/core/native/native_reminders_bridge.dart';
+import 'package:quran_app_android/core/service/navigation/app_navigation_service.dart';
 import 'package:quran_app_android/core/util/constant/static_vars.dart';
 import 'package:quran_app_android/core/util/routes/routes.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -424,6 +425,19 @@ class NotifyHelper {
   Future<void> onDidReceiveNotificationResponse(
     NotificationResponse notificationResponse,
   ) async {
+    final actionId = notificationResponse.actionId;
+    if (actionId != null && actionId.isNotEmpty) {
+      if (actionId == 'action_mushaf') {
+        await AppNavigationService.instance.handleNavigation({'target_screen': 'wird'});
+        return;
+      } else if (actionId == 'action_azkar') {
+        await AppNavigationService.instance.handleNavigation({'target_screen': 'azkar'});
+        return;
+      } else if (actionId == 'action_prayer') {
+        await AppNavigationService.instance.handleNavigation({'target_screen': 'prayer_times'});
+        return;
+      }
+    }
     await handleNotificationPayload(notificationResponse.payload);
   }
 

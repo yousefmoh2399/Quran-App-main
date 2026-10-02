@@ -32,6 +32,7 @@ import 'package:quran_app_android/features/quran/presentation/views/quran_view.d
 import 'package:quran_app_android/features/quran/presentation/views/quran_search_view.dart';
 import 'package:quran_app_android/features/settings/presentation/views/permissions_status_view.dart';
 import 'package:quran_app_android/features/settings/presentation/views/settings_view.dart';
+import 'package:quran_app_android/features/settings/presentation/views/lock_screen_banner_settings_view.dart';
 import 'package:quran_app_android/features/settings/presentation/views/backup_restore_view.dart';
 import 'package:quran_app_android/features/settings/presentation/views/privacy_policy_view.dart';
 import 'package:quran_app_android/features/settings/presentation/views/about_app_view.dart';
@@ -275,6 +276,12 @@ class AppRoutes {
       transitionDuration: kTransitionDuration,
     ),
     GetPage(
+      name: lockScreenBannerSettings,
+      page: () => const LockScreenBannerSettingsView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
       name: privacyPolicy,
       page: () => const PrivacyPolicyView(),
       transition: Transition.cupertino,
@@ -322,6 +329,7 @@ class AppRoutes {
   static String wirdSettings = '/wirdSettings';
   static String notificationSoundsSettings = '/notificationSoundsSettings';
   static String prayerTracker = '/prayerTracker';
+  static String lockScreenBannerSettings = '/lockScreenBannerSettings';
   static String postPrayerAzkar = '/postPrayerAzkar';
   static String islamicCalendar = '/islamicCalendar';
   static String ramadanImsakia = '/ramadanImsakia';
