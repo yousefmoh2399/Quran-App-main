@@ -16,10 +16,12 @@ import '../widgets/mushaf_dual_page_view.dart';
 import '../widgets/mushaf_jump_dialog.dart';
 import '../widgets/mushaf_page_widget.dart';
 import '../widgets/page_bookmark_bottom_sheet.dart';
+import '../../../quran/presentation/views/quran_search_view.dart';
 
 /// The authentic 604-page, 15-line Madinah Mushaf reader screen.
 class MushafView extends StatefulWidget {
-  const MushafView({super.key});
+  final int? initialPage;
+  const MushafView({super.key, this.initialPage});
 
   @override
   State<MushafView> createState() => _MushafViewState();
@@ -36,6 +38,11 @@ class _MushafViewState extends State<MushafView> {
       Get.delete<MushafController>();
     }
     controller = Get.put(MushafController());
+    if (widget.initialPage != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller.goToPage(widget.initialPage!);
+      });
+    }
   }
 
   @override
@@ -361,9 +368,20 @@ class _MushafViewState extends State<MushafView> {
                 ),
               ),
 
-              // Jump Dialog Button
+              // Quran Full-Text Search Button
               IconButton(
                 icon: const Icon(Icons.search_rounded),
+                color: colors.text,
+                tooltip: 'البحث في القرآن',
+                onPressed: () => Get.to(
+                  () => const QuranSearchView(),
+                  transition: Transition.cupertino,
+                ),
+              ),
+
+              // Jump Dialog Button
+              IconButton(
+                icon: const Icon(Icons.explore_outlined),
                 color: colors.text,
                 tooltip: 'انتقال سريع',
                 onPressed: () => _openJumpDialog(context, controller, currentPage),

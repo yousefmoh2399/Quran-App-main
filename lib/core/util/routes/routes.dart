@@ -28,6 +28,7 @@ import 'package:quran_app_android/features/reminders/presentation/views/reminder
 import 'package:quran_app_android/features/pngtree/presentation/views/pngTreeView.dart';
 import 'package:quran_app_android/features/qiblah/presentation/views/qiblah_view.dart';
 import 'package:quran_app_android/features/quran/presentation/views/quran_view.dart';
+import 'package:quran_app_android/features/quran/presentation/views/quran_search_view.dart';
 import 'package:quran_app_android/features/settings/presentation/views/permissions_status_view.dart';
 import 'package:quran_app_android/features/settings/presentation/views/settings_view.dart';
 import 'package:quran_app_android/features/settings/presentation/views/backup_restore_view.dart';
@@ -134,6 +135,12 @@ class AppRoutes {
     GetPage(
       name: mushaf,
       page: () => const MushafView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: quranSearch,
+      page: () => const QuranSearchView(),
       transition: Transition.cupertino,
       transitionDuration: kTransitionDuration,
     ),
@@ -316,6 +323,7 @@ class AppRoutes {
   static String quranScreen = '/quranScreen';
   static String detailsScreen = '/detailsScreen';
   static String mushaf = '/mushaf';
+  static String quranSearch = '/quranSearch';
   static String mushafDebug = '/mushafDebug';
   static String onboarding = '/onboarding';
   static String sectionHadith = '/sectionHadith';

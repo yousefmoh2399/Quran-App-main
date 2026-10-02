@@ -17,6 +17,7 @@ import 'widget/juz_index_item.dart';
 import 'widget/quran_continue_card.dart';
 import 'widget/quran_filter_chips_bar.dart';
 import 'widget/surah_index_item.dart';
+import 'quran_search_view.dart';
 
 class QuranScreen extends StatefulWidget {
   const QuranScreen({super.key});
@@ -103,6 +104,16 @@ class _QuranScreenState extends State<QuranScreen>
     return AppScaffold(
       title: 'فهرس القرآن الكريم',
       constrainContentWidth: true,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.manage_search_rounded),
+          tooltip: 'البحث في نص الآيات',
+          onPressed: () => Get.to(
+            () => const QuranSearchView(),
+            transition: Transition.cupertino,
+          ),
+        ),
+      ],
       body: GetBuilder<QuranViewModel>(
         init: quranVM,
         builder: (ctrl) {
@@ -164,6 +175,45 @@ class _QuranScreenState extends State<QuranScreen>
                   ),
                 ),
               ),
+
+              // Search in Ayahs banner when user is searching
+              if (_searchQuery.trim().isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: 4),
+                  child: Material(
+                    color: colors.primary.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      onTap: () {
+                        Get.to(
+                          () => const QuranSearchView(),
+                          transition: Transition.cupertino,
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        child: Row(
+                          children: [
+                            Icon(Icons.manage_search_rounded, size: 20, color: colors.primary),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                'ابحث عن "$_searchQuery" في نص آيات القرآن الكريم...',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  color: colors.primary,
+                                ),
+                              ),
+                            ),
+                            Icon(Icons.arrow_forward_ios_rounded, size: 14, color: colors.primary),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
 
               // 2. Pinned Top Card: "تابع من سورة [الاسم] صفحة [الرقم]"
               if (hasLastRead && _searchQuery.isEmpty)

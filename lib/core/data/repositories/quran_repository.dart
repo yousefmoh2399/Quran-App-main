@@ -76,21 +76,33 @@ class QuranRepository {
   }
 
   /// Searches Ayahs by query using FTS5 with fallback to LIKE on normalized text.
-  Future<List<AyahEntity>> searchAyahs(String query) async {
-    final normalized = ArabicNormalizer.normalize(query);
-    if (normalized.isEmpty) return [];
+  Future<List<AyahEntity>> searchAyahs(
+    String query, {
+    int? surahId,
+    int limit = 100,
+  }) async {
+    final variants = ArabicNormalizer.generateSearchVariants(query);
+    if (variants.isEmpty) return [];
 
     final db = await _db;
 
     try {
-      // 1. Attempt FTS5 search
-      final ftsResults = await db.rawQuery('''
+      // 1. Attempt FTS5 search across all variants
+      final matchExpr = variants.map((v) => '"$v"').join(' OR ');
+      String sql = '''
         SELECT a.* FROM ayahs a
         JOIN ayahs_fts f ON a.id = f.rowid
         WHERE f.text_search MATCH ?
-        ORDER TO MATCH
-        LIMIT 100;
-      ''', ['"$normalized"']);
+      ''';
+      final List<dynamic> args = [matchExpr];
+      if (surahId != null) {
+        sql += ' AND a.surah_id = ?';
+        args.add(surahId);
+      }
+      sql += ' ORDER BY a.surah_id ASC, a.ayah_number ASC LIMIT ?;';
+      args.add(limit);
+
+      final ftsResults = await db.rawQuery(sql, args);
 
       if (ftsResults.isNotEmpty) {
         return ftsResults.map((m) => AyahEntity.fromMap(m)).toList();
@@ -99,13 +111,22 @@ class QuranRepository {
       // Fallback below if FTS query syntax error or no results
     }
 
-    // 2. Substring LIKE search on normalized text
+    // 2. Substring LIKE search on normalized text for all variants
+    final likeConditions = variants.map((_) => 'text_search LIKE ?').join(' OR ');
+    String whereClause = '($likeConditions)';
+    final List<Object?> whereArgs = <Object?>[
+      ...variants.map((v) => '%$v%'),
+    ];
+    if (surahId != null) {
+      whereClause += ' AND surah_id = ?';
+      whereArgs.add(surahId);
+    }
     final likeResults = await db.query(
       'ayahs',
-      where: 'text_search LIKE ?',
-      whereArgs: ['%$normalized%'],
+      where: whereClause,
+      whereArgs: whereArgs,
       orderBy: 'surah_id ASC, ayah_number ASC',
-      limit: 100,
+      limit: limit,
     );
     return likeResults.map((m) => AyahEntity.fromMap(m)).toList();
   }

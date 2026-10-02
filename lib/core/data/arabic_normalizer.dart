@@ -23,4 +23,19 @@ class ArabicNormalizer {
         .replaceAll('\u00A0', ' ')
         .trim();
   }
+
+  /// Generates normalized search variants, including dagger-alef omissions (e.g. الصابرين / الصبرين).
+  static List<String> generateSearchVariants(String query) {
+    final normalized = normalize(query);
+    if (normalized.isEmpty) return [];
+
+    final variants = <String>{normalized};
+    if (normalized.contains('ا')) {
+      final noAlef = normalized.replaceAll('ا', '');
+      if (noAlef.isNotEmpty && noAlef.length >= 2) {
+        variants.add(noAlef);
+      }
+    }
+    return variants.toList();
+  }
 }
