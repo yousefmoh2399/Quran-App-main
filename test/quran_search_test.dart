@@ -117,14 +117,14 @@ void main() {
       await tester.tap(find.text('إن الله مع الصابرين'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
+      await tester.runAsync(() async {
+        await Future.delayed(const Duration(milliseconds: 300));
+      });
       await tester.pump();
 
       // Check results or text field populated
       final textField = tester.widget<TextField>(find.byType(TextField));
       expect(textField.controller?.text, 'إن الله مع الصابرين');
-
-      // Flush sqflite internal 10-second lock monitor timer
-      await tester.pump(const Duration(seconds: 11));
     });
   });
 }

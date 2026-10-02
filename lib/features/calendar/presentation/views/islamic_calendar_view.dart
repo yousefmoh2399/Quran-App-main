@@ -483,13 +483,14 @@ class _IslamicCalendarViewState extends State<IslamicCalendarView> {
   }
 
   void _showDateConverterDialog(BuildContext context) {
+    final colors = context.appColors;
     DateTime selectedGreg = DateTime.now();
     HijriCalendar convertedHijri = _calendarService.fromGregorian(selectedGreg);
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: colors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -505,25 +506,35 @@ class _IslamicCalendarViewState extends State<IslamicCalendarView> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         'محوّل التاريخ الهجري والميلادي',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: colors.text,
+                        ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.close),
+                        icon: Icon(Icons.close, color: colors.text),
                         onPressed: () => Navigator.pop(ctx),
                       ),
                     ],
                   ),
-                  const Divider(),
+                  Divider(color: colors.divider),
                   const SizedBox(height: 8),
 
                   // Pick Gregorian date
                   ListTile(
-                    title: const Text('التاريخ الميلادي'),
-                    subtitle: Text('${selectedGreg.day}/${selectedGreg.month}/${selectedGreg.year}'),
-                    leading: const Icon(Icons.calendar_month_rounded, color: Colors.teal),
-                    trailing: const Icon(Icons.edit_calendar_rounded),
+                    title: Text(
+                      'التاريخ الميلادي',
+                      style: TextStyle(color: colors.text, fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(
+                      '${selectedGreg.day}/${selectedGreg.month}/${selectedGreg.year}',
+                      style: TextStyle(color: colors.textMuted),
+                    ),
+                    leading: Icon(Icons.calendar_month_rounded, color: colors.primary),
+                    trailing: Icon(Icons.edit_calendar_rounded, color: colors.primary),
                     onTap: () async {
                       final picked = await showDatePicker(
                         context: context,
@@ -539,29 +550,29 @@ class _IslamicCalendarViewState extends State<IslamicCalendarView> {
                       }
                     },
                   ),
-                  const Divider(),
+                  Divider(color: colors.divider),
 
                   // Result Hijri Date
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.teal.shade50,
+                      color: colors.primary.withOpacity(0.08),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.teal.shade200),
+                      border: Border.all(color: colors.primary.withOpacity(0.25)),
                     ),
                     child: Column(
                       children: [
-                        const Text(
+                        Text(
                           'التاريخ الهجري المقابل',
-                          style: TextStyle(fontSize: 12, color: Colors.teal),
+                          style: TextStyle(fontSize: 12, color: colors.primary),
                         ),
                         const SizedBox(height: 6),
                         Text(
                           '${convertedHijri.hDay} ${IslamicCalendarService.hijriMonthNames[convertedHijri.hMonth]} ${convertedHijri.hYear} هـ',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Colors.teal,
+                            color: colors.primary,
                             fontFamily: AppTypography.decorativeFont,
                           ),
                         ),

@@ -5,22 +5,70 @@ import 'dart:io';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 String normalizeArabic(String text) {
-  return text
-      // Remove diacritics / tashkeel
-      .replaceAll(RegExp(r'[\u064B-\u065F\u0670\u06D6-\u06ED]'), '')
-      // Remove Quranic annotation signs
-      .replaceAll(RegExp(r'[\u0610-\u061A\u06D6-\u06ED]'), '')
-      // Normalize Alef variants
-      .replaceAll(RegExp(r'[إأآٱ]'), 'ا')
-      // Normalize Yaa
-      .replaceAll('ى', 'ي')
-      // Normalize Taa Marbuta
-      .replaceAll('ة', 'ه')
-      // Normalize Tatweel
-      .replaceAll('ـ', '')
-      // Replace non-breaking space
-      .replaceAll('\u00A0', ' ')
-      .trim();
+  if (text.isEmpty) return '';
+  var s = text;
+
+  // 1. Convert Uthmanic waw-dagger-alef to Alef (e.g. الصلوة -> الصلاة)
+  s = s.replaceAll('و\u0670', 'ا');
+  s = s.replaceAll('وٰ', 'ا');
+
+  // 2. Small high Yaa (ۧ) -> ي (e.g. إبرٰهيۧم -> إبراهيم)
+  s = s.replaceAll('\u06E7', 'ي');
+  // Small high Waw (ۥ) -> و (e.g. داوۥد -> داوود)
+  s = s.replaceAll('\u06E5', 'و');
+
+  // 3. Remove diacritics / tashkeel FIRST (fatha, damma, kasra, sukun, shaddah)
+  // while keeping dagger-alef (\u0670 / ٰ)
+  s = s.replaceAll(RegExp(r'[\u064B-\u065F]'), '');
+
+  // 4. Remove Quranic annotation signs & pause marks
+  s = s.replaceAll(RegExp(r'[\u0610-\u061A\u06D6-\u06ED]'), '');
+
+  // 5. Handle words where dagger alef is pronounced but NEVER written in standard Arabic:
+  // - Ilah: إلٰه / لٰه -> له
+  s = s.replaceAll(RegExp(r'ل[ـ\u0640]?[\u0670ٰ]ه'), 'له');
+  // - Demonstrative / Tanbih: هٰذ -> هذ, هٰؤ -> هؤ, ذٰل -> ذل, لٰك -> لك, لٰئ -> لئ
+  s = s.replaceAll(RegExp(r'ه[ـ\u0640]?[\u0670ٰ]ذ'), 'هذ');
+  s = s.replaceAll(RegExp(r'ه[ـ\u0640]?[\u0670ٰ]ؤ'), 'هؤ');
+  s = s.replaceAll(RegExp(r'ذ[ـ\u0640]?[\u0670ٰ]ل'), 'ذل');
+  s = s.replaceAll(RegExp(r'ل[ـ\u0640]?[\u0670ٰ]ك'), 'لك');
+  s = s.replaceAll(RegExp(r'ل[ـ\u0640]?[\u0670ٰ]ئ'), 'لئ');
+  // - Rahman: رحـٰمن -> رحمن
+  s = s.replaceAll(RegExp(r'م[ـ\u0640]?[\u0670ٰ]ن'), 'من');
+
+  // 6. Remaining dagger alef (\u0670 / ٰ) -> ا (e.g. إبراهيم, إسماعيل, السماوات, صادقين)
+  s = s.replaceAll('\u0670', 'ا');
+  s = s.replaceAll('ٰ', 'ا');
+
+  // 7. Normalize Alef variants to bare Alef
+  s = s.replaceAll(RegExp(r'[إأآٱ]'), 'ا');
+
+  // 8. Standalone hamza followed by alef: ءا -> ا (ءادم -> ادم, ءامنوا -> امنوا)
+  s = s.replaceAll('ءا', 'ا');
+
+  // 9. Normalize Yaa / Alef Maqsura: ى -> ي
+  s = s.replaceAll('ى', 'ي');
+
+  // 10. Normalize Taa Marbuta: ة -> ه
+  s = s.replaceAll('ة', 'ه');
+
+  // 11. Normalize Tatweel: ـ -> ''
+  s = s.replaceAll('ـ', '');
+
+  // 12. Modern common misspellings or phonetics
+  s = s.replaceAll('رحمان', 'رحمن');
+  s = s.replaceAll('الاه', 'اله');
+  s = s.replaceAll('هاذا', 'هذا');
+  s = s.replaceAll('هاذه', 'هذه');
+  s = s.replaceAll('هاؤلاء', 'هؤلاء');
+  s = s.replaceAll('ذالك', 'ذلك');
+  s = s.replaceAll('لاكن', 'لكن');
+
+  // 13. Unify whitespaces
+  s = s.replaceAll('\u00A0', ' ');
+  s = s.replaceAll(RegExp(r'\s+'), ' ');
+
+  return s.trim();
 }
 
 void main() async {

@@ -205,7 +205,7 @@ class AdhanSettingsView extends StatelessWidget {
               child: Column(
                 children: [
                   DropdownButtonFormField<String>(
-                    value: settings.adhanSound,
+                    value: 'default',
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                       border: OutlineInputBorder(
@@ -224,11 +224,10 @@ class AdhanSettingsView extends StatelessWidget {
                       color: colors.text,
                     ),
                     items: const [
-                      DropdownMenuItem(value: 'default', child: Text('أذان الحرم المكي الشريف')),
-                      DropdownMenuItem(value: 'madinah', child: Text('أذان المسجد النبوي الشريف')),
-                      DropdownMenuItem(value: 'alaqsa', child: Text('أذان المسجد الأقصى المبارك')),
-                      DropdownMenuItem(value: 'abdulbasit', child: Text('أذان الشيخ عبد الباسط عبد الصمد')),
-                      DropdownMenuItem(value: 'mishary', child: Text('أذان الشيخ مشاري راشد العفاسي')),
+                      DropdownMenuItem(
+                        value: 'default',
+                        child: Text('الأذان المعتمد الكامل (مدمج بدون إنترنت)'),
+                      ),
                     ],
                     onChanged: (val) {
                       if (val != null) controller.updateAdhanSound(val);

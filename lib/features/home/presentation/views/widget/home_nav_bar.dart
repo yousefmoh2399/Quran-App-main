@@ -76,7 +76,7 @@ class HomeNavBar extends StatelessWidget {
           NavigationDestination(
             icon: Icon(Icons.bookmark_border_rounded, color: colors.textMuted),
             selectedIcon: Icon(Icons.bookmark_rounded, color: colors.primary),
-            label: 'علاماتي والورد',
+            label: 'علاماتي',
           ),
           NavigationDestination(
             icon: Icon(Icons.grid_view_outlined, color: colors.textMuted),

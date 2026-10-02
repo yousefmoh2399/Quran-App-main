@@ -99,7 +99,7 @@ class BookmarksView extends StatelessWidget {
                       children: [
                         Icon(Icons.history_edu_rounded, size: 15.0),
                         SizedBox(width: 4.0),
-                        Text('سجل القراءة'),
+                        Text('الورد وسجل القراءة'),
                       ],
                     ),
                   ),

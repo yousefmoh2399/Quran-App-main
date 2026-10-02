@@ -120,6 +120,15 @@ class _MyRemindersViewState extends State<MyRemindersView> {
   }
 
   Future<void> _toggleReminder(String id, bool enabled) async {
+    setState(() {
+      final index = _reminders.indexWhere((r) => r['id'] == id);
+      if (index != -1) {
+        final updated = Map<String, dynamic>.from(_reminders[index]);
+        updated['enabled'] = enabled ? 1 : 0;
+        _reminders[index] = updated;
+      }
+    });
+
     await NativeRemindersBridge.toggleReminder(id, enabled);
     await _loadReminders();
     if (mounted) {
@@ -306,7 +315,7 @@ class _MyRemindersViewState extends State<MyRemindersView> {
     required VoidCallback onConfigure,
   }) {
     final reminder = _getReminder(id);
-    final isEnabled = reminder != null && reminder['enabled'] == 1;
+    final isEnabled = reminder != null && (reminder['enabled'] == 1 || reminder['enabled'] == true);
 
     String subtitle = defaultSubtitle;
     if (reminder != null) {

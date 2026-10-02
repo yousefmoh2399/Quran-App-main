@@ -71,24 +71,7 @@ Future<void> main() async {
     cacheDir.createSync(recursive: true);
   }
 
-  // 1. Verify connectivity with test request
-  final client = HttpClient();
-  client.connectionTimeout = const Duration(seconds: 10);
-  try {
-    final testReq = await client.getUrl(Uri.parse('$kBaseUrl/page-001.json'));
-    final testRes = await testReq.close();
-    if (testRes.statusCode != 200) {
-      print('❌ Failed to reach layout API (status: ${testRes.statusCode})');
-      exit(1);
-    }
-  } catch (e) {
-    print('❌ Network error / API unreachable: $e');
-    print('Aborting process as requested.');
-    exit(1);
-  }
-
-  // 2. Download missing pages concurrently
-  print('Downloading layout for all 604 pages...');
+  // 2. Download missing pages concurrently if any
   final List<int> pagesToDownload = [];
   for (int p = 1; p <= 604; p++) {
     final pad = p.toString().padLeft(3, '0');
@@ -100,6 +83,20 @@ Future<void> main() async {
 
   if (pagesToDownload.isNotEmpty) {
     print('Fetching ${pagesToDownload.length} pages from remote repository...');
+    final client = HttpClient();
+    client.connectionTimeout = const Duration(seconds: 10);
+    try {
+      final testReq = await client.getUrl(Uri.parse('$kBaseUrl/page-001.json'));
+      final testRes = await testReq.close();
+      if (testRes.statusCode != 200) {
+        print('❌ Failed to reach layout API (status: ${testRes.statusCode})');
+        exit(1);
+      }
+    } catch (e) {
+      print('❌ Network error / API unreachable: $e');
+      print('Aborting process as requested.');
+      exit(1);
+    }
     const int batchSize = 25;
     for (int i = 0; i < pagesToDownload.length; i += batchSize) {
       final end = (i + batchSize < pagesToDownload.length)
@@ -123,11 +120,11 @@ Future<void> main() async {
       final progress = ((end / pagesToDownload.length) * 100).toStringAsFixed(1);
       stdout.write('\rDownloaded $end/${pagesToDownload.length} ($progress%)');
     }
+    client.close();
     print('\nAll 604 pages downloaded and cached locally.');
   } else {
     print('All 604 pages already cached locally in ${cacheDir.path}.');
   }
-  client.close();
 
   // 3. Connect to SQLite database
   sqfliteFfiInit();

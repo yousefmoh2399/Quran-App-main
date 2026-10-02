@@ -92,7 +92,7 @@ void main() {
       expect(find.text('الرئيسية'), findsOneWidget);
       expect(find.text('المصحف'), findsOneWidget);
       expect(find.text('الأذكار'), findsOneWidget);
-      expect(find.text('علاماتي والورد'), findsOneWidget);
+      expect(find.text('علاماتي'), findsOneWidget);
       expect(find.text('المزيد'), findsOneWidget);
 
       await tester.tap(find.text('المزيد'));

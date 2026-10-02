@@ -330,7 +330,7 @@ class _PrayerTrackerViewState extends State<PrayerTrackerView> {
     return Container(
       padding: AppSpacing.paddingMd,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.surface,
         borderRadius: AppRadius.borderMd,
         border: Border.all(color: colors.divider),
       ),
@@ -340,9 +340,9 @@ class _PrayerTrackerViewState extends State<PrayerTrackerView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'إحصاء الأسبوع الأخير',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: colors.text),
               ),
               Text(
                 '$weeklyPercent% التزام',
@@ -381,17 +381,17 @@ class _PrayerTrackerViewState extends State<PrayerTrackerView> {
           children: [
             Text(
               'حاسبة قضاء الفوائت',
-              style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+              style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: colors.text),
             ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: Colors.purple.withOpacity(0.12),
+                color: colors.primary.withOpacity(0.12),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
                 'إجمالي: $totalQadaa',
-                style: const TextStyle(color: Colors.purple, fontSize: 11, fontWeight: FontWeight.bold),
+                style: TextStyle(color: colors.primary, fontSize: 11, fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -410,11 +410,11 @@ class _PrayerTrackerViewState extends State<PrayerTrackerView> {
                     Expanded(
                       child: Text(
                         p['name']!,
-                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: colors.text),
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.remove_circle_outline, color: Colors.teal),
+                      icon: Icon(Icons.remove_circle_outline, color: colors.accent),
                       onPressed: count > 0 ? () => _modifyQadaa(p['key']!, -1) : null,
                     ),
                     Container(
@@ -422,11 +422,11 @@ class _PrayerTrackerViewState extends State<PrayerTrackerView> {
                       alignment: Alignment.center,
                       child: Text(
                         '$count',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: colors.text),
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.add_circle_outline, color: Colors.purple),
+                      icon: Icon(Icons.add_circle_outline, color: colors.primary),
                       onPressed: () => _modifyQadaa(p['key']!, 1),
                     ),
                   ],
