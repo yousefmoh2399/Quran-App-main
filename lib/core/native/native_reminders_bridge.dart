@@ -2,7 +2,7 @@ import 'package:flutter/services.dart';
 
 /// Dart bridge to communicate with the Native Kotlin Unified Reminders Engine.
 class NativeRemindersBridge {
-  static const MethodChannel _channel = MethodChannel('com.example.quran_app/native_reminders');
+  static const MethodChannel _channel = MethodChannel('com.taqarrab.quran/native_reminders');
 
   /// Fetches all reminders stored in SQLite.
   static Future<List<Map<String, dynamic>>> getAllReminders() async {

@@ -138,7 +138,7 @@ class AboutAppView extends StatelessWidget {
                     label: const Text('شارك التطبيق', style: TextStyle(fontWeight: FontWeight.bold)),
                     onPressed: () {
                       Share.share(
-                        'حمّل تطبيق "تقرّب" لقراءة القرآن الكريم ومواقيت الصلاة والأذكار بدون إعلانات وبحجم خفيف جداً.\nhttps://play.google.com/store/apps/details?id=com.example.quran_app_android',
+                        'حمّل تطبيق "تقرّب" لقراءة القرآن الكريم ومواقيت الصلاة والأذكار بدون إعلانات وبحجم خفيف جداً.\nhttps://play.google.com/store/apps/details?id=com.taqarrab.quran',
                       );
                     },
                   ),

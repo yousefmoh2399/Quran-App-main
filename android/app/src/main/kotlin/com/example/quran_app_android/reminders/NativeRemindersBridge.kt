@@ -14,7 +14,7 @@ class NativeRemindersBridge(private val context: Context) : MethodChannel.Method
 
     companion object {
         private const val TAG = "NativeRemindersBridge"
-        private const val CHANNEL = "com.example.quran_app/native_reminders"
+        private const val CHANNEL = "com.taqarrab.quran/native_reminders"
 
         fun registerWith(messenger: BinaryMessenger, context: Context): MethodChannel {
             val channel = MethodChannel(messenger, CHANNEL)

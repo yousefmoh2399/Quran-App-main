@@ -1,0 +1,8 @@
+# Template for Android Release Keystore signing configuration.
+# Copy this file to 'android/key.properties' and fill in your private credentials.
+# NOTE: Never commit your real key.properties or .jks file to public git repositories!
+
+keyAlias=upload
+keyPassword=YOUR_KEY_PASSWORD
+storePassword=YOUR_STORE_PASSWORD
+storeFile=../upload-keystore.jks
