@@ -4,6 +4,8 @@ import 'package:quran_app_android/core/design/app_typography.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
 import 'package:quran_app_android/core/util/routes/routes.dart';
 
+import 'package:quran_app_android/core/service/navigation/app_navigation_service.dart';
+
 class SplashScreenView extends StatefulWidget {
   const SplashScreenView({super.key});
 
@@ -69,14 +71,17 @@ class _SplashScreenViewState extends State<SplashScreenView>
     });
   }
 
-  void _navigateNext() {
+  void _navigateNext() async {
     final settings = Get.find<SettingsServices>();
     final bool hasOnboarded =
         settings.sharedPref?.getBool('onboarding') ?? false;
 
-    Get.offAllNamed(
+    await Get.offAllNamed(
       hasOnboarded ? AppRoutes.home : AppRoutes.onboarding,
     );
+    if (hasOnboarded) {
+      AppNavigationService.instance.processColdStartNavigationIfNeeded();
+    }
   }
 
   @override

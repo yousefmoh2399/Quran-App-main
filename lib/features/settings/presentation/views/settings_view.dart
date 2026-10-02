@@ -95,6 +95,14 @@ class SettingsView extends StatelessWidget {
                   trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
                   onTap: () => Get.toNamed(AppRoutes.myReminders),
                 ),
+                SettingsTile(
+                  icon: Icons.music_note_rounded,
+                  iconColor: colors.primary,
+                  title: 'أصوات ونغمات التنبيهات',
+                  subtitle: 'تخصيص رنين الإشعارات (الورد، الأذكار، الصدقة) أو توحيدها',
+                  trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
+                  onTap: () => Get.toNamed(AppRoutes.notificationSoundsSettings),
+                ),
               ],
             ),
 

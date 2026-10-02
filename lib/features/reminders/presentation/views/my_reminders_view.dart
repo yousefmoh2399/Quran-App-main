@@ -152,6 +152,11 @@ class _MyRemindersViewState extends State<MyRemindersView> {
         centerTitle: true,
         actions: [
           IconButton(
+            icon: const Icon(Icons.music_note_rounded),
+            tooltip: 'أصوات التنبيهات',
+            onPressed: () => Get.toNamed(AppRoutes.notificationSoundsSettings),
+          ),
+          IconButton(
             icon: const Icon(Icons.history_rounded),
             tooltip: 'سجل الصدقات',
             onPressed: () => Get.toNamed('/sadaqahLogs'),
@@ -217,6 +222,56 @@ class _MyRemindersViewState extends State<MyRemindersView> {
                           ),
                         ),
                       ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Notification Sounds Customization Card
+                  Card(
+                    elevation: 1,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: () => Get.toNamed(AppRoutes.notificationSoundsSettings),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF1B4D3E).withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(Icons.music_note_rounded, color: Color(0xFF1B4D3E), size: 24),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'أصوات ونغمات التنبيهات',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    'تخصيص نغمة لكل تذكير أو نغمة موحدة مع الاستماع للتجربة',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: theme.textTheme.bodySmall?.color,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
 

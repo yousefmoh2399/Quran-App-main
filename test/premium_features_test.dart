@@ -23,35 +23,25 @@ void main() {
       const int planStart = 10;
       const int planEnd = 20;
 
-      // Case 1: No previous reading -> starts at plan.startPage
-      int? savedWirdPage;
-      int? lastRead;
-      int currentRead = 0;
-      int resumePage = planStart;
-      if (savedWirdPage != null && savedWirdPage >= planStart && savedWirdPage <= planEnd) {
-        resumePage = savedWirdPage;
-      } else if (lastRead != null && lastRead >= planStart && lastRead <= planEnd) {
-        resumePage = lastRead;
-      } else if (currentRead > 0) {
-        resumePage = (planStart + currentRead).clamp(planStart, planEnd);
+      int computeResumePage({int? savedWirdPage, int? lastRead, int currentRead = 0}) {
+        if (savedWirdPage != null && savedWirdPage >= planStart && savedWirdPage <= planEnd) {
+          return savedWirdPage;
+        } else if (lastRead != null && lastRead >= planStart && lastRead <= planEnd) {
+          return lastRead;
+        } else if (currentRead > 0) {
+          return (planStart + currentRead).clamp(planStart, planEnd);
+        }
+        return planStart;
       }
-      expect(resumePage, 10);
+
+      // Case 1: No previous reading -> starts at plan.startPage
+      expect(computeResumePage(), 10);
 
       // Case 2: User read to page 14 -> resumePage is 14
-      savedWirdPage = 14;
-      if (savedWirdPage >= planStart && savedWirdPage <= planEnd) {
-        resumePage = savedWirdPage;
-      }
-      expect(resumePage, 14);
+      expect(computeResumePage(savedWirdPage: 14), 14);
 
-      // Case 3: Saved page beyond plan -> clamps to planEnd
-      savedWirdPage = 25;
-      if (savedWirdPage >= planStart && savedWirdPage <= planEnd) {
-        resumePage = savedWirdPage;
-      } else {
-        resumePage = (planStart + 5).clamp(planStart, planEnd);
-      }
-      expect(resumePage, 15);
+      // Case 3: Saved page beyond plan -> falls back to currentRead progression
+      expect(computeResumePage(savedWirdPage: 25, currentRead: 5), 15);
     });
   });
 }

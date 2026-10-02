@@ -24,6 +24,7 @@ import 'package:quran_app_android/features/reminders/presentation/views/sadaqah_
 import 'package:quran_app_android/features/reminders/presentation/views/sadaqah_logs_view.dart';
 import 'package:quran_app_android/features/reminders/presentation/views/commute_wird_settings_view.dart';
 import 'package:quran_app_android/features/reminders/presentation/views/wird_reminder_settings_view.dart';
+import 'package:quran_app_android/features/reminders/presentation/views/notification_sounds_settings_view.dart';
 import 'package:quran_app_android/features/reminders/presentation/views/reminders_debug_view.dart';
 import 'package:quran_app_android/features/pngtree/presentation/views/pngTreeView.dart';
 import 'package:quran_app_android/features/qiblah/presentation/views/qiblah_view.dart';
@@ -232,6 +233,12 @@ class AppRoutes {
       transitionDuration: kTransitionDuration,
     ),
     GetPage(
+      name: notificationSoundsSettings,
+      page: () => const NotificationSoundsSettingsView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
       name: prayerTracker,
       page: () => const PrayerTrackerView(),
       transition: Transition.cupertino,
@@ -313,6 +320,7 @@ class AppRoutes {
   static String sadaqahLogs = '/sadaqahLogs';
   static String commuteWirdSettings = '/commuteWirdSettings';
   static String wirdSettings = '/wirdSettings';
+  static String notificationSoundsSettings = '/notificationSoundsSettings';
   static String prayerTracker = '/prayerTracker';
   static String postPrayerAzkar = '/postPrayerAzkar';
   static String islamicCalendar = '/islamicCalendar';

@@ -462,6 +462,10 @@ class NotifyHelper {
       });
       return;
     }
+    if (payload == 'taqarrab://prayer_times' || payload.startsWith('taqarrab://prayer_times')) {
+      await Get.toNamed(AppRoutes.adhan);
+      return;
+    }
     if (payload.startsWith('adhkar')) {
       await Get.toNamed(AppRoutes.azkar);
       return;
@@ -469,10 +473,18 @@ class NotifyHelper {
     if (payload.startsWith('mushaf|wird')) {
       final parts = payload.split('|');
       final page = parts.length > 2 ? int.tryParse(parts[2]) : null;
-      await Get.toNamed(AppRoutes.mushaf, arguments: {'pageNumber': page ?? 1});
+      if (page != null) {
+        await Get.toNamed(AppRoutes.mushaf, arguments: {'pageNumber': page});
+      } else {
+        await Get.toNamed(AppRoutes.mushaf);
+      }
       return;
     }
-    await Get.toNamed(payload);
+    try {
+      await Get.toNamed(payload);
+    } catch (e) {
+      debugPrint('⚠️ Could not navigate to notification payload route "$payload": $e');
+    }
   }
 
   void onDidReceiveLocalNotification(

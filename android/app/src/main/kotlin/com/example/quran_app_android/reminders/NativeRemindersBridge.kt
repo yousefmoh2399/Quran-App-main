@@ -120,13 +120,75 @@ class NativeRemindersBridge(private val context: Context) : MethodChannel.Method
                             "next_trigger_millis" to nextTime,
                             "next_trigger_formatted" to dateFormat.format(Date(nextTime)),
                             "is_cancelled_by_condition" to isCancelled,
-                            "channel" to ReminderChannels.getChannelIdForType(item.type)
+                            "channel" to ReminderChannels.getChannelIdForType(context, item.type)
                         )
                     }.sortedBy { it["next_trigger_millis"] as Long }
 
                     result.success(list)
                 } catch (e: Exception) {
                     result.error("UPCOMING_ERROR", e.message, null)
+                }
+            }
+
+            "previewSound" -> {
+                try {
+                    val soundKey = call.argument<String>("soundKey") ?: "system_default"
+                    SoundPlayerHelper.play(context, soundKey)
+                    result.success(true)
+                } catch (e: Exception) {
+                    result.error("PLAY_ERROR", e.message, null)
+                }
+            }
+
+            "stopSound" -> {
+                try {
+                    SoundPlayerHelper.stop()
+                    result.success(true)
+                } catch (e: Exception) {
+                    result.error("STOP_ERROR", e.message, null)
+                }
+            }
+
+            "saveSoundSettings" -> {
+                try {
+                    val mode = call.argument<String>("mode") ?: "custom"
+                    val unifiedSound = call.argument<String>("unifiedSound") ?: "fazakkir"
+                    val wirdSound = call.argument<String>("wirdSound") ?: "fazakkir"
+                    val commuteSound = call.argument<String>("commuteSound") ?: "fazakkir"
+                    val sadaqahSound = call.argument<String>("sadaqahSound") ?: "azkar_2"
+                    val azkarSound = call.argument<String>("azkarSound") ?: "azkar_1"
+
+                    val prefs = context.getSharedPreferences(ReminderChannels.PREFS_SOUNDS, Context.MODE_PRIVATE)
+                    prefs.edit()
+                        .putString(ReminderChannels.KEY_MODE, mode)
+                        .putString(ReminderChannels.KEY_UNIFIED_SOUND, unifiedSound)
+                        .putString(ReminderChannels.KEY_WIRD_SOUND, wirdSound)
+                        .putString(ReminderChannels.KEY_COMMUTE_SOUND, commuteSound)
+                        .putString(ReminderChannels.KEY_SADAQAH_SOUND, sadaqahSound)
+                        .putString(ReminderChannels.KEY_AZKAR_SOUND, azkarSound)
+                        .apply()
+
+                    ReminderChannels.createChannels(context)
+                    result.success(true)
+                } catch (e: Exception) {
+                    result.error("SAVE_SOUNDS_ERROR", e.message, null)
+                }
+            }
+
+            "getSoundSettings" -> {
+                try {
+                    val prefs = context.getSharedPreferences(ReminderChannels.PREFS_SOUNDS, Context.MODE_PRIVATE)
+                    val map = mapOf(
+                        "mode" to (prefs.getString(ReminderChannels.KEY_MODE, "custom") ?: "custom"),
+                        "unifiedSound" to (prefs.getString(ReminderChannels.KEY_UNIFIED_SOUND, "fazakkir") ?: "fazakkir"),
+                        "wirdSound" to (prefs.getString(ReminderChannels.KEY_WIRD_SOUND, "fazakkir") ?: "fazakkir"),
+                        "commuteSound" to (prefs.getString(ReminderChannels.KEY_COMMUTE_SOUND, "fazakkir") ?: "fazakkir"),
+                        "sadaqahSound" to (prefs.getString(ReminderChannels.KEY_SADAQAH_SOUND, "azkar_2") ?: "azkar_2"),
+                        "azkarSound" to (prefs.getString(ReminderChannels.KEY_AZKAR_SOUND, "azkar_1") ?: "azkar_1")
+                    )
+                    result.success(map)
+                } catch (e: Exception) {
+                    result.error("GET_SOUNDS_ERROR", e.message, null)
                 }
             }
 
@@ -172,6 +234,48 @@ class NativeRemindersBridge(private val context: Context) : MethodChannel.Method
             }
 
             else -> result.notImplemented()
+        }
+    }
+
+    object SoundPlayerHelper {
+        private var mediaPlayer: android.media.MediaPlayer? = null
+
+        fun play(context: Context, soundKey: String) {
+            stop()
+            try {
+                val uri = ReminderChannels.getSoundUri(context, soundKey) ?: return
+                mediaPlayer = android.media.MediaPlayer().apply {
+                    setDataSource(context, uri)
+                    setAudioAttributes(
+                        android.media.AudioAttributes.Builder()
+                            .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION)
+                            .build()
+                    )
+                    prepare()
+                    start()
+                    setOnCompletionListener {
+                        stop()
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error playing sound: $soundKey", e)
+            }
+        }
+
+        fun stop() {
+            try {
+                mediaPlayer?.let {
+                    if (it.isPlaying) {
+                        it.stop()
+                    }
+                    it.release()
+                }
+            } catch (e: Exception) {
+                // ignore
+            } finally {
+                mediaPlayer = null
+            }
         }
     }
 }

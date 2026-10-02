@@ -137,4 +137,59 @@ class NativeRemindersBridge {
       return [];
     }
   }
+
+  /// Previews/plays an audio sound natively without third-party dependencies.
+  static Future<bool> previewSound(String soundKey) async {
+    try {
+      final success = await _channel.invokeMethod<bool>('previewSound', {'soundKey': soundKey});
+      return success ?? false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Stops any currently playing preview sound.
+  static Future<bool> stopSound() async {
+    try {
+      final success = await _channel.invokeMethod<bool>('stopSound');
+      return success ?? false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Saves notification sound configuration (custom per category, unified, or system default).
+  static Future<bool> saveSoundSettings({
+    required String mode,
+    required String unifiedSound,
+    required String wirdSound,
+    required String commuteSound,
+    required String sadaqahSound,
+    required String azkarSound,
+  }) async {
+    try {
+      final success = await _channel.invokeMethod<bool>('saveSoundSettings', {
+        'mode': mode,
+        'unifiedSound': unifiedSound,
+        'wirdSound': wirdSound,
+        'commuteSound': commuteSound,
+        'sadaqahSound': sadaqahSound,
+        'azkarSound': azkarSound,
+      });
+      return success ?? false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Retrieves current notification sound settings from native preferences.
+  static Future<Map<String, String>> getSoundSettings() async {
+    try {
+      final result = await _channel.invokeMethod<Map<dynamic, dynamic>>('getSoundSettings');
+      if (result == null) return {};
+      return result.map((k, v) => MapEntry(k.toString(), v.toString()));
+    } catch (e) {
+      return {};
+    }
+  }
 }

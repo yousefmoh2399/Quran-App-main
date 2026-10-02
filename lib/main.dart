@@ -9,6 +9,7 @@ import 'package:quran_app_android/core/permissions/permission_service.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
 import 'package:quran_app_android/core/service/settings/notifications_services.dart';
 import 'package:quran_app_android/core/design/app_theme.dart';
+import 'package:quran_app_android/core/service/navigation/app_navigation_service.dart';
 import 'package:quran_app_android/core/service/theme_controller.dart';
 import 'package:quran_app_android/core/util/binding.dart';
 import 'package:quran_app_android/core/util/routes/routes.dart';
@@ -44,6 +45,7 @@ Future initService() async {
   await Get.putAsync(() => SettingsServices().init());
   Get.put(ThemeController());
   await PermissionService.instance.init();
+  await AppNavigationService.instance.init();
 }
 
 class MyApp extends StatefulWidget {

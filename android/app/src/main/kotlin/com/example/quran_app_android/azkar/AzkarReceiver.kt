@@ -99,6 +99,9 @@ class AzkarReceiver : BroadcastReceiver() {
         // Tap opens MainActivity
         val openIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra("target_screen", "azkar")
+            putExtra("route", "/azkar")
+            putExtra("category", dhikr.category)
         }
         val contentPendingIntent = PendingIntent.getActivity(
             context,

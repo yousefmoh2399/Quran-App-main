@@ -95,7 +95,7 @@ class UnifiedReminderReceiver : BroadcastReceiver() {
     }
 
     private fun showNotification(context: Context, reminder: ReminderItem) {
-        val channelId = ReminderChannels.getChannelIdForType(reminder.type)
+        val channelId = ReminderChannels.getChannelIdForType(context, reminder.type)
         val payload = runCatching { JSONObject(reminder.payloadJson) }.getOrElse { JSONObject() }
         val schedule = runCatching { JSONObject(reminder.scheduleJson) }.getOrElse { JSONObject() }
 
@@ -104,7 +104,6 @@ class UnifiedReminderReceiver : BroadcastReceiver() {
 
         val openAppIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            putExtra("route", "/mushaf")
         }
 
         val builder = NotificationCompat.Builder(context, channelId)
@@ -112,11 +111,20 @@ class UnifiedReminderReceiver : BroadcastReceiver() {
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
 
+        val soundKey = ReminderChannels.getSoundKeyForType(context, reminder.type)
+        val soundUri = ReminderChannels.getSoundUri(context, soundKey)
+        if (soundKey == "silent") {
+            builder.setSilent(true)
+        } else if (soundUri != null) {
+            builder.setSound(soundUri)
+        }
+
         when (reminder.type) {
             ReminderItem.TYPE_WIRD_DAILY -> {
                 if (title.isEmpty()) title = "وردك القرآني اليومي"
                 if (body.isEmpty()) body = "حان وقت وردك القرآني اليومي، رتّل وتدبّر آيات الله."
                 openAppIntent.putExtra("target_screen", "wird")
+                openAppIntent.putExtra("route", "/mushaf")
             }
 
             ReminderItem.TYPE_WIRD_COMMUTE -> {
@@ -124,6 +132,7 @@ class UnifiedReminderReceiver : BroadcastReceiver() {
                 if (title.isEmpty()) title = "ورد المواصلات"
                 if (body.isEmpty()) body = "استثمر وقت طريقك في تلاوة القرآن ($targetPages صفحات)"
                 openAppIntent.putExtra("target_screen", "commute_wird")
+                openAppIntent.putExtra("route", "/mushaf")
                 openAppIntent.putExtra("commute_mode", true)
                 openAppIntent.putExtra("reminder_id", reminder.id)
             }
@@ -132,6 +141,8 @@ class UnifiedReminderReceiver : BroadcastReceiver() {
                 if (title.isEmpty()) title = "تذكير الصدقة الشهرية"
                 val randomHadith = SADAQAH_MESSAGES[Random.nextInt(SADAQAH_MESSAGES.size)]
                 body = randomHadith
+                openAppIntent.putExtra("target_screen", "sadaqah")
+                openAppIntent.putExtra("route", "/sadaqahLogs")
 
                 // Add "تصدّقت" Action Button directly in the notification
                 val donateIntent = Intent(context, SadaqahActionReceiver::class.java).apply {
@@ -157,6 +168,8 @@ class UnifiedReminderReceiver : BroadcastReceiver() {
                 val dhikr = AzkarDataRepository.getRandom(context)
                 title = "أذكار وتسابيح"
                 body = "${dhikr.text}\n— ${dhikr.source}"
+                openAppIntent.putExtra("target_screen", "azkar")
+                openAppIntent.putExtra("route", "/azkar")
             }
         }
 
