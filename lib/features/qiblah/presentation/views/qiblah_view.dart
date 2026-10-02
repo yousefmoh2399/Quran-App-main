@@ -75,6 +75,8 @@ class _QiblahViewState extends State<QiblahView>
                   animationController: animationController,
                   begin: begin,
                   qiblaDirection: qiblaDirection,
+                  userLatitude: 30.0444,
+                  userLongitude: 31.2357,
                 );
               }
 
@@ -86,6 +88,8 @@ class _QiblahViewState extends State<QiblahView>
                   animationController: animationController,
                   begin: begin,
                   qiblaDirection: qiblaDirection,
+                  userLatitude: pos.latitude,
+                  userLongitude: pos.longitude,
                 );
               }
 

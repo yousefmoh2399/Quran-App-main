@@ -285,32 +285,41 @@ class DailyWirdCard extends StatelessWidget {
     HomeViewModel homeVM, {
     WirdPlan? existingPlan,
   }) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _WirdPlanModalSheet(
-        homeVM: homeVM,
-        existingPlan: existingPlan,
-      ),
-    );
+    openWirdPlanModal(context, homeVM, existingPlan: existingPlan);
   }
 }
 
-class _WirdPlanModalSheet extends StatefulWidget {
+void openWirdPlanModal(
+  BuildContext context,
+  HomeViewModel homeVM, {
+  WirdPlan? existingPlan,
+}) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (context) => WirdPlanModalSheet(
+      homeVM: homeVM,
+      existingPlan: existingPlan,
+    ),
+  );
+}
+
+class WirdPlanModalSheet extends StatefulWidget {
   final HomeViewModel homeVM;
   final WirdPlan? existingPlan;
 
-  const _WirdPlanModalSheet({
+  const WirdPlanModalSheet({
+    super.key,
     required this.homeVM,
     this.existingPlan,
   });
 
   @override
-  State<_WirdPlanModalSheet> createState() => _WirdPlanModalSheetState();
+  State<WirdPlanModalSheet> createState() => _WirdPlanModalSheetState();
 }
 
-class _WirdPlanModalSheetState extends State<_WirdPlanModalSheet> {
+class _WirdPlanModalSheetState extends State<WirdPlanModalSheet> {
   late WirdType _selectedType;
   late int _target;
   late int _startPage;

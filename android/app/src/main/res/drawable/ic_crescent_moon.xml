@@ -1,0 +1,14 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Crescent Moon -->
+    <path
+        android:fillColor="#E5C365"
+        android:pathData="M12.3,2a10,10 0 0,0 -1.9,0.18 8,8 0 1,1 10.42,10.42A10,10 0 1,0 12.3,2Z" />
+    <!-- Small star -->
+    <path
+        android:fillColor="#FFF4D0"
+        android:pathData="M18.5,3.5l0.7,1.5l1.6,0.2l-1.2,1.1l0.3,1.6l-1.4,-0.8l-1.4,0.8l0.3,-1.6l-1.2,-1.1l1.6,-0.2z" />
+</vector>

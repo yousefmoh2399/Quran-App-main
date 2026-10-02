@@ -1,4 +1,8 @@
+import 'dart:convert';
 import 'package:sqflite/sqflite.dart';
+import '../../native/native_reminders_bridge.dart';
+import '../../../features/quran/data/models/juz_model.dart';
+import '../models/quran_marks_models.dart';
 import '../models/user_models.dart';
 import '../user_database.dart';
 
@@ -223,6 +227,186 @@ class UserRepository {
     };
   }
 
+  /// Fetches an aggregated summary of bookmarks, memorization, and last-read state
+  /// across all Surahs and Juzs in a single high-performance operation.
+  Future<QuranMarksAggregate> getMarksAggregate({
+    required QuranIndexStructure structure,
+    int? lastReadPage,
+    int? lastReadSurah,
+    String? lastReadSurahName,
+  }) async {
+    final db = await _db;
+
+    // 1. Aggregated query for bookmarks
+    final bookmarkRows = await db.rawQuery('''
+      SELECT type, 
+             COALESCE(page, 0) as page, 
+             COALESCE(surah, 0) as surah, 
+             COALESCE(ayah, 0) as ayah 
+      FROM bookmarks
+    ''');
+
+    // 2. Aggregated query for memorized items
+    final memorizedRows = await db.rawQuery('''
+      SELECT type, 
+             COALESCE(page, 0) as page, 
+             COALESCE(surah, 0) as surah, 
+             COALESCE(ayah, 0) as ayah 
+      FROM memorized 
+      WHERE status = 'memorized'
+    ''');
+
+    final surahBookmarks = <int>{};
+    final juzBookmarks = <int>{};
+    final surahMemorizedAyahs = <int, Set<int>>{};
+    for (final sId in structure.surahs.keys) {
+      surahMemorizedAyahs[sId] = <int>{};
+    }
+
+    // Process Bookmarks
+    for (final row in bookmarkRows) {
+      final type = row['type'] as String?;
+      final page = (row['page'] as int?) ?? 0;
+      final surah = (row['surah'] as int?) ?? 0;
+
+      if (type == BookmarkType.ayah.name) {
+        if (surah > 0) {
+          surahBookmarks.add(surah);
+        }
+      } else {
+        // Page bookmark
+        if (surah > 0) {
+          surahBookmarks.add(surah);
+        }
+        if (page > 0) {
+          // Boundary page: every surah present on this page receives the bookmark flag
+          final surahsOnPage = structure.pageToSurahs[page] ?? const [];
+          surahBookmarks.addAll(surahsOnPage);
+
+          // Juz bookmark
+          for (final entry in structure.juzPages.entries) {
+            final start = entry.value[0];
+            final end = entry.value[1];
+            if (page >= start && page <= end) {
+              juzBookmarks.add(entry.key);
+            }
+          }
+        }
+      }
+    }
+
+    // Process Memorization
+    for (final row in memorizedRows) {
+      final type = row['type'] as String?;
+      final page = (row['page'] as int?) ?? 0;
+      final surah = (row['surah'] as int?) ?? 0;
+      final ayah = (row['ayah'] as int?) ?? 0;
+
+      if (type == BookmarkType.ayah.name) {
+        if (surah > 0 && ayah > 0) {
+          surahMemorizedAyahs[surah]?.add(ayah);
+        }
+      } else {
+        // Page memorized
+        if (page > 0) {
+          final surahsOnPage = structure.pageToSurahs[page] ?? const [];
+          for (final sId in surahsOnPage) {
+            final surahMeta = structure.surahs[sId];
+            final ayahsOnThisPage = surahMeta?.ayahsByPage[page] ?? const [];
+            surahMemorizedAyahs[sId]?.addAll(ayahsOnThisPage);
+          }
+        }
+      }
+    }
+
+    // Boundary page resolution for Last Read:
+    // Exactly ONE active Surah gets the "آخر قراءة" badge.
+    int? resolvedLastReadSurah;
+    if (lastReadPage != null && lastReadPage > 0 && lastReadPage <= 604) {
+      final surahsOnLastPage = structure.pageToSurahs[lastReadPage] ?? const [];
+      if (lastReadSurah != null && surahsOnLastPage.contains(lastReadSurah)) {
+        resolvedLastReadSurah = lastReadSurah;
+      } else if (surahsOnLastPage.isNotEmpty) {
+        resolvedLastReadSurah = surahsOnLastPage.first;
+      }
+    }
+
+    // Build SurahMarksSummary
+    final surahSummaries = <int, SurahMarksSummary>{};
+    for (final entry in structure.surahs.entries) {
+      final sId = entry.key;
+      final meta = entry.value;
+      final memAyahs = surahMemorizedAyahs[sId] ?? const <int>{};
+      final isLastRead = resolvedLastReadSurah == sId;
+
+      surahSummaries[sId] = SurahMarksSummary(
+        surahId: sId,
+        surahName: meta.nameAr,
+        startPage: meta.startPage,
+        endPage: meta.endPage,
+        totalVerses: meta.totalVerses,
+        memorizedAyahsCount: memAyahs.length,
+        hasBookmark: surahBookmarks.contains(sId),
+        isLastRead: isLastRead,
+        lastReadPage: isLastRead ? lastReadPage : null,
+      );
+    }
+
+    // Build JuzMarksSummary
+    final juzSummaries = <int, JuzMarksSummary>{};
+    for (int j = 1; j <= 30; j++) {
+      final bounds = structure.juzPages[j] ?? [1, 20];
+      final startP = bounds[0];
+      final endP = bounds[1];
+      final isLastRead = lastReadPage != null &&
+          lastReadPage >= startP &&
+          lastReadPage <= endP;
+
+      int juzTotalVerses = 0;
+      int juzMemorizedVerses = 0;
+      for (int p = startP; p <= endP; p++) {
+        final surahsOnPage = structure.pageToSurahs[p] ?? const [];
+        for (final sId in surahsOnPage) {
+          final surahMeta = structure.surahs[sId];
+          final ayahsOnPage = surahMeta?.ayahsByPage[p] ?? const [];
+          juzTotalVerses += ayahsOnPage.length;
+          final memSet = surahMemorizedAyahs[sId] ?? const <int>{};
+          for (final a in ayahsOnPage) {
+            if (memSet.contains(a)) {
+              juzMemorizedVerses++;
+            }
+          }
+        }
+      }
+
+      final juzModel = JuzModel.allJuz.firstWhere(
+        (m) => m.number == j,
+        orElse: () => JuzModel.allJuz[j - 1],
+      );
+
+      juzSummaries[j] = JuzMarksSummary(
+        juzNumber: j,
+        title: juzModel.title,
+        startSurahName: juzModel.startSurahName,
+        startPage: startP,
+        endPage: endP,
+        totalVerses: juzTotalVerses,
+        memorizedAyahsCount: juzMemorizedVerses,
+        hasBookmark: juzBookmarks.contains(j),
+        isLastRead: isLastRead,
+        lastReadPage: isLastRead ? lastReadPage : null,
+      );
+    }
+
+    return QuranMarksAggregate(
+      surahs: surahSummaries,
+      juzs: juzSummaries,
+      lastReadPage: lastReadPage,
+      lastReadSurah: resolvedLastReadSurah,
+      lastReadSurahName: lastReadSurahName,
+    );
+  }
+
   // ==========================================
   // READING LOG
   // ==========================================
@@ -296,6 +480,37 @@ class UserRepository {
     return rows.first['last_page'] as int?;
   }
 
+  Future<Map<String, dynamic>> getReadingStats() async {
+    final db = await _db;
+    final totalPages = Sqflite.firstIntValue(await db.rawQuery('SELECT SUM(pages_read) FROM reading_log')) ?? 0;
+    final totalDays = Sqflite.firstIntValue(await db.rawQuery('SELECT COUNT(*) FROM reading_log WHERE pages_read > 0')) ?? 0;
+    
+    final logs = await getReadingLog(limit: 60);
+    int streak = 0;
+    DateTime checkDate = DateTime.now();
+    final logDates = logs.where((l) => l.pagesRead > 0).map((l) => l.date).toSet();
+    
+    final todayStr = _formatDate(checkDate);
+    final yesterdayStr = _formatDate(checkDate.subtract(const Duration(days: 1)));
+    if (logDates.contains(todayStr)) {
+      streak++;
+      checkDate = checkDate.subtract(const Duration(days: 1));
+    } else if (logDates.contains(yesterdayStr)) {
+      checkDate = checkDate.subtract(const Duration(days: 1));
+    }
+    
+    while (logDates.contains(_formatDate(checkDate))) {
+      streak++;
+      checkDate = checkDate.subtract(const Duration(days: 1));
+    }
+
+    return {
+      'totalPages': totalPages,
+      'totalDays': totalDays,
+      'streak': streak,
+    };
+  }
+
   // ==========================================
   // WIRD PLAN & STREAK
   // ==========================================
@@ -310,16 +525,44 @@ class UserRepository {
   Future<int> saveWirdPlan(WirdPlan plan) async {
     final db = await _db;
     final existing = await getWirdPlan();
+    int res;
     if (existing == null) {
-      return await db.insert('wird_plan', plan.toMap());
+      res = await db.insert('wird_plan', plan.toMap());
     } else {
-      return await db.update(
+      res = await db.update(
         'wird_plan',
         plan.toMap(),
         where: 'id = ?',
         whereArgs: [existing.id],
       );
     }
+
+    // Sync with Native Reminders Engine
+    try {
+      int hour = 20;
+      int minute = 0;
+      if (plan.reminderTime.isNotEmpty) {
+        final parts = plan.reminderTime.split(':');
+        if (parts.length >= 2) {
+          hour = int.tryParse(parts[0]) ?? 20;
+          minute = int.tryParse(parts[1]) ?? 0;
+        }
+      }
+      NativeRemindersBridge.saveReminder({
+        'id': 'wird_daily',
+        'type': 'wird_daily',
+        'schedule_json': jsonEncode({'hour': hour, 'minute': minute}),
+        'payload_json': jsonEncode({
+          'title': 'وردك القرآني اليومي',
+          'body': 'حان وقت وردك القرآني (صـ ${plan.startPage} إلى ${plan.endPage})',
+          'start_page': plan.startPage,
+        }),
+        'enabled': plan.enabled ? 1 : 0,
+        'last_triggered': 0,
+      });
+    } catch (_) {}
+
+    return res;
   }
 
   /// Calculates target start and end pages for a given plan starting from [fromPage].
@@ -403,6 +646,252 @@ class UserRepository {
     );
 
     await saveWirdPlan(updated);
+
+    try {
+      await NativeRemindersBridge.markWirdCompleted(date: today);
+    } catch (_) {}
+
+    await evaluateAchievements();
     return updated;
   }
+
+  // ==========================================
+  // PRAYER TRACKING & QADAA
+  // ==========================================
+
+  Future<void> savePrayerLog(PrayerLog log) async {
+    final db = await _db;
+    await db.insert(
+      'prayer_logs',
+      log.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    await evaluateAchievements();
+  }
+
+  Future<Map<String, PrayerLog>> getPrayerLogsForDate(String date) async {
+    final db = await _db;
+    final rows = await db.query(
+      'prayer_logs',
+      where: 'date = ?',
+      whereArgs: [date],
+    );
+    final map = <String, PrayerLog>{};
+    for (final r in rows) {
+      final log = PrayerLog.fromMap(r);
+      map[log.prayer] = log;
+    }
+    return map;
+  }
+
+  Future<List<PrayerLog>> getPrayerLogsBetween(String startDate, String endDate) async {
+    final db = await _db;
+    final rows = await db.query(
+      'prayer_logs',
+      where: 'date >= ? AND date <= ?',
+      whereArgs: [startDate, endDate],
+      orderBy: 'date ASC',
+    );
+    return rows.map((r) => PrayerLog.fromMap(r)).toList();
+  }
+
+  Future<Map<String, int>> getQadaaCounts() async {
+    final db = await _db;
+    final rows = await db.query('qadaa_prayers');
+    final map = <String, int>{'fajr': 0, 'dhuhr': 0, 'asr': 0, 'maghrib': 0, 'isha': 0};
+    for (final r in rows) {
+      final prayer = r['prayer'] as String;
+      final count = r['count'] as int? ?? 0;
+      map[prayer] = count;
+    }
+    return map;
+  }
+
+  Future<void> setQadaaCount(String prayer, int count) async {
+    final db = await _db;
+    await db.insert(
+      'qadaa_prayers',
+      {'prayer': prayer, 'count': count.clamp(0, 99999)},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  // ==========================================
+  // FASTING TRACKING
+  // ==========================================
+
+  Future<void> saveFastingLog(FastingLog log) async {
+    final db = await _db;
+    await db.insert(
+      'fasting_logs',
+      log.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    await evaluateAchievements();
+  }
+
+  Future<void> deleteFastingLog(String date) async {
+    final db = await _db;
+    await db.delete('fasting_logs', where: 'date = ?', whereArgs: [date]);
+  }
+
+  Future<List<FastingLog>> getFastingLogsForMonth(String yearMonthPrefix) async {
+    final db = await _db;
+    final rows = await db.query(
+      'fasting_logs',
+      where: 'date LIKE ?',
+      whereArgs: ['$yearMonthPrefix%'],
+      orderBy: 'date ASC',
+    );
+    return rows.map((r) => FastingLog.fromMap(r)).toList();
+  }
+
+  Future<bool> isDayFasted(String date) async {
+    final db = await _db;
+    final rows = await db.query(
+      'fasting_logs',
+      where: 'date = ? AND completed = 1',
+      whereArgs: [date],
+      limit: 1,
+    );
+    return rows.isNotEmpty;
+  }
+
+  // ==========================================
+  // TAFSIR CACHE
+  // ==========================================
+
+  Future<String?> getCachedTafsir(int surah, int ayah, int tafsirId) async {
+    final db = await _db;
+    final rows = await db.query(
+      'tafsir_cache',
+      columns: ['text'],
+      where: 'surah = ? AND ayah = ? AND tafsir_id = ?',
+      whereArgs: [surah, ayah, tafsirId],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return rows.first['text'] as String?;
+  }
+
+  Future<void> cacheTafsir(int surah, int ayah, int tafsirId, String text) async {
+    final db = await _db;
+    await db.insert(
+      'tafsir_cache',
+      {'surah': surah, 'ayah': ayah, 'tafsir_id': tafsirId, 'text': text},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  // ==========================================
+  // ACHIEVEMENTS & STATS
+  // ==========================================
+
+  Future<Set<String>> getUnlockedAchievements() async {
+    final db = await _db;
+    final rows = await db.query('user_achievements');
+    return rows.map((r) => r['id'] as String).toSet();
+  }
+
+  Future<bool> unlockAchievement(String badgeId) async {
+    final db = await _db;
+    final rows = await db.query('user_achievements', where: 'id = ?', whereArgs: [badgeId], limit: 1);
+    if (rows.isNotEmpty) return false;
+
+    await db.insert('user_achievements', {
+      'id': badgeId,
+      'unlocked_at': DateTime.now().toIso8601String(),
+    });
+    return true;
+  }
+
+  Future<void> evaluateAchievements() async {
+    final stats = await getReadingStats();
+    final totalPages = stats['totalPages'] ?? 0;
+    final totalDays = stats['totalDays'] ?? 0;
+
+    if (totalPages >= 1) await unlockAchievement('first_page');
+    if (totalDays >= 3) await unlockAchievement('streak_3');
+    if (totalDays >= 7) await unlockAchievement('streak_7');
+    if (totalDays >= 30) await unlockAchievement('streak_30');
+
+    // Check prayer achievement
+    final today = _formatDate(DateTime.now());
+    final todayPrayers = await getPrayerLogsForDate(today);
+    if (todayPrayers.length >= 5 && todayPrayers.values.every((p) => p.status == PrayerStatus.onTime || p.status == PrayerStatus.jamaah)) {
+      await unlockAchievement('prayers_day');
+    }
+
+    // Check fasting achievement
+    final db = await _db;
+    final fastingCount = Sqflite.firstIntValue(await db.rawQuery('SELECT COUNT(*) FROM fasting_logs WHERE completed = 1')) ?? 0;
+    if (fastingCount >= 1) await unlockAchievement('fasting_day');
+
+    final plan = await getWirdPlan();
+    if (plan != null && (plan.streak >= 30 || plan.lastCompletedDate != null && plan.startPage == 1 && plan.streak > 10)) {
+      await unlockAchievement('first_khatma');
+    }
+  }
+
+  // ==========================================
+  // BACKUP & RESTORE
+  // ==========================================
+
+  Future<String> exportUserDataJson() async {
+    final db = await _db;
+    final data = <String, dynamic>{
+      'version': 2,
+      'app': 'taqarrab',
+      'exported_at': DateTime.now().toIso8601String(),
+      'bookmarks': await db.query('bookmarks'),
+      'memorized': await db.query('memorized'),
+      'reading_log': await db.query('reading_log'),
+      'wird_plan': await db.query('wird_plan'),
+      'commute_wird_log': await db.query('commute_wird_log'),
+      'commute_wird_state': await db.query('commute_wird_state'),
+      'prayer_logs': await db.query('prayer_logs'),
+      'qadaa_prayers': await db.query('qadaa_prayers'),
+      'fasting_logs': await db.query('fasting_logs'),
+      'user_achievements': await db.query('user_achievements'),
+    };
+    return const JsonEncoder.withIndent('  ').convert(data);
+  }
+
+  Future<bool> importUserDataJson(String jsonStr) async {
+    try {
+      final decoded = json.decode(jsonStr) as Map<String, dynamic>;
+      if (!decoded.containsKey('version')) return false;
+
+      final db = await _db;
+      await db.transaction((txn) async {
+        void safeRestore(String table, String key) async {
+          if (decoded.containsKey(key)) {
+            final list = decoded[key] as List<dynamic>?;
+            if (list != null) {
+              for (final item in list) {
+                if (item is Map<String, dynamic>) {
+                  await txn.insert(table, item, conflictAlgorithm: ConflictAlgorithm.replace);
+                }
+              }
+            }
+          }
+        }
+
+        safeRestore('bookmarks', 'bookmarks');
+        safeRestore('memorized', 'memorized');
+        safeRestore('reading_log', 'reading_log');
+        safeRestore('wird_plan', 'wird_plan');
+        safeRestore('commute_wird_log', 'commute_wird_log');
+        safeRestore('commute_wird_state', 'commute_wird_state');
+        safeRestore('prayer_logs', 'prayer_logs');
+        safeRestore('qadaa_prayers', 'qadaa_prayers');
+        safeRestore('fasting_logs', 'fasting_logs');
+        safeRestore('user_achievements', 'user_achievements');
+      });
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
 }
+

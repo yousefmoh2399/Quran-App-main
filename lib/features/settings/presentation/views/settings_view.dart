@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quran_app_android/core/design/app_colors.dart';
@@ -8,8 +9,6 @@ import 'package:quran_app_android/core/design/components/app_card.dart';
 import 'package:quran_app_android/core/design/components/app_scaffold.dart';
 import 'package:quran_app_android/core/design/gallery/design_gallery_view.dart';
 import 'package:quran_app_android/core/util/routes/routes.dart';
-import 'package:quran_app_android/features/settings/presentation/view_model/settins_view_model.dart';
-import 'package:quran_app_android/features/settings/presentation/views/widget/section_azkar_notification.dart';
 import 'package:quran_app_android/features/settings/presentation/views/widget/section_theme_mode.dart';
 import 'package:quran_app_android/features/settings/presentation/views/widget/settings_group_card.dart';
 import 'package:quran_app_android/features/settings/presentation/views/widget/settings_tile.dart';
@@ -22,135 +21,211 @@ class SettingsView extends StatelessWidget {
     final colors = context.appColors;
 
     return AppScaffold(
-      title: 'الإعدادات',
+      title: 'المزيد',
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
           vertical: AppSpacing.md,
         ),
-        child: GetBuilder<SettingsViewModel>(
-          init: SettingsViewModel(),
-          builder: (controller) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // App Identity Header Card
+            _buildAppHeaderCard(context, colors),
+            AppSpacing.verticalLg,
+
+            // 1. عباداتي
+            SettingsGroupCard(
+              title: 'عباداتي',
+              icon: Icons.auto_awesome_rounded,
               children: [
-                // App Identity Card
-                _buildAppHeaderCard(context, colors),
-                AppSpacing.verticalLg,
-
-                // 1. Appearance / Theme Mode
-                const SectionThemeMode(),
-
-                // 2. Azkar & Notifications
-                SectionAzkarNotification(controller: controller),
-
-                // 3. Prayer Times & Adhan Settings
-                SettingsGroupCard(
-                  title: 'مواقيت الصلاة والأذان',
-                  icon: Icons.access_time_filled_rounded,
-                  children: [
-                    const SettingsTile(
-                      icon: Icons.calculate_outlined,
-                      title: 'طريقة الحساب المعتمدة',
-                      subtitle: 'الهيئة المصرية العامة للمساحة',
-                    ),
-                    const SettingsTile(
-                      icon: Icons.menu_book_outlined,
-                      title: 'المذهب الفقهي لحساب العصر',
-                      subtitle: 'الشافعي / الحنبلي / المالكي',
-                    ),
-                    SettingsTile(
-                      icon: Icons.mosque_outlined,
-                      title: 'عرض مواقيت الصلاة اليوم',
-                      subtitle: 'متابعة العد التنازلي والمواقيت الكاملة',
-                      onTap: () {
-                        Get.toNamed(AppRoutes.adhan);
-                      },
-                    ),
-                    SettingsTile(
-                      icon: Icons.security_rounded,
-                      title: 'حالة الصلاحيات والتنبيهات',
-                      subtitle: 'فحص أذونات الموقع، الإشعارات، المنبهات والبطارية',
-                      onTap: () {
-                        Get.toNamed(AppRoutes.permissionsStatus);
-                      },
-                    ),
-                  ],
+                SettingsTile(
+                  icon: Icons.fact_check_rounded,
+                  title: 'سجل الصلوات وقضاء الفوائت',
+                  subtitle: 'تسجيل الصلوات اليومية ونسب الالتزام',
+                  onTap: () => Get.toNamed(AppRoutes.prayerTracker),
                 ),
-
-                // 4. App Info & Sources
-                SettingsGroupCard(
-                  title: 'عن التطبيق والمصادر',
-                  icon: Icons.info_outline_rounded,
-                  children: [
-                    const SettingsTile(
-                      icon: Icons.verified_outlined,
-                      title: 'مصادر النصوص والبيانات',
-                      subtitle:
-                          'مصحف المدينة (مجمع الملك فهد) • التفسير الميسر • موطأ مالك',
-                    ),
-                    const SettingsTile(
-                      icon: Icons.wifi_off_rounded,
-                      title: 'وضع التشغيل',
-                      subtitle: 'أوفلاين بالكامل دون الحاجة لشبكة الإنترنت',
-                    ),
-                    SettingsTile(
-                      icon: Icons.palette_outlined,
-                      title: 'معرض مكونات التصميم (Design System)',
-                      subtitle: 'استعراض الألوان والرموز والمكونات',
-                      onTap: () {
-                        Get.to(() => const DesignGalleryView());
-                      },
-                    ),
-                    const SettingsTile(
-                      icon: Icons.phonelink_setup_rounded,
-                      title: 'إصدار التطبيق',
-                      subtitle: '1.0.0 (تحديث شامل لواجهة المستخدم)',
-                    ),
-                  ],
+                SettingsTile(
+                  icon: Icons.calendar_today_rounded,
+                  title: 'التقويم الهجري والمناسبات',
+                  subtitle: 'المناسبات الإسلامية، صيام السنن، وتحويل التاريخ',
+                  onTap: () => Get.toNamed(AppRoutes.islamicCalendar),
                 ),
-
-                // Spiritual Footer Card
-                AppCard(
-                  variant: AppCardVariant.flat,
-                  padding: AppSpacing.paddingMd,
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.favorite_rounded,
-                        size: 22,
-                        color: colors.primary,
-                      ),
-                      AppSpacing.verticalXs,
-                      Text(
-                        '«اللهم اجعل القرآن ربيع قلوبنا ونور صدورنا وجلاء أحزاننا»',
-                        style: TextStyle(
-                          fontFamily: AppTypography.decorativeFont,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: colors.primary,
-                          height: 1.5,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      AppSpacing.verticalXs,
-                      Text(
-                        'تطبيق مجاني وخالٍ تماماً من الإعلانات • صدقة جارية',
-                        style: TextStyle(
-                          fontFamily: AppTypography.uiFont,
-                          fontSize: 11,
-                          color: colors.textMuted,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
+                SettingsTile(
+                  icon: Icons.nights_stay_rounded,
+                  title: 'إمساكية شهر رمضان المبارك',
+                  subtitle: 'مواقيت الإمساك والإفطار للشهر الفضيل',
+                  onTap: () => Get.toNamed(AppRoutes.ramadanImsakia),
                 ),
-                AppSpacing.verticalXl,
+                SettingsTile(
+                  icon: Icons.radio_button_checked_rounded,
+                  title: 'أذكار ما بعد الصلاة المفروضة',
+                  subtitle: 'التسبيح والتحميد والتكبير بعد الفريضة',
+                  onTap: () => Get.toNamed(AppRoutes.postPrayerAzkar),
+                ),
+                SettingsTile(
+                  icon: Icons.library_books_rounded,
+                  title: 'التفسير الميسر',
+                  subtitle: 'تفسير ومعاني آيات وسور القرآن الكريم',
+                  onTap: () => Get.toNamed(AppRoutes.tafsser),
+                ),
+                SettingsTile(
+                  icon: Icons.military_tech_rounded,
+                  title: 'إنجازاتي وأوسمة القراءة',
+                  subtitle: 'متابعة الختمات وأيام الالتزام المستمر',
+                  onTap: () => Get.toNamed(AppRoutes.achievements),
+                ),
               ],
-            );
-          },
+            ),
+
+            // 2. التذكيرات
+            SettingsGroupCard(
+              title: 'التذكيرات والتنبيهات',
+              icon: Icons.notifications_active_rounded,
+              children: [
+                SettingsTile(
+                  icon: Icons.alarm_on_rounded,
+                  iconColor: colors.primary,
+                  title: 'تذكيراتي',
+                  subtitle: 'الورد اليومي، ورد المواصلات، الصدقة الشهرية، والأذكار',
+                  trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
+                  onTap: () => Get.toNamed(AppRoutes.myReminders),
+                ),
+              ],
+            ),
+
+            // 3. الأذان ومواقيت الصلاة
+            SettingsGroupCard(
+              title: 'الأذان ومواقيت الصلاة',
+              icon: Icons.access_time_filled_rounded,
+              children: [
+                SettingsTile(
+                  icon: Icons.mosque_outlined,
+                  title: 'مواقيت الصلاة اليوم',
+                  subtitle: 'متابعة العد التنازلي والمواقيت الكاملة',
+                  onTap: () => Get.toNamed(AppRoutes.adhan),
+                ),
+                SettingsTile(
+                  icon: Icons.tune_rounded,
+                  title: 'إعدادات الأذان والمؤذن والمواقيت',
+                  subtitle: 'طريقة الحساب، المذهب، أصوات المؤذنين، وتعديل الدقائق',
+                  onTap: () => Get.toNamed(AppRoutes.adhanSettings),
+                ),
+                SettingsTile(
+                  icon: Icons.security_rounded,
+                  title: 'حالة الصلاحيات والتنبيهات',
+                  subtitle: 'فحص أذونات الموقع، الإشعارات، والمنبهات في الخلفية',
+                  onTap: () => Get.toNamed(AppRoutes.permissionsStatus),
+                ),
+                if (kDebugMode)
+                  SettingsTile(
+                    icon: Icons.bug_report_outlined,
+                    title: 'فحص جدولة الأذان والتنبيهات',
+                    subtitle: 'جدول الـ 7 أيام واختبار التنبيه التجريبي',
+                    onTap: () => Get.toNamed(AppRoutes.adhanDebug),
+                  ),
+              ],
+            ),
+
+            // 4. المظهر
+            const SectionThemeMode(),
+
+            // 5. النسخ الاحتياطي والبيانات
+            SettingsGroupCard(
+              title: 'النسخ الاحتياطي واستعادة البيانات',
+              icon: Icons.backup_rounded,
+              children: [
+                SettingsTile(
+                  icon: Icons.cloud_sync_rounded,
+                  title: 'النسخ الاحتياطي والاستعادة',
+                  subtitle: 'تصدير واستيراد العلامات والورد وسجل الصلوات كملف آمن',
+                  onTap: () => Get.toNamed(AppRoutes.backupRestore),
+                ),
+              ],
+            ),
+
+            // 6. عن التطبيق
+            SettingsGroupCard(
+              title: 'عن التطبيق والمصادر',
+              icon: Icons.info_outline_rounded,
+              children: [
+                SettingsTile(
+                  icon: Icons.info_rounded,
+                  title: 'عن التطبيق والمطور',
+                  subtitle: 'معلومات الترخيص والمراجع ومشاركة الأجر',
+                  onTap: () => Get.toNamed(AppRoutes.aboutApp),
+                ),
+                SettingsTile(
+                  icon: Icons.privacy_tip_rounded,
+                  title: 'سياسة الخصوصية والأمان',
+                  subtitle: 'تطبيق محلي تماماً بدون تتبع أو جمع أي بيانات',
+                  onTap: () => Get.toNamed(AppRoutes.privacyPolicy),
+                ),
+                const SettingsTile(
+                  icon: Icons.verified_outlined,
+                  title: 'مصادر النصوص والبيانات',
+                  subtitle:
+                      'مصحف المدينة (مجمع الملك فهد) • التفسير الميسر • موطأ مالك',
+                ),
+                const SettingsTile(
+                  icon: Icons.wifi_off_rounded,
+                  title: 'وضع التشغيل',
+                  subtitle: 'يعمل بالكامل دون الحاجة للاتصال بالإنترنت',
+                ),
+                if (kDebugMode)
+                  SettingsTile(
+                    icon: Icons.palette_outlined,
+                    title: 'معرض مكونات التصميم',
+                    subtitle: 'استعراض الألوان والرموز والمكونات المرئية',
+                    onTap: () => Get.to(() => const DesignGalleryView()),
+                  ),
+                const SettingsTile(
+                  icon: Icons.phonelink_setup_rounded,
+                  title: 'إصدار التطبيق',
+                  subtitle: '1.1.0 (الإصدار الشامل)',
+                ),
+              ],
+            ),
+
+            // Spiritual Footer Card
+            AppCard(
+              variant: AppCardVariant.flat,
+              padding: AppSpacing.paddingMd,
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.favorite_rounded,
+                    size: 22,
+                    color: colors.primary,
+                  ),
+                  AppSpacing.verticalXs,
+                  Text(
+                    '«اللهم اجعل القرآن ربيع قلوبنا ونور صدورنا وجلاء أحزاننا»',
+                    style: TextStyle(
+                      fontFamily: AppTypography.decorativeFont,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: colors.primary,
+                      height: 1.5,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  AppSpacing.verticalXs,
+                  Text(
+                    'تطبيق مجاني وخالٍ تماماً من الإعلانات • صدقة جارية',
+                    style: TextStyle(
+                      fontFamily: AppTypography.uiFont,
+                      fontSize: 11,
+                      color: colors.textMuted,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+            AppSpacing.verticalXl,
+          ],
         ),
       ),
     );

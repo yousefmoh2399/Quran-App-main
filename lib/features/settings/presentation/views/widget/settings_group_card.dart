@@ -38,13 +38,17 @@ class SettingsGroupCard extends StatelessWidget {
                 ),
                 AppSpacing.horizontalXs,
               ],
-              Text(
-                title,
-                style: TextStyle(
-                  fontFamily: AppTypography.uiFont,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: colors.primary,
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontFamily: AppTypography.uiFont,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: colors.primary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],

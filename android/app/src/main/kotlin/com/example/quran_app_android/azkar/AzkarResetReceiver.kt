@@ -10,9 +10,8 @@ class AzkarResetReceiver : BroadcastReceiver() {
         try {
             Log.i("AzkarResetReceiver", "🌙 Midnight reached — rescheduling azkar for new day")
 
-            // إعادة الجدولة من الساعة 10 صباحًا لحد 10 مساءً
-            AzkarScheduler.scheduleDailyAzkar(context, intervalHours = 2)
-
+            // Re-schedule next chained alarm
+            AzkarScheduler.scheduleNext(context)
         } catch (e: Exception) {
             Log.e("AzkarResetReceiver", "❌ Error resetting daily azkar: ${e.message}")
             e.printStackTrace()

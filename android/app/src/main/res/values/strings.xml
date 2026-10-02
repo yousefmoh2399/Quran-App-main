@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">قرآن أندرويد</string>
+    <string name="widget_azkar_small_desc">ذكر وتذكير متجدد كل 10 دقائق (صغير 2x1)</string>
+    <string name="widget_azkar_med_desc">أذكار متجددة مع الصلاة القادمة وزر تبديل الذكر (متوسط 4x2)</string>
+    <string name="widget_azkar_large_desc">كارت الأذكار الشامل ومواقيت الصلوات الخمس اليومية (كبير 4x4)</string>
+    <string name="widget_prayer_desc">مواقيت الصلاة الخمس مع العد التنازلي للصلاة القادمة (4x2)</string>
+    <string name="widget_wird_desc">متابعة الورد القرآني والختمة وأيام الالتزام ومتابعة القراءة (4x2)</string>
+</resources>

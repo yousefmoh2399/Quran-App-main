@@ -55,21 +55,19 @@ class MushafPageWidget extends StatefulWidget {
 class _MushafPageWidgetState extends State<MushafPageWidget> {
   final GlobalKey _boundaryKey = GlobalKey();
   bool _isCapturing = false;
+  late Future<void> _fontLoadingFuture;
 
   @override
   void initState() {
     super.initState();
-    _scheduleCapture();
+    _fontLoadingFuture = _ensurePageFonts(widget.page);
   }
 
   @override
   void didUpdateWidget(covariant MushafPageWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.page.pageNumber != widget.page.pageNumber ||
-        oldWidget.theme.mode != widget.theme.mode ||
-        oldWidget.pageBookmarkColor != widget.pageBookmarkColor ||
-        oldWidget.pageMemorizeStatus != widget.pageMemorizeStatus) {
-      _scheduleCapture();
+    if (oldWidget.page.pageNumber != widget.page.pageNumber) {
+      _fontLoadingFuture = _ensurePageFonts(widget.page);
     }
   }
 
@@ -81,7 +79,7 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
 
   Future<void> _captureRasterImage() async {
     if (!mounted || _isCapturing) return;
-    if (widget.selectedAyah != null) return;
+    if (widget.selectedAyah != null || widget.isMoving) return;
     if (MushafRasterCache.instance.has(widget.page.pageNumber, widget.theme.mode)) {
       return;
     }
@@ -127,56 +125,25 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
       widget.theme.mode,
     );
 
-    // When the page is swiping or turning, and a pre-rendered raster image is available,
-    // display only the lightweight 2D texture (RawImage) for butter-smooth 60fps scrolling.
-    if (widget.isMoving && cachedImage != null && widget.selectedAyah == null) {
-      return GestureDetector(
-        onTap: widget.onTapPage,
-        behavior: HitTestBehavior.opaque,
-        child: Container(
-          color: widget.theme.pageBg,
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: RawImage(
-                  image: cachedImage,
-                  fit: BoxFit.fill,
-                ),
-              ),
-              if (widget.pageBookmarkColor != null || widget.pageMemorizeStatus != null)
-                Positioned(
-                  top: 0.0,
-                  right: widget.isRightPage ? 36.0 : null,
-                  left: widget.isRightPage ? null : 36.0,
-                  child: PageRibbonWidget(
-                    color: widget.pageBookmarkColor?.color ??
-                        widget.pageMemorizeStatus?.badgeColor ??
-                        Colors.amber,
-                    icon: widget.pageBookmarkColor != null
-                        ? Icons.bookmark_rounded
-                        : Icons.check_circle_rounded,
-                  ),
-                ),
-            ],
-          ),
-        ),
-      );
-    }
+    return FutureBuilder<void>(
+      future: _fontLoadingFuture,
+      builder: (context, snapshot) {
+        final fontReady = snapshot.connectionState == ConnectionState.done;
+        final showLiveInteractive = fontReady && !widget.isMoving;
 
-    // Settled page: render live interactive widgets inside RepaintBoundary
-    return RepaintBoundary(
-      key: _boundaryKey,
-      child: FutureBuilder<void>(
-        future: _ensurePageFonts(widget.page),
-        builder: (context, snapshot) {
-          final fontReady = snapshot.connectionState == ConnectionState.done;
+        if (fontReady && !widget.isMoving && widget.selectedAyah == null) {
+          _scheduleCapture();
+        }
 
-          return GestureDetector(
+        final liveContent = RepaintBoundary(
+          key: _boundaryKey,
+          child: GestureDetector(
             onTap: widget.onTapPage,
             behavior: HitTestBehavior.opaque,
             child: Container(
               color: widget.theme.pageBg,
               child: Stack(
+                fit: StackFit.expand,
                 children: [
                   CustomPaint(
                     painter: MushafFramePainter(
@@ -209,28 +176,107 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
                     ),
                   ),
 
-                  // Corner Silk Ribbon (Bookmarked or Memorized)
-                  if (widget.pageBookmarkColor != null || widget.pageMemorizeStatus != null)
-                    Positioned(
-                      top: 0.0,
-                      right: widget.isRightPage ? 36.0 : null,
-                      left: widget.isRightPage ? null : 36.0,
-                      child: PageRibbonWidget(
-                        color: widget.pageBookmarkColor?.color ??
-                            widget.pageMemorizeStatus?.badgeColor ??
-                            Colors.amber,
-                        icon: widget.pageBookmarkColor != null
-                            ? Icons.bookmark_rounded
-                            : Icons.check_circle_rounded,
-                      ),
-                    ),
+                  // Corner Silk Ribbons (Bookmarked and/or Memorized)
+                  ..._buildRibbons(),
                 ],
               ),
             ),
-          );
+          ),
+        );
+
+          if (cachedImage != null && widget.selectedAyah == null) {
+            final cachedView = GestureDetector(
+              onTap: widget.onTapPage,
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                color: widget.theme.pageBg,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: RawImage(
+                        image: cachedImage,
+                        fit: BoxFit.fill,
+                      ),
+                    ),
+                    ..._buildRibbons(),
+                  ],
+                ),
+              ),
+            );
+
+            final disableAnimations = MediaQuery.of(context).disableAnimations;
+
+            // Crossfade smoothly between cached texture and live interactive widget
+            return AnimatedCrossFade(
+              firstChild: cachedView,
+              secondChild: liveContent,
+              crossFadeState: showLiveInteractive
+                  ? CrossFadeState.showSecond
+                  : CrossFadeState.showFirst,
+              duration: disableAnimations
+                  ? Duration.zero
+                  : const Duration(milliseconds: 150),
+              layoutBuilder: (topChild, topChildKey, bottomChild, bottomChildKey) {
+                return Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Positioned.fill(key: bottomChildKey, child: bottomChild),
+                    Positioned.fill(key: topChildKey, child: topChild),
+                  ],
+                );
+              },
+            );
+          }
+
+          return liveContent;
         },
-      ),
-    );
+      );
+  }
+
+  /// Builds corner silk ribbons for bookmarked and/or memorized page.
+  List<Widget> _buildRibbons() {
+    final ribbons = <Widget>[];
+
+    final hasBookmark = widget.pageBookmarkColor != null;
+    final hasMemorize = widget.pageMemorizeStatus != null;
+
+    if (hasBookmark) {
+      ribbons.add(
+        Positioned(
+          top: 0.0,
+          right: widget.isRightPage ? 36.0 : null,
+          left: widget.isRightPage ? null : 36.0,
+          child: PageRibbonWidget(
+            color: widget.pageBookmarkColor!.color,
+            icon: Icons.bookmark_rounded,
+          ),
+        ),
+      );
+    }
+
+    if (hasMemorize) {
+      final double offset = hasBookmark ? 66.0 : 36.0;
+      final status = widget.pageMemorizeStatus!;
+      final IconData memIcon = status == MemorizeStatus.memorized
+          ? Icons.check_circle_rounded
+          : (status == MemorizeStatus.needsReview
+              ? Icons.rate_review_rounded
+              : Icons.sync_rounded);
+
+      ribbons.add(
+        Positioned(
+          top: 0.0,
+          right: widget.isRightPage ? offset : null,
+          left: widget.isRightPage ? null : offset,
+          child: PageRibbonWidget(
+            color: status.badgeColor,
+            icon: memIcon,
+          ),
+        ),
+      );
+    }
+
+    return ribbons;
   }
 
   /// Builds the top header row:

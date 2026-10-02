@@ -1,6 +1,6 @@
-﻿import 'package:adhan/adhan.dart';
+import 'package:adhan/adhan.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:quran_app_android/core/util/arabic_date_formatter.dart';
 import 'package:quran_app_android/features/adhan/presentation/view_model/adhan_view_model.dart';
 import 'package:quran_app_android/features/adhan/presentation/views/widget/adhan_view_data.dart';
 
@@ -52,7 +52,7 @@ class AdhanBodyListView extends StatelessWidget {
   }
 
   String formateDate(DateTime date) {
-    return DateFormat.jm().format(date);
+    return ArabicDateFormatter.formatTime12h(date);
   }
 
   bool _isCurrentTime(

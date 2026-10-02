@@ -11,6 +11,8 @@ import '../../../../core/design/app_typography.dart';
 import '../controllers/mushaf_controller.dart';
 import '../models/mushaf_theme_model.dart';
 import '../utils/mushaf_utils.dart';
+import '../views/ayah_card_generator_view.dart';
+import '../../../tafsser/data/tafsir_repository.dart';
 
 /// Interactive action sheet displayed when an Ayah is tapped in the Mushaf.
 ///
@@ -53,6 +55,10 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet> {
   MemorizeStatus? _selectedStatus;
   bool _showNotesInput = false;
 
+  TafsirSource _selectedTafsir = TafsirSource.muyassar;
+  String? _loadedTafsirText;
+  bool _isLoadingTafsir = false;
+
   @override
   void initState() {
     super.initState();
@@ -64,6 +70,28 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet> {
     _selectedStatus = memorized?.status;
     _noteController = TextEditingController(text: bookmark?.note ?? '');
     _showNotesInput = bookmark?.note != null && bookmark!.note!.isNotEmpty;
+    _loadedTafsirText = widget.ayahEntity?.tafsirMuyassar;
+  }
+
+  Future<void> _changeTafsir(TafsirSource source) async {
+    if (source == _selectedTafsir && _loadedTafsirText != null) return;
+    setState(() {
+      _selectedTafsir = source;
+      _isLoadingTafsir = true;
+    });
+
+    final text = await TafsirRepository.instance.getAyahTafsir(
+      surahNumber: widget.surahNumber,
+      ayahNumber: widget.ayahNumber,
+      source: source,
+    );
+
+    if (mounted) {
+      setState(() {
+        _loadedTafsirText = text;
+        _isLoadingTafsir = false;
+      });
+    }
   }
 
   @override
@@ -179,7 +207,6 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet> {
   Widget build(BuildContext context) {
     final colors = context.appColors;
     final textTheme = Theme.of(context).textTheme;
-    final tafsirText = widget.ayahEntity?.tafsirMuyassar;
     final arabicText = widget.ayahEntity?.textAr ?? '';
 
     return Container(
@@ -234,10 +261,30 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet> {
                     ),
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.close_rounded, size: 22.0),
-                  color: colors.textMuted,
-                  onPressed: widget.onClose,
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.photo_library_outlined, size: 22.0),
+                      color: colors.primary,
+                      tooltip: 'مشاركة كصورة',
+                      onPressed: () {
+                        final ayahText = widget.ayahEntity?.textAr ?? 'آية ${widget.ayahNumber}';
+                        final tafsirText = widget.ayahEntity?.tafsirMuyassar;
+                        Get.to(() => AyahCardGeneratorView(
+                          ayahText: ayahText,
+                          surahName: 'سورة ${widget.surahName}',
+                          ayahNumber: widget.ayahNumber,
+                          tafsirText: tafsirText,
+                        ));
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded, size: 22.0),
+                      color: colors.textMuted,
+                      onPressed: widget.onClose,
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -352,16 +399,34 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet> {
                           ),
                         ],
                       ),
-                      IconButton(
-                        icon: Icon(
-                          _showNotesInput ? Icons.note_rounded : Icons.note_add_outlined,
-                          size: 20.0,
-                          color: colors.accent,
-                        ),
-                        tooltip: 'ملاحظة',
-                        onPressed: () {
-                          setState(() => _showNotesInput = !_showNotesInput);
-                        },
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (_isBookmarked)
+                            TextButton.icon(
+                              onPressed: _toggleBookmark,
+                              icon: Icon(Icons.bookmark_remove_rounded, size: 16.0, color: colors.error),
+                              label: Text(
+                                'حذف',
+                                style: TextStyle(
+                                  fontFamily: AppTypography.uiFont,
+                                  color: colors.error,
+                                  fontSize: 12.0,
+                                ),
+                              ),
+                            ),
+                          IconButton(
+                            icon: Icon(
+                              _showNotesInput ? Icons.note_rounded : Icons.note_add_outlined,
+                              size: 20.0,
+                              color: colors.accent,
+                            ),
+                            tooltip: 'ملاحظة',
+                            onPressed: () {
+                              setState(() => _showNotesInput = !_showNotesInput);
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -457,17 +522,55 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet> {
 
                   // Tafseer Section
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(Icons.auto_stories_rounded, size: 18.0, color: colors.accent),
-                      AppSpacing.horizontalXs,
-                      Text(
-                        'التفسير الميسر',
-                        style: textTheme.titleSmall?.copyWith(
-                          color: colors.accent,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Row(
+                        children: [
+                          Icon(Icons.auto_stories_rounded, size: 18.0, color: colors.accent),
+                          AppSpacing.horizontalXs,
+                          Text(
+                            'تفسير الآية',
+                            style: textTheme.titleSmall?.copyWith(
+                              color: colors.accent,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
+                      if (_isLoadingTafsir)
+                        const SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
                     ],
+                  ),
+                  AppSpacing.verticalXs,
+                  // Tafsir Source Chips
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: TafsirSource.values.map((src) {
+                        final isSel = _selectedTafsir == src;
+                        return Padding(
+                          padding: const EdgeInsets.only(left: 6.0),
+                          child: ChoiceChip(
+                            label: Text(
+                              src.title,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
+                                color: isSel ? Colors.white : colors.text,
+                              ),
+                            ),
+                            selected: isSel,
+                            selectedColor: colors.primary,
+                            backgroundColor: colors.surface,
+                            onSelected: (_) => _changeTafsir(src),
+                          ),
+                        );
+                      }).toList(),
+                    ),
                   ),
                   AppSpacing.verticalSm,
                   Container(
@@ -478,9 +581,9 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet> {
                       border: Border.all(color: colors.divider),
                     ),
                     child: Text(
-                      tafsirText != null && tafsirText.isNotEmpty
-                          ? tafsirText
-                          : 'جارٍ تحميل التفسير الميسر...',
+                      _loadedTafsirText != null && _loadedTafsirText!.isNotEmpty
+                          ? _loadedTafsirText!
+                          : 'جارٍ تحميل التفسير...',
                       textDirection: TextDirection.rtl,
                       style: textTheme.bodyMedium?.copyWith(
                         color: colors.text,

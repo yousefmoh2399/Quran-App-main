@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:quran_app_android/core/native/permissions_helper.dart';
 import 'package:quran_app_android/core/permissions/permission_service.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
@@ -16,6 +17,7 @@ void main() {
   runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
+      await initializeDateFormatting('ar', null);
       await SystemChrome.setPreferredOrientations([
         DeviceOrientation.portraitUp,
       ]);

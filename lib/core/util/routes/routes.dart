@@ -4,7 +4,10 @@ import 'package:quran_app_android/core/middleware/middleware.dart';
 import 'package:quran_app_android/core/util/binding.dart';
 import 'package:quran_app_android/core/util/constant/constant.dart';
 import 'package:quran_app_android/features/adhan/presentation/views/adhan_view.dart';
+import 'package:quran_app_android/features/adhan/presentation/views/adhan_settings_view.dart';
+import 'package:quran_app_android/features/adhan/presentation/views/adhan_debug_view.dart';
 import 'package:quran_app_android/features/azkar/presentation/views/azkar_details_view.dart';
+import 'package:quran_app_android/features/azkar/presentation/views/azkar_notifications_settings_view.dart';
 import 'package:quran_app_android/features/azkar/presentation/views/azkar_view.dart';
 import 'package:quran_app_android/features/bookmarks/presentation/views/bookmarks_view.dart';
 import 'package:quran_app_android/features/hadith/presentation/views/hadith__view.dart';
@@ -16,11 +19,25 @@ import 'package:quran_app_android/features/notifications/views/notify_view.dart'
 import 'package:quran_app_android/features/onboarding/presentation/views/onboarding_screen.dart';
 import 'package:quran_app_android/features/mushaf/presentation/views/mushaf_font_debug_view.dart';
 import 'package:quran_app_android/features/mushaf/presentation/views/mushaf_view.dart';
+import 'package:quran_app_android/features/reminders/presentation/views/my_reminders_view.dart';
+import 'package:quran_app_android/features/reminders/presentation/views/sadaqah_settings_view.dart';
+import 'package:quran_app_android/features/reminders/presentation/views/sadaqah_logs_view.dart';
+import 'package:quran_app_android/features/reminders/presentation/views/commute_wird_settings_view.dart';
+import 'package:quran_app_android/features/reminders/presentation/views/wird_reminder_settings_view.dart';
+import 'package:quran_app_android/features/reminders/presentation/views/reminders_debug_view.dart';
 import 'package:quran_app_android/features/pngtree/presentation/views/pngTreeView.dart';
 import 'package:quran_app_android/features/qiblah/presentation/views/qiblah_view.dart';
 import 'package:quran_app_android/features/quran/presentation/views/quran_view.dart';
 import 'package:quran_app_android/features/settings/presentation/views/permissions_status_view.dart';
 import 'package:quran_app_android/features/settings/presentation/views/settings_view.dart';
+import 'package:quran_app_android/features/settings/presentation/views/backup_restore_view.dart';
+import 'package:quran_app_android/features/settings/presentation/views/privacy_policy_view.dart';
+import 'package:quran_app_android/features/settings/presentation/views/about_app_view.dart';
+import 'package:quran_app_android/features/prayers_tracker/presentation/views/prayer_tracker_view.dart';
+import 'package:quran_app_android/features/prayers_tracker/presentation/views/post_prayer_azkar_view.dart';
+import 'package:quran_app_android/features/calendar/presentation/views/islamic_calendar_view.dart';
+import 'package:quran_app_android/features/calendar/presentation/views/ramadan_imsakia_view.dart';
+import 'package:quran_app_android/features/stats/presentation/views/achievements_dashboard_view.dart';
 import 'package:quran_app_android/features/tafsser/presentation/views/tafseer_details_view.dart';
 import 'package:quran_app_android/features/tafsser/presentation/views/tafseer_view.dart';
 
@@ -158,6 +175,110 @@ class AppRoutes {
       transition: Transition.cupertino,
       transitionDuration: kTransitionDuration,
     ),
+    GetPage(
+      name: adhanSettings,
+      page: () => const AdhanSettingsView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: azkarNotificationsSettings,
+      page: () => const AzkarNotificationsSettingsView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: myReminders,
+      page: () => const MyRemindersView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: sadaqahSettings,
+      page: () => const SadaqahSettingsView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: sadaqahLogs,
+      page: () => const SadaqahLogsView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: commuteWirdSettings,
+      page: () => const CommuteWirdSettingsView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: wirdSettings,
+      page: () => const WirdReminderSettingsView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: prayerTracker,
+      page: () => const PrayerTrackerView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: postPrayerAzkar,
+      page: () => const PostPrayerAzkarView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: islamicCalendar,
+      page: () => const IslamicCalendarView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: ramadanImsakia,
+      page: () => const RamadanImsakiaView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: achievements,
+      page: () => const AchievementsDashboardView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: backupRestore,
+      page: () => const BackupRestoreView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: privacyPolicy,
+      page: () => const PrivacyPolicyView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: aboutApp,
+      page: () => const AboutAppView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    if (kDebugMode) ...[
+      GetPage(
+        name: adhanDebug,
+        page: () => const AdhanDebugView(),
+        transition: Transition.cupertino,
+        transitionDuration: kTransitionDuration,
+      ),
+      GetPage(
+        name: remindersDebug,
+        page: () => const RemindersDebugView(),
+        transition: Transition.cupertino,
+        transitionDuration: kTransitionDuration,
+      ),
+    ],
   ];
 
   static String home = '/home';
@@ -171,7 +292,24 @@ class AppRoutes {
   static String pngTree = '/pngTree';
   static String azkar = '/azkar';
   static String azkarDetails = '/azkarDetails';
+  static String azkarNotificationsSettings = '/azkarNotificationsSettings';
+  static String myReminders = '/myReminders';
+  static String sadaqahSettings = '/sadaqahSettings';
+  static String sadaqahLogs = '/sadaqahLogs';
+  static String commuteWirdSettings = '/commuteWirdSettings';
+  static String wirdSettings = '/wirdSettings';
+  static String prayerTracker = '/prayerTracker';
+  static String postPrayerAzkar = '/postPrayerAzkar';
+  static String islamicCalendar = '/islamicCalendar';
+  static String ramadanImsakia = '/ramadanImsakia';
+  static String achievements = '/achievements';
+  static String backupRestore = '/backupRestore';
+  static String privacyPolicy = '/privacyPolicy';
+  static String aboutApp = '/aboutApp';
   static String adhan = '/adhan';
+  static String adhanSettings = '/adhanSettings';
+  static String adhanDebug = '/adhanDebug';
+  static String remindersDebug = '/remindersDebug';
   static String notify = '/notify';
   static String adhanAlert = '/adhanAlert';
   static String qiblah = '/qiblah';
