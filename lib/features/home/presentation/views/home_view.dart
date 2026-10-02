@@ -12,11 +12,19 @@ import 'package:quran_app_android/features/home/presentation/views/widget/home_n
 import 'package:quran_app_android/features/home/presentation/views/widget/home_quick_shortcuts.dart';
 import 'package:quran_app_android/features/home/presentation/views/widget/next_prayer_card.dart';
 
-class HomeView extends StatelessWidget {
+class HomeView extends StatefulWidget {
   const HomeView({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  State<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
     // Ensure controllers are registered safely
     if (!Get.isRegistered<HomeViewModel>()) {
       Get.put(HomeViewModel());
@@ -24,13 +32,23 @@ class HomeView extends StatelessWidget {
     if (!Get.isRegistered<AdhanViewModel>()) {
       Get.put(AdhanViewModel());
     }
+  }
 
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return AppScaffold(
       useSafeArea: true,
       constrainContentWidth: true,
       bottomNavigationBar: const HomeNavBar(currentIndex: 0),
       body: RefreshIndicator(
         color: context.appColors.primary,
+        notificationPredicate: (notification) => notification.depth == 0,
         onRefresh: () async {
           final adhanVM = Get.find<AdhanViewModel>();
           await adhanVM.initializeAdhan();
@@ -38,8 +56,10 @@ class HomeView extends StatelessWidget {
           await homeVM.loadUserQuranData();
         },
         child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(
-            parent: BouncingScrollPhysics(),
+          key: const PageStorageKey<String>('home_scroll_view'),
+          controller: _scrollController,
+          physics: const ClampingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
