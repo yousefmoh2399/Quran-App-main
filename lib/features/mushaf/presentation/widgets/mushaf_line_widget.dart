@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../../core/data/models/mushaf_models.dart';
 import '../../../../core/data/models/user_models.dart';
 import '../../../../core/design/app_typography.dart';
@@ -18,6 +19,7 @@ class MushafLineWidget extends StatelessWidget {
   final Map<String, BookmarkColor>? bookmarkedAyahs;
   final Map<String, MemorizeStatus>? memorizedAyahs;
   final void Function(int surahNumber, int ayahNumber)? onAyahTapped;
+  final VoidCallback? onTapPage;
 
   const MushafLineWidget({
     super.key,
@@ -29,6 +31,7 @@ class MushafLineWidget extends StatelessWidget {
     this.bookmarkedAyahs,
     this.memorizedAyahs,
     this.onAyahTapped,
+    this.onTapPage,
   });
 
   @override
@@ -180,6 +183,10 @@ class MushafLineWidget extends StatelessWidget {
             return GestureDetector(
               behavior: HitTestBehavior.translucent,
               onTap: () {
+                onTapPage?.call();
+              },
+              onLongPress: () {
+                HapticFeedback.mediumImpact();
                 if (onAyahTapped != null) {
                   onAyahTapped!(word.surahNumber, word.ayahNumber);
                 }

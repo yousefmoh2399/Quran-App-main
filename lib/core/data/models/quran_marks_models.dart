@@ -8,6 +8,7 @@ class SurahMarksSummary {
   final int totalVerses;
   final int memorizedAyahsCount;
   final bool hasBookmark;
+  final int? bookmarkedPage;
   final bool isLastRead;
   final int? lastReadPage;
 
@@ -19,6 +20,7 @@ class SurahMarksSummary {
     required this.totalVerses,
     this.memorizedAyahsCount = 0,
     this.hasBookmark = false,
+    this.bookmarkedPage,
     this.isLastRead = false,
     this.lastReadPage,
   });
@@ -46,6 +48,7 @@ class SurahMarksSummary {
     int? totalVerses,
     int? memorizedAyahsCount,
     bool? hasBookmark,
+    int? bookmarkedPage,
     bool? isLastRead,
     int? lastReadPage,
   }) {
@@ -57,6 +60,7 @@ class SurahMarksSummary {
       totalVerses: totalVerses ?? this.totalVerses,
       memorizedAyahsCount: memorizedAyahsCount ?? this.memorizedAyahsCount,
       hasBookmark: hasBookmark ?? this.hasBookmark,
+      bookmarkedPage: bookmarkedPage ?? this.bookmarkedPage,
       isLastRead: isLastRead ?? this.isLastRead,
       lastReadPage: lastReadPage ?? this.lastReadPage,
     );

@@ -268,6 +268,71 @@ class SurahIndexItem extends StatelessWidget {
                       ],
                     ),
                   ],
+
+                  // Bookmarked Page Badge & Beginning Button
+                  if (!isLastRead && hasBookmark && marks?.bookmarkedPage != null) ...[
+                    AppSpacing.verticalXs,
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: colors.accent,
+                            borderRadius: AppRadius.borderSm,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.bookmark_rounded,
+                                size: 13,
+                                color: Colors.white,
+                              ),
+                              AppSpacing.horizontalXs,
+                              Text(
+                                'علامة محفوظة - صـ ${toArabicDigits(marks!.bookmarkedPage!)}',
+                                style: textTheme.labelSmall?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (onStartFromBeginning != null)
+                          InkWell(
+                            onTap: onStartFromBeginning,
+                            borderRadius: AppRadius.borderSm,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.first_page_rounded,
+                                    size: 15,
+                                    color: colors.textMuted,
+                                  ),
+                                  AppSpacing.horizontalXs,
+                                  Text(
+                                    'من أول السورة',
+                                    style: textTheme.labelSmall?.copyWith(
+                                      color: colors.textMuted,
+                                      fontSize: 10.5,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),

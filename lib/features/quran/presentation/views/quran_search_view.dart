@@ -226,9 +226,14 @@ class _QuranSearchViewState extends State<QuranSearchView> {
     );
   }
 
-  void _navigateToPage(int page) {
+  void _navigateToPage(int page, {int? surah, int? ayah}) {
     Get.to(
-      () => MushafView(initialPage: page),
+      () => const MushafView(),
+      arguments: {
+        'pageNumber': page,
+        if (surah != null) 'surah': surah,
+        if (ayah != null) 'ayah': ayah,
+      },
       transition: Transition.cupertino,
     );
   }
@@ -259,7 +264,7 @@ class _QuranSearchViewState extends State<QuranSearchView> {
   }
 
   Widget _buildHighlightedText(String fullText, String query, AppColorsExtension colors) {
-    if (query.isEmpty) {
+    if (query.trim().isEmpty) {
       return Text(
         fullText,
         style: TextStyle(
@@ -272,36 +277,45 @@ class _QuranSearchViewState extends State<QuranSearchView> {
       );
     }
 
-    final normalizedFull = ArabicNormalizer.normalize(fullText);
     final normalizedQuery = ArabicNormalizer.normalize(query);
+    final queryTokens = normalizedQuery
+        .split(' ')
+        .where((t) => t.trim().isNotEmpty)
+        .toList();
 
+    final words = fullText.split(' ');
     final spans = <TextSpan>[];
-    int start = 0;
 
-    while (start < fullText.length) {
-      final index = normalizedFull.indexOf(normalizedQuery, start);
-      if (index == -1) {
-        spans.add(TextSpan(text: fullText.substring(start)));
-        break;
+    for (int i = 0; i < words.length; i++) {
+      final word = words[i];
+      final normWord = ArabicNormalizer.normalize(word);
+
+      bool isMatch = false;
+      if (normalizedQuery.isNotEmpty && normWord.contains(normalizedQuery)) {
+        isMatch = true;
+      } else {
+        for (final token in queryTokens) {
+          if (token.length >= 2 && normWord.contains(token)) {
+            isMatch = true;
+            break;
+          }
+        }
       }
 
-      if (index > start) {
-        spans.add(TextSpan(text: fullText.substring(start, index)));
-      }
-
-      final matchEnd = (index + normalizedQuery.length).clamp(0, fullText.length);
       spans.add(
         TextSpan(
-          text: fullText.substring(index, matchEnd),
+          text: word,
           style: TextStyle(
-            backgroundColor: colors.accent.withOpacity(0.35),
-            fontWeight: FontWeight.bold,
-            color: colors.primary,
+            color: isMatch ? colors.primary : colors.text,
+            backgroundColor: isMatch ? colors.accent.withOpacity(0.28) : Colors.transparent,
+            fontWeight: isMatch ? FontWeight.bold : FontWeight.normal,
           ),
         ),
       );
 
-      start = matchEnd;
+      if (i < words.length - 1) {
+        spans.add(const TextSpan(text: ' '));
+      }
     }
 
     return Text.rich(
@@ -529,7 +543,7 @@ class _QuranSearchViewState extends State<QuranSearchView> {
                     ),
                     if (ayah.pageNumber != null)
                       InkWell(
-                        onTap: () => _navigateToPage(ayah.pageNumber!),
+                        onTap: () => _navigateToPage(ayah.pageNumber!, surah: ayah.surahId, ayah: ayah.ayahNumber),
                         borderRadius: BorderRadius.circular(AppRadius.sm),
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -589,7 +603,7 @@ class _QuranSearchViewState extends State<QuranSearchView> {
                     ),
                     if (ayah.pageNumber != null)
                       ElevatedButton.icon(
-                        onPressed: () => _navigateToPage(ayah.pageNumber!),
+                        onPressed: () => _navigateToPage(ayah.pageNumber!, surah: ayah.surahId, ayah: ayah.ayahNumber),
                         icon: const Icon(Icons.arrow_forward_rounded, size: 16),
                         label: const Text('عرض بالمصحف', style: TextStyle(fontSize: 12.5)),
                         style: ElevatedButton.styleFrom(

@@ -320,6 +320,12 @@ class _QuranScreenState extends State<QuranScreen>
                                       ctrl: ctrl,
                                       specificPage: marks!.lastReadPage,
                                     );
+                                  } else if (marks?.hasBookmark == true && marks?.bookmarkedPage != null) {
+                                    _openSurah(
+                                      model: surah,
+                                      ctrl: ctrl,
+                                      specificPage: marks!.bookmarkedPage,
+                                    );
                                   } else {
                                     _openSurah(
                                       model: surah,
@@ -327,7 +333,8 @@ class _QuranScreenState extends State<QuranScreen>
                                     );
                                   }
                                 },
-                                onStartFromBeginning: marks?.isLastRead == true
+                                onStartFromBeginning: (marks?.isLastRead == true ||
+                                        (marks?.hasBookmark == true && marks?.bookmarkedPage != null))
                                     ? () => _openSurah(
                                           model: surah,
                                           ctrl: ctrl,

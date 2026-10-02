@@ -78,6 +78,8 @@ class _MushafViewState extends State<MushafView> {
                     child: Obx(() {
                       final themeConfig = MushafThemeConfig.of(controller.currentTheme.value);
                       final currentPage = controller.currentPage.value;
+                      // Touch userMarksVersion so bookmark and memorization changes rebuild immediately
+                      final _ = controller.userMarksVersion.value;
 
                       return Container(
                         color: themeConfig.pageBg,

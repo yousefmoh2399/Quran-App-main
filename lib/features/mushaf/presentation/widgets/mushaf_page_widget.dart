@@ -346,6 +346,7 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
                 bookmarkedAyahs: widget.bookmarkedAyahs,
                 memorizedAyahs: widget.memorizedAyahs,
                 onAyahTapped: widget.onAyahTapped,
+                onTapPage: widget.onTapPage,
               ),
             );
           }).toList(),
@@ -368,6 +369,7 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
               bookmarkedAyahs: widget.bookmarkedAyahs,
               memorizedAyahs: widget.memorizedAyahs,
               onAyahTapped: widget.onAyahTapped,
+              onTapPage: widget.onTapPage,
             ),
           ),
         );

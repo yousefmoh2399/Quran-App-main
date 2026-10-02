@@ -40,6 +40,7 @@ class MushafController extends GetxController {
   final RxMap<int, MemorizedItem> pageMemorizedMap = <int, MemorizedItem>{}.obs;
   final RxMap<String, BookmarkItem> ayahBookmarksMap = <String, BookmarkItem>{}.obs;
   final RxMap<String, MemorizedItem> ayahMemorizedMap = <String, MemorizedItem>{}.obs;
+  final RxInt userMarksVersion = 0.obs;
 
   // Commute Mode Observables
   final RxBool isCommuteMode = false.obs;
@@ -84,6 +85,18 @@ class MushafController extends GetxController {
     });
 
     _startDwellTimer(initialPage);
+
+    // If an exact ayah was requested in arguments, select it after layout
+    final args = Get.arguments;
+    if (args is Map<String, dynamic>) {
+      final s = args['surah'] as int?;
+      final a = args['ayah'] as int?;
+      if (s != null && a != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          selectAyah(s, a);
+        });
+      }
+    }
   }
 
   @override
@@ -260,6 +273,8 @@ class MushafController extends GetxController {
           ayahMemorizedMap['${m.surah}:${m.ayah}'] = m;
         }
       }
+      userMarksVersion.value++;
+      update();
     } catch (e) {
       debugPrint('Error loading user data in mushaf controller: $e');
     }
@@ -310,6 +325,7 @@ class MushafController extends GetxController {
       bookmarkedPages.add(pageNumber);
     }
     MushafRasterCache.instance.removePage(pageNumber);
+    userMarksVersion.value++;
     update();
   }
 
@@ -331,6 +347,7 @@ class MushafController extends GetxController {
     pageBookmarksMap[pageNumber] = item.copyWith(id: id);
     bookmarkedPages.add(pageNumber);
     MushafRasterCache.instance.removePage(pageNumber);
+    userMarksVersion.value++;
     update();
   }
 
@@ -344,6 +361,7 @@ class MushafController extends GetxController {
     pageBookmarksMap.remove(pageNumber);
     bookmarkedPages.remove(pageNumber);
     MushafRasterCache.instance.removePage(pageNumber);
+    userMarksVersion.value++;
     update();
   }
 
@@ -361,6 +379,7 @@ class MushafController extends GetxController {
       pageMemorizedMap[pageNumber] = item.copyWith(id: id);
     }
     MushafRasterCache.instance.removePage(pageNumber);
+    userMarksVersion.value++;
     update();
   }
 
@@ -382,6 +401,7 @@ class MushafController extends GetxController {
     final id = await _userRepo.addBookmark(item);
     ayahBookmarksMap['$surah:$ayah'] = item.copyWith(id: id);
     MushafRasterCache.instance.removePage(page);
+    userMarksVersion.value++;
     update();
   }
 
@@ -389,6 +409,7 @@ class MushafController extends GetxController {
     await _userRepo.deleteBookmarkByAyah(surah, ayah);
     ayahBookmarksMap.remove('$surah:$ayah');
     MushafRasterCache.instance.removePage(page);
+    userMarksVersion.value++;
     update();
   }
 
@@ -413,6 +434,7 @@ class MushafController extends GetxController {
       ayahMemorizedMap['$surah:$ayah'] = item.copyWith(id: id);
     }
     MushafRasterCache.instance.removePage(page);
+    userMarksVersion.value++;
     update();
   }
 

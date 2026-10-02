@@ -257,6 +257,7 @@ class UserRepository {
     ''');
 
     final surahBookmarks = <int>{};
+    final surahBookmarkedPages = <int, int>{};
     final juzBookmarks = <int>{};
     final surahMemorizedAyahs = <int, Set<int>>{};
     for (final sId in structure.surahs.keys) {
@@ -272,16 +273,25 @@ class UserRepository {
       if (type == BookmarkType.ayah.name) {
         if (surah > 0) {
           surahBookmarks.add(surah);
+          if (page > 0) {
+            surahBookmarkedPages.putIfAbsent(surah, () => page);
+          }
         }
       } else {
         // Page bookmark
         if (surah > 0) {
           surahBookmarks.add(surah);
+          if (page > 0) {
+            surahBookmarkedPages.putIfAbsent(surah, () => page);
+          }
         }
         if (page > 0) {
           // Boundary page: every surah present on this page receives the bookmark flag
           final surahsOnPage = structure.pageToSurahs[page] ?? const [];
-          surahBookmarks.addAll(surahsOnPage);
+          for (final sId in surahsOnPage) {
+            surahBookmarks.add(sId);
+            surahBookmarkedPages.putIfAbsent(sId, () => page);
+          }
 
           // Juz bookmark
           for (final entry in structure.juzPages.entries) {
@@ -347,6 +357,7 @@ class UserRepository {
         totalVerses: meta.totalVerses,
         memorizedAyahsCount: memAyahs.length,
         hasBookmark: surahBookmarks.contains(sId),
+        bookmarkedPage: surahBookmarkedPages[sId],
         isLastRead: isLastRead,
         lastReadPage: isLastRead ? lastReadPage : null,
       );
