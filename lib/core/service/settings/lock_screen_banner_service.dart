@@ -156,8 +156,6 @@ class LockScreenBannerService {
     String nextPrayerName = 'الصلاة';
     String nextPrayerTimeStr = '';
     Prayer actualNext = Prayer.none;
-    String allPrayersHtmlLine1 = '';
-    String allPrayersHtmlLine2 = '';
     String allPrayersPlainLine1 = '';
     String allPrayersPlainLine2 = '';
     final prayerTimesMap = <String, String>{};
@@ -207,15 +205,6 @@ class LockScreenBannerService {
 
         nextPrayerCountdown = 'متبقي $countdownStr';
 
-        String formatHtmlPrayer(Prayer p) {
-          final name = pName(p);
-          final time = fTime(pt.timeForPrayer(p)!);
-          if (p == actualNext) {
-            return '<font color="#D4AF37"><b>▸ $name $time ◂</b></font>';
-          }
-          return '$name $time';
-        }
-
         String formatPlainPrayer(Prayer p) {
           final name = pName(p);
           final time = fTime(pt.timeForPrayer(p)!);
@@ -224,9 +213,6 @@ class LockScreenBannerService {
           }
           return '$name $time';
         }
-
-        allPrayersHtmlLine1 = '${formatHtmlPrayer(Prayer.fajr)}  •  ${formatHtmlPrayer(Prayer.dhuhr)}  •  ${formatHtmlPrayer(Prayer.asr)}';
-        allPrayersHtmlLine2 = '${formatHtmlPrayer(Prayer.maghrib)}  •  ${formatHtmlPrayer(Prayer.isha)}';
 
         allPrayersPlainLine1 = '${formatPlainPrayer(Prayer.fajr)}  •  ${formatPlainPrayer(Prayer.dhuhr)}  •  ${formatPlainPrayer(Prayer.asr)}';
         allPrayersPlainLine2 = '${formatPlainPrayer(Prayer.maghrib)}  •  ${formatPlainPrayer(Prayer.isha)}';
@@ -292,36 +278,28 @@ class LockScreenBannerService {
     }
 
     // Construct Structured HTML Content for Expanded Android Notification
-    final htmlBuffer = StringBuffer();
     final plainBuffer = StringBuffer();
 
-    if (model.showAllPrayers && allPrayersHtmlLine1.isNotEmpty) {
-      htmlBuffer.writeln('🕌 <b>مواقيت الصلاة:</b>');
-      htmlBuffer.writeln('$allPrayersHtmlLine1<br/>$allPrayersHtmlLine2');
-      htmlBuffer.writeln('<br/>');
-
-      plainBuffer.writeln('🕌 مواقيت الصلاة:');
-      plainBuffer.writeln('$allPrayersPlainLine1\n$allPrayersPlainLine2');
+    if (model.showAllPrayers && allPrayersPlainLine1.isNotEmpty) {
+      plainBuffer.writeln('🕌 مواقيت الصلاة اليوم:');
+      plainBuffer.writeln('   $allPrayersPlainLine1');
+      plainBuffer.writeln('   $allPrayersPlainLine2');
       plainBuffer.writeln('');
     }
 
     if (model.showWirdProgress && wirdLine.isNotEmpty) {
-      htmlBuffer.writeln('📖 <b>الورد القرآني:</b> $wirdLine<br/>');
-      plainBuffer.writeln('📖 الورد القرآني: $wirdLine');
+      plainBuffer.writeln('📖 الورد: $wirdLine');
     }
 
     if (model.showDailyZikr && zikrLine.isNotEmpty) {
-      htmlBuffer.writeln('📿 <b>ذكر الوقت:</b> «$zikrLine»<br/>');
       plainBuffer.writeln('📿 ذكر الوقت: «$zikrLine»');
     }
 
     if (model.showHijriDate && hijriLine.isNotEmpty) {
-      htmlBuffer.writeln('📅 <b>التاريخ:</b> $hijriLine');
-      plainBuffer.writeln('📅 التاريخ: $hijriLine');
+      plainBuffer.writeln('📅 $hijriLine');
     }
 
-    if (htmlBuffer.isEmpty) {
-      htmlBuffer.writeln('ألا بذكر الله تطمئن القلوب 🌿');
+    if (plainBuffer.isEmpty) {
       plainBuffer.writeln('ألا بذكر الله تطمئن القلوب 🌿');
     }
 
@@ -329,10 +307,10 @@ class LockScreenBannerService {
 
     return BannerDisplayData(
       title: bannerTitle,
-      subText: 'تقرّب • $cityName',
+      subText: cityName,
       summaryText: 'مواقيت الصلاة والورد',
       collapsedText: collapsedText,
-      bigContentText: htmlBuffer.toString().trim(),
+      bigContentText: plainBuffer.toString().trim(),
       plainContentText: plainBuffer.toString().trim(),
       nextPrayerCountdown: nextPrayerCountdown,
       allPrayersLine: allPrayersUnified,
@@ -417,12 +395,13 @@ class LockScreenBannerService {
       visibility: NotificationVisibility.public,
       subText: data.subText,
       styleInformation: BigTextStyleInformation(
-        data.bigContentText,
+        data.plainContentText,
         contentTitle: data.title,
         summaryText: data.summaryText,
-        htmlFormatContent: true,
-        htmlFormatContentTitle: true,
-        htmlFormatSummaryText: true,
+        htmlFormatContent: false,
+        htmlFormatContentTitle: false,
+        htmlFormatSummaryText: false,
+        htmlFormatBigText: false,
       ),
       actions: actions.isNotEmpty ? actions : null,
     );
