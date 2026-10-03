@@ -346,23 +346,34 @@ class _RamadanKhatmaViewState extends State<RamadanKhatmaView> {
                 borderRadius: AppRadius.borderLg,
                 border: Border.all(color: colors.primary.withOpacity(0.12)),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                alignment: WrapAlignment.center,
                 children: [
                   OutlinedButton.icon(
                     onPressed: () => _addPages(1),
-                    icon: const Icon(Icons.add, size: 18),
-                    label: const Text('+ صفحة واحدة'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    ),
+                    icon: const Icon(Icons.add, size: 16),
+                    label: const Text('+ صفحة', style: TextStyle(fontSize: 12)),
                   ),
                   OutlinedButton.icon(
                     onPressed: () => _addPages(4),
-                    icon: const Icon(Icons.exposure_plus_1, size: 18),
-                    label: const Text('+ 4 صفحات'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    ),
+                    icon: const Icon(Icons.exposure_plus_1, size: 16),
+                    label: const Text('+ 4 صفحات', style: TextStyle(fontSize: 12)),
                   ),
                   OutlinedButton.icon(
                     onPressed: () => _addPages(20),
-                    icon: const Icon(Icons.menu_book_rounded, size: 18),
-                    label: const Text('+ جزء كامل (20)'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    ),
+                    icon: const Icon(Icons.menu_book_rounded, size: 16),
+                    label: const Text('+ جزء (20)', style: TextStyle(fontSize: 12)),
                   ),
                 ],
               ),
@@ -375,6 +386,7 @@ class _RamadanKhatmaViewState extends State<RamadanKhatmaView> {
 
   Widget _buildTargetChip(int target, String title, String subtitle) {
     final isSelected = _targetKhatmas == target;
+    final colors = context.appColors;
     return Expanded(
       child: InkWell(
         onTap: () => _updateTarget(target),
@@ -382,10 +394,10 @@ class _RamadanKhatmaViewState extends State<RamadanKhatmaView> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF09261E) : Colors.transparent,
+            color: isSelected ? const Color(0xFF09261E) : colors.surface,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: isSelected ? const Color(0xFFD4AF37) : Colors.grey.shade300,
+              color: isSelected ? const Color(0xFFD4AF37) : colors.divider,
               width: isSelected ? 1.5 : 1,
             ),
           ),
@@ -395,7 +407,7 @@ class _RamadanKhatmaViewState extends State<RamadanKhatmaView> {
                 title,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: isSelected ? const Color(0xFFD4AF37) : Colors.black87,
+                  color: isSelected ? const Color(0xFFD4AF37) : colors.text,
                   fontWeight: FontWeight.bold,
                   fontSize: 12,
                 ),
@@ -405,7 +417,7 @@ class _RamadanKhatmaViewState extends State<RamadanKhatmaView> {
                 subtitle,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: isSelected ? Colors.white70 : Colors.grey.shade600,
+                  color: isSelected ? Colors.white70 : colors.textMuted,
                   fontSize: 9,
                 ),
               ),

@@ -183,19 +183,19 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
     _dragDeltaX += delta;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    // In Arabic RTL:
-    // Dragging left (negative delta) = turn forward to Next Page (+1)
-    // Dragging right (positive delta) = turn backward to Previous Page (-1)
+    // In Arabic RTL Mushaf:
+    // Dragging right (positive delta) = turn forward to Next Page (+1)
+    // Dragging left (negative delta) = turn backward to Previous Page (-1)
     if (!_isTurning) {
-      if (_dragDeltaX < -6.0) {
-        // Turning to Next Page
+      if (_dragDeltaX > 6.0) {
+        // Turning to Next Page (swiping right to flip forward in RTL book)
         if (widget.currentPage >= 604) return;
         _isTurning = true;
         _isNext = true;
         _targetPage = widget.currentPage + 1;
         widget.controller.isPageTurning.value = true;
-      } else if (_dragDeltaX > 6.0) {
-        // Turning to Previous Page
+      } else if (_dragDeltaX < -6.0) {
+        // Turning to Previous Page (swiping left to go back in RTL book)
         if (widget.currentPage <= 1) return;
         _isTurning = true;
         _isNext = false;
@@ -207,9 +207,9 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
     if (_isTurning) {
       double rawProgress;
       if (_isNext) {
-        rawProgress = (-_dragDeltaX / (screenWidth * 0.95)).clamp(0.0, 1.0);
-      } else {
         rawProgress = (_dragDeltaX / (screenWidth * 0.95)).clamp(0.0, 1.0);
+      } else {
+        rawProgress = (-_dragDeltaX / (screenWidth * 0.95)).clamp(0.0, 1.0);
       }
 
       setState(() {
@@ -225,13 +225,13 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
     bool shouldCommit = false;
 
     if (_isNext) {
-      // Swiping left: negative velocity commits
-      if (velocity < -250.0 || _dragProgress >= 0.22) {
+      // Swiping right: positive velocity commits
+      if (velocity > 250.0 || _dragProgress >= 0.22) {
         shouldCommit = true;
       }
     } else {
-      // Swiping right: positive velocity commits
-      if (velocity > 250.0 || _dragProgress >= 0.22) {
+      // Swiping left: negative velocity commits
+      if (velocity < -250.0 || _dragProgress >= 0.22) {
         shouldCommit = true;
       }
     }
@@ -343,8 +343,8 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
 
   Widget _buildPaperCurlTransition(double width) {
     final t = _dragProgress.clamp(0.0, 1.0);
-    // Curl cylinder width scales naturally with progress
-    final double curlCylinderWidth = (36.0 + 14.0 * math.sin(t * math.pi)).clamp(20.0, 50.0);
+    // Wider curl cylinder for a more pronounced paper bend effect
+    final double curlCylinderWidth = (52.0 + 18.0 * math.sin(t * math.pi)).clamp(30.0, 70.0);
 
     if (_isNext) {
       // Turning Forward (Next Page):
@@ -360,7 +360,7 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
             top: 0,
             bottom: 0,
             left: (foldX - curlCylinderWidth * 1.2).clamp(0.0, width),
-            width: curlCylinderWidth * 1.5,
+            width: curlCylinderWidth * 2.0,
             child: IgnorePointer(
               child: Container(
                 decoration: BoxDecoration(
@@ -369,7 +369,7 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
                     end: Alignment.centerRight,
                     colors: [
                       Colors.transparent,
-                      Colors.black.withOpacity(0.35 * (1.0 - t * 0.4)),
+                      Colors.black.withOpacity(0.55 * (1.0 - t * 0.4)),
                     ],
                   ),
                 ),
@@ -400,7 +400,7 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
               top: 0,
               bottom: 0,
               left: foldX,
-              width: curlCylinderWidth * 0.8,
+              width: curlCylinderWidth * 1.0,
               child: IgnorePointer(
                 child: Container(
                   decoration: BoxDecoration(
@@ -408,8 +408,8 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
                       colors: [
-                        Colors.black.withOpacity(0.40 * (1.0 - t * 0.3)),
-                        Colors.black.withOpacity(0.12 * (1.0 - t * 0.3)),
+                        Colors.black.withOpacity(0.60 * (1.0 - t * 0.3)),
+                        Colors.black.withOpacity(0.20 * (1.0 - t * 0.3)),
                         Colors.transparent,
                       ],
                       stops: const [0.0, 0.45, 1.0],
@@ -433,11 +433,11 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
                       end: Alignment.centerRight,
                       colors: [
                         Colors.transparent,
-                        Colors.white.withOpacity(0.30 * (1.0 - t * 0.3)),
-                        Colors.black.withOpacity(0.18 * (1.0 - t * 0.3)),
-                        Colors.black.withOpacity(0.35 * (1.0 - t * 0.3)),
+                        Colors.white.withOpacity(0.50 * (1.0 - t * 0.3)),
+                        Colors.black.withOpacity(0.28 * (1.0 - t * 0.3)),
+                        Colors.black.withOpacity(0.55 * (1.0 - t * 0.3)),
                       ],
-                      stops: const [0.0, 0.35, 0.70, 1.0],
+                      stops: const [0.0, 0.30, 0.65, 1.0],
                     ),
                   ),
                 ),

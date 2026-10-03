@@ -155,16 +155,22 @@ class _RamadanHubViewState extends State<RamadanHubView> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.timer_outlined, color: Color(0xFFD4AF37), size: 22),
-                            const SizedBox(width: 8),
-                            Text(
-                              _countdownTitle,
-                              style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
-                            ),
-                          ],
+                        Expanded(
+                          child: Row(
+                            children: [
+                              const Icon(Icons.timer_outlined, color: Color(0xFFD4AF37), size: 22),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  _countdownTitle,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
+                        const SizedBox(width: 8),
                         Text(
                           _countdownText,
                           style: const TextStyle(

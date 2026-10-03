@@ -55,14 +55,19 @@ class _RamadanTaraweehViewState extends State<RamadanTaraweehView> {
     setState(() => _currentRakat = newCount);
     await _service.setTaraweehCurrent(newCount);
 
-    if (newCount == _targetRakats && !_witrDone) {
-      Get.snackbar(
-        '🌟 أتممت التراويح!',
-        'هنيئاً لك إتمام ركعات التراويح، يتبقى لك ركعات الشفع والوتر 🤲',
-        backgroundColor: const Color(0xFF09261E),
-        colorText: const Color(0xFFD4AF37),
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 4),
+    if (newCount == _targetRakats && !_witrDone && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+            '🌟 هنيئاً! أتممت التراويح، يتبقى ركعات الشفع والوتر 🤲',
+            style: TextStyle(color: Color(0xFFD4AF37), fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: const Color(0xFF09261E),
+          duration: const Duration(seconds: 4),
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
       );
     }
   }
@@ -319,23 +324,24 @@ class _RamadanTaraweehViewState extends State<RamadanTaraweehView> {
 
   Widget _buildChoiceChip(int target, String label) {
     final isSelected = _targetRakats == target;
+    final colors = context.appColors;
     return InkWell(
       onTap: () => _setTarget(target),
       borderRadius: BorderRadius.circular(10),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF09261E) : Colors.transparent,
+          color: isSelected ? const Color(0xFF09261E) : colors.surface,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: isSelected ? const Color(0xFFD4AF37) : Colors.grey.shade300,
+            color: isSelected ? const Color(0xFFD4AF37) : colors.divider,
           ),
         ),
         child: Text(
           label,
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: isSelected ? const Color(0xFFD4AF37) : Colors.black87,
+            color: isSelected ? const Color(0xFFD4AF37) : colors.text,
             fontWeight: FontWeight.bold,
             fontSize: 12,
           ),

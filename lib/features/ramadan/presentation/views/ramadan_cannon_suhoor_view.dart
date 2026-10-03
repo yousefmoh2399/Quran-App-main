@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_radius.dart';
 import '../../../../core/design/app_spacing.dart';
@@ -75,16 +74,21 @@ class _RamadanCannonSuhoorViewState extends State<RamadanCannonSuhoorView> {
       await NativeRemindersBridge.previewSound('fazakkir');
     } catch (_) {}
 
-    Get.snackbar(
-      '💥 مدفع الإفطار',
-      'مدفع الإفطار.. اضرررررب! تقبل الله صيامكم وطاعتكم 🌙',
-      backgroundColor: const Color(0xFF09261E),
-      colorText: const Color(0xFFD4AF37),
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 4),
-      margin: const EdgeInsets.all(16),
-      borderRadius: 12,
-    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+            '💥 مدفع الإفطار.. اضرررررب! تقبل الله صيامكم وطاعتكم 🌙',
+            style: TextStyle(color: Color(0xFFD4AF37), fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: const Color(0xFF09261E),
+          duration: const Duration(seconds: 4),
+          margin: const EdgeInsets.all(16),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+    }
 
     await Future.delayed(const Duration(seconds: 4));
     if (mounted) {
@@ -299,47 +303,53 @@ class _RamadanCannonSuhoorViewState extends State<RamadanCannonSuhoorView> {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              ),
+                              onPressed: () async {
+                                HapticFeedback.lightImpact();
+                                await RamadanNotificationService.instance.testTriggerSuhoor();
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('🔔 تم إرسال تجربة إشعار السحور المبارك'),
+                                      behavior: SnackBarBehavior.floating,
+                                      duration: Duration(seconds: 3),
+                                    ),
+                                  );
+                                }
+                              },
+                              icon: const Text('🌙'),
+                              label: const Text('إشعار السحور', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                            ),
                           ),
-                          onPressed: () async {
-                            HapticFeedback.lightImpact();
-                            await RamadanNotificationService.instance.testTriggerSuhoor();
-                            Get.snackbar(
-                              '🔔 تم إرسال الإشعار',
-                              'تم إرسال تجربة إشعار السحور المبارك إلى شريط الإشعارات',
-                              snackPosition: SnackPosition.BOTTOM,
-                              duration: const Duration(seconds: 3),
-                            );
-                          },
-                          icon: const Text('🌙'),
-                          label: const Text('إشعار السحور', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              ),
+                              onPressed: () async {
+                                HapticFeedback.heavyImpact();
+                                await RamadanNotificationService.instance.testTriggerIftarCannon();
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('💥 تم إرسال تجربة إشعار مدفع الإفطار'),
+                                      behavior: SnackBarBehavior.floating,
+                                      duration: Duration(seconds: 3),
+                                    ),
+                                  );
+                                }
+                              },
+                              icon: const Text('💥'),
+                              label: const Text('إشعار الإفطار', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                            ),
                           ),
-                          onPressed: () async {
-                            HapticFeedback.heavyImpact();
-                            await RamadanNotificationService.instance.testTriggerIftarCannon();
-                            Get.snackbar(
-                              '💥 تم إرسال الإشعار',
-                              'تم إرسال تجربة إشعار مدفع الإفطار إلى شريط الإشعارات',
-                              snackPosition: SnackPosition.BOTTOM,
-                              duration: const Duration(seconds: 3),
-                            );
-                          },
-                          icon: const Text('💥'),
-                          label: const Text('إشعار الإفطار', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                        ),
-                      ),
                     ],
                   ),
                 ],
@@ -415,11 +425,12 @@ class _RamadanCannonSuhoorViewState extends State<RamadanCannonSuhoorView> {
                           Clipboard.setData(const ClipboardData(
                             text: 'ذَهَبَ الظَّمَأُ، وَابْتَلَّتِ الْعُرُوقُ، وَثَبَتَ الأَجْرُ إِنْ شَاءَ اللَّهُ.',
                           ));
-                          Get.snackbar(
-                            'تم النسخ بنجاح',
-                            'تم نسخ دعاء الإفطار إلى الحافظة',
-                            snackPosition: SnackPosition.BOTTOM,
-                            duration: const Duration(seconds: 2),
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('✅ تم نسخ دعاء الإفطار إلى الحافظة'),
+                              behavior: SnackBarBehavior.floating,
+                              duration: Duration(seconds: 2),
+                            ),
                           );
                         },
                         icon: const Icon(Icons.copy_rounded, size: 18),
@@ -438,6 +449,7 @@ class _RamadanCannonSuhoorViewState extends State<RamadanCannonSuhoorView> {
 
   Widget _buildMinutesChip(int minutes, String label) {
     final isSelected = _suhoorMinutes == minutes;
+    final colors = context.appColors;
     return Expanded(
       child: InkWell(
         onTap: () => _setSuhoorMinutes(minutes),
@@ -445,10 +457,10 @@ class _RamadanCannonSuhoorViewState extends State<RamadanCannonSuhoorView> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
           decoration: BoxDecoration(
-            color: isSelected ? context.appColors.primary : Colors.transparent,
+            color: isSelected ? colors.primary : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: isSelected ? context.appColors.primary : Colors.grey.shade400,
+              color: isSelected ? colors.primary : colors.divider,
             ),
           ),
           child: Text(
@@ -457,7 +469,7 @@ class _RamadanCannonSuhoorViewState extends State<RamadanCannonSuhoorView> {
             style: TextStyle(
               fontSize: 11,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              color: isSelected ? Colors.white : Colors.black87,
+              color: isSelected ? Colors.white : colors.text,
             ),
           ),
         ),
