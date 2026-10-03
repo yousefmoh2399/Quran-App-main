@@ -8,6 +8,7 @@ import 'package:quran_app_android/core/design/components/app_card.dart';
 import 'package:quran_app_android/features/quran/data/models/details_model.dart';
 import 'package:quran_app_android/features/tafsser/data/models/tafaseerModel.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:quran_app_android/core/util/share_helper.dart';
 
 class AyahTafseerCard extends StatelessWidget {
   final VersesModel verse;
@@ -100,18 +101,17 @@ class AyahTafseerCard extends StatelessWidget {
                       );
                     },
                   ),
-                  IconButton(
-                    icon: Icon(Icons.share_rounded, size: 18, color: colors.primary),
-                    tooltip: 'مشاركة',
-                    onPressed: () async {
-                      await Share.share(
-                        '﴿$ayahText﴾ [$surahName: $ayahNum]\n\nالتفسير الميسر:\n$tafseerText',
-                        sharePositionOrigin: Rect.fromPoints(
-                          const Offset(2, 2),
-                          const Offset(3, 3),
-                        ),
-                      );
-                    },
+                  Builder(
+                    builder: (btnContext) => IconButton(
+                      icon: Icon(Icons.share_rounded, size: 18, color: colors.primary),
+                      tooltip: 'مشاركة',
+                      onPressed: () async {
+                        await Share.share(
+                          '﴿$ayahText﴾ [$surahName: $ayahNum]\n\nالتفسير الميسر:\n$tafseerText',
+                          sharePositionOrigin: getSharePositionOrigin(btnContext),
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),

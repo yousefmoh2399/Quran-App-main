@@ -9,6 +9,7 @@ import 'package:quran_app_android/features/azkar/data/models/azkar_model.dart';
 import 'package:quran_app_android/features/azkar/presentation/view_model/azkar_view_model.dart';
 import 'package:quran_app_android/features/azkar/presentation/views/widget/azkar_circular_counter.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:quran_app_android/core/util/share_helper.dart';
 
 class AzkarItemCard extends StatefulWidget {
   final ArrayAzkarModel model;
@@ -177,22 +178,21 @@ class _AzkarItemCardState extends State<AzkarItemCard> {
                 ),
               ),
               Container(width: 1, height: 20, color: colors.divider),
-              TextButton.icon(
-                onPressed: () async {
-                  await Share.share(
-                    cleanedText,
-                    sharePositionOrigin: Rect.fromPoints(
-                      const Offset(2, 2),
-                      const Offset(3, 3),
+              Builder(
+                builder: (btnContext) => TextButton.icon(
+                  onPressed: () async {
+                    await Share.share(
+                      cleanedText,
+                      sharePositionOrigin: getSharePositionOrigin(btnContext),
+                    );
+                  },
+                  icon: Icon(Icons.share_rounded, size: 18, color: colors.primary),
+                  label: Text(
+                    'مشاركة',
+                    style: textTheme.labelMedium?.copyWith(
+                      color: colors.primary,
+                      fontWeight: FontWeight.bold,
                     ),
-                  );
-                },
-                icon: Icon(Icons.share_rounded, size: 18, color: colors.primary),
-                label: Text(
-                  'مشاركة',
-                  style: textTheme.labelMedium?.copyWith(
-                    color: colors.primary,
-                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),

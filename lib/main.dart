@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:quran_app_android/core/notifications/ios_prayer_scheduler.dart';
+import 'package:quran_app_android/core/notifications/ios_reminder_scheduler.dart';
 import 'package:get/get.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:quran_app_android/core/native/permissions_helper.dart';
@@ -54,12 +57,19 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   final SettingsServices settingsServices = Get.find<SettingsServices>();
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    if (Platform.isIOS) {
+      Future.microtask(() async {
+        await IosPrayerNotificationScheduler.instance.recalculateAndSchedule();
+        await IosReminderNotificationScheduler.instance.rescheduleAll();
+      });
+    }
     _listenToInitialNotification();
     Future.microtask(() async {
       final notify = NotifyHelper();
@@ -79,6 +89,21 @@ class _MyAppState extends State<MyApp> {
         debugPrint('⚠️ scheduleAzkar skipped: $e\n$st');
       }
     });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && Platform.isIOS) {
+      debugPrint('📱 [iOS Lifecycle] App resumed, renewing prayer & reminder schedules...');
+      IosPrayerNotificationScheduler.instance.recalculateAndSchedule();
+      IosReminderNotificationScheduler.instance.rescheduleAll();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   Future<void> _listenToInitialNotification() async {

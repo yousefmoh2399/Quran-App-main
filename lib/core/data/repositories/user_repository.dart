@@ -6,6 +6,7 @@ import '../../../features/quran/data/models/juz_model.dart';
 import '../models/quran_marks_models.dart';
 import '../models/user_models.dart';
 import '../user_database.dart';
+import '../../services/widget_sync_service.dart';
 
 /// Repository managing user personal data:
 /// - Bookmarks (Pages and Verses with custom colors and notes)
@@ -572,6 +573,20 @@ class UserRepository {
         'enabled': plan.enabled ? 1 : 0,
         'last_triggered': 0,
       });
+    } catch (_) {}
+
+    try {
+      final todayLog = await getTodayReadingLog();
+      final lastPage = await getLastReadPage();
+      await WidgetSyncService.syncWirdProgress(
+        streak: plan.streak,
+        targetPages: plan.target,
+        completedPages: todayLog?.pagesRead ?? 0,
+        lastPage: lastPage ?? plan.startPage,
+        planTitle: plan.type == WirdType.pagesPerDay
+            ? 'الورد اليومي'
+            : (plan.type == WirdType.khatmaInDays ? 'ختمة القرآن' : 'ورد الأجزاء'),
+      );
     } catch (_) {}
 
     return res;

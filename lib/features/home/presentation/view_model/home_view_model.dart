@@ -9,6 +9,7 @@ import 'package:quran_app_android/core/native/native_azkar_bridge.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
 import 'package:quran_app_android/core/service/settings/lock_screen_banner_service.dart';
 import 'package:quran_app_android/core/service/settings/notifications_services.dart';
+import 'package:quran_app_android/core/services/widget_sync_service.dart';
 import 'package:quran_app_android/core/util/assets.dart';
 import 'package:quran_app_android/core/util/constant/static_vars.dart';
 import 'package:quran_app_android/core/util/routes/routes.dart';
@@ -73,6 +74,18 @@ class HomeViewModel extends GetxController {
 
       if (plan != null && plan.enabled) {
         await NotifyHelper().scheduleDailyWirdNotification();
+      }
+
+      if (plan != null) {
+        unawaited(WidgetSyncService.syncWirdProgress(
+          streak: plan.streak,
+          targetPages: plan.target,
+          completedPages: todayPagesRead.value,
+          lastPage: lastReadPage.value ?? 1,
+          planTitle: plan.type == WirdType.pagesPerDay
+              ? 'الورد اليومي'
+              : (plan.type == WirdType.khatmaInDays ? 'ختمة القرآن' : 'ورد الأجزاء'),
+        ));
       }
 
       await getLastRead();

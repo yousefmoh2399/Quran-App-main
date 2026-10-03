@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../../../core/util/share_helper.dart';
 import '../../../../core/data/models/ayah_entity.dart';
 import '../../../../core/data/models/user_models.dart';
 import '../../../../core/design/app_colors.dart';
@@ -188,7 +189,10 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet> {
         ..writeln(tafsir);
     }
 
-    Share.share(shareContent.toString());
+    Share.share(
+      shareContent.toString(),
+      sharePositionOrigin: getSharePositionOrigin(context),
+    );
   }
 
   void _showFeedback(String message) {

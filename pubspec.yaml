@@ -33,7 +33,6 @@ dependencies:
   hijri: ^3.0.0
   flutter_compass: ^0.8.1
   home_widget: ^0.7.0+1
-  android_intent_plus: ^6.0.0
   flutter_timezone: ^5.1.0
   path_provider: ^2.1.5
 

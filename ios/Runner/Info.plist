@@ -28,12 +28,6 @@
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>نحتاج إذن تحديد الموقع لتحديد اتجاه القِبلة وحساب مواقيت الصلاة بدقة لموقعك الحالي. / We need your location to calculate accurate prayer times and determine the Qiblah direction.</string>
-	<key>NSCameraUsageDescription</key>
-	<string>نحتاج إذن الكاميرا لعرض اتجاه القِبلة على الكاميرا (الواقع المعزز) لتحديد وجهة الصلاة بدقة. / We need camera access to display the Qiblah direction overlay.</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>نحتاج إذن حفظ الصور لتصدير وحفظ بطاقات الآيات القرآنية في ألبوم الصور. / We need permission to save generated Quran ayah cards to your photo library.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>نحتاج الوصول إلى الصور لمشاركتها وحفظ بطاقات الآيات. / Needed to access and save Quran ayah cards.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>

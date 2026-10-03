@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:adhan/adhan.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 
 import 'package:get/get.dart';
+import 'package:quran_app_android/core/native/native_adhan_bridge.dart';
 import 'package:quran_app_android/core/native/native_reminders_bridge.dart';
 import 'package:quran_app_android/core/service/navigation/app_navigation_service.dart';
 import 'package:quran_app_android/core/util/constant/static_vars.dart';
@@ -87,7 +89,28 @@ class NotifyHelper {
           requestAlertPermission: true,
           requestBadgePermission: true,
           requestSoundPermission: true,
-          requestCriticalPermission: true,
+          requestCriticalPermission: false,
+          notificationCategories: [
+            DarwinNotificationCategory(
+              'prayer_category',
+              actions: <DarwinNotificationAction>[
+                DarwinNotificationAction.plain(
+                  'action_prayed',
+                  'صلّيت',
+                  options: <DarwinNotificationActionOption>{
+                    DarwinNotificationActionOption.foreground,
+                  },
+                ),
+                DarwinNotificationAction.plain(
+                  'action_stop',
+                  'إيقاف',
+                  options: <DarwinNotificationActionOption>{
+                    DarwinNotificationActionOption.destructive,
+                  },
+                ),
+              ],
+            ),
+          ],
           onDidReceiveLocalNotification: onDidReceiveLocalNotification,
         );
     final InitializationSettings initializationSettings =
@@ -454,7 +477,23 @@ class NotifyHelper {
   ) async {
     final actionId = notificationResponse.actionId;
     if (actionId != null && actionId.isNotEmpty) {
-      if (actionId == 'action_mushaf') {
+      if (actionId == 'action_prayed') {
+        debugPrint('🕌 User tapped "صلّيت" from iOS notification action');
+        if (notificationResponse.payload != null) {
+          try {
+            final data = jsonDecode(notificationResponse.payload!) as Map;
+            final prayerKey = data['prayerKey']?.toString() ?? '';
+            if (prayerKey.isNotEmpty) {
+              await NativeAdhanBridge.markPrayerAsPrayed(prayerKey, status: 'on_time');
+            }
+          } catch (_) {}
+        }
+        return;
+      } else if (actionId == 'action_stop') {
+        debugPrint('🛑 User tapped "إيقاف" from iOS notification action');
+        await NativeAdhanBridge.stopAdhan();
+        return;
+      } else if (actionId == 'action_mushaf') {
         await AppNavigationService.instance.handleNavigation({'target_screen': 'wird'});
         return;
       } else if (actionId == 'action_azkar') {
@@ -566,7 +605,7 @@ class NotifyHelper {
         ?.requestPermissions(
           alert: true,
           badge: true,
-          critical: true,
+          critical: false,
           sound: true,
         );
   }
