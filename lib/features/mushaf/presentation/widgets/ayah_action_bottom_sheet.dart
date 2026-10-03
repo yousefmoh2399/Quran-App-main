@@ -111,6 +111,7 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet> {
       setState(() => _isBookmarked = false);
       _showFeedback('تمت إزالة العلامة المرجعية للآية');
     } else {
+      _controller.selectedAyahColor.value = _selectedColor;
       await _controller.setAyahBookmark(
         surah: widget.surahNumber,
         ayah: widget.ayahNumber,
@@ -125,6 +126,7 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet> {
 
   Future<void> _updateColor(BookmarkColor color) async {
     setState(() => _selectedColor = color);
+    _controller.selectedAyahColor.value = color;
     if (_isBookmarked) {
       final note = _noteController.text.trim();
       await _controller.setAyahBookmark(

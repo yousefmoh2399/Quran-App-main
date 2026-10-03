@@ -75,8 +75,9 @@ class _MushafViewState extends State<MushafView> {
                     child: Obx(() {
                       final themeConfig = MushafThemeConfig.of(controller.currentTheme.value);
                       final currentPage = controller.currentPage.value;
-                      // Touch userMarksVersion so bookmark and memorization changes rebuild immediately
+                      // Touch userMarksVersion & selectedAyahColor so bookmark, color, and memorization changes rebuild immediately
                       final _ = controller.userMarksVersion.value;
+                      final _ = controller.selectedAyahColor.value;
 
                       return Container(
                         color: themeConfig.pageBg,
@@ -88,6 +89,7 @@ class _MushafViewState extends State<MushafView> {
                                 getPage: controller.getPage,
                                 selectedSurah: controller.selectedSurah.value,
                                 selectedAyah: controller.selectedAyah.value,
+                                selectedAyahColor: controller.selectedAyahColor.value,
                                 isMoving: controller.isPageTurning.value,
                                 onPageChanged: controller.onPageChanged,
                                 onAyahTapped: (s, a) => controller.selectAyah(s, a),
@@ -237,6 +239,7 @@ class _MushafViewState extends State<MushafView> {
       getPage: controller.getPage,
       selectedSurah: controller.selectedSurah.value,
       selectedAyah: controller.selectedAyah.value,
+      selectedAyahColor: controller.selectedAyahColor.value,
       onPageChanged: (newPage) {
         controller.onPageChanged(newPage);
       },

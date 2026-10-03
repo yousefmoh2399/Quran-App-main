@@ -27,12 +27,13 @@ class MushafRepository {
       orderBy: 'line_number ASC',
     );
 
-    // Fetch all words for this page ordered by line_number ASC, word_index ASC
+    // Fetch all words for this page ordered by line_number ASC, id ASC
+    // Note: id reflects the exact sequential reading order in the Quran text.
     final wordRows = await db.query(
       'mushaf_words',
       where: 'page_number = ?',
       whereArgs: [pageNumber],
-      orderBy: 'line_number ASC, word_index ASC',
+      orderBy: 'line_number ASC, id ASC',
     );
 
     final wordsByLine = <int, List<MushafWord>>{};

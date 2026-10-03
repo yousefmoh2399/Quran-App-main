@@ -23,6 +23,7 @@ class MushafPageWidget extends StatefulWidget {
   final MushafThemeConfig theme;
   final int? selectedSurah;
   final int? selectedAyah;
+  final BookmarkColor? selectedAyahColor;
   final bool isRightPage;
   final bool isMoving;
   final BookmarkColor? pageBookmarkColor;
@@ -38,6 +39,7 @@ class MushafPageWidget extends StatefulWidget {
     required this.theme,
     this.selectedSurah,
     this.selectedAyah,
+    this.selectedAyahColor,
     this.isRightPage = true,
     this.isMoving = false,
     this.pageBookmarkColor,
@@ -343,6 +345,7 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
                 theme: widget.theme,
                 selectedSurah: widget.selectedSurah,
                 selectedAyah: widget.selectedAyah,
+                selectedAyahColor: widget.selectedAyahColor,
                 bookmarkedAyahs: widget.bookmarkedAyahs,
                 memorizedAyahs: widget.memorizedAyahs,
                 onAyahTapped: widget.onAyahTapped,
@@ -366,6 +369,7 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
               theme: widget.theme,
               selectedSurah: widget.selectedSurah,
               selectedAyah: widget.selectedAyah,
+              selectedAyahColor: widget.selectedAyahColor,
               bookmarkedAyahs: widget.bookmarkedAyahs,
               memorizedAyahs: widget.memorizedAyahs,
               onAyahTapped: widget.onAyahTapped,

@@ -34,6 +34,7 @@ class MushafController extends GetxController {
   final RxnInt selectedSurah = RxnInt();
   final RxnInt selectedAyah = RxnInt();
   final Rxn<AyahEntity> selectedAyahEntity = Rxn<AyahEntity>();
+  final Rx<BookmarkColor> selectedAyahColor = BookmarkColor.gold.obs;
 
   // Bookmarks & Memorization Maps
   final RxSet<int> bookmarkedPages = <int>{}.obs;
@@ -412,6 +413,7 @@ class MushafController extends GetxController {
     );
     final id = await _userRepo.addBookmark(item);
     ayahBookmarksMap['$surah:$ayah'] = item.copyWith(id: id);
+    selectedAyahColor.value = color;
     MushafRasterCache.instance.removePage(page);
     userMarksVersion.value++;
     update();
@@ -458,6 +460,13 @@ class MushafController extends GetxController {
   Future<void> selectAyah(int surahNumber, int ayahNumber) async {
     selectedSurah.value = surahNumber;
     selectedAyah.value = ayahNumber;
+
+    final existing = getAyahBookmark(surahNumber, ayahNumber);
+    if (existing != null) {
+      selectedAyahColor.value = existing.color;
+    } else {
+      selectedAyahColor.value = BookmarkColor.gold;
+    }
 
     try {
       final ayah = await _quranRepo.getAyah(surahNumber, ayahNumber);

@@ -22,6 +22,7 @@ class MushafPaperFlipView extends StatefulWidget {
   final Future<MushafPage?> Function(int pageNumber) getPage;
   final int? selectedSurah;
   final int? selectedAyah;
+  final BookmarkColor? selectedAyahColor;
   final void Function(int newPage) onPageChanged;
   final void Function(int surahNumber, int ayahNumber) onAyahTapped;
   final VoidCallback onTapPage;
@@ -39,6 +40,7 @@ class MushafPaperFlipView extends StatefulWidget {
     required this.getPage,
     this.selectedSurah,
     this.selectedAyah,
+    this.selectedAyahColor,
     required this.onPageChanged,
     required this.onAyahTapped,
     required this.onTapPage,
@@ -266,6 +268,7 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
         memorizedAyahs: widget.getAyahMemorizeStatuses(),
         selectedSurah: widget.selectedSurah,
         selectedAyah: widget.selectedAyah,
+        selectedAyahColor: widget.selectedAyahColor,
         onAyahTapped: widget.onAyahTapped,
         onTapPage: widget.onTapPage,
       );
@@ -287,6 +290,7 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
             memorizedAyahs: widget.getAyahMemorizeStatuses(),
             selectedSurah: widget.selectedSurah,
             selectedAyah: widget.selectedAyah,
+            selectedAyahColor: widget.selectedAyahColor,
             onAyahTapped: widget.onAyahTapped,
             onTapPage: widget.onTapPage,
           );

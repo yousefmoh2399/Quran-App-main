@@ -16,6 +16,7 @@ class MushafLineWidget extends StatelessWidget {
   final MushafThemeConfig theme;
   final int? selectedSurah;
   final int? selectedAyah;
+  final BookmarkColor? selectedAyahColor;
   final Map<String, BookmarkColor>? bookmarkedAyahs;
   final Map<String, MemorizeStatus>? memorizedAyahs;
   final void Function(int surahNumber, int ayahNumber)? onAyahTapped;
@@ -28,6 +29,7 @@ class MushafLineWidget extends StatelessWidget {
     required this.theme,
     this.selectedSurah,
     this.selectedAyah,
+    this.selectedAyahColor,
     this.bookmarkedAyahs,
     this.memorizedAyahs,
     this.onAyahTapped,
@@ -144,6 +146,126 @@ class MushafLineWidget extends StatelessWidget {
       );
     }
 
+    final words = line.words;
+    final wordWidgets = <Widget>[];
+
+    for (int i = 0; i < words.length; i++) {
+      final word = words[i];
+      final isHighlighted = selectedSurah != null &&
+          selectedAyah != null &&
+          word.surahNumber == selectedSurah &&
+          word.ayahNumber == selectedAyah;
+
+      final verseKey = '${word.surahNumber}:${word.ayahNumber}';
+      final bookmarkColor = bookmarkedAyahs?[verseKey];
+      final memorizeStatus = memorizedAyahs?[verseKey];
+
+      Color bgColor = Colors.transparent;
+      Color? borderColor;
+      double borderWidth = 0.8;
+
+      if (isHighlighted) {
+        // Highlight with the active chosen bookmark color or theme highlight
+        final activeColor = bookmarkColor?.color ?? selectedAyahColor?.color ?? theme.ayahHighlight;
+        bgColor = activeColor.withOpacity(0.30);
+        borderColor = activeColor.withOpacity(0.95);
+        borderWidth = 1.2;
+      } else if (bookmarkColor != null && memorizeStatus != null) {
+        bgColor = memorizeStatus.badgeColor.withOpacity(0.20);
+        borderColor = bookmarkColor.color.withOpacity(0.85);
+        borderWidth = 1.0;
+      } else if (bookmarkColor != null) {
+        bgColor = bookmarkColor.color.withOpacity(0.22);
+        borderColor = bookmarkColor.color.withOpacity(0.70);
+        borderWidth = 0.8;
+      } else if (memorizeStatus != null) {
+        bgColor = memorizeStatus.badgeColor.withOpacity(0.18);
+        borderColor = memorizeStatus.badgeColor.withOpacity(0.50);
+        borderWidth = 0.6;
+      }
+
+      // Continuous highlight grouping for words of the same verse on this line
+      final bool hasActiveStyling = bgColor != Colors.transparent;
+      final bool isSameAyahAsPrev = i > 0 &&
+          words[i - 1].surahNumber == word.surahNumber &&
+          words[i - 1].ayahNumber == word.ayahNumber;
+      final bool isSameAyahAsNext = i < words.length - 1 &&
+          words[i + 1].surahNumber == word.surahNumber &&
+          words[i + 1].ayahNumber == word.ayahNumber;
+
+      // In Arabic RTL, words flow Right to Left:
+      // words[0] is at the right edge of the line.
+      // So isSameAyahAsPrev connects to the RIGHT, and isSameAyahAsNext connects to the LEFT.
+      final bool isRightEnd = !isSameAyahAsPrev;
+      final bool isLeftEnd = !isSameAyahAsNext;
+
+      BorderRadius borderRadius;
+      if (!hasActiveStyling || (isRightEnd && isLeftEnd)) {
+        borderRadius = BorderRadius.circular(4.0);
+      } else if (isRightEnd) {
+        borderRadius = const BorderRadius.only(
+          topRight: Radius.circular(4.0),
+          bottomRight: Radius.circular(4.0),
+        );
+      } else if (isLeftEnd) {
+        borderRadius = const BorderRadius.only(
+          topLeft: Radius.circular(4.0),
+          bottomLeft: Radius.circular(4.0),
+        );
+      } else {
+        borderRadius = BorderRadius.zero;
+      }
+
+      Border? border;
+      if (borderColor != null) {
+        final side = BorderSide(color: borderColor, width: borderWidth);
+        border = Border(
+          top: side,
+          bottom: side,
+          right: isRightEnd ? side : BorderSide.none,
+          left: isLeftEnd ? side : BorderSide.none,
+        );
+      }
+
+      final margin = EdgeInsets.only(
+        right: (!hasActiveStyling || isRightEnd) ? 0.8 : 0.0,
+        left: (!hasActiveStyling || isLeftEnd) ? 0.8 : 0.0,
+      );
+
+      wordWidgets.add(
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () {
+            onTapPage?.call();
+          },
+          onLongPress: () {
+            HapticFeedback.mediumImpact();
+            if (onAyahTapped != null) {
+              onAyahTapped!(word.surahNumber, word.ayahNumber);
+            }
+          },
+          child: Container(
+            margin: margin,
+            padding: const EdgeInsets.symmetric(horizontal: 1.5, vertical: 1.0),
+            decoration: BoxDecoration(
+              color: bgColor,
+              borderRadius: borderRadius,
+              border: border,
+            ),
+            child: Text(
+              word.glyphCode,
+              style: TextStyle(
+                fontFamily: MushafFontManager.pageFontFamily(word.pageNumber),
+                fontSize: 22.0,
+                color: theme.textColor,
+                height: 1.1,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     // In Arabic RTL, words flow right to left
     return FittedBox(
       fit: BoxFit.fitWidth,
@@ -153,64 +275,7 @@ class MushafLineWidget extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
-          children: line.words.map((word) {
-            final isHighlighted = selectedSurah != null &&
-                selectedAyah != null &&
-                word.surahNumber == selectedSurah &&
-                word.ayahNumber == selectedAyah;
-
-            final verseKey = '${word.surahNumber}:${word.ayahNumber}';
-            final bookmarkColor = bookmarkedAyahs?[verseKey];
-            final memorizeStatus = memorizedAyahs?[verseKey];
-
-            Color bgColor = Colors.transparent;
-            Border? border;
-
-            if (isHighlighted) {
-              bgColor = theme.ayahHighlight;
-              border = Border.all(color: theme.surahHeaderBorder, width: 0.8);
-            } else if (bookmarkColor != null && memorizeStatus != null) {
-              bgColor = memorizeStatus.badgeColor.withOpacity(0.18);
-              border = Border.all(color: bookmarkColor.color.withOpacity(0.80), width: 1.0);
-            } else if (bookmarkColor != null) {
-              bgColor = bookmarkColor.color.withOpacity(0.20);
-              border = Border.all(color: bookmarkColor.color.withOpacity(0.60), width: 0.7);
-            } else if (memorizeStatus != null) {
-              bgColor = memorizeStatus.badgeColor.withOpacity(0.18);
-              border = Border.all(color: memorizeStatus.badgeColor.withOpacity(0.50), width: 0.6);
-            }
-
-            return GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: () {
-                onTapPage?.call();
-              },
-              onLongPress: () {
-                HapticFeedback.mediumImpact();
-                if (onAyahTapped != null) {
-                  onAyahTapped!(word.surahNumber, word.ayahNumber);
-                }
-              },
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 0.8),
-                padding: const EdgeInsets.symmetric(horizontal: 1.5, vertical: 1.0),
-                decoration: BoxDecoration(
-                  color: bgColor,
-                  borderRadius: BorderRadius.circular(4.0),
-                  border: border,
-                ),
-                child: Text(
-                  word.glyphCode,
-                  style: TextStyle(
-                    fontFamily: MushafFontManager.pageFontFamily(word.pageNumber),
-                    fontSize: 22.0,
-                    color: theme.textColor,
-                    height: 1.1,
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
+          children: wordWidgets,
         ),
       ),
     );

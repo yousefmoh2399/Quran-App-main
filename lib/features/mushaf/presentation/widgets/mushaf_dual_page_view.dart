@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../../core/data/models/mushaf_models.dart';
+import '../../../../core/data/models/user_models.dart';
 import '../controllers/mushaf_controller.dart';
 import '../models/mushaf_theme_model.dart';
 import '../utils/mushaf_scroll_physics.dart';
@@ -15,6 +16,7 @@ class MushafDualPageView extends StatefulWidget {
   final Map<int, MushafPage> pagesCache;
   final int? selectedSurah;
   final int? selectedAyah;
+  final BookmarkColor? selectedAyahColor;
   final bool isMoving;
   final Future<MushafPage?> Function(int pageNumber) getPage;
   final void Function(int newPage) onPageChanged;
@@ -30,6 +32,7 @@ class MushafDualPageView extends StatefulWidget {
     required this.onPageChanged,
     this.selectedSurah,
     this.selectedAyah,
+    this.selectedAyahColor,
     this.isMoving = false,
     this.onAyahTapped,
     this.onTapPage,
@@ -149,6 +152,7 @@ class _MushafDualPageViewState extends State<MushafDualPageView> {
         memorizedAyahs: ayahMemorized,
         selectedSurah: widget.selectedSurah,
         selectedAyah: widget.selectedAyah,
+        selectedAyahColor: widget.selectedAyahColor,
         onAyahTapped: widget.onAyahTapped,
         onTapPage: widget.onTapPage,
       );
@@ -169,6 +173,7 @@ class _MushafDualPageViewState extends State<MushafDualPageView> {
             memorizedAyahs: ayahMemorized,
             selectedSurah: widget.selectedSurah,
             selectedAyah: widget.selectedAyah,
+            selectedAyahColor: widget.selectedAyahColor,
             onAyahTapped: widget.onAyahTapped,
             onTapPage: widget.onTapPage,
           );
