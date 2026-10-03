@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/data/models/mushaf_models.dart';
 import '../../../../core/data/models/user_models.dart';
+import '../../../../core/util/assets.dart';
 import '../controllers/mushaf_controller.dart';
 import '../models/mushaf_theme_model.dart';
 import 'mushaf_page_widget.dart';
@@ -73,7 +74,7 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
     super.initState();
     _animController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 280),
+      duration: const Duration(milliseconds: 520),
     );
 
     _animController.addListener(() {
@@ -94,7 +95,7 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
           _dragProgress = 0.0;
           _dragDeltaX = 0.0;
           widget.controller.isPageTurning.value = false;
-          HapticFeedback.selectionClick();
+          HapticFeedback.lightImpact();
           widget.onPageChanged(committedPage);
         } else {
           // Cancelled turn
@@ -137,9 +138,10 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
     _isTurning = true;
     _dragProgress = 0.0;
     widget.controller.isPageTurning.value = true;
+    HapticFeedback.selectionClick();
     setState(() {});
 
-    _animateTurnTo(1.0, duration: const Duration(milliseconds: 280));
+    _animateTurnTo(1.0, duration: const Duration(milliseconds: 480));
   }
 
   /// Programmatic backward turn animation (e.g. from bottom bar prev button)
@@ -152,12 +154,13 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
     _isTurning = true;
     _dragProgress = 0.0;
     widget.controller.isPageTurning.value = true;
+    HapticFeedback.selectionClick();
     setState(() {});
 
-    _animateTurnTo(1.0, duration: const Duration(milliseconds: 280));
+    _animateTurnTo(1.0, duration: const Duration(milliseconds: 480));
   }
 
-  void _animateTurnTo(double targetValue, {Duration duration = const Duration(milliseconds: 240)}) {
+  void _animateTurnTo(double targetValue, {Duration duration = const Duration(milliseconds: 480)}) {
     _isAnimating = true;
     _turnAnimation = Tween<double>(
       begin: _dragProgress,
@@ -183,33 +186,35 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
     _dragDeltaX += delta;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    // In Arabic RTL Mushaf:
-    // Dragging right (positive delta) = turn forward to Next Page (+1)
-    // Dragging left (negative delta) = turn backward to Previous Page (-1)
+    // Authentic Arabic RTL Mushaf:
+    // Dragging left (negative delta) = turn page forward to Next Page (+1) (تقليب لليمين -> يسار للمتابعة)
+    // Dragging right (positive delta) = turn page backward to Previous Page (-1) (رجوع للصفحة السابقة)
     if (!_isTurning) {
-      if (_dragDeltaX > 6.0) {
-        // Turning to Next Page (swiping right to flip forward in RTL book)
+      if (_dragDeltaX < -6.0) {
+        // Turning to Next Page
         if (widget.currentPage >= 604) return;
         _isTurning = true;
         _isNext = true;
         _targetPage = widget.currentPage + 1;
         widget.controller.isPageTurning.value = true;
-      } else if (_dragDeltaX < -6.0) {
-        // Turning to Previous Page (swiping left to go back in RTL book)
+        HapticFeedback.selectionClick();
+      } else if (_dragDeltaX > 6.0) {
+        // Turning to Previous Page
         if (widget.currentPage <= 1) return;
         _isTurning = true;
         _isNext = false;
         _targetPage = widget.currentPage - 1;
         widget.controller.isPageTurning.value = true;
+        HapticFeedback.selectionClick();
       }
     }
 
     if (_isTurning) {
       double rawProgress;
       if (_isNext) {
-        rawProgress = (_dragDeltaX / (screenWidth * 0.95)).clamp(0.0, 1.0);
+        rawProgress = (-_dragDeltaX / (screenWidth * 0.88)).clamp(0.0, 1.0);
       } else {
-        rawProgress = (-_dragDeltaX / (screenWidth * 0.95)).clamp(0.0, 1.0);
+        rawProgress = (_dragDeltaX / (screenWidth * 0.88)).clamp(0.0, 1.0);
       }
 
       setState(() {
@@ -225,25 +230,25 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
     bool shouldCommit = false;
 
     if (_isNext) {
-      // Swiping right: positive velocity commits
-      if (velocity > 250.0 || _dragProgress >= 0.22) {
+      // Swiping left: negative velocity commits
+      if (velocity < -220.0 || _dragProgress >= 0.20) {
         shouldCommit = true;
       }
     } else {
-      // Swiping left: negative velocity commits
-      if (velocity < -250.0 || _dragProgress >= 0.22) {
+      // Swiping right: positive velocity commits
+      if (velocity > 220.0 || _dragProgress >= 0.20) {
         shouldCommit = true;
       }
     }
 
     if (shouldCommit) {
-      // Complete paper turn smoothly to 1.0
+      // Complete paper turn smoothly
       final remaining = (1.0 - _dragProgress).clamp(0.1, 1.0);
-      final ms = (250 * remaining).toInt().clamp(120, 280);
+      final ms = (480 * remaining).toInt().clamp(240, 480);
       _animateTurnTo(1.0, duration: Duration(milliseconds: ms));
     } else {
-      // Cancel paper turn smoothly back to 0.0
-      final ms = (220 * _dragProgress).toInt().clamp(100, 220);
+      // Cancel paper turn smoothly back
+      final ms = (350 * _dragProgress).toInt().clamp(160, 350);
       _animateTurnTo(0.0, duration: Duration(milliseconds: ms));
     }
   }
@@ -343,24 +348,30 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
 
   Widget _buildPaperCurlTransition(double width) {
     final t = _dragProgress.clamp(0.0, 1.0);
-    // Wider curl cylinder for a more pronounced paper bend effect
-    final double curlCylinderWidth = (52.0 + 18.0 * math.sin(t * math.pi)).clamp(30.0, 70.0);
 
     if (_isNext) {
       // Turning Forward (Next Page):
-      // The current page is peeled from right to left across the screen.
-      // foldX marks the boundary where paper is curling over.
-      final foldX = (width * (1.0 - t)).clamp(0.0, width);
+      // The current page leaf physically rotates in 3D around the left spine (0° to -180°).
+      final angle = -t * math.pi;
+      final isFrontVisible = t < 0.5;
+
+      final liftProgress = math.sin(t * math.pi);
+      final shadowWidth = (width * 0.70 * liftProgress).clamp(16.0, width);
+      final shadowOpacity = (0.48 * liftProgress).clamp(0.0, 0.48);
 
       return Stack(
         fit: StackFit.expand,
         children: [
-          // 1. Soft Ambient Cast Shadow onto the revealed page underneath
+          // 1. Revealed Page Underneath (Next Page)
+          if (_targetPage != null)
+            _buildSinglePage(_targetPage!, isMoving: true),
+
+          // 2. Realistic Dynamic Cast Drop Shadow cast onto the revealed page
           Positioned(
             top: 0,
             bottom: 0,
-            left: (foldX - curlCylinderWidth * 1.2).clamp(0.0, width),
-            width: curlCylinderWidth * 2.0,
+            left: 0,
+            width: shadowWidth,
             child: IgnorePointer(
               child: Container(
                 decoration: BoxDecoration(
@@ -368,89 +379,84 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                     colors: [
+                      Colors.black.withOpacity(shadowOpacity * 0.85),
+                      Colors.black.withOpacity(shadowOpacity * 0.45),
                       Colors.transparent,
-                      Colors.black.withOpacity(0.55 * (1.0 - t * 0.4)),
                     ],
+                    stops: const [0.0, 0.45, 1.0],
                   ),
                 ),
               ),
             ),
           ),
 
-          // 2. The Turning Page (clipped to the unpeeled region [0, foldX])
-          Positioned(
-            top: 0,
-            bottom: 0,
-            left: 0,
-            width: foldX,
-            child: ClipRect(
-              child: OverflowBox(
-                minWidth: width,
-                maxWidth: width,
-                alignment: Alignment.centerLeft,
-                child: _buildSinglePage(widget.currentPage, isMoving: true),
-              ),
+          // 3. The 3D Turning Page Leaf (Pivoting around the Left Spine)
+          Transform(
+            alignment: Alignment.centerLeft,
+            transform: Matrix4.identity()
+              ..setEntry(3, 2, 0.0012) // Realistic 3D perspective depth
+              ..rotateY(angle),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                if (isFrontVisible) ...[
+                  // Front: The current page with all text, frame, and verses visibly rotating in 3D
+                  _buildSinglePage(widget.currentPage, isMoving: true),
+
+                  // Dynamic paper curvature gradient & highlight as it catches light
+                  IgnorePointer(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [
+                            Colors.black.withOpacity(0.35 * t), // Spine crease shadow
+                            Colors.transparent,
+                            Colors.white.withOpacity(0.40 * liftProgress), // Peak curve highlight
+                            Colors.black.withOpacity(0.20 * t), // Outer bend shadow
+                          ],
+                          stops: const [0.0, 0.35, 0.70, 1.0],
+                        ),
+                      ),
+                    ),
+                  ),
+                ] else ...[
+                  // Back of the page (turned past 90 degrees)
+                  Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.identity()..rotateY(math.pi),
+                    child: _buildBackOfPage(),
+                  ),
+
+                  // Soft shadow on the back of the turning page as it settles
+                  IgnorePointer(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.centerRight,
+                          end: Alignment.centerLeft,
+                          colors: [
+                            Colors.black.withOpacity(0.30 * (1.0 - t)),
+                            Colors.white.withOpacity(0.35 * liftProgress),
+                            Colors.transparent,
+                          ],
+                          stops: const [0.0, 0.40, 1.0],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
 
-          // 3. 3D Perspective Paper Curl Cylinder & Edge Lighting along the fold
-          if (foldX > 2.0 && foldX < width - 2.0) ...[
-            // Drop shadow cast by the curved page edge
-            Positioned(
-              top: 0,
-              bottom: 0,
-              left: foldX,
-              width: curlCylinderWidth * 1.0,
-              child: IgnorePointer(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: [
-                        Colors.black.withOpacity(0.60 * (1.0 - t * 0.3)),
-                        Colors.black.withOpacity(0.20 * (1.0 - t * 0.3)),
-                        Colors.transparent,
-                      ],
-                      stops: const [0.0, 0.45, 1.0],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
-            // Highlight and inner paper curl cylinder on the page itself
-            Positioned(
-              top: 0,
-              bottom: 0,
-              left: (foldX - curlCylinderWidth).clamp(0.0, width),
-              width: curlCylinderWidth,
-              child: IgnorePointer(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: [
-                        Colors.transparent,
-                        Colors.white.withOpacity(0.50 * (1.0 - t * 0.3)),
-                        Colors.black.withOpacity(0.28 * (1.0 - t * 0.3)),
-                        Colors.black.withOpacity(0.55 * (1.0 - t * 0.3)),
-                      ],
-                      stops: const [0.0, 0.30, 0.65, 1.0],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-
-          // 4. Authentic Inner Book Spine Binding Shadow (gutter depth)
+          // 4. Authentic Quran Book Spine Gutter Depth Shadow (كعب المصحف)
           Positioned(
             top: 0,
             bottom: 0,
             left: 0,
-            width: 14.0,
+            width: 24.0,
             child: IgnorePointer(
               child: Container(
                 decoration: BoxDecoration(
@@ -458,9 +464,11 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                     colors: [
-                      Colors.black.withOpacity(0.15),
+                      Colors.black.withOpacity(0.32),
+                      Colors.black.withOpacity(0.12),
                       Colors.transparent,
                     ],
+                    stops: const [0.0, 0.40, 1.0],
                   ),
                 ),
               ),
@@ -470,21 +478,26 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
       );
     } else {
       // Turning Backward (Previous Page):
-      // The previous page peels in from the left over the current page.
-      final foldX = (width * t).clamp(0.0, width);
+      // The previous page (_targetPage) sweeps in from the left over the current page!
+      final angle = -(1.0 - t) * math.pi;
+      final isFrontVisible = t >= 0.5;
+
+      final liftProgress = math.sin(t * math.pi);
+      final shadowWidth = (width * 0.70 * liftProgress).clamp(16.0, width);
+      final shadowOpacity = (0.48 * liftProgress).clamp(0.0, 0.48);
 
       return Stack(
         fit: StackFit.expand,
         children: [
-          // 1. Current page underneath
+          // 1. Current Page Underneath (stays flat until covered)
           _buildSinglePage(widget.currentPage, isMoving: true),
 
-          // 2. Soft Ambient Cast Shadow under the incoming page onto current page
+          // 2. Cast Drop Shadow onto the current page
           Positioned(
             top: 0,
             bottom: 0,
-            left: foldX,
-            width: curlCylinderWidth * 1.4,
+            left: 0,
+            width: shadowWidth,
             child: IgnorePointer(
               child: Container(
                 decoration: BoxDecoration(
@@ -492,63 +505,84 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                     colors: [
-                      Colors.black.withOpacity(0.35 * (1.0 - (1.0 - t) * 0.4)),
+                      Colors.black.withOpacity(shadowOpacity * 0.85),
+                      Colors.black.withOpacity(shadowOpacity * 0.45),
                       Colors.transparent,
                     ],
+                    stops: const [0.0, 0.45, 1.0],
                   ),
                 ),
               ),
             ),
           ),
 
-          // 3. Incoming Previous Page (clipped to [0, foldX])
-          Positioned(
-            top: 0,
-            bottom: 0,
-            left: 0,
-            width: foldX,
-            child: ClipRect(
-              child: OverflowBox(
-                minWidth: width,
-                maxWidth: width,
-                alignment: Alignment.centerLeft,
-                child: _buildSinglePage(_targetPage!, isMoving: true),
-              ),
-            ),
-          ),
+          // 3. The 3D Incoming Page Leaf (Pivoting around the Left Spine)
+          Transform(
+            alignment: Alignment.centerLeft,
+            transform: Matrix4.identity()
+              ..setEntry(3, 2, 0.0012)
+              ..rotateY(angle),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                if (isFrontVisible) ...[
+                  // Front of previous page landing flat
+                  if (_targetPage != null)
+                    _buildSinglePage(_targetPage!, isMoving: true),
 
-          // 4. Paper Curl Cylinder & Edge Lighting on the incoming page edge
-          if (foldX > 2.0 && foldX < width - 2.0)
-            Positioned(
-              top: 0,
-              bottom: 0,
-              left: (foldX - curlCylinderWidth).clamp(0.0, width),
-              width: curlCylinderWidth,
-              child: IgnorePointer(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: [
-                        Colors.transparent,
-                        Colors.white.withOpacity(0.30 * t),
-                        Colors.black.withOpacity(0.18 * t),
-                        Colors.black.withOpacity(0.35 * t),
-                      ],
-                      stops: const [0.0, 0.35, 0.70, 1.0],
+                  // Ambient lighting as it settles
+                  IgnorePointer(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [
+                            Colors.black.withOpacity(0.35 * (1.0 - t)),
+                            Colors.transparent,
+                            Colors.white.withOpacity(0.40 * liftProgress),
+                            Colors.black.withOpacity(0.20 * (1.0 - t)),
+                          ],
+                          stops: const [0.0, 0.35, 0.70, 1.0],
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-            ),
+                ] else ...[
+                  // Back of incoming page rising from left
+                  Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.identity()..rotateY(math.pi),
+                    child: _buildBackOfPage(),
+                  ),
 
-          // 5. Authentic Inner Book Spine Binding Shadow
+                  IgnorePointer(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.centerRight,
+                          end: Alignment.centerLeft,
+                          colors: [
+                            Colors.black.withOpacity(0.30 * t),
+                            Colors.white.withOpacity(0.35 * liftProgress),
+                            Colors.transparent,
+                          ],
+                          stops: const [0.0, 0.40, 1.0],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+
+          // 4. Authentic Quran Book Spine Gutter Depth Shadow
           Positioned(
             top: 0,
             bottom: 0,
             left: 0,
-            width: 14.0,
+            width: 24.0,
             child: IgnorePointer(
               child: Container(
                 decoration: BoxDecoration(
@@ -556,9 +590,11 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                     colors: [
-                      Colors.black.withOpacity(0.15),
+                      Colors.black.withOpacity(0.32),
+                      Colors.black.withOpacity(0.12),
                       Colors.transparent,
                     ],
+                    stops: const [0.0, 0.40, 1.0],
                   ),
                 ),
               ),
@@ -567,5 +603,33 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
         ],
       );
     }
+  }
+
+  Widget _buildBackOfPage() {
+    return Container(
+      color: widget.theme.pageBg,
+      child: Center(
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: widget.theme.frameBorderOuter.withOpacity(0.25),
+              width: 1.5,
+            ),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Center(
+            child: Opacity(
+              opacity: 0.12,
+              child: Image.asset(
+                AssetsData.mushaf_1,
+                width: 160,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

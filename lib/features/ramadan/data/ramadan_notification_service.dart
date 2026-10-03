@@ -126,7 +126,7 @@ class RamadanNotificationService {
             body: '«ذَهَبَ الظَّمَأُ، وَابْتَلَّتِ الْعُرُوقُ، وَثَبَتَ الأَجْرُ إِنْ شَاءَ اللَّهُ» 🌙 تقبل الله صيامكم.',
             scheduledDate: iftarTime,
             payload: 'ramadan|cannon',
-            soundFile: 'adhan',
+            soundFile: 'cannon',
           );
         }
       } else {

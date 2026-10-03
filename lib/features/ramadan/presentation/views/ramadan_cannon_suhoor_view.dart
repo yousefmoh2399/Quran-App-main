@@ -71,7 +71,7 @@ class _RamadanCannonSuhoorViewState extends State<RamadanCannonSuhoorView> {
     setState(() => _isPlayingPreview = true);
 
     try {
-      await NativeRemindersBridge.previewSound('fazakkir');
+      await NativeRemindersBridge.previewSound('cannon');
     } catch (_) {}
 
     if (mounted) {

@@ -40,6 +40,7 @@ object ReminderChannels {
             "azkar_2" -> Uri.parse("android.resource://${context.packageName}/raw/azkar_2")
             "fazakkir" -> Uri.parse("android.resource://${context.packageName}/raw/fazakkir")
             "adhan" -> Uri.parse("android.resource://${context.packageName}/raw/adhan")
+            "cannon" -> Uri.parse("android.resource://${context.packageName}/raw/cannon")
             else -> RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
         }
     }
