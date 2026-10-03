@@ -9,6 +9,7 @@ import 'package:quran_app_android/core/native/native_adhan_bridge.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
 import 'package:quran_app_android/core/service/settings/notifications_services.dart';
 import 'package:quran_app_android/core/util/constant/static_vars.dart';
+import 'package:quran_app_android/core/services/widget_sync_service.dart';
 import 'package:quran_app_android/features/adhan/presentation/view_model/adhan_view_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -366,6 +367,16 @@ class LockScreenBannerService {
     } catch (_) {}
 
     final data = await buildDisplayData(model);
+
+    try {
+      if (data.nextPrayerName.isNotEmpty && data.nextPrayerTimeStr.isNotEmpty) {
+        unawaited(WidgetSyncService.syncPrayerTimes(
+          nextPrayerName: data.nextPrayerName,
+          nextPrayerTime: data.nextPrayerTimeStr,
+          cityName: data.cityName,
+        ));
+      }
+    } catch (_) {}
 
     final actions = <AndroidNotificationAction>[];
     if (model.showQuickActions) {

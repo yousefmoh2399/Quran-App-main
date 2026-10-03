@@ -25,6 +25,7 @@
 		CA9BE26F2D7CC0B200892F57 /* MyHomeWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA9BE26E2D7CC0B200892F57 /* MyHomeWidgetBundle.swift */; };
 		CA9BE2712D7CC0B200892F57 /* MyHomeWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA9BE2702D7CC0B200892F57 /* MyHomeWidget.swift */; };
 		CA9BE2732D7CC0B300892F57 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CA9BE2722D7CC0B300892F57 /* Assets.xcassets */; };
+		CA9BE2812D7CC10000892F57 /* azkar_widget_data.json in Resources */ = {isa = PBXBuildFile; fileRef = CA9BE2802D7CC10000892F57 /* azkar_widget_data.json */; };
 		CA9BE2772D7CC0B300892F57 /* MyHomeWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CA9BE2682D7CC0B200892F57 /* MyHomeWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
@@ -103,6 +104,7 @@
 		CA9BE2702D7CC0B200892F57 /* MyHomeWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyHomeWidget.swift; sourceTree = "<group>"; };
 		CA9BE2722D7CC0B300892F57 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CA9BE2742D7CC0B300892F57 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		CA9BE2802D7CC10000892F57 /* azkar_widget_data.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = azkar_widget_data.json; sourceTree = "<group>"; };
 		CA9BE27D2D7CC0CE00892F57 /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
 		CA9BE27E2D7CC0ED00892F57 /* MyHomeWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MyHomeWidgetExtension.entitlements; sourceTree = "<group>"; };
 		E72627E2D84925E6D452E4E8 /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
@@ -233,6 +235,7 @@
 				CA9BE2702D7CC0B200892F57 /* MyHomeWidget.swift */,
 				CA9BE2722D7CC0B300892F57 /* Assets.xcassets */,
 				CA9BE2742D7CC0B300892F57 /* Info.plist */,
+				CA9BE2802D7CC10000892F57 /* azkar_widget_data.json */,
 			);
 			path = MyHomeWidget;
 			sourceTree = "<group>";
@@ -372,6 +375,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CA9BE2732D7CC0B300892F57 /* Assets.xcassets in Resources */,
+				CA9BE2812D7CC10000892F57 /* azkar_widget_data.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
