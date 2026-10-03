@@ -14,7 +14,7 @@ class MushafScrollPhysics extends PageScrollPhysics {
   @override
   SpringDescription get spring => const SpringDescription(
         mass: 1.0,
-        stiffness: 120.0,
-        damping: 1.2,
+        stiffness: 180.0,
+        damping: 26.8,
       );
 }

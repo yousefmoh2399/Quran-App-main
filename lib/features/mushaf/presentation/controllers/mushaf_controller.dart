@@ -13,6 +13,7 @@ import '../../../../core/service/settings/SettingsServices.dart';
 import '../../../home/presentation/view_model/home_view_model.dart';
 import 'package:quran_app_android/features/reminders/data/commute_wird_repository.dart';
 import '../models/mushaf_theme_model.dart';
+import '../widgets/mushaf_paper_flip_view.dart';
 
 /// Central controller for the 604-page Madinah Mushaf experience.
 class MushafController extends GetxController {
@@ -62,8 +63,11 @@ class MushafController extends GetxController {
   // In-memory Pages Cache
   final Map<int, MushafPage> pagesCache = {};
 
-  // PageController for PageView
+  // PageController for PageView / DualView
   late PageController pageController;
+
+  // Paper flip view state handle for realistic page turning
+  MushafPaperFlipViewState? paperFlipState;
 
   static const String _prefLastPage = 'mushaf_last_page';
   static const String _prefThemeMode = 'mushaf_theme_mode';
@@ -483,8 +487,20 @@ class MushafController extends GetxController {
   }
 
   /// Navigates to a specific page.
-  void goToPage(int pageNumber) {
+  void goToPage(int pageNumber, {bool animate = true}) {
     final clamped = pageNumber.clamp(1, 604);
+    if (clamped == currentPage.value) return;
+
+    if (animate && paperFlipState != null) {
+      if (clamped == currentPage.value + 1) {
+        paperFlipState?.turnNext();
+        return;
+      } else if (clamped == currentPage.value - 1) {
+        paperFlipState?.turnPrevious();
+        return;
+      }
+    }
+
     currentPage.value = clamped;
     if (pageController.hasClients) {
       pageController.jumpToPage(clamped - 1);

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import '../../../../core/data/models/mushaf_models.dart';
 import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_radius.dart';
 import '../../../../core/design/app_spacing.dart';
@@ -9,12 +7,11 @@ import '../../../../core/design/app_typography.dart';
 import '../../../../core/mushaf/mushaf_raster_cache.dart';
 import '../controllers/mushaf_controller.dart';
 import '../models/mushaf_theme_model.dart';
-import '../utils/mushaf_scroll_physics.dart';
 import '../utils/mushaf_utils.dart';
 import '../widgets/ayah_action_bottom_sheet.dart';
 import '../widgets/mushaf_dual_page_view.dart';
 import '../widgets/mushaf_jump_dialog.dart';
-import '../widgets/mushaf_page_widget.dart';
+import '../widgets/mushaf_paper_flip_view.dart';
 import '../widgets/page_bookmark_bottom_sheet.dart';
 import '../../../quran/presentation/views/quran_search_view.dart';
 
@@ -233,83 +230,23 @@ class _MushafViewState extends State<MushafView> {
     MushafController controller,
     MushafThemeConfig themeConfig,
   ) {
-    final disableAnimations = MediaQuery.of(context).disableAnimations;
-
-    final childView = NotificationListener<ScrollNotification>(
-      onNotification: (notification) {
-        if (notification is ScrollStartNotification) {
-          controller.isPageTurning.value = true;
-        } else if (notification is ScrollEndNotification) {
-          controller.isPageTurning.value = false;
-          HapticFeedback.selectionClick();
-        }
-        return false;
+    final childView = MushafPaperFlipView(
+      currentPage: controller.currentPage.value,
+      theme: themeConfig,
+      pagesCache: controller.pagesCache,
+      getPage: controller.getPage,
+      selectedSurah: controller.selectedSurah.value,
+      selectedAyah: controller.selectedAyah.value,
+      onPageChanged: (newPage) {
+        controller.onPageChanged(newPage);
       },
-      child: PageView.builder(
-        controller: controller.pageController,
-        reverse: true, // Authentic RTL reading order
-        physics: disableAnimations
-            ? const PageScrollPhysics()
-            : const MushafScrollPhysics(),
-        itemCount: 604,
-        onPageChanged: (pageIndex) {
-          controller.onPageChanged(pageIndex + 1);
-        },
-        itemBuilder: (context, pageIndex) {
-          final pageNum = pageIndex + 1;
-          final cached = controller.pagesCache[pageNum];
-          final isMoving = controller.isPageTurning.value;
-
-          if (cached != null) {
-            return MushafPageWidget(
-              page: cached,
-              theme: themeConfig,
-              isMoving: isMoving,
-              isRightPage: pageNum % 2 != 0,
-              pageBookmarkColor: controller.getPageBookmarkColor(pageNum),
-              pageMemorizeStatus: controller.getPageMemorizeStatus(pageNum),
-              bookmarkedAyahs: controller.getAyahBookmarkColors(),
-              memorizedAyahs: controller.getAyahMemorizeStatuses(),
-              selectedSurah: controller.selectedSurah.value,
-              selectedAyah: controller.selectedAyah.value,
-              onAyahTapped: (s, a) => controller.selectAyah(s, a),
-              onTapPage: controller.toggleOverlay,
-            );
-          }
-
-          return FutureBuilder<MushafPage?>(
-            future: controller.getPage(pageNum),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done && snapshot.data != null) {
-                return MushafPageWidget(
-                  page: snapshot.data!,
-                  theme: themeConfig,
-                  isMoving: isMoving,
-                  isRightPage: pageNum % 2 != 0,
-                  pageBookmarkColor: controller.getPageBookmarkColor(pageNum),
-                  pageMemorizeStatus: controller.getPageMemorizeStatus(pageNum),
-                  bookmarkedAyahs: controller.getAyahBookmarkColors(),
-                  memorizedAyahs: controller.getAyahMemorizeStatuses(),
-                  selectedSurah: controller.selectedSurah.value,
-                  selectedAyah: controller.selectedAyah.value,
-                  onAyahTapped: (s, a) => controller.selectAyah(s, a),
-                  onTapPage: controller.toggleOverlay,
-                );
-              }
-
-              return Container(
-                color: themeConfig.pageBg,
-                child: Center(
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.0,
-                    color: themeConfig.frameBorderInner,
-                  ),
-                ),
-              );
-            },
-          );
-        },
-      ),
+      onAyahTapped: (s, a) => controller.selectAyah(s, a),
+      onTapPage: controller.toggleOverlay,
+      getPageBookmarkColor: controller.getPageBookmarkColor,
+      getPageMemorizeStatus: controller.getPageMemorizeStatus,
+      getAyahBookmarkColors: controller.getAyahBookmarkColors,
+      getAyahMemorizeStatuses: controller.getAyahMemorizeStatuses,
+      controller: controller,
     );
 
     if (controller.isCommuteMode.value) {
@@ -462,7 +399,7 @@ class _MushafViewState extends State<MushafView> {
                         activeColor: colors.primary,
                         inactiveColor: colors.divider,
                         onChanged: (val) {
-                          controller.goToPage(val.round());
+                          controller.goToPage(val.round(), animate: false);
                         },
                       ),
                     ),
