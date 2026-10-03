@@ -265,7 +265,9 @@ class LockScreenBannerService {
     try {
       final adhkar = StaticVars().smallDo3a2;
       if (adhkar.isNotEmpty) {
-        final idx = (DateTime.now().hour + DateTime.now().day) % adhkar.length;
+        final now = DateTime.now();
+        final slot = now.minute ~/ 15;
+        final idx = (now.hour * 4 + slot + now.day) % adhkar.length;
         zikrLine = adhkar[idx];
       }
     } catch (_) {}

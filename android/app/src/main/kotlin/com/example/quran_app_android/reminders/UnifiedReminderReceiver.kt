@@ -33,6 +33,14 @@ class UnifiedReminderReceiver : BroadcastReceiver() {
             "قال ﷺ: «إن الصدقة لتطفئ عن أهلها حر القبور، وإنما يستظل المؤمن يوم القيامة في ظل صدقته»",
             "قال تعالى: ﴿وَمَا تُنفِقُوا مِنْ خَيْرٍ يُوَفَّ إِلَيْكُمْ وَأَنتُمْ لَا تُظْلَمُونَ﴾"
         )
+        private val WIRD_QUOTES = listOf(
+            "قال ﷺ: «اقرؤوا القرآن فإنه يأتي يوم القيامة شفيعاً لأصحابه» (صحيح مسلم)",
+            "قال تعالى: ﴿إِنَّ هَٰذَا الْقُرْآنَ يَهْدِي لِلَّتِي هِيَ أَقْوَمُ﴾",
+            "قال ﷺ: «خيركم من تعلم القرآن وعلمه» (صحيح البخاري)",
+            "قال تعالى: ﴿وَرَتِّلِ الْقُرْآنَ تَرْتِيلًا﴾",
+            "قال ﷺ: «يقال لصاحب القرآن: اقرأ وارق ورتل كما كنت ترتل في الدنيا» (رواه الترمذي)",
+            "قال تعالى: ﴿كِتَابٌ أَنزَلْنَاهُ إِلَيْكَ مُبَارَكٌ لِّيَدَّبَّرُوا آيَاتِهِ﴾"
+        )
     }
 
     override fun onReceive(context: Context, intent: Intent?) {
@@ -121,16 +129,17 @@ class UnifiedReminderReceiver : BroadcastReceiver() {
 
         when (reminder.type) {
             ReminderItem.TYPE_WIRD_DAILY -> {
-                if (title.isEmpty()) title = "وردك القرآني اليومي"
-                if (body.isEmpty()) body = "حان وقت وردك القرآني اليومي، رتّل وتدبّر آيات الله."
+                if (title.isEmpty()) title = "وردك القرآني اليومي 📖"
+                val quote = WIRD_QUOTES[Random.nextInt(WIRD_QUOTES.size)]
+                body = "حان وقت وردك القرآني المبارك، رتّل وتدبّر آيات الله.\n$quote"
                 openAppIntent.putExtra("target_screen", "wird")
                 openAppIntent.putExtra("route", "/mushaf")
             }
 
             ReminderItem.TYPE_WIRD_COMMUTE -> {
                 val targetPages = schedule.optInt("target_pages", 3)
-                if (title.isEmpty()) title = "ورد المواصلات"
-                if (body.isEmpty()) body = "استثمر وقت طريقك في تلاوة القرآن ($targetPages صفحات)"
+                if (title.isEmpty()) title = "ورد المواصلات 🚌"
+                if (body.isEmpty()) body = "استثمر وقت طريقك في تلاوة القرآن الكريم ($targetPages صفحات)"
                 openAppIntent.putExtra("target_screen", "commute_wird")
                 openAppIntent.putExtra("route", "/mushaf")
                 openAppIntent.putExtra("commute_mode", true)
@@ -138,7 +147,7 @@ class UnifiedReminderReceiver : BroadcastReceiver() {
             }
 
             ReminderItem.TYPE_SADAQAH_MONTHLY -> {
-                if (title.isEmpty()) title = "تذكير الصدقة الشهرية"
+                if (title.isEmpty()) title = "تذكير الصدقة الشهرية 🌿"
                 val randomHadith = SADAQAH_MESSAGES[Random.nextInt(SADAQAH_MESSAGES.size)]
                 body = randomHadith
                 openAppIntent.putExtra("target_screen", "sadaqah")
@@ -165,11 +174,15 @@ class UnifiedReminderReceiver : BroadcastReceiver() {
             }
 
             ReminderItem.TYPE_AZKAR_PERIODIC -> {
-                val dhikr = AzkarDataRepository.getRandom(context)
-                title = "أذكار وتسابيح"
-                body = "${dhikr.text}\n— ${dhikr.source}"
+                val settings = com.example.quran_app_android.azkar.AzkarSettingsManager.getSettings(context)
+                val dhikr = AzkarDataRepository.getRotatingZikr(context, settings.selectedCategories)
+                title = AzkarDataRepository.getTitleForDhikr(dhikr)
+                body = dhikr.text
+                val bigBody = "${dhikr.text}\n\n📖 المصدر: ${dhikr.source}${if (dhikr.count > 1) " • التكرار: ${dhikr.count} مرات" else ""}"
+                builder.setStyle(NotificationCompat.BigTextStyle().bigText(bigBody))
                 openAppIntent.putExtra("target_screen", "azkar")
                 openAppIntent.putExtra("route", "/azkar")
+                openAppIntent.putExtra("category", dhikr.category)
             }
         }
 
@@ -182,14 +195,24 @@ class UnifiedReminderReceiver : BroadcastReceiver() {
 
         builder.setContentTitle(title)
             .setContentText(body)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(body))
             .setContentIntent(pendingIntent)
+            .setOnlyAlertOnce(false)
 
-        val notificationId = NOTIFICATION_ID_BASE + Math.abs(reminder.id.hashCode() % 1000)
+        if (reminder.type != ReminderItem.TYPE_AZKAR_PERIODIC) {
+            builder.setStyle(NotificationCompat.BigTextStyle().bigText(body))
+        }
+
+        // Rotating slots for periodic azkar so status bar shows recent ones and plays sound reliably
+        val notificationId = if (reminder.type == ReminderItem.TYPE_AZKAR_PERIODIC) {
+            val azkarSlot = (System.currentTimeMillis() / (1000 * 60)) % 5
+            NOTIFICATION_ID_BASE + 400 + azkarSlot.toInt()
+        } else {
+            NOTIFICATION_ID_BASE + Math.abs(reminder.id.hashCode() % 1000)
+        }
 
         if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
             NotificationManagerCompat.from(context).notify(notificationId, builder.build())
-            Log.i(TAG, "📢 Notification posted successfully for [${reminder.id}]")
+            Log.i(TAG, "📢 Notification posted successfully for [${reminder.id}]: $title")
         } else {
             Log.w(TAG, "Notification permission POST_NOTIFICATIONS not granted")
         }

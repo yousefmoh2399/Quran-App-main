@@ -83,6 +83,11 @@ class NativeAzkarBridge {
 
   /// Legacy compatibility helper
   static Future<void> scheduleDailyAzkar(int intervalHours) async {
+    final existing = await getSettings();
+    if (existing != null && existing['interval'] != null) {
+      // Preserve user configured interval and categories
+      return;
+    }
     await saveSettings({
       'enabled': true,
       'interval': intervalHours * 60,

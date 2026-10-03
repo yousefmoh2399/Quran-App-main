@@ -101,6 +101,13 @@ class NotifyHelper {
       onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
     );
     await _configureAndroidChannels();
+    // Cancel any legacy scheduled local notifications with static text
+    try {
+      await flutterLocalNotificationsPlugin.cancel(1);
+      await flutterLocalNotificationsPlugin.cancel(20);
+      await flutterLocalNotificationsPlugin.cancel(900);
+      await flutterLocalNotificationsPlugin.cancel(901);
+    } catch (_) {}
     await ensureSchedulingPermissions(requestIfNeeded: true);
     requestIOSPermissions();
     _initialized = true;
@@ -180,6 +187,17 @@ class NotifyHelper {
       return;
     }
     final int randomIndex = Random().nextInt(adhkar.length);
+    final hour = DateTime.now().hour;
+    final String dynamicTitle = (hour >= 5 && hour < 12)
+        ? '☀️ أذكار الصباح'
+        : (hour >= 15 && hour < 21)
+            ? '🌙 أذكار المساء'
+            : (hour >= 21 || hour < 5)
+                ? '🌙 أذكار الليل والسكينة'
+                : '📿 ذكر وتذكير';
+
+    final text = adhkar[randomIndex];
+
     final AndroidNotificationDetails androidNotificationDetails =
         AndroidNotificationDetails(
           _azkarChannel.id,
@@ -189,7 +207,13 @@ class NotifyHelper {
           priority: Priority.high,
           playSound: true,
           enableVibration: true,
+          onlyAlertOnce: false,
           ticker: 'adhkar_reminder',
+          styleInformation: BigTextStyleInformation(
+            text,
+            contentTitle: dynamicTitle,
+            summaryText: 'حصن المسلم والأذكار',
+          ),
           sound: RawResourceAndroidNotificationSound(
             _stripExtension(soundAzkar1),
           ),
@@ -203,10 +227,11 @@ class NotifyHelper {
           interruptionLevel: InterruptionLevel.timeSensitive,
         );
 
+    final notificationId = 20 + Random().nextInt(10);
     await flutterLocalNotificationsPlugin.show(
-      20,
-      'فَذَكِّرْ',
-      adhkar[randomIndex],
+      notificationId,
+      dynamicTitle,
+      text,
       NotificationDetails(
         android: androidNotificationDetails,
         iOS: iosNotificationDetails,

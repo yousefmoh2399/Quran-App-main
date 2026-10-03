@@ -54,8 +54,8 @@ class AzkarReceiver : BroadcastReceiver() {
                 return
             }
 
-            // 2. Select a dhikr dynamically from native repository respecting selected categories
-            val dhikr = AzkarDataRepository.getRandom(context, settings.selectedCategories)
+            // 2. Select a rotating dhikr dynamically from native repository respecting selected categories
+            val dhikr = AzkarDataRepository.getRotatingZikr(context, settings.selectedCategories)
 
             // 3. Display the notification
             showNotification(context, dhikr, settings)
@@ -110,8 +110,8 @@ class AzkarReceiver : BroadcastReceiver() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val title = "ذكر وتذكير 📿 • ${dhikr.category_name}"
-        val bigText = "${dhikr.text}\n\n📖 المصدر: ${dhikr.source}"
+        val title = AzkarDataRepository.getTitleForDhikr(dhikr)
+        val bigText = "${dhikr.text}\n\n📖 المصدر: ${dhikr.source}${if (dhikr.count > 1) " • التكرار: ${dhikr.count} مرات" else ""}"
 
         val builder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_crescent_moon)
@@ -120,6 +120,7 @@ class AzkarReceiver : BroadcastReceiver() {
             .setStyle(NotificationCompat.BigTextStyle().bigText(bigText))
             .setContentIntent(contentPendingIntent)
             .setAutoCancel(true)
+            .setOnlyAlertOnce(false)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
         if (settings.vibrationEnabled) {

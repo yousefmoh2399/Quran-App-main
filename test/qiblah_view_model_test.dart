@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:quran_app_android/features/qiblah/presentation/view_model/qiblah_view_model.dart';
 import 'package:quran_app_android/features/qiblah/presentation/views/qiblah_view.dart';
-import 'package:quran_app_android/core/permissions/permission_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

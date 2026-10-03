@@ -62,8 +62,6 @@ void main() {
       final page1 = createDummyPage(1);
       final pagesCache = <int, MushafPage>{1: page1};
 
-      int? changedTo;
-
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -72,9 +70,7 @@ void main() {
               theme: MushafThemeConfig.light,
               pagesCache: pagesCache,
               getPage: (p) async => createDummyPage(p),
-              onPageChanged: (newPage) {
-                changedTo = newPage;
-              },
+              onPageChanged: (_) {},
               onAyahTapped: (_, __) {},
               onTapPage: () {},
               getPageBookmarkColor: (_) => null,
