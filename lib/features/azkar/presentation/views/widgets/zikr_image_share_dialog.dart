@@ -239,15 +239,20 @@ class _ZikrImageShareDialogState extends State<ZikrImageShareDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'تصميم بطاقة الذكر',
-                    style: TextStyle(
-                      fontFamily: AppTypography.uiFont,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: colors.text,
+                  Expanded(
+                    child: Text(
+                      'تصميم بطاقة الذكر',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: AppTypography.uiFont,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: colors.text,
+                      ),
                     ),
                   ),
+                  const SizedBox(width: 8),
                   IconButton(
                     icon: const Icon(Icons.close_rounded, size: 20),
                     onPressed: () => Navigator.pop(context),
@@ -293,16 +298,20 @@ class _ZikrImageShareDialogState extends State<ZikrImageShareDialog> {
                             height: 1,
                             color: _selectedPreset.accentColor.withOpacity(0.5),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: Text(
-                              '✨ ${widget.categoryTitle} ✨',
-                              style: TextStyle(
-                                fontFamily: AppTypography.uiFont,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: _selectedPreset.accentColor,
-                                letterSpacing: 0.5,
+                          Flexible(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              child: Text(
+                                '✨ ${widget.categoryTitle} ✨',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontFamily: AppTypography.uiFont,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: _selectedPreset.accentColor,
+                                  letterSpacing: 0.5,
+                                ),
                               ),
                             ),
                           ),
@@ -361,6 +370,7 @@ class _ZikrImageShareDialogState extends State<ZikrImageShareDialog> {
                       // App Branding Footer
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
                             Icons.auto_stories_rounded,
@@ -368,13 +378,17 @@ class _ZikrImageShareDialogState extends State<ZikrImageShareDialog> {
                             color: _selectedPreset.accentColor,
                           ),
                           const SizedBox(width: 6),
-                          Text(
-                            'تطبيق تَقَرَّبْ • قرآن وأذكار',
-                            style: TextStyle(
-                              fontFamily: AppTypography.uiFont,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: _selectedPreset.accentColor.withOpacity(0.85),
+                          Flexible(
+                            child: Text(
+                              'تطبيق تَقَرَّبْ • قرآن وأذكار',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontFamily: AppTypography.uiFont,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: _selectedPreset.accentColor.withOpacity(0.85),
+                              ),
                             ),
                           ),
                         ],
@@ -387,25 +401,24 @@ class _ZikrImageShareDialogState extends State<ZikrImageShareDialog> {
               const SizedBox(height: 16),
 
               // Theme Selector Chips
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 8,
+                runSpacing: 6,
                 children: ZikrCardPreset.values.map((preset) {
                   final isSelected = _selectedPreset == preset;
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: ChoiceChip(
-                      label: Text(
-                        preset.title,
-                        style: TextStyle(
-                          fontFamily: AppTypography.uiFont,
-                          fontSize: 11.5,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                        ),
+                  return ChoiceChip(
+                    label: Text(
+                      preset.title,
+                      style: TextStyle(
+                        fontFamily: AppTypography.uiFont,
+                        fontSize: 11.5,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                       ),
-                      selected: isSelected,
-                      selectedColor: colors.primary.withOpacity(0.15),
-                      onSelected: (_) => setState(() => _selectedPreset = preset),
                     ),
+                    selected: isSelected,
+                    selectedColor: colors.primary.withOpacity(0.15),
+                    onSelected: (_) => setState(() => _selectedPreset = preset),
                   );
                 }).toList(),
               ),

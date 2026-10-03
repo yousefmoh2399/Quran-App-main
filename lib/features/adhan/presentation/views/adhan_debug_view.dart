@@ -117,7 +117,9 @@ class _AdhanDebugViewState extends State<AdhanDebugView> {
                         icon: const Icon(Icons.timer_outlined, size: 20),
                         label: const Text(
                           'جرّب أذان بعد 10 ثواني',
-                          style: TextStyle(fontFamily: AppTypography.uiFont, fontWeight: FontWeight.bold),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontFamily: AppTypography.uiFont, fontWeight: FontWeight.bold, fontSize: 12),
                         ),
                         onPressed: _triggerTestAdhan,
                       ),
@@ -133,9 +135,12 @@ class _AdhanDebugViewState extends State<AdhanDebugView> {
                         icon: Icon(Icons.sync_rounded, color: colors.primary, size: 20),
                         label: Text(
                           'إعادة جدولة 7 أيام',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontFamily: AppTypography.uiFont,
                             fontWeight: FontWeight.bold,
+                            fontSize: 12,
                             color: colors.primary,
                           ),
                         ),
@@ -163,13 +168,15 @@ class _AdhanDebugViewState extends State<AdhanDebugView> {
                           children: [
                             Icon(Icons.info_outline_rounded, color: colors.primary, size: 18),
                             AppSpacing.horizontalXs,
-                            Text(
-                              'إعدادات المحرك المسجلة في Kotlin',
-                              style: TextStyle(
-                                fontFamily: AppTypography.uiFont,
-                                fontWeight: FontWeight.bold,
-                                color: colors.text,
-                                fontSize: 13.5,
+                            Expanded(
+                              child: Text(
+                                'إعدادات المحرك المسجلة في Kotlin',
+                                style: TextStyle(
+                                  fontFamily: AppTypography.uiFont,
+                                  fontWeight: FontWeight.bold,
+                                  color: colors.text,
+                                  fontSize: 13.5,
+                                ),
                               ),
                             ),
                           ],
@@ -198,8 +205,11 @@ class _AdhanDebugViewState extends State<AdhanDebugView> {
                 ],
 
                 // Upcoming 7-day scheduled alarms
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 8,
+                  runSpacing: 4,
                   children: [
                     Text(
                       'الصلوات المجدولة القادمة (${toArabicDigits(_upcomingPrayers.length)} صلاة)',

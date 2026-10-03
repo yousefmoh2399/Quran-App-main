@@ -66,9 +66,11 @@ class _RemindersDebugViewState extends State<RemindersDebugView> {
                         children: [
                           Icon(Icons.shield_outlined, color: primary),
                           const SizedBox(width: 8),
-                          const Text(
-                            'المجدول الموحد (Single Chained Alarm)',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                          const Expanded(
+                            child: Text(
+                              'المجدول الموحد (Single Chained Alarm)',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                            ),
                           ),
                         ],
                       ),
@@ -78,8 +80,11 @@ class _RemindersDebugViewState extends State<RemindersDebugView> {
                         style: TextStyle(fontSize: 12.5),
                       ),
                       const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      Wrap(
+                        alignment: WrapAlignment.spaceBetween,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 8,
+                        runSpacing: 8,
                         children: [
                           Text(
                             'إجمالي التذكيرات المجدولة: ${_upcoming.length}',
@@ -89,7 +94,7 @@ class _RemindersDebugViewState extends State<RemindersDebugView> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: primary,
                               foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                             ),
                             icon: const Icon(Icons.sync_rounded, size: 16),
                             label: const Text('إعادة جدولة الكل', style: TextStyle(fontSize: 12)),
@@ -160,11 +165,14 @@ class _RemindersDebugViewState extends State<RemindersDebugView> {
                                   ),
                                   const SizedBox(width: 8),
                                 ],
-                                Text(
-                                  id,
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                Expanded(
+                                  child: Text(
+                                    id,
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
-                                const Spacer(),
+                                const SizedBox(width: 8),
                                 Chip(
                                   label: Text(type, style: const TextStyle(fontSize: 10)),
                                   padding: EdgeInsets.zero,
@@ -197,14 +205,16 @@ class _RemindersDebugViewState extends State<RemindersDebugView> {
                                   color: isCancelled ? Colors.orange : Colors.green,
                                 ),
                                 const SizedBox(width: 6),
-                                Text(
-                                  isCancelled
-                                      ? 'شرط الإلغاء: مُحقق (سيتخطى الإشعار ويجدول التالي) 🚫'
-                                      : 'شرط الإلغاء: غير محقق (سيظهر الإشعار بنجاح) 🔔',
-                                  style: TextStyle(
-                                    fontSize: 11.5,
-                                    fontWeight: FontWeight.bold,
-                                    color: isCancelled ? Colors.orange : Colors.green,
+                                Expanded(
+                                  child: Text(
+                                    isCancelled
+                                        ? 'شرط الإلغاء: مُحقق (سيتخطى الإشعار ويجدول التالي) 🚫'
+                                        : 'شرط الإلغاء: غير محقق (سيظهر الإشعار بنجاح) 🔔',
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.bold,
+                                      color: isCancelled ? Colors.orange : Colors.green,
+                                    ),
                                   ),
                                 ),
                               ],
