@@ -16,6 +16,8 @@ import com.example.quran_app_android.MainActivity
 import com.example.quran_app_android.R
 import com.example.quran_app_android.azkar.AzkarDataRepository
 import org.json.JSONObject
+import java.util.Calendar
+import kotlin.math.abs
 import kotlin.random.Random
 
 class UnifiedReminderReceiver : BroadcastReceiver() {
@@ -152,7 +154,7 @@ class UnifiedReminderReceiver : BroadcastReceiver() {
                         val s = slotsArray.getJSONObject(i)
                         val h = s.optInt("hour", 7)
                         val m = s.optInt("minute", 30)
-                        val diff = Math.abs((h * 60 + m) - currentMins)
+                        val diff = abs((h * 60 + m) - currentMins)
                         if (diff < minDiff) {
                             minDiff = diff
                             bestSlot = s
@@ -160,7 +162,7 @@ class UnifiedReminderReceiver : BroadcastReceiver() {
                     }
                     if (bestSlot != null) {
                         targetPages = bestSlot.optInt("target_pages", targetPages)
-                        slotId = bestSlot.optString("id", null)
+                        slotId = if (bestSlot.has("id")) bestSlot.optString("id") else null
                     }
                 }
 
