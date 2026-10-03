@@ -32,6 +32,9 @@ class AdhanSettingsModel {
   // Audio choice
   final String adhanSound;
 
+  // Post-Adhan Du'a by Sheikh Al-Shaarawy
+  final bool playPostAdhanDua;
+
   const AdhanSettingsModel({
     required this.latitude,
     required this.longitude,
@@ -57,6 +60,7 @@ class AdhanSettingsModel {
     this.maghribMode = 'adhan',
     this.ishaMode = 'adhan',
     this.adhanSound = 'default',
+    this.playPostAdhanDua = true,
   });
 
   Map<String, dynamic> toMap() {
@@ -85,6 +89,7 @@ class AdhanSettingsModel {
       'maghribMode': maghribMode,
       'ishaMode': ishaMode,
       'adhanSound': adhanSound,
+      'playPostAdhanDua': playPostAdhanDua,
     };
   }
 
@@ -114,6 +119,7 @@ class AdhanSettingsModel {
       maghribMode: map['maghribMode'] as String? ?? 'adhan',
       ishaMode: map['ishaMode'] as String? ?? 'adhan',
       adhanSound: map['adhanSound'] as String? ?? 'default',
+      playPostAdhanDua: map['playPostAdhanDua'] as bool? ?? true,
     );
   }
 
@@ -142,6 +148,7 @@ class AdhanSettingsModel {
     String? maghribMode,
     String? ishaMode,
     String? adhanSound,
+    bool? playPostAdhanDua,
   }) {
     return AdhanSettingsModel(
       latitude: latitude ?? this.latitude,
@@ -168,6 +175,7 @@ class AdhanSettingsModel {
       maghribMode: maghribMode ?? this.maghribMode,
       ishaMode: ishaMode ?? this.ishaMode,
       adhanSound: adhanSound ?? this.adhanSound,
+      playPostAdhanDua: playPostAdhanDua ?? this.playPostAdhanDua,
     );
   }
 }

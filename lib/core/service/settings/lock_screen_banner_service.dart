@@ -1,9 +1,13 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:adhan/adhan.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:hijri/hijri_calendar.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:quran_app_android/core/data/repositories/user_repository.dart';
 import 'package:quran_app_android/core/native/native_adhan_bridge.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
@@ -380,6 +384,21 @@ class LockScreenBannerService {
       ]);
     }
 
+    // Generate high-resolution branded card image
+    final pngBytes = await _generateBannerBitmap(data, model);
+    String? iosAttachmentPath;
+
+    if (pngBytes != null && Platform.isIOS) {
+      try {
+        final tempDir = await getTemporaryDirectory();
+        final file = File('${tempDir.path}/lock_banner_preview.png');
+        await file.writeAsBytes(pngBytes);
+        iosAttachmentPath = file.path;
+      } catch (e) {
+        debugPrint('⚠️ Error saving banner attachment for iOS: $e');
+      }
+    }
+
     final androidDetails = AndroidNotificationDetails(
       'prayer_banner_channel_v2',
       'شريط مواقيت الصلاة وشاشة القفل',
@@ -391,32 +410,307 @@ class LockScreenBannerService {
       showWhen: false,
       icon: 'icon',
       largeIcon: const DrawableResourceAndroidBitmap('icon'),
-      color: const Color(0xFF0F5C4A),
+      color: const Color(0xFF1B4D3E),
+      colorized: true,
       category: AndroidNotificationCategory.status,
       visibility: NotificationVisibility.public,
       subText: data.subText,
-      styleInformation: BigTextStyleInformation(
-        data.plainContentText,
-        contentTitle: data.title,
-        summaryText: data.summaryText,
-        htmlFormatContent: false,
-        htmlFormatContentTitle: false,
-        htmlFormatSummaryText: false,
-        htmlFormatBigText: false,
-      ),
+      styleInformation: pngBytes != null
+          ? BigPictureStyleInformation(
+              ByteArrayAndroidBitmap(pngBytes),
+              contentTitle: data.title,
+              summaryText: data.summaryText,
+              hideExpandedLargeIcon: true,
+            )
+          : BigTextStyleInformation(
+              data.plainContentText,
+              contentTitle: data.title,
+              summaryText: data.summaryText,
+            ),
       actions: actions.isNotEmpty ? actions : null,
+    );
+
+    final darwinDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: false,
+      interruptionLevel: InterruptionLevel.passive,
+      subtitle: data.subText,
+      attachments: iosAttachmentPath != null
+          ? [DarwinNotificationAttachment(iosAttachmentPath)]
+          : null,
     );
 
     await notify.flutterLocalNotificationsPlugin.show(
       NotifyHelper.prayerBannerNotificationId,
       data.title,
       data.collapsedText.isNotEmpty ? data.collapsedText : data.plainContentText,
-      NotificationDetails(android: androidDetails),
+      NotificationDetails(android: androidDetails, iOS: darwinDetails),
       payload: 'taqarrab://prayer_times',
     );
 
     _startAutoRefreshTimer();
     debugPrint('✅ [LockScreenBannerService] Lock screen banner successfully updated.');
+  }
+
+  Future<Uint8List?> _generateBannerBitmap(
+      BannerDisplayData data, LockScreenBannerModel model) async {
+    try {
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder, const Rect.fromLTWH(0, 0, 720, 380));
+
+      // 1. Dark emerald gradient background (#1B4D3E -> #0A261D)
+      final bgPaint = Paint()
+        ..shader = ui.Gradient.linear(
+          const Offset(0, 0),
+          const Offset(720, 380),
+          [const Color(0xFF1B4D3E), const Color(0xFF09241B)],
+        );
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+            const Rect.fromLTWH(0, 0, 720, 380), const Radius.circular(24)),
+        bgPaint,
+      );
+
+      // 2. Gold frame accent #D4AF37
+      final borderPaint = Paint()
+        ..color = const Color(0xFFD4AF37).withOpacity(0.4)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.0;
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+            const Rect.fromLTWH(4, 4, 712, 372), const Radius.circular(20)),
+        borderPaint,
+      );
+
+      double curY = 20.0;
+
+      // 3. Header: App title, City, Date
+      final headerSpan = TextSpan(
+        children: [
+          const TextSpan(
+            text: '🕌 تطبيق تقرّب  •  ',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFFD4AF37),
+            ),
+          ),
+          TextSpan(
+            text: '${data.cityName}  •  ${data.hijriLine}',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+              color: Colors.white70,
+            ),
+          ),
+        ],
+      );
+      final headerPainter = TextPainter(
+        text: headerSpan,
+        textDirection: TextDirection.rtl,
+      )..layout(maxWidth: 680);
+      headerPainter.paint(canvas, Offset(700 - headerPainter.width, curY));
+      curY += headerPainter.height + 16.0;
+
+      // 4. Next Prayer Countdown
+      if (model.showNextPrayer && data.nextPrayerName.isNotEmpty) {
+        final nextPrayerSpan = TextSpan(
+          children: [
+            const TextSpan(
+              text: 'الصلاة القادمة: ',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            TextSpan(
+              text: '${data.nextPrayerName} ${data.nextPrayerTimeStr} ',
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFFD4AF37),
+              ),
+            ),
+            TextSpan(
+              text: '(${data.nextPrayerCountdown})',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF81C784),
+              ),
+            ),
+          ],
+        );
+        final nextPrayerPainter = TextPainter(
+          text: nextPrayerSpan,
+          textDirection: TextDirection.rtl,
+        )..layout(maxWidth: 680);
+        nextPrayerPainter.paint(
+            canvas, Offset(700 - nextPrayerPainter.width, curY));
+        curY += nextPrayerPainter.height + 18.0;
+      }
+
+      // 5. Prayer Times Table (5 columns)
+      if (model.showAllPrayers && data.prayerTimesMap.isNotEmpty) {
+        final prayers = [
+          {
+            'name': 'الفجر',
+            'key': 'fajr',
+            'isNext': data.actualNextPrayer == Prayer.fajr
+          },
+          {
+            'name': 'الظهر',
+            'key': 'dhuhr',
+            'isNext': data.actualNextPrayer == Prayer.dhuhr
+          },
+          {
+            'name': 'العصر',
+            'key': 'asr',
+            'isNext': data.actualNextPrayer == Prayer.asr
+          },
+          {
+            'name': 'المغرب',
+            'key': 'maghrib',
+            'isNext': data.actualNextPrayer == Prayer.maghrib
+          },
+          {
+            'name': 'العشاء',
+            'key': 'isha',
+            'isNext': data.actualNextPrayer == Prayer.isha
+          },
+        ];
+
+        final colWidth = 660 / prayers.length;
+        for (int i = 0; i < prayers.length; i++) {
+          final p = prayers[i];
+          final isNext = p['isNext'] as bool;
+          final timeStr = data.prayerTimesMap[p['key']] ?? '';
+          final cellX = 30.0 + (prayers.length - 1 - i) * colWidth;
+
+          if (isNext) {
+            final highlightPaint = Paint()
+              ..color = const Color(0xFFD4AF37).withOpacity(0.18)
+              ..style = PaintingStyle.fill;
+            canvas.drawRRect(
+              RRect.fromRectAndRadius(
+                Rect.fromLTWH(cellX + 4, curY - 4, colWidth - 8, 56),
+                const Radius.circular(10),
+              ),
+              highlightPaint,
+            );
+            final hlBorder = Paint()
+              ..color = const Color(0xFFD4AF37).withOpacity(0.4)
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 1.0;
+            canvas.drawRRect(
+              RRect.fromRectAndRadius(
+                Rect.fromLTWH(cellX + 4, curY - 4, colWidth - 8, 56),
+                const Radius.circular(10),
+              ),
+              hlBorder,
+            );
+          }
+
+          final cellSpan = TextSpan(
+            children: [
+              TextSpan(
+                text: '${p['name']}\n',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: isNext ? const Color(0xFFD4AF37) : Colors.white70,
+                ),
+              ),
+              TextSpan(
+                text: timeStr,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: isNext ? Colors.white : Colors.white60,
+                ),
+              ),
+            ],
+          );
+          final cellPainter = TextPainter(
+            text: cellSpan,
+            textAlign: TextAlign.center,
+            textDirection: TextDirection.rtl,
+          )..layout(maxWidth: colWidth);
+          cellPainter.paint(
+            canvas,
+            Offset(cellX + (colWidth - cellPainter.width) / 2, curY),
+          );
+        }
+        curY += 66.0;
+      }
+
+      // 6. Wird Progress
+      if (model.showWirdProgress && data.wirdLine.isNotEmpty) {
+        final wirdSpan = TextSpan(
+          children: [
+            const TextSpan(
+              text: '📖 الورد: ',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFFD4AF37),
+              ),
+            ),
+            TextSpan(
+              text: data.wirdLine,
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        );
+        final wirdPainter = TextPainter(
+          text: wirdSpan,
+          textDirection: TextDirection.rtl,
+        )..layout(maxWidth: 680);
+        wirdPainter.paint(canvas, Offset(700 - wirdPainter.width, curY));
+        curY += wirdPainter.height + 10.0;
+      }
+
+      // 7. Daily Dhikr
+      if (model.showDailyZikr && data.zikrLine.isNotEmpty) {
+        final zikrSpan = TextSpan(
+          children: [
+            const TextSpan(
+              text: '📿 ذكر الوقت: ',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFFD4AF37),
+              ),
+            ),
+            TextSpan(
+              text: '«${data.zikrLine}»',
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        );
+        final zikrPainter = TextPainter(
+          text: zikrSpan,
+          textDirection: TextDirection.rtl,
+        )..layout(maxWidth: 680);
+        zikrPainter.paint(canvas, Offset(700 - zikrPainter.width, curY));
+      }
+
+      final picture = recorder.endRecording();
+      final img = await picture.toImage(720, 380);
+      final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
+      return byteData?.buffer.asUint8List();
+    } catch (e) {
+      debugPrint('⚠️ Error generating banner bitmap: $e');
+      return null;
+    }
   }
 
   void _startAutoRefreshTimer() {

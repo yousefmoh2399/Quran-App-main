@@ -6,6 +6,7 @@ import '../../../../core/design/app_typography.dart';
 import '../../../../core/design/responsive.dart';
 import '../controllers/bookmarks_controller.dart';
 import '../widgets/bookmarks_tab.dart';
+import '../widgets/hadith_bookmarks_tab.dart';
 import '../widgets/memorized_tab.dart';
 import '../widgets/reading_log_tab.dart';
 
@@ -105,6 +106,20 @@ class BookmarksView extends StatelessWidget {
                     ),
                   ),
                 ),
+                Tab(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.auto_stories_rounded, size: 15.0),
+                        SizedBox(width: 4.0),
+                        Text('الأحاديث'),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -130,6 +145,7 @@ class BookmarksView extends StatelessWidget {
                 BookmarksTab(controller: controller),
                 MemorizedTab(controller: controller),
                 ReadingLogTab(controller: controller),
+                HadithBookmarksTab(controller: controller),
               ],
             ),
           ),

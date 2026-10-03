@@ -4,10 +4,13 @@ import '../../../../core/data/models/user_models.dart';
 import '../../../../core/data/repositories/quran_repository.dart';
 import '../../../../core/data/repositories/user_repository.dart';
 import '../../../../core/util/routes/routes.dart';
+import 'package:quran_app_android/features/hadith/data/models/hadith_bookmark_model.dart';
+import 'package:quran_app_android/features/hadith/data/repositories/hadith_bookmark_repository.dart';
 
 class BookmarksController extends GetxController with GetSingleTickerProviderStateMixin {
   final UserRepository _userRepo = UserRepository();
   final QuranRepository _quranRepo = QuranRepository();
+  final HadithBookmarkRepository _hadithRepo = HadithBookmarkRepository();
 
   late TabController tabController;
 
@@ -20,13 +23,14 @@ class BookmarksController extends GetxController with GetSingleTickerProviderSta
   final RxMap<String, dynamic> memorizationStats = <String, dynamic>{}.obs;
 
   final RxList<ReadingLogEntry> readingLogs = <ReadingLogEntry>[].obs;
+  final RxList<HadithBookmarkModel> hadithBookmarks = <HadithBookmarkModel>[].obs;
 
   final Map<int, String> surahNames = {};
 
   @override
   void onInit() {
     super.onInit();
-    tabController = TabController(length: 3, vsync: this);
+    tabController = TabController(length: 4, vsync: this);
     loadAll();
   }
 
@@ -50,6 +54,7 @@ class BookmarksController extends GetxController with GetSingleTickerProviderSta
         _loadBookmarks(),
         _loadMemorized(),
         _loadReadingLog(),
+        _loadHadithBookmarks(),
       ]);
     } catch (e) {
       debugPrint('Error loading bookmarks data: $e');
@@ -74,6 +79,21 @@ class BookmarksController extends GetxController with GetSingleTickerProviderSta
   Future<void> _loadReadingLog() async {
     final logs = await _userRepo.getReadingLog(limit: 60);
     readingLogs.assignAll(logs);
+  }
+
+  Future<void> _loadHadithBookmarks() async {
+    final list = await _hadithRepo.getAllBookmarks();
+    hadithBookmarks.assignAll(list);
+  }
+
+  Future<void> toggleHadithMemorized(String id) async {
+    await _hadithRepo.toggleMemorized(id);
+    await _loadHadithBookmarks();
+  }
+
+  Future<void> deleteHadithBookmark(String id) async {
+    await _hadithRepo.removeBookmark(id);
+    await _loadHadithBookmarks();
   }
 
   void onSearchChanged(String query) {

@@ -197,6 +197,29 @@ object PermissionsBridge {
         val packageName = ctx.packageName
         try {
             when {
+                Build.MANUFACTURER.contains("huawei", true) || Build.MANUFACTURER.contains("honor", true) -> {
+                    val huaweiBatteryIntents = listOf(
+                        Intent().setClassName("com.huawei.systemmanager", "com.huawei.systemmanager.optimize.process.ProtectActivity"),
+                        Intent().setClassName("com.huawei.systemmanager", "com.huawei.systemmanager.appcontrol.activity.StartupAppControlActivity"),
+                        Intent().setClassName("com.huawei.systemmanager", "com.huawei.systemmanager.power.ui.HwPowerManagerActivity"),
+                        Intent().setClassName("com.huawei.systemmanager", "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity")
+                    )
+                    var opened = false
+                    for (i in huaweiBatteryIntents) {
+                        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        try {
+                            ctx.startActivity(i)
+                            opened = true
+                            break
+                        } catch (_: Exception) {}
+                    }
+                    if (!opened) {
+                        val fallback = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                        fallback.data = Uri.parse("package:$packageName")
+                        fallback.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        ctx.startActivity(fallback)
+                    }
+                }
                 Build.MANUFACTURER.contains("xiaomi", true) -> {
                     val intent = Intent("miui.intent.action.POWER_HIDE_MODE_APP_LIST")
                     intent.putExtra("package_name", packageName)
@@ -266,10 +289,22 @@ object PermissionsBridge {
 
     private fun openVendorAutoStart(ctx: Context) {
         val intents = listOf(
-            Intent().setClassName("com.miui.securitycenter", "com.miui.permcenter.autostart.AutoStartManagementActivity"),
-            Intent("oppo.intent.action.OPPO_AUTO_START").setClassName("com.coloros.safecenter", "com.coloros.safecenter.startupapp.StartupAppListActivity"),
+            // Huawei / Honor (EMUI 8-12 & HarmonyOS)
+            Intent().setClassName("com.huawei.systemmanager", "com.huawei.systemmanager.appcontrol.activity.StartupAppControlActivity"),
             Intent().setClassName("com.huawei.systemmanager", "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity"),
-            Intent().setClassName("com.vivo.permissionmanager", "com.vivo.permissionmanager.activity.BgStartUpManagerActivity")
+            Intent().setClassName("com.huawei.systemmanager", "com.huawei.systemmanager.optimize.bootstart.BootStartActivity"),
+            Intent().setClassName("com.huawei.systemmanager", "com.huawei.systemmanager.optimize.process.ProtectActivity"),
+            // Xiaomi / Poco / Redmi (MIUI / HyperOS)
+            Intent().setClassName("com.miui.securitycenter", "com.miui.permcenter.autostart.AutoStartManagementActivity"),
+            // Oppo / Realme / OnePlus (ColorOS)
+            Intent("oppo.intent.action.OPPO_AUTO_START").setClassName("com.coloros.safecenter", "com.coloros.safecenter.startupapp.StartupAppListActivity"),
+            Intent().setClassName("com.coloros.safecenter", "com.coloros.safecenter.permission.startup.StartupAppListActivity"),
+            // Vivo / iQOO (FuntouchOS / OriginOS)
+            Intent().setClassName("com.vivo.permissionmanager", "com.vivo.permissionmanager.activity.BgStartUpManagerActivity"),
+            Intent().setClassName("com.iqoo.secure", "com.iqoo.secure.ui.phoneoptimize.AddWhiteListActivity"),
+            // Samsung (One UI)
+            Intent("com.samsung.android.sm.ACTION_BATTERY"),
+            Intent().setClassName("com.samsung.android.lool", "com.samsung.android.sm.ui.battery.BatteryActivity")
         )
 
         for (i in intents) {

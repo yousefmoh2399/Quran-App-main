@@ -321,6 +321,43 @@ class AdhanSettingsView extends StatelessWidget {
 
             AppSpacing.verticalMd,
 
+            // 4. Post-Adhan Du'a (Sheikh Al-Shaarawy)
+            _buildSectionHeader('دعاء ما بعد الأذان', Icons.record_voice_over_rounded, colors),
+            AppSpacing.verticalXs,
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              decoration: BoxDecoration(
+                color: colors.surface,
+                borderRadius: AppRadius.borderLg,
+                border: Border.all(color: colors.divider),
+              ),
+              child: SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                  'دعاء ما بعد الأذان (الشيخ الشعراوي)',
+                  style: TextStyle(
+                    fontFamily: AppTypography.uiFont,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.bold,
+                    color: colors.text,
+                  ),
+                ),
+                subtitle: Text(
+                  'تشغيل دعاء «اللهم رب هذه الدعوة التامة...» بصوت فضيلة الشيخ محمد متولي الشعراوي تلقائياً بعد انتهاء الأذان مباشرة',
+                  style: TextStyle(
+                    fontFamily: AppTypography.uiFont,
+                    fontSize: 11.5,
+                    color: colors.textMuted,
+                  ),
+                ),
+                value: settings.playPostAdhanDua,
+                activeColor: colors.primary,
+                onChanged: (val) => controller.updatePlayPostAdhanDua(val),
+              ),
+            ),
+
+            AppSpacing.verticalMd,
+
             // Prayer Times Notification Banner Toggle
             _buildSectionHeader('شريط الإشعارات لمواقيت الصلاة', Icons.view_headline_rounded, colors),
             AppSpacing.verticalXs,

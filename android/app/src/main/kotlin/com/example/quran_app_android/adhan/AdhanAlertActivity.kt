@@ -300,19 +300,64 @@ class AdhanAlertActivity : AppCompatActivity() {
     private fun registerAdhanCompletionReceiver() {
         adhanCompletedReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                val action = intent?.action
-                Log.i(TAG, "Received broadcast: $action, showing Du'a")
+                val action = intent?.action ?: return
+                Log.i(TAG, "Received broadcast in AdhanAlertActivity: $action")
                 val cardDua = findViewById<View>(R.id.cardDua)
-                revealDuaCard(cardDua)
                 val btnStop = findViewById<Button>(R.id.btnStopAdhan)
-                btnStop.isEnabled = false
-                btnStop.text = if (action == AdhanService.ACTION_ADHAN_SILENCED) "تم كتم الصوت 🔕" else "انتهى الأذان"
-                btnStop.alpha = 0.5f
+                val tvSubtitle = findViewById<TextView>(R.id.tvAdhanSubtitle)
+
+                when (action) {
+                    AdhanService.ACTION_DUA_STARTED -> {
+                        revealDuaCard(cardDua)
+                        btnStop.isEnabled = true
+                        btnStop.text = "إيقاف الدعاء ⏹️"
+                        btnStop.alpha = 1.0f
+                        tvSubtitle.text = "🎧 دعاء ما بعد الأذان • الشيخ الشعراوي"
+                    }
+                    AdhanService.ACTION_DUA_COMPLETED -> {
+                        Log.i(TAG, "Du'a finished -> auto-closing Adhan alert screen")
+                        revealDuaCard(cardDua)
+                        btnStop.isEnabled = false
+                        btnStop.text = "تقبل الله طاعتكم 🤲"
+                        btnStop.alpha = 0.6f
+                        handler.removeCallbacks(autoDismissRunnable)
+                        handler.postDelayed({
+                            if (!isFinishing && !isDestroyed) {
+                                finish()
+                            }
+                        }, 1200L)
+                    }
+                    AdhanService.ACTION_ADHAN_COMPLETED -> {
+                        val shouldPlayDua = NativePrayerManager.getSettings(this@AdhanAlertActivity).playPostAdhanDua
+                        if (!shouldPlayDua) {
+                            Log.i(TAG, "Adhan finished and Du'a is disabled -> auto-closing Adhan alert screen")
+                            btnStop.isEnabled = false
+                            btnStop.text = "انتهى الأذان"
+                            btnStop.alpha = 0.6f
+                            handler.removeCallbacks(autoDismissRunnable)
+                            handler.postDelayed({
+                                if (!isFinishing && !isDestroyed) {
+                                    finish()
+                                }
+                            }, 1200L)
+                        } else {
+                            revealDuaCard(cardDua)
+                        }
+                    }
+                    AdhanService.ACTION_ADHAN_SILENCED -> {
+                        revealDuaCard(cardDua)
+                        btnStop.isEnabled = false
+                        btnStop.text = "تم كتم الصوت 🔕"
+                        btnStop.alpha = 0.5f
+                    }
+                }
             }
         }
         val filter = IntentFilter().apply {
             addAction(AdhanService.ACTION_ADHAN_COMPLETED)
             addAction(AdhanService.ACTION_ADHAN_SILENCED)
+            addAction(AdhanService.ACTION_DUA_STARTED)
+            addAction(AdhanService.ACTION_DUA_COMPLETED)
         }
         androidx.core.content.ContextCompat.registerReceiver(
             this,

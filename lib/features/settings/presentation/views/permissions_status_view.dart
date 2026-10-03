@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_spacing.dart';
@@ -150,6 +152,77 @@ class _PermissionsStatusViewState extends State<PermissionsStatusView> {
                     await _refresh();
                   },
                 ),
+
+              if (!kIsWeb && Platform.isAndroid) ...[
+                const SizedBox(height: AppSpacing.md),
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: colors.surface,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: colors.accent.withOpacity(0.3)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: colors.accent.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(
+                              Icons.bolt,
+                              size: 22,
+                              color: colors.accent,
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                          Expanded(
+                            child: Text(
+                              'استقرار الأذان في الخلفية (Huawei / Xiaomi / Oppo / Samsung)',
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: colors.text,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 38.0),
+                        child: Text(
+                          'تقوم بعض الهواتف (خاصة هواوي، شاومي، أوبو، سامسونج) بإيقاف التطبيقات في الخلفية لتوفير الشحن. لضمان سماع الأذان بدون انقطاع، يُنصح بتفعيل "بدء التشغيل التلقائي" والسماح للتطبيق بالعمل في الخلفية.',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colors.textMuted,
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          OutlinedButton.icon(
+                            onPressed: () async {
+                              await _service.openVendorAutoStart();
+                            },
+                            style: OutlinedButton.styleFrom(
+                              visualDensity: VisualDensity.compact,
+                              foregroundColor: colors.accent,
+                            ),
+                            icon: const Icon(Icons.power_settings_new, size: 16),
+                            label: const Text('إعدادات التشغيل التلقائي'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ],
           );
         },

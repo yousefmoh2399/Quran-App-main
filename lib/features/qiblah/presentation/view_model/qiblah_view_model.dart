@@ -1,4 +1,5 @@
 import 'package:adhan/adhan.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -70,11 +71,28 @@ class QiblahViewModel extends GetxController {
       final serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (serviceEnabled && isDone.value) {
         isRefreshingLocation.value = true;
-        final freshPos = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.low,
-          timeLimit: const Duration(seconds: 3),
-        );
-        _setCoordinates(freshPos.latitude, freshPos.longitude, 'GPS مباشر');
+        Position? freshPos;
+        try {
+          freshPos = await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.low,
+            timeLimit: const Duration(seconds: 3),
+          );
+        } catch (_) {
+          if (defaultTargetPlatform == TargetPlatform.android) {
+            try {
+              freshPos = await Geolocator.getCurrentPosition(
+                locationSettings: AndroidSettings(
+                  accuracy: LocationAccuracy.low,
+                  forceLocationManager: true,
+                  timeLimit: const Duration(seconds: 3),
+                ),
+              );
+            } catch (_) {}
+          }
+        }
+        if (freshPos != null) {
+          _setCoordinates(freshPos.latitude, freshPos.longitude, 'GPS مباشر');
+        }
       }
     } catch (_) {
       // Silently keep previous valid coordinates without disrupting user

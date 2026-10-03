@@ -56,7 +56,8 @@ object NativeAdhanBridge : MethodChannel.MethodCallHandler {
                         asrMode = (args["asrMode"] as? String) ?: "adhan",
                         maghribMode = (args["maghribMode"] as? String) ?: "adhan",
                         ishaMode = (args["ishaMode"] as? String) ?: "adhan",
-                        adhanSound = (args["adhanSound"] as? String) ?: "default"
+                        adhanSound = (args["adhanSound"] as? String) ?: "default",
+                        playPostAdhanDua = (args["playPostAdhanDua"] as? Boolean) ?: true
                     )
 
                     NativePrayerManager.saveSettings(context, settings)
@@ -96,7 +97,8 @@ object NativeAdhanBridge : MethodChannel.MethodCallHandler {
                             "asrMode" to settings.asrMode,
                             "maghribMode" to settings.maghribMode,
                             "ishaMode" to settings.ishaMode,
-                            "adhanSound" to settings.adhanSound
+                            "adhanSound" to settings.adhanSound,
+                            "playPostAdhanDua" to settings.playPostAdhanDua
                         )
                     )
                 } catch (e: Exception) {

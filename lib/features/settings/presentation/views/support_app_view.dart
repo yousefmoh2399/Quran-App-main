@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
@@ -63,8 +64,11 @@ class _SupportAppViewState extends State<SupportAppView> {
   }
 
   void _shareApp(BuildContext context) {
+    final storeLink = Platform.isIOS
+        ? 'https://apps.apple.com/app/id6470000000'
+        : 'https://play.google.com/store/apps/details?id=com.taqarrab.quran';
     Share.share(
-      'تطبيق "تقرّب" — رفيقك اليومي للقرآن الكريم، الأذكار، ومواقيت الصلاة، تطبيق مجاني وخالٍ تماماً 100% من الإعلانات.\nحمّله وشاركه صدقة جارية:\nhttps://play.google.com/store/apps/details?id=com.taqarrab.quran',
+      'تطبيق "تقرّب" — رفيقك اليومي للقرآن الكريم، الأذكار، ومواقيت الصلاة، تطبيق مجاني وخالٍ تماماً 100% من الإعلانات.\nحمّله وشاركه صدقة جارية:\n$storeLink',
       sharePositionOrigin: getSharePositionOrigin(context),
     );
   }
@@ -89,17 +93,24 @@ class _SupportAppViewState extends State<SupportAppView> {
             _buildHeroHeader(colors),
             AppSpacing.verticalLg,
 
-            // 2. Donation & Wallet Transfer Card (Primary Action)
-            _buildWalletCard(context, colors),
-            AppSpacing.verticalLg,
+            // 2. Donation & Wallet Card (Android only) vs Islamic Community Support Card (iOS)
+            if (!Platform.isIOS) ...[
+              _buildWalletCard(context, colors),
+              AppSpacing.verticalLg,
+            ] else ...[
+              _buildIosSupportCard(context, colors),
+              AppSpacing.verticalLg,
+            ],
 
             // 3. Why Support Matters (Impact Breakdown)
             _buildImpactSection(colors),
             AppSpacing.verticalLg,
 
-            // 4. Alternative Ways to Support (Non-Monetary)
-            _buildAlternativeSupportCard(context, colors),
-            AppSpacing.verticalLg,
+            // 4. Alternative Ways to Support (Non-Monetary) on Android
+            if (!Platform.isIOS) ...[
+              _buildAlternativeSupportCard(context, colors),
+              AppSpacing.verticalLg,
+            ],
 
             // 5. Spiritual Blessing Card
             _buildSpiritualClosing(colors),
@@ -195,13 +206,114 @@ class _SupportAppViewState extends State<SupportAppView> {
           ),
           AppSpacing.verticalMd,
           Text(
-            'حرصاً على قدسية كتاب الله وهيبة الذكر، عاهدنا أنفسنا ألا نضع أي إعلان يقطع خشوعك أو يشتت تلاوتك.\n\nاستمرار التطبيق مجاناً، وتحديث خوادم الأذان والقبلة، وتطوير ميزات جديدة يحتاج جهداً وتكاليف تشغيلية مستمرة. مساهمتك الكريمة تُمكّننا من مواصلة هذه الرسالة صدقةً جارية بإذن الله.',
+            Platform.isIOS
+                ? 'حرصاً على قدسية كتاب الله وهيبة الذكر، عاهدنا أنفسنا ألا نضع أي إعلان يقطع خشوعك أو يشتت تلاوتك.\n\nاستمرار التطبيق مجاناً بالكامل متاحٌ بفضل الله ثم بدعواتكم الطيبة ومشاركتكم للتطبيق ليكون صدقةً جارية لنا ولكم بإذن الله.'
+                : 'حرصاً على قدسية كتاب الله وهيبة الذكر، عاهدنا أنفسنا ألا نضع أي إعلان يقطع خشوعك أو يشتت تلاوتك.\n\nاستمرار التطبيق مجاناً، وتحديث خوادم الأذان والقبلة، وتطوير ميزات جديدة يحتاج جهداً وتكاليف تشغيلية مستمرة. مساهمتك الكريمة تُمكّننا من مواصلة هذه الرسالة صدقةً جارية بإذن الله.',
             style: TextStyle(
               fontSize: 13,
               height: 1.65,
               color: colors.text,
             ),
             textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildIosSupportCard(BuildContext context, AppColorsExtension colors) {
+    return AppCard(
+      variant: AppCardVariant.elevated,
+      padding: AppSpacing.paddingLg,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: colors.primary.withOpacity(0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.favorite_rounded,
+                  color: colors.primary,
+                  size: 24,
+                ),
+              ),
+              AppSpacing.horizontalMd,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'شارك في نشر الخير والأجر',
+                      style: TextStyle(
+                        fontFamily: AppTypography.decorativeFont,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: colors.text,
+                      ),
+                    ),
+                    Text(
+                      'الدال على الخير كفاعله • صدقة جارية',
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        color: colors.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          AppSpacing.verticalMd,
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: colors.surface,
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              border: Border.all(color: colors.divider),
+            ),
+            child: Text(
+              'تطبيق تقرّب وقف إسلامي مجاني بالكامل لوجه الله تعالى وخالٍ 100% من الإعلانات التجارية. أعظم دعم تقدمه لنا هو إيصال هذا الخير إلى أهلك وأصدقائك وكتابة تقييمك الطيب على متجر App Store.',
+              style: TextStyle(
+                fontSize: 12.5,
+                height: 1.6,
+                color: colors.text,
+              ),
+            ),
+          ),
+          AppSpacing.verticalMd,
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colors.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(borderRadius: AppRadius.borderMd),
+            ),
+            icon: const Icon(Icons.share_rounded, size: 20),
+            label: const Text(
+              'مشاركة تطبيق تقرّب مع الأهل والأصدقاء',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5),
+            ),
+            onPressed: () => _shareApp(context),
+          ),
+          AppSpacing.verticalSm,
+          OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              foregroundColor: colors.primary,
+              side: BorderSide(color: colors.primary),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: AppRadius.borderMd),
+            ),
+            icon: const Icon(Icons.star_rate_rounded, color: Color(0xFFD4AF37), size: 20),
+            label: const Text(
+              'تقييم التطبيق 5 نجوم على App Store ⭐',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+            ),
+            onPressed: () => _shareApp(context),
           ),
         ],
       ),
@@ -369,7 +481,7 @@ class _SupportAppViewState extends State<SupportAppView> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Text(
-            'أين يُصرف دعمك ومساهمتك؟',
+            Platform.isIOS ? 'رسالتنا وأهدافنا في تطبيق تقرّب' : 'أين يُصرف دعمك ومساهمتك؟',
             style: TextStyle(
               fontFamily: AppTypography.decorativeFont,
               fontSize: 16,

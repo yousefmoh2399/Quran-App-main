@@ -7,6 +7,7 @@ import 'package:quran_app_android/features/adhan/presentation/view_model/adhan_v
 import 'package:quran_app_android/features/home/presentation/view_model/home_view_model.dart';
 import 'package:quran_app_android/features/azkar/presentation/views/widgets/smart_zikr_card.dart';
 import 'package:quran_app_android/features/home/presentation/views/widget/continue_reading_wird_card.dart';
+import 'package:quran_app_android/features/home/presentation/views/widget/home_hadith_memorization_card.dart';
 import 'package:quran_app_android/features/home/presentation/views/widget/home_header.dart';
 import 'package:quran_app_android/features/home/presentation/views/widget/home_nav_bar.dart';
 import 'package:quran_app_android/features/home/presentation/views/widget/home_quick_shortcuts.dart';
@@ -72,6 +73,8 @@ class _HomeViewState extends State<HomeView> {
               ContinueReadingWirdCard(),
               AppSpacing.verticalLg,
               HomeQuickShortcuts(),
+              AppSpacing.verticalLg,
+              HomeHadithMemorizationCard(),
               AppSpacing.verticalLg,
               SmartZikrCard(),
               AppSpacing.verticalXxl,

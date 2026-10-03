@@ -28,6 +28,8 @@ class AdhanService : Service(), AudioManager.OnAudioFocusChangeListener {
         const val ACTION_PRAYED = "PRAYED"
         const val ACTION_ADHAN_COMPLETED = "com.example.quran_app_android.ADHAN_COMPLETED"
         const val ACTION_ADHAN_SILENCED = "com.example.quran_app_android.ADHAN_SILENCED"
+        const val ACTION_DUA_STARTED = "com.example.quran_app_android.DUA_STARTED"
+        const val ACTION_DUA_COMPLETED = "com.example.quran_app_android.DUA_COMPLETED"
         const val CHANNEL_ID = "adhan_playback_channel"
         private const val NOTIFICATION_ID = 1001
         private const val TAG = "AdhanService"
@@ -126,12 +128,20 @@ class AdhanService : Service(), AudioManager.OnAudioFocusChangeListener {
                 setOnCompletionListener {
                     Log.i(TAG, "Adhan audio playback finished smoothly")
                     unregisterHardwareButtonReceiver()
-                    try {
-                        sendBroadcast(Intent(ACTION_ADHAN_COMPLETED).apply { setPackage(packageName) })
-                    } catch (_: Exception) {}
-                    abandonAudioFocus()
-                    stopForeground(false)
-                    stopSelf()
+
+                    val settings = NativePrayerManager.getSettings(this@AdhanService)
+                    if (settings.playPostAdhanDua) {
+                        Log.i(TAG, "Post-Adhan Dua is enabled -> starting Sheikh Al-Shaarawy Du'a")
+                        playPostAdhanDua(audioAttributes)
+                    } else {
+                        Log.i(TAG, "Post-Adhan Dua is disabled -> ending service and broadcasting completion")
+                        try {
+                            sendBroadcast(Intent(ACTION_ADHAN_COMPLETED).apply { setPackage(packageName) })
+                        } catch (_: Exception) {}
+                        abandonAudioFocus()
+                        stopForeground(false)
+                        stopSelf()
+                    }
                 }
                 playbackStartTime = System.currentTimeMillis()
                 start()
@@ -144,6 +154,103 @@ class AdhanService : Service(), AudioManager.OnAudioFocusChangeListener {
             abandonAudioFocus()
             stopForeground(false)
             stopSelf()
+        }
+    }
+
+    private fun playPostAdhanDua(audioAttributes: AudioAttributes) {
+        try {
+            try {
+                sendBroadcast(Intent(ACTION_DUA_STARTED).apply { setPackage(packageName) })
+            } catch (_: Exception) {}
+
+            updateNotificationForDua()
+
+            try {
+                player?.reset()
+                player?.release()
+            } catch (_: Exception) {}
+            player = null
+
+            val resId = R.raw.post_adhan_dua
+            player = MediaPlayer.create(this, resId).apply {
+                setAudioAttributes(audioAttributes)
+                isLooping = false
+                setOnCompletionListener {
+                    Log.i(TAG, "Sheikh Al-Shaarawy Du'a playback completed smoothly")
+                    unregisterHardwareButtonReceiver()
+                    try {
+                        sendBroadcast(Intent(ACTION_DUA_COMPLETED).apply { setPackage(packageName) })
+                    } catch (_: Exception) {}
+                    abandonAudioFocus()
+                    stopForeground(false)
+                    stopSelf()
+                }
+                playbackStartTime = System.currentTimeMillis()
+                start()
+                registerHardwareButtonReceiver()
+            }
+            Log.i(TAG, "Sheikh Al-Shaarawy Du'a playback started successfully")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to play post-Adhan Dua: ${e.message}", e)
+            try {
+                sendBroadcast(Intent(ACTION_DUA_COMPLETED).apply { setPackage(packageName) })
+            } catch (_: Exception) {}
+            abandonAudioFocus()
+            stopForeground(false)
+            stopSelf()
+        }
+    }
+
+    private fun updateNotificationForDua() {
+        try {
+            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val fullScreenIntent = Intent(this, AdhanAlertActivity::class.java).apply {
+                putExtra("prayer_key", currentPrayerKey)
+                putExtra("prayer_name", currentPrayerName)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            }
+            val fullScreenPending = PendingIntent.getActivity(
+                this,
+                0,
+                fullScreenIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            val stopIntent = Intent(this, AdhanService::class.java).apply {
+                action = ACTION_STOP_ADHAN
+            }
+            val stopPending = PendingIntent.getService(
+                this,
+                1,
+                stopIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val appIconBitmap = try {
+                BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher)
+            } catch (_: Exception) {
+                null
+            }
+
+            val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle("🤲 دعاء ما بعد الأذان")
+                .setContentText("فضيلة الشيخ محمد متولي الشعراوي")
+                .setSmallIcon(R.drawable.ic_mosque)
+                .apply {
+                    if (appIconBitmap != null) {
+                        setLargeIcon(appIconBitmap)
+                    }
+                }
+                .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setCategory(NotificationCompat.CATEGORY_ALARM)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setContentIntent(fullScreenPending)
+                .setOngoing(true)
+                .addAction(R.drawable.ic_mosque, "إيقاف", stopPending)
+                .build()
+
+            manager.notify(NOTIFICATION_ID, notification)
+        } catch (e: Exception) {
+            Log.w(TAG, "Could not update notification for Dua: ${e.message}")
         }
     }
 

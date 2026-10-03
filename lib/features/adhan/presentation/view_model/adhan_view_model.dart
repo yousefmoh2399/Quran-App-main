@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:adhan/adhan.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -92,12 +93,32 @@ class AdhanViewModel extends GetxController {
       return;
     }
 
+    Position? position;
     try {
-      final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.medium,
-        timeLimit: const Duration(seconds: 15),
+      position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.medium,
+          timeLimit: Duration(seconds: 10),
+        ),
       );
+    } catch (e) {
+      debugPrint('Standard location failed ($e), falling back to native Android LocationManager (Huawei / Non-GMS support)...');
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        try {
+          position = await Geolocator.getCurrentPosition(
+            locationSettings: AndroidSettings(
+              accuracy: LocationAccuracy.medium,
+              forceLocationManager: true,
+              timeLimit: const Duration(seconds: 12),
+            ),
+          );
+        } catch (e2) {
+          debugPrint('Native LocationManager also failed ($e2)');
+        }
+      }
+    }
 
+    if (position != null) {
       final prevLat = latitude;
       final prevLng = longitude;
 
@@ -120,8 +141,7 @@ class AdhanViewModel extends GetxController {
       }
 
       await saveLocation(latitude!, longitude!, cityName);
-    } catch (e) {
-      debugPrint('Failed to get updated location: $e');
+    } else {
       if (latitude == null || longitude == null) {
         // Try last known position
         try {

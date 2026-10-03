@@ -155,6 +155,11 @@ class AdhanSettingsController extends GetxController {
     saveSettings();
   }
 
+  void updatePlayPostAdhanDua(bool value) {
+    settings.value = settings.value.copyWith(playPostAdhanDua: value);
+    saveSettings();
+  }
+
   void setCity(String cityName, double lat, double lng) {
     settings.value = settings.value.copyWith(
       cityName: cityName,

@@ -43,7 +43,9 @@ data class AdhanSettings(
     val maghribMode: String = "adhan",
     val ishaMode: String = "adhan",
     // Selected audio: "default", "makkah", "madinah", "abdulbasit", "mishary", "alaqsa"
-    val adhanSound: String = "default"
+    val adhanSound: String = "default",
+    // Sheikh Al-Shaarawy Post-Adhan Du'a
+    val playPostAdhanDua: Boolean = true
 )
 
 data class ScheduledPrayer(
@@ -98,7 +100,8 @@ object NativePrayerManager {
             asrMode = prefs.getString("asrMode", "adhan") ?: "adhan",
             maghribMode = prefs.getString("maghribMode", "adhan") ?: "adhan",
             ishaMode = prefs.getString("ishaMode", "adhan") ?: "adhan",
-            adhanSound = prefs.getString("adhanSound", "default") ?: "default"
+            adhanSound = prefs.getString("adhanSound", "default") ?: "default",
+            playPostAdhanDua = prefs.getBoolean("playPostAdhanDua", true)
         )
     }
 
@@ -129,6 +132,7 @@ object NativePrayerManager {
             putString("maghribMode", settings.maghribMode)
             putString("ishaMode", settings.ishaMode)
             putString("adhanSound", settings.adhanSound)
+            putBoolean("playPostAdhanDua", settings.playPostAdhanDua)
             apply()
         }
         Log.i(TAG, "Saved settings: lat=${settings.latitude}, lng=${settings.longitude}, method=${settings.calculationMethod}, madhab=${settings.madhab}")
