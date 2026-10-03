@@ -9,6 +9,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.BitmapFactory
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
@@ -310,11 +311,21 @@ class AdhanService : Service(), AudioManager.OnAudioFocusChangeListener {
         )
 
         val citySuffix = if (cityName.isNotEmpty()) " • $cityName" else ""
+        val appIconBitmap = try {
+            BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher)
+        } catch (_: Exception) {
+            null
+        }
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("🕌 حان الآن وقت $prayerName")
             .setContentText("حي على الصلاة • حي على الفلاح$citySuffix")
             .setSmallIcon(R.drawable.ic_mosque)
+            .apply {
+                if (appIconBitmap != null) {
+                    setLargeIcon(appIconBitmap)
+                }
+            }
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)

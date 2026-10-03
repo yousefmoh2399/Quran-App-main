@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import android.os.PowerManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
@@ -114,8 +115,10 @@ class UnifiedReminderReceiver : BroadcastReceiver() {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
 
+        val appIconBitmap = BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher)
         val builder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_crescent_moon)
+            .setLargeIcon(appIconBitmap)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
 

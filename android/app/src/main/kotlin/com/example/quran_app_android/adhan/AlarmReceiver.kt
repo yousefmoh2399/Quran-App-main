@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.PowerManager
 import android.util.Log
@@ -125,8 +126,19 @@ class AlarmReceiver : BroadcastReceiver() {
         }
 
         val locationSuffix = if (cityName.isNotEmpty()) " في $cityName" else ""
+        val appIconBitmap = try {
+            BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher)
+        } catch (_: Exception) {
+            null
+        }
+
         val notification = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_mosque)
+            .apply {
+                if (appIconBitmap != null) {
+                    setLargeIcon(appIconBitmap)
+                }
+            }
             .setContentTitle("حان الآن موعد صلاة $prayerName")
             .setContentText("أقم صلاتك تسعد حياتك$locationSuffix")
             .setPriority(NotificationCompat.PRIORITY_HIGH)

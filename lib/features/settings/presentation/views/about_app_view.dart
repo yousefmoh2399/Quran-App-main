@@ -6,6 +6,7 @@ import '../../../../core/design/app_radius.dart';
 import '../../../../core/design/app_spacing.dart';
 import '../../../../core/design/app_typography.dart';
 import '../../../../core/design/components/app_card.dart';
+import '../../../../core/util/assets.dart';
 
 class AboutAppView extends StatelessWidget {
   const AboutAppView({super.key});
@@ -31,20 +32,27 @@ class AboutAppView extends StatelessWidget {
               child: Column(
                 children: [
                   Container(
-                    width: 80,
-                    height: 80,
+                    width: 88,
+                    height: 88,
                     decoration: BoxDecoration(
-                      color: colors.primary,
-                      shape: BoxShape.circle,
+                      borderRadius: BorderRadius.circular(22),
                       boxShadow: [
                         BoxShadow(
-                          color: colors.primary.withOpacity(0.3),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
+                          color: colors.primary.withOpacity(0.35),
+                          blurRadius: 16,
+                          offset: const Offset(0, 6),
                         ),
                       ],
                     ),
-                    child: const Icon(Icons.menu_book_rounded, size: 40, color: Colors.white),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(22),
+                      child: Image.asset(
+                        AssetsData.taqarrabLogo,
+                        width: 88,
+                        height: 88,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 12),
                   const Text(

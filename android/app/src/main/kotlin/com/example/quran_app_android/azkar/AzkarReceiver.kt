@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.net.Uri
@@ -113,8 +114,19 @@ class AzkarReceiver : BroadcastReceiver() {
         val title = AzkarDataRepository.getTitleForDhikr(dhikr)
         val bigText = "${dhikr.text}\n\n📖 المصدر: ${dhikr.source}${if (dhikr.count > 1) " • التكرار: ${dhikr.count} مرات" else ""}"
 
+        val appIconBitmap = try {
+            BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher)
+        } catch (_: Exception) {
+            null
+        }
+
         val builder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_crescent_moon)
+            .apply {
+                if (appIconBitmap != null) {
+                    setLargeIcon(appIconBitmap)
+                }
+            }
             .setContentTitle(title)
             .setContentText(dhikr.text)
             .setStyle(NotificationCompat.BigTextStyle().bigText(bigText))

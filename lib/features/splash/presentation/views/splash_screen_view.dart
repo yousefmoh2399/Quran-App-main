@@ -139,20 +139,23 @@ class _SplashScreenViewState extends State<SplashScreenView>
                         opacity: _logoFadeAnimation.value,
                         child: Container(
                           decoration: BoxDecoration(
-                            shape: BoxShape.circle,
+                            borderRadius: BorderRadius.circular(32),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFFD4AF37).withOpacity(0.25),
-                                blurRadius: 36,
+                                color: const Color(0xFFD4AF37).withOpacity(0.35),
+                                blurRadius: 40,
                                 spreadRadius: 4,
                               ),
                             ],
                           ),
-                          child: Image.asset(
-                            AssetsData.taqarrabLogo,
-                            width: 140,
-                            height: 140,
-                            fit: BoxFit.contain,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(32),
+                            child: Image.asset(
+                              AssetsData.taqarrabLogo,
+                              width: 140,
+                              height: 140,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
                       ),
