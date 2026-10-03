@@ -1,8 +1,5 @@
-import 'package:adhan/adhan.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:quran_app_android/core/design/app_colors.dart';
 import 'package:quran_app_android/core/design/components/app_scaffold.dart';
 import 'package:quran_app_android/features/qiblah/presentation/view_model/qiblah_view_model.dart';
 import 'package:quran_app_android/features/qiblah/presentation/views/widget/go_settings_view.dart';
@@ -19,7 +16,6 @@ class _QiblahViewState extends State<QiblahView>
     with SingleTickerProviderStateMixin {
   late AnimationController animationController;
   final double begin = 0.0;
-  Future<Position>? getPosition;
 
   final QiblahViewModel qiblahViewModel = Get.isRegistered<QiblahViewModel>()
       ? Get.find<QiblahViewModel>()
@@ -28,12 +24,10 @@ class _QiblahViewState extends State<QiblahView>
   @override
   void initState() {
     super.initState();
-    qiblahViewModel.requestLocationPermission();
     animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
     );
-    getPosition = _determinePosition();
   }
 
   @override
@@ -44,57 +38,23 @@ class _QiblahViewState extends State<QiblahView>
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.appColors;
-
     return AppScaffold(
       title: 'اتجاه القبلة',
       constrainContentWidth: true,
       body: GetBuilder<QiblahViewModel>(
         init: qiblahViewModel,
         builder: (controller) {
-          if (!controller.isDone.value) {
+          // If permission is not granted AND no location is known, show settings request
+          if (!controller.isDone.value && !controller.hasLocation.value) {
             return const GoSettingsView();
           }
 
-          return FutureBuilder<Position>(
-            future: getPosition,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
-                  ),
-                );
-              }
-
-              if (snapshot.hasError) {
-                // Fallback to Cairo coordinates if location retrieval times out
-                final Coordinates coordinates = Coordinates(30.0444, 31.2357);
-                final double qiblaDirection = Qibla(coordinates).direction;
-                return QiblahStreamBuilder(
-                  animationController: animationController,
-                  begin: begin,
-                  qiblaDirection: qiblaDirection,
-                  userLatitude: 30.0444,
-                  userLongitude: 31.2357,
-                );
-              }
-
-              if (snapshot.hasData) {
-                final Position pos = snapshot.data!;
-                final Coordinates coordinates = Coordinates(pos.latitude, pos.longitude);
-                final double qiblaDirection = Qibla(coordinates).direction;
-                return QiblahStreamBuilder(
-                  animationController: animationController,
-                  begin: begin,
-                  qiblaDirection: qiblaDirection,
-                  userLatitude: pos.latitude,
-                  userLongitude: pos.longitude,
-                );
-              }
-
-              return const GoSettingsView();
-            },
+          return QiblahStreamBuilder(
+            animationController: animationController,
+            begin: begin,
+            qiblaDirection: controller.qiblaDirection.value,
+            userLatitude: controller.userLatitude.value,
+            userLongitude: controller.userLongitude.value,
           );
         },
       ),
@@ -102,26 +62,3 @@ class _QiblahViewState extends State<QiblahView>
   }
 }
 
-Future<Position> _determinePosition() async {
-  bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-  if (!serviceEnabled) {
-    return Future.error('Location services are disabled.');
-  }
-
-  LocationPermission permission = await Geolocator.checkPermission();
-  if (permission == LocationPermission.denied) {
-    permission = await Geolocator.requestPermission();
-    if (permission == LocationPermission.denied) {
-      return Future.error('Location permissions are denied');
-    }
-  }
-
-  if (permission == LocationPermission.deniedForever) {
-    return Future.error('Location permissions are permanently denied');
-  }
-
-  return await Geolocator.getCurrentPosition(
-    desiredAccuracy: LocationAccuracy.medium,
-    timeLimit: const Duration(seconds: 15),
-  );
-}

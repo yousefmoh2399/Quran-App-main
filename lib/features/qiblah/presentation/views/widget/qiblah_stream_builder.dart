@@ -31,6 +31,9 @@ class QiblahStreamBuilder extends StatefulWidget {
 }
 
 class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
+  static double _lastKnownHeading = 0.0;
+  static bool _hasReceivedHeading = false;
+
   late Animation<double> animation;
   double begin = 0.0;
   bool _hasVibrated = false;
@@ -50,10 +53,25 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
     return StreamBuilder<CompassEvent>(
       stream: FlutterCompass.events,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        if (snapshot.connectionState == ConnectionState.waiting && !_hasReceivedHeading) {
           return Center(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 36,
+                  height: 36,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
+                  ),
+                ),
+                AppSpacing.verticalMd,
+                Text(
+                  'جاري قراءة مستشعر البوصلة...',
+                  style: textTheme.bodyMedium?.copyWith(color: colors.textMuted),
+                ),
+              ],
             ),
           );
         }
@@ -67,7 +85,10 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
         }
 
         final compassEvent = snapshot.data;
-        if (compassEvent == null || compassEvent.heading == null) {
+        if (compassEvent?.heading != null) {
+          _lastKnownHeading = compassEvent!.heading!;
+          _hasReceivedHeading = true;
+        } else if (!_hasReceivedHeading) {
           return const EmptyState(
             icon: Icons.explore_off_rounded,
             title: 'مستشعر البوصلة غير متوفر',
@@ -75,7 +96,7 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
           );
         }
 
-        final double currentHeading = compassEvent.heading!;
+        final double currentHeading = _lastKnownHeading;
         final double headingRad = currentHeading * (pi / 180);
         final double qiblaRad = widget.qiblaDirection * (pi / 180);
         final double diffAngle = qiblaRad - headingRad;
