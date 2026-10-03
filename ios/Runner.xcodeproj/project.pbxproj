@@ -19,6 +19,7 @@
 		CA0236B62D7C84B800F80F44 /* azkar_2.wav in Resources */ = {isa = PBXBuildFile; fileRef = CA0236B32D7C84B800F80F44 /* azkar_2.wav */; };
 		CA0236B72D7C84B800F80F44 /* adhan.wav in Resources */ = {isa = PBXBuildFile; fileRef = CA0236B42D7C84B800F80F44 /* adhan.wav */; };
 		CA0236B82D7C84B800F80F44 /* azkar_1.wav in Resources */ = {isa = PBXBuildFile; fileRef = CA0236B52D7C84B800F80F44 /* azkar_1.wav */; };
+		CA0236B92D7C84B800F80F44 /* adhan_ios.wav in Resources */ = {isa = PBXBuildFile; fileRef = CA0236BA2D7C84B800F80F44 /* adhan_ios.wav */; };
 		CA9BE26A2D7CC0B200892F57 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA9BE2692D7CC0B200892F57 /* WidgetKit.framework */; };
 		CA9BE26C2D7CC0B200892F57 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA9BE26B2D7CC0B200892F57 /* SwiftUI.framework */; };
 		CA9BE26F2D7CC0B200892F57 /* MyHomeWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA9BE26E2D7CC0B200892F57 /* MyHomeWidgetBundle.swift */; };
@@ -93,6 +94,7 @@
 		CA0236B32D7C84B800F80F44 /* azkar_2.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = azkar_2.wav; sourceTree = "<group>"; };
 		CA0236B42D7C84B800F80F44 /* adhan.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = adhan.wav; sourceTree = "<group>"; };
 		CA0236B52D7C84B800F80F44 /* azkar_1.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = azkar_1.wav; sourceTree = "<group>"; };
+		CA0236BA2D7C84B800F80F44 /* adhan_ios.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = adhan_ios.wav; sourceTree = "<group>"; };
 		CA0237272D7CA09700F80F44 /* AzkarWidgetExtensionExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AzkarWidgetExtensionExtension.entitlements; sourceTree = "<group>"; };
 		CA9BE2682D7CC0B200892F57 /* MyHomeWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MyHomeWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA9BE2692D7CC0B200892F57 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
@@ -186,6 +188,7 @@
 				CA0237272D7CA09700F80F44 /* AzkarWidgetExtensionExtension.entitlements */,
 				CA0236B42D7C84B800F80F44 /* adhan.wav */,
 				CA0236B52D7C84B800F80F44 /* azkar_1.wav */,
+				CA0236BA2D7C84B800F80F44 /* adhan_ios.wav */,
 				CA0236B32D7C84B800F80F44 /* azkar_2.wav */,
 				9740EEB11CF90186004384FC /* Flutter */,
 				97C146F01CF9000F007C117D /* Runner */,
@@ -360,6 +363,7 @@
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
 				CA0236B72D7C84B800F80F44 /* adhan.wav in Resources */,
+				CA0236B92D7C84B800F80F44 /* adhan_ios.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

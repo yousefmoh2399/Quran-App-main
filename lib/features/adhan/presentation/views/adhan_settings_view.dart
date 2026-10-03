@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -55,6 +56,61 @@ class AdhanSettingsView extends StatelessWidget {
         return ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
           children: [
+            if (settings.latitude == 0.0 && settings.longitude == 0.0) ...[
+              Container(
+                margin: const EdgeInsets.only(bottom: 14.0),
+                padding: const EdgeInsets.all(12.0),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withOpacity(0.12),
+                  borderRadius: AppRadius.borderMd,
+                  border: Border.all(color: Colors.amber.withOpacity(0.5)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.location_off_rounded, size: 22, color: Colors.amber),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'لم يتم تحديد موقعك بعد. يرجى تفعيل الموقع أو اختيار مدينتك يدوياً لحساب المواقيت وجدولة تنبيهات الأذان.',
+                        style: TextStyle(
+                          fontFamily: AppTypography.uiFont,
+                          fontSize: 12.0,
+                          color: colors.text,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            if (Platform.isIOS) ...[
+              Container(
+                margin: const EdgeInsets.only(bottom: 14.0),
+                padding: const EdgeInsets.all(12.0),
+                decoration: BoxDecoration(
+                  color: colors.primary.withOpacity(0.08),
+                  borderRadius: AppRadius.borderMd,
+                  border: Border.all(color: colors.primary.withOpacity(0.2)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline_rounded, size: 20, color: colors.primary),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'تنبيهات أذان iOS: يتم جدولة 8 أيام مسبقاً (40 إشعاراً) بصوت الأذان المبارك وبتصنيف الوقت الحساس (Time-Sensitive). تتجدد الجدولة تلقائياً عند فتح التطبيق.',
+                        style: TextStyle(
+                          fontFamily: AppTypography.uiFont,
+                          fontSize: 12.0,
+                          color: colors.text,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             // 1. Calculation Method Card
             _buildSectionHeader('طريقة حساب المواقيت', Icons.calculate_rounded, colors),
             AppSpacing.verticalXs,
