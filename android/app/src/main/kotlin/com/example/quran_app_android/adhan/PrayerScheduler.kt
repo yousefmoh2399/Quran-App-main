@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.PowerManager
 import android.util.Log
+import com.example.quran_app_android.MainActivity
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -83,13 +84,20 @@ object PrayerScheduler {
             }
 
             try {
+                val showIntent = Intent(context, MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                }
+                val showPending = PendingIntent.getActivity(
+                    context,
+                    prayer.requestCode,
+                    showIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     if (canExact) {
-                        alarmManager.setExactAndAllowWhileIdle(
-                            AlarmManager.RTC_WAKEUP,
-                            prayer.timeMillis,
-                            pendingIntent
-                        )
+                        val alarmClockInfo = AlarmManager.AlarmClockInfo(prayer.timeMillis, showPending)
+                        alarmManager.setAlarmClock(alarmClockInfo, pendingIntent)
                     } else {
                         Log.w(TAG, "⚠️ صلاحية المنبهات الدقيقة غير متاحة، استخدام setAndAllowWhileIdle لصلاة ${prayer.nameAr}")
                         alarmManager.setAndAllowWhileIdle(
@@ -211,12 +219,19 @@ object PrayerScheduler {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
+            val showIntent = Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+            val showPending = PendingIntent.getActivity(
+                context,
+                TEST_ADHAN_REQUEST_CODE,
+                showIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmManager.setExactAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    triggerTime,
-                    pendingIntent
-                )
+                val alarmClockInfo = AlarmManager.AlarmClockInfo(triggerTime, showPending)
+                alarmManager.setAlarmClock(alarmClockInfo, pendingIntent)
             } else {
                 alarmManager.setExact(
                     AlarmManager.RTC_WAKEUP,

@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.util.Log
+import com.example.quran_app_android.MainActivity
 import com.example.quran_app_android.azkar.AzkarScheduler
 import org.json.JSONArray
 import org.json.JSONObject
@@ -65,22 +66,40 @@ object UnifiedReminderScheduler {
         )
 
         try {
-            // "alarm غير دقيق (setAndAllowWhileIdle) للتذكيرات العادية، وexact للأذان فقط"
+            val showIntent = Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+            val showPending = PendingIntent.getActivity(
+                context,
+                REQUEST_CODE_UNIFIED_ALARM,
+                showIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmManager.setAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    earliestTriggerTime,
-                    pendingIntent
-                )
+                val canExact = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    alarmManager.canScheduleExactAlarms()
+                } else true
+
+                if (canExact) {
+                    val alarmClockInfo = AlarmManager.AlarmClockInfo(earliestTriggerTime, showPending)
+                    alarmManager.setAlarmClock(alarmClockInfo, pendingIntent)
+                } else {
+                    alarmManager.setAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        earliestTriggerTime,
+                        pendingIntent
+                    )
+                }
             } else {
-                alarmManager.set(
+                alarmManager.setExact(
                     AlarmManager.RTC_WAKEUP,
                     earliestTriggerTime,
                     pendingIntent
                 )
             }
 
-            Log.i(TAG, "⏰ Scheduled unified alarm for [${closestReminder.id} - ${closestReminder.type}] at ${Date(earliestTriggerTime)}")
+            Log.i(TAG, "⏰ Scheduled unified alarm (exact alarm clock) for [${closestReminder.id} - ${closestReminder.type}] at ${Date(earliestTriggerTime)}")
 
             // Save active schedule info in SharedPreferences for easy querying
             val prefs = context.getSharedPreferences("unified_reminders_state", Context.MODE_PRIVATE)

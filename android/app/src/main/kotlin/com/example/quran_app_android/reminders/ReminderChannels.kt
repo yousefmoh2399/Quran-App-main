@@ -86,6 +86,7 @@ object ReminderChannels {
             val channel = NotificationChannel(channelId, name, importance).apply {
                 description = desc
                 enableVibration(true)
+                lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
                 if (soundKey == "silent") {
                     setSound(null, null)
                 } else if (soundUri != null) {

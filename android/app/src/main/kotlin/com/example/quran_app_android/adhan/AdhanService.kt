@@ -16,6 +16,7 @@ import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.Build
 import android.os.IBinder
+import android.os.PowerManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.example.quran_app_android.R
@@ -124,6 +125,7 @@ class AdhanService : Service(), AudioManager.OnAudioFocusChangeListener {
 
             player = MediaPlayer.create(this, resId).apply {
                 setAudioAttributes(audioAttributes)
+                setWakeMode(applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
                 isLooping = false
                 setOnCompletionListener {
                     Log.i(TAG, "Adhan audio playback finished smoothly")
@@ -174,6 +176,7 @@ class AdhanService : Service(), AudioManager.OnAudioFocusChangeListener {
             val resId = R.raw.post_adhan_dua
             player = MediaPlayer.create(this, resId).apply {
                 setAudioAttributes(audioAttributes)
+                setWakeMode(applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
                 isLooping = false
                 setOnCompletionListener {
                     Log.i(TAG, "Sheikh Al-Shaarawy Du'a playback completed smoothly")
@@ -269,10 +272,8 @@ class AdhanService : Service(), AudioManager.OnAudioFocusChangeListener {
                     return
                 }
 
-                if (action == "android.media.VOLUME_CHANGED_ACTION" ||
-                    action == Intent.ACTION_SCREEN_OFF ||
-                    action == Intent.ACTION_SCREEN_ON) {
-                    Log.i(TAG, "🔕 Hardware button press detected via broadcast [$action] -> Silencing Adhan")
+                if (action == "android.media.VOLUME_CHANGED_ACTION") {
+                    Log.i(TAG, "🔕 Hardware volume button press detected via broadcast [$action] -> Silencing Adhan")
                     silenceAdhan()
                 }
             }
@@ -280,8 +281,6 @@ class AdhanService : Service(), AudioManager.OnAudioFocusChangeListener {
 
         val filter = IntentFilter().apply {
             addAction("android.media.VOLUME_CHANGED_ACTION")
-            addAction(Intent.ACTION_SCREEN_OFF)
-            addAction(Intent.ACTION_SCREEN_ON)
         }
 
         try {

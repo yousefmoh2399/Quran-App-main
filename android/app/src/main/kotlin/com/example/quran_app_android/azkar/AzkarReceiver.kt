@@ -81,9 +81,10 @@ class AzkarReceiver : BroadcastReceiver() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channelName = if (settings.soundEnabled) "تنبيهات الأذكار (صوتي)" else "تنبيهات الأذكار (صامت)"
-            val importance = if (settings.soundEnabled) NotificationManager.IMPORTANCE_DEFAULT else NotificationManager.IMPORTANCE_LOW
+            val importance = if (settings.soundEnabled) NotificationManager.IMPORTANCE_HIGH else NotificationManager.IMPORTANCE_DEFAULT
             val channel = NotificationChannel(channelId, channelName, importance).apply {
                 description = "تنبيهات واستغفار دوري خلال اليوم"
+                lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
                 if (settings.vibrationEnabled) {
                     enableVibration(true)
                     vibrationPattern = longArrayOf(0, 250, 200, 250)
@@ -133,7 +134,9 @@ class AzkarReceiver : BroadcastReceiver() {
             .setContentIntent(contentPendingIntent)
             .setAutoCancel(true)
             .setOnlyAlertOnce(false)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setPriority(if (settings.soundEnabled) NotificationCompat.PRIORITY_MAX else NotificationCompat.PRIORITY_DEFAULT)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 
         if (settings.vibrationEnabled) {
             builder.setVibrate(longArrayOf(0, 250, 200, 250))

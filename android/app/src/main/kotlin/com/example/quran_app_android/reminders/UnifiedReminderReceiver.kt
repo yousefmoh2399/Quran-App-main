@@ -122,7 +122,9 @@ class UnifiedReminderReceiver : BroadcastReceiver() {
             .setSmallIcon(R.drawable.ic_crescent_moon)
             .setLargeIcon(appIconBitmap)
             .setAutoCancel(true)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 
         val soundKey = ReminderChannels.getSoundKeyForType(context, reminder.type)
         val soundUri = ReminderChannels.getSoundUri(context, soundKey)

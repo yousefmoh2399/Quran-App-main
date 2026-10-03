@@ -29,16 +29,29 @@ class AlarmReceiver : BroadcastReceiver() {
             "🚨 تم استقبال منبّه صلاة $prayerName (mode=$notificationMode, sound=$adhanSound, test=$isTest)"
         )
 
-        // 1. استيقاظ المعالج لحظيًا
+        // 1. استيقاظ المعالج لحظيًا وضمان عدم نوم الـ CPU
         try {
             val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-            val wakeLock = pm.newWakeLock(
-                PowerManager.PARTIAL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
-                "quran_app:adhan_alarm_wakelock"
+            val cpuWakeLock = pm.newWakeLock(
+                PowerManager.PARTIAL_WAKE_LOCK,
+                "quran_app:adhan_alarm_cpu_wakelock"
             )
-            wakeLock.acquire(15 * 1000L) // 15 ثانية كافية لإطلاق الخدمة والشاشة
+            cpuWakeLock.acquire(45 * 1000L) // 45 ثانية كافية لإطلاق الخدمة وبدء تشغيل الصوت
         } catch (e: Exception) {
-            Log.e("AlarmReceiver", "⚠️ فشل أخذ WakeLock: ${e.message}")
+            Log.e("AlarmReceiver", "⚠️ فشل أخذ CPU WakeLock: ${e.message}")
+        }
+
+        // إيقاظ وإضاءة الشاشة فوراً عند الأذان
+        try {
+            val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+            @Suppress("DEPRECATION")
+            val screenLock = pm.newWakeLock(
+                PowerManager.SCREEN_BRIGHT_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP or PowerManager.ON_AFTER_RELEASE,
+                "quran_app:adhan_screen_wakelock"
+            )
+            screenLock.acquire(10 * 1000L)
+        } catch (e: Exception) {
+            Log.w("AlarmReceiver", "⚠️ فشل إضاءة الشاشة مباشرة: ${e.message}")
         }
 
         // 2. تجديد وإكمال نافذة الـ 7 أيام فورًا (Self-replenishing rolling window)

@@ -88,19 +88,26 @@ class AdhanAlertActivity : AppCompatActivity() {
         if (!isFinishing) finish()
     }
 
+    private var activityStartTime: Long = 0L
+
     private fun setupLockScreenPresentation() {
+        activityStartTime = System.currentTimeMillis()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true)
             setTurnScreenOn(true)
-        } else {
-            @Suppress("DEPRECATION")
-            window.addFlags(
-                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
-                WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
-            )
         }
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        @Suppress("DEPRECATION")
+        window.addFlags(
+            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+            WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+            WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
+            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+        )
+
+        val keyguardManager = getSystemService(Context.KEYGUARD_SERVICE) as? android.app.KeyguardManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            keyguardManager?.requestDismissKeyguard(this, null)
+        }
 
         // Android 14 (API 34) verification
         if (Build.VERSION.SDK_INT >= 34) {
@@ -279,6 +286,11 @@ class AdhanAlertActivity : AppCompatActivity() {
         screenOffReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 if (intent?.action == Intent.ACTION_SCREEN_OFF) {
+                    val elapsed = System.currentTimeMillis() - activityStartTime
+                    if (elapsed < 1500L) {
+                        Log.i(TAG, "Ignoring initial SCREEN_OFF event during activity startup ($elapsed ms)")
+                        return
+                    }
                     Log.i(TAG, "Screen off broadcast received (Power button pressed) -> Silencing Adhan")
                     silenceAdhanByHardwareButton("Power Button (Screen Off)")
                     handler.removeCallbacks(autoDismissRunnable)
