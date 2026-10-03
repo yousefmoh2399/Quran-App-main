@@ -201,7 +201,7 @@ class NativeRemindersBridge(private val context: Context) : MethodChannel.Method
             }
 
             "markCommuteCompleted" -> {
-                val slotId = call.argument<String>("slot_id") ?: "commute"
+                val slotId = call.argument<String>("slotId") ?: call.argument<String>("slot_id") ?: "commute"
                 val dateStr = call.argument<String>("date") ?: SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
                 val prefs = context.getSharedPreferences(ReminderCancellationChecker.PREFS_USER_PROGRESS, Context.MODE_PRIVATE)
                 prefs.edit().putBoolean("commute_done_${slotId}_$dateStr", true).apply()

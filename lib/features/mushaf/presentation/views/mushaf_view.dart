@@ -605,18 +605,24 @@ class _MushafViewState extends State<MushafView> {
                   'المقروء: $readCount من $target صفحات',
                   style: const TextStyle(color: Colors.white, fontSize: 12.5, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 4),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2E7D32),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    minimumSize: const Size(120, 32),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  onPressed: controller.completeCommuteWird,
-                  child: const Text('أتممت الورد ✓', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                ),
+                Obx(() {
+                  final isDone = controller.isCommuteCompleted.value;
+                  return ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isDone ? Colors.grey.shade700 : const Color(0xFF2E7D32),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                      minimumSize: const Size(120, 32),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    icon: Icon(isDone ? Icons.check_circle_rounded : Icons.done_all_rounded, size: 16),
+                    onPressed: isDone ? null : controller.completeCommuteWird,
+                    label: Text(
+                      isDone ? 'تم الإنجاز بنجاح ✓' : 'أتممت الورد ✓',
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    ),
+                  );
+                }),
               ],
             ),
           ),

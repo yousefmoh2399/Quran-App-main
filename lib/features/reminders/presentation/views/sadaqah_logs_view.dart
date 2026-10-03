@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:quran_app_android/core/native/native_reminders_bridge.dart';
+import 'package:quran_app_android/core/util/app_snackbar.dart';
 
 class SadaqahLogsView extends StatefulWidget {
   const SadaqahLogsView({super.key});
@@ -33,60 +33,76 @@ class _SadaqahLogsViewState extends State<SadaqahLogsView> {
     final amountController = TextEditingController();
     final noteController = TextEditingController(text: 'صدقة شهرية');
 
-    Get.defaultDialog(
-      title: 'تسجيل صدقة مباركة',
-      titleStyle: const TextStyle(fontWeight: FontWeight.bold),
-      content: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('تسجيل صدقة مباركة', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: amountController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'المبلغ (اختياري)',
                 hintText: 'مثلاً: 50 أو 100',
-                prefixIcon: Icon(Icons.attach_money_rounded),
+                prefixIcon: const Icon(Icons.attach_money_rounded),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: noteController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'بيان أو ملاحظة',
                 hintText: 'إطعام مسكين، كفالة، صدقة جارية...',
-                prefixIcon: Icon(Icons.note_alt_outlined),
+                prefixIcon: const Icon(Icons.note_alt_outlined),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
           ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+            child: const Text('إلغاء', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF1B4D3E),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            onPressed: () async {
+              final amountText = amountController.text.trim();
+              final amount = amountText.isNotEmpty ? double.tryParse(amountText) : null;
+              final note = noteController.text.trim();
+              final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+              await NativeRemindersBridge.markSadaqahDonated(
+                date: todayStr,
+                amount: amount,
+                note: note.isNotEmpty ? note : 'صدقة',
+              );
+
+              if (dialogCtx.mounted) {
+                Navigator.of(dialogCtx).pop();
+              }
+              if (mounted) {
+                _loadLogs();
+                AppSnackbar.show(
+                  'تقبل الله طاعتكم',
+                  'تم حفظ الصدقة في سجلك المحلي بنجاح 🤲',
+                  context: context,
+                );
+              }
+            },
+            child: const Text('تسجيل وتأكيد', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
       ),
-      textConfirm: 'تسجيل وتأكيد',
-      textCancel: 'إلغاء',
-      confirmTextColor: Colors.white,
-      buttonColor: const Color(0xFF1B4D3E),
-      onConfirm: () async {
-        final amountText = amountController.text.trim();
-        final amount = amountText.isNotEmpty ? double.tryParse(amountText) : null;
-        final note = noteController.text.trim();
-        final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
-
-        await NativeRemindersBridge.markSadaqahDonated(
-          date: todayStr,
-          amount: amount,
-          note: note.isNotEmpty ? note : 'صدقة',
-        );
-
-        Get.back();
-        _loadLogs();
-        Get.snackbar(
-          'تقبل الله طاعتكم',
-          'تم حفظ الصدقة في سجلك المحلي بنجاح 🤲',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: const Color(0xFF1B4D3E),
-          colorText: Colors.white,
-        );
-      },
     );
   }
 

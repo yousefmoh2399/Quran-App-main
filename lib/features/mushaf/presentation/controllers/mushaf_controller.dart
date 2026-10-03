@@ -54,6 +54,7 @@ class MushafController extends GetxController {
   final RxInt commutePagesRead = 1.obs;
   final RxString commuteSlotId = 'commute'.obs;
   final RxBool commuteCountTowardsMain = true.obs;
+  final RxBool isCommuteCompleted = false.obs;
 
   // Debounced last read timer (2 seconds after page settles)
   Timer? _lastReadDebounce;
@@ -135,6 +136,12 @@ class MushafController extends GetxController {
         isCommuteMode.value = true;
         if (args.containsKey('target_pages')) {
           commuteTargetPages.value = (args['target_pages'] as num).toInt();
+        }
+        if (args.containsKey('slot_id')) {
+          commuteSlotId.value = args['slot_id']?.toString() ?? 'commute';
+        }
+        if (args.containsKey('count_towards_main')) {
+          commuteCountTowardsMain.value = args['count_towards_main'] as bool? ?? true;
         }
         if (args.containsKey('page')) {
           final p = (args['page'] as num).toInt().clamp(1, 604);
@@ -578,13 +585,67 @@ class MushafController extends GetxController {
         slotId: commuteSlotId.value,
         countTowardsMain: commuteCountTowardsMain.value,
       );
-      Get.snackbar(
-        'مبارك إتمام ورد المواصلات! 🎉',
-        'تم تسجيل $count صفحات وزيادة سلسلة التلاوة بنجاح 🤲',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: const Color(0xFF1B4D3E),
-        colorText: Colors.white,
-        duration: const Duration(seconds: 4),
+      isCommuteCompleted.value = true;
+
+      Get.dialog(
+        AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Row(
+            children: const [
+              Text('🎉 '),
+              Text('تقبل الله طاعتكم!', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'تم تسجيل إتمام ورد المواصلات بنجاح ($count صفحات).',
+                style: const TextStyle(fontSize: 15),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1B4D3E).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: const [
+                    Icon(Icons.check_circle_rounded, color: Color(0xFF1B4D3E)),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'تم تحديث سجل قراءتك وإلغاء تذكير هذا الوقت لهذا اليوم 🌿',
+                        style: TextStyle(fontSize: 13, color: Color(0xFF1B4D3E), fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              child: const Text('متابعة القراءة', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1B4D3E),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              onPressed: () {
+                Get.back();
+                Get.back();
+              },
+              child: const Text('العودة للرئيسية'),
+            ),
+          ],
+        ),
+        barrierDismissible: true,
       );
     } catch (e) {
       debugPrint('Error completing commute wird: $e');

@@ -67,6 +67,18 @@ class MainActivity : FlutterActivity() {
         if (extras.containsKey("commute_mode")) {
             map["commute_mode"] = extras.getBoolean("commute_mode")
         }
+        if (extras.containsKey("target_pages")) {
+            map["target_pages"] = extras.getInt("target_pages")
+        }
+        if (extras.containsKey("slot_id")) {
+            map["slot_id"] = extras.getString("slot_id")
+        }
+        if (extras.containsKey("count_towards_main")) {
+            map["count_towards_main"] = extras.getBoolean("count_towards_main")
+        }
+        if (extras.containsKey("page")) {
+            map["page"] = extras.getInt("page")
+        }
         if (extras.containsKey("category")) {
             map["category"] = extras.getString("category")
         }

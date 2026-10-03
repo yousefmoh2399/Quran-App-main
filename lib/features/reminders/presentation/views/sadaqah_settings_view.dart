@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quran_app_android/core/design/responsive.dart';
 import 'package:quran_app_android/core/native/native_reminders_bridge.dart';
+import 'package:quran_app_android/core/util/app_snackbar.dart';
 
 class SadaqahSettingsView extends StatefulWidget {
   const SadaqahSettingsView({super.key});
@@ -71,13 +72,13 @@ class _SadaqahSettingsViewState extends State<SadaqahSettingsView> {
 
     await NativeRemindersBridge.saveReminder(item);
 
-    Get.snackbar(
-      'تم الحفظ',
-      'تم تحديث إعدادات تذكير الصدقة وإعادة الجدولة',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: const Color(0xFF1B4D3E),
-      colorText: Colors.white,
-    );
+    if (mounted) {
+      AppSnackbar.show(
+        'تم الحفظ',
+        'تم تحديث إعدادات تذكير الصدقة وإعادة جدولتها بنجاح 🌿',
+        context: context,
+      );
+    }
   }
 
   Future<void> _pickTime() async {
@@ -301,13 +302,13 @@ class _SadaqahSettingsViewState extends State<SadaqahSettingsView> {
                   label: const Text('تجربة إشعار الصدقة وزر "تصدّقت" الآن'),
                   onPressed: () async {
                     await NativeRemindersBridge.testTriggerReminder('sadaqah_monthly');
-                    Get.snackbar(
-                      'تم إرسال الإشعار',
-                      'تفقّد لوحة الإشعارات واضغط على زر "تصدّقت ✓" لتجربة التسجيل المباشر',
-                      snackPosition: SnackPosition.TOP,
-                      backgroundColor: primary,
-                      colorText: Colors.white,
-                    );
+                    if (context.mounted) {
+                      AppSnackbar.show(
+                        'تم إرسال الإشعار',
+                        'تفقّد لوحة الإشعارات واضغط على زر "تصدّقت ✓" لتجربة التسجيل المباشر',
+                        context: context,
+                      );
+                    }
                   },
                 ),
               ],

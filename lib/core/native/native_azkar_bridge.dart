@@ -21,10 +21,10 @@ class NativeAzkarBridge {
 
         final interval = (settings['interval'] as num?)?.toInt() ?? 60;
         final enabled = (settings['enabled'] as bool?) ?? true;
-        final fromH = (settings['activeFromHour'] as num?)?.toInt() ?? 8;
-        final fromM = (settings['activeFromMinute'] as num?)?.toInt() ?? 0;
-        final toH = (settings['activeToHour'] as num?)?.toInt() ?? 22;
-        final toM = (settings['activeToMinute'] as num?)?.toInt() ?? 0;
+        final fromH = (settings['fromHour'] ?? settings['activeFromHour'] as num?)?.toInt() ?? 8;
+        final fromM = (settings['fromMin'] ?? settings['activeFromMinute'] as num?)?.toInt() ?? 0;
+        final toH = (settings['toHour'] ?? settings['activeToHour'] as num?)?.toInt() ?? 22;
+        final toM = (settings['toMin'] ?? settings['activeToMinute'] as num?)?.toInt() ?? 0;
 
         await NativeRemindersBridge.saveReminder({
           'id': 'azkar_periodic',
@@ -54,10 +54,10 @@ class NativeAzkarBridge {
       try {
         final interval = (settings['interval'] as num?)?.toInt() ?? 60;
         final enabled = (settings['enabled'] as bool?) ?? true;
-        final fromH = (settings['activeFromHour'] as num?)?.toInt() ?? 8;
-        final fromM = (settings['activeFromMinute'] as num?)?.toInt() ?? 0;
-        final toH = (settings['activeToHour'] as num?)?.toInt() ?? 22;
-        final toM = (settings['activeToMinute'] as num?)?.toInt() ?? 0;
+        final fromH = (settings['fromHour'] ?? settings['activeFromHour'] as num?)?.toInt() ?? 8;
+        final fromM = (settings['fromMin'] ?? settings['activeFromMinute'] as num?)?.toInt() ?? 0;
+        final toH = (settings['toHour'] ?? settings['activeToHour'] as num?)?.toInt() ?? 22;
+        final toM = (settings['toMin'] ?? settings['activeToMinute'] as num?)?.toInt() ?? 0;
 
         await NativeRemindersBridge.saveReminder({
           'id': 'azkar_periodic',

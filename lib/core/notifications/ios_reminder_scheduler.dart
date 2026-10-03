@@ -232,7 +232,7 @@ class IosReminderNotificationScheduler {
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        payload: jsonEncode({'type': 'wird_daily', 'dayOffset': dayOffset}),
+        payload: jsonEncode({'type': 'wird_daily', 'route': '/mushaf', 'dayOffset': dayOffset}),
       );
     }
   }
@@ -248,6 +248,14 @@ class IosReminderNotificationScheduler {
 
     final hour = (sched['hour'] as num?)?.toInt() ?? 7;
     final minute = (sched['minute'] as num?)?.toInt() ?? 30;
+    final targetPages = (sched['target_pages'] as num?)?.toInt() ?? 3;
+    final lastPage = (sched['last_page'] as num?)?.toInt() ?? 1;
+    final countTowardsMain = sched['count_towards_main'] as bool? ?? true;
+
+    final rawDays = sched['days'];
+    final Set<int> activeDays = rawDays is List
+        ? rawDays.map((e) => (e as num).toInt()).toSet()
+        : {1, 2, 3, 4, 5};
 
     for (int dayOffset = 0; dayOffset < NotificationBudget.transitSlotCount; dayOffset++) {
       final scheduledDate = DateTime(
@@ -259,6 +267,12 @@ class IosReminderNotificationScheduler {
       );
 
       if (!scheduledDate.isAfter(now)) continue;
+
+      // Check active days (Sun=1, Mon=2 ... Sat=7) or standard Dart weekday (Mon=1 ... Sun=7)
+      final customDay = scheduledDate.weekday == DateTime.sunday ? 1 : scheduledDate.weekday + 1;
+      if (!activeDays.contains(customDay) && !activeDays.contains(scheduledDate.weekday)) {
+        continue;
+      }
 
       final id = NotificationBudget.getTransitId(dayOffset);
       final tzTime = tz.TZDateTime.from(scheduledDate, tz.local);
@@ -274,13 +288,21 @@ class IosReminderNotificationScheduler {
       await notificationsPlugin.zonedSchedule(
         id,
         'أذكار وورد المواصلات',
-        'استثمر وقت تنقلك في ذكر الله والاستماع للقرآن الكريم 🚗',
+        'استثمر وقت تنقلك في ذكر الله والاستماع للقرآن الكريم ($targetPages صفحات) 🚗',
         tzTime,
         const NotificationDetails(iOS: darwinDetails),
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        payload: jsonEncode({'type': 'transit', 'dayOffset': dayOffset}),
+        payload: jsonEncode({
+          'type': 'wird_commute',
+          'route': '/mushaf',
+          'commute_mode': true,
+          'target_pages': targetPages,
+          'page': lastPage,
+          'count_towards_main': countTowardsMain,
+          'dayOffset': dayOffset,
+        }),
       );
     }
   }

@@ -140,12 +140,41 @@ class UnifiedReminderReceiver : BroadcastReceiver() {
             }
 
             ReminderItem.TYPE_WIRD_COMMUTE -> {
-                val targetPages = schedule.optInt("target_pages", 3)
+                var targetPages = schedule.optInt("target_pages", 3)
+                var slotId: String? = null
+                val slotsArray = schedule.optJSONArray("slots")
+                if (slotsArray != null && slotsArray.length() > 0) {
+                    val cal = Calendar.getInstance()
+                    val currentMins = cal.get(Calendar.HOUR_OF_DAY) * 60 + cal.get(Calendar.MINUTE)
+                    var bestSlot: JSONObject? = null
+                    var minDiff = Int.MAX_VALUE
+                    for (i in 0 until slotsArray.length()) {
+                        val s = slotsArray.getJSONObject(i)
+                        val h = s.optInt("hour", 7)
+                        val m = s.optInt("minute", 30)
+                        val diff = Math.abs((h * 60 + m) - currentMins)
+                        if (diff < minDiff) {
+                            minDiff = diff
+                            bestSlot = s
+                        }
+                    }
+                    if (bestSlot != null) {
+                        targetPages = bestSlot.optInt("target_pages", targetPages)
+                        slotId = bestSlot.optString("id", null)
+                    }
+                }
+
                 if (title.isEmpty()) title = "ورد المواصلات 🚌"
                 if (body.isEmpty()) body = "استثمر وقت طريقك في تلاوة القرآن الكريم ($targetPages صفحات)"
                 openAppIntent.putExtra("target_screen", "commute_wird")
                 openAppIntent.putExtra("route", "/mushaf")
                 openAppIntent.putExtra("commute_mode", true)
+                openAppIntent.putExtra("target_pages", targetPages)
+                if (slotId != null) openAppIntent.putExtra("slot_id", slotId)
+                val countTowards = schedule.optBoolean("count_towards_main", true)
+                openAppIntent.putExtra("count_towards_main", countTowards)
+                val lastPage = schedule.optInt("last_page", 1)
+                openAppIntent.putExtra("page", lastPage)
                 openAppIntent.putExtra("reminder_id", reminder.id)
             }
 

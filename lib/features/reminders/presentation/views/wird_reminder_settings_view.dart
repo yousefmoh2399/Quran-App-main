@@ -5,6 +5,8 @@ import 'package:quran_app_android/core/data/models/user_models.dart';
 import 'package:quran_app_android/core/data/repositories/user_repository.dart';
 import 'package:quran_app_android/core/design/responsive.dart';
 import 'package:quran_app_android/core/native/native_reminders_bridge.dart';
+import 'package:quran_app_android/core/util/app_snackbar.dart';
+import 'package:quran_app_android/features/home/presentation/view_model/home_view_model.dart';
 
 class WirdReminderSettingsView extends StatefulWidget {
   const WirdReminderSettingsView({super.key});
@@ -95,13 +97,17 @@ class _WirdReminderSettingsViewState extends State<WirdReminderSettingsView> {
       'last_triggered': 0,
     });
 
-    Get.snackbar(
-      'تم الحفظ',
-      'تم تحديث موعد تذكير الورد القرآني وجدولته بنجاح',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: const Color(0xFF1B4D3E),
-      colorText: Colors.white,
-    );
+    if (Get.isRegistered<HomeViewModel>()) {
+      Get.find<HomeViewModel>().loadUserQuranData();
+    }
+
+    if (mounted) {
+      AppSnackbar.show(
+        'تم الحفظ',
+        'تم تحديث موعد تذكير الورد القرآني وجدولته بنجاح 📖',
+        context: context,
+      );
+    }
   }
 
   @override
@@ -241,13 +247,13 @@ class _WirdReminderSettingsViewState extends State<WirdReminderSettingsView> {
                   label: const Text('تجربة إشعار الورد اليومي الآن'),
                   onPressed: () async {
                     await NativeRemindersBridge.testTriggerReminder('wird_daily');
-                    Get.snackbar(
-                      'تم إرسال الإشعار',
-                      'تفقّد لوحة الإشعارات واضغط عليه للفتح المباشر على المصحف',
-                      snackPosition: SnackPosition.TOP,
-                      backgroundColor: primary,
-                      colorText: Colors.white,
-                    );
+                    if (context.mounted) {
+                      AppSnackbar.show(
+                        'تم إرسال الإشعار',
+                        'تفقّد لوحة الإشعارات واضغط عليه للفتح المباشر على المصحف',
+                        context: context,
+                      );
+                    }
                   },
                 ),
               ],

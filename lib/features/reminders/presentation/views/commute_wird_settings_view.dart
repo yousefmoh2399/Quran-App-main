@@ -431,10 +431,16 @@ class _CommuteWirdSettingsViewState extends State<CommuteWirdSettingsView> {
                   icon: const Icon(Icons.menu_book_rounded),
                   label: const Text('فتح المصحف الآن في "وضع المواصلات"'),
                   onPressed: () {
+                    final primarySlot = _slots.isNotEmpty
+                        ? _slots.first
+                        : CommuteSlot(id: 'morning', title: 'الصباح', hour: 7, minute: 30, targetPages: 3);
                     Get.toNamed('/mushaf', arguments: {
                       'commute_mode': true,
                       'page': _state?.currentPage ?? 1,
-                    });
+                      'target_pages': primarySlot.targetPages,
+                      'slot_id': primarySlot.id,
+                      'count_towards_main': _countTowardsMain,
+                    })?.then((_) => _loadSettings());
                   },
                 ),
               ],

@@ -108,14 +108,32 @@ object UnifiedReminderScheduler {
             }
 
             ReminderItem.TYPE_WIRD_COMMUTE -> {
-                val hour = schedule.optInt("hour", 7)
-                val minute = schedule.optInt("minute", 30)
                 val daysArray = schedule.optJSONArray("days")
                 val activeDays = if (daysArray != null && daysArray.length() > 0) {
                     (0 until daysArray.length()).map { daysArray.getInt(it) }.toSet()
                 } else {
                     setOf(Calendar.SUNDAY, Calendar.MONDAY, Calendar.TUESDAY, Calendar.WEDNESDAY, Calendar.THURSDAY)
                 }
+
+                val slotsArray = schedule.optJSONArray("slots")
+                if (slotsArray != null && slotsArray.length() > 0) {
+                    var earliestSlot = Long.MAX_VALUE
+                    for (i in 0 until slotsArray.length()) {
+                        val slot = slotsArray.getJSONObject(i)
+                        val slotHour = slot.optInt("hour", 7)
+                        val slotMinute = slot.optInt("minute", 30)
+                        val slotNext = calculateNextWeeklyTime(slotHour, slotMinute, activeDays, now)
+                        if (slotNext in (now + 1000L)..<earliestSlot) {
+                            earliestSlot = slotNext
+                        }
+                    }
+                    if (earliestSlot != Long.MAX_VALUE) {
+                        return earliestSlot
+                    }
+                }
+
+                val hour = schedule.optInt("hour", 7)
+                val minute = schedule.optInt("minute", 30)
                 calculateNextWeeklyTime(hour, minute, activeDays, now)
             }
 
