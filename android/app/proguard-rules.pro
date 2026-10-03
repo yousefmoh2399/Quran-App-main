@@ -6,6 +6,10 @@
 -keep class io.flutter.** { *; }
 -keep class io.flutter.plugins.** { *; }
 
+# Flutter Deferred Components / Play Core (optional feature, ignore missing references)
+-dontwarn com.google.android.play.core.**
+-dontwarn io.flutter.embedding.engine.deferredcomponents.**
+
 # Keep native app code, broadcast receivers, alarm services, and widgets
 -keep class com.example.quran_app_android.** { *; }
 -keepclassmembers class com.example.quran_app_android.** { *; }
