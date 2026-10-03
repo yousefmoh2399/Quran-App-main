@@ -8,6 +8,7 @@ import 'package:quran_app_android/core/design/app_typography.dart';
 import 'package:quran_app_android/core/design/components/app_card.dart';
 import 'package:quran_app_android/core/design/components/app_scaffold.dart';
 import 'package:quran_app_android/core/design/gallery/design_gallery_view.dart';
+import 'package:quran_app_android/core/util/assets.dart';
 import 'package:quran_app_android/core/util/routes/routes.dart';
 import 'package:quran_app_android/features/settings/presentation/views/widget/section_theme_mode.dart';
 import 'package:quran_app_android/features/settings/presentation/views/widget/settings_group_card.dart';
@@ -34,6 +35,10 @@ class SettingsView extends StatelessWidget {
           children: [
             // App Identity Header Card
             _buildAppHeaderCard(context, colors),
+            AppSpacing.verticalMd,
+
+            // Support App Banner (Ad-Free & Voluntary Contribution)
+            _buildSupportBanner(context, colors),
             AppSpacing.verticalLg,
 
             // 1. عباداتي
@@ -170,6 +175,14 @@ class SettingsView extends StatelessWidget {
               icon: Icons.info_outline_rounded,
               children: [
                 SettingsTile(
+                  icon: Icons.volunteer_activism_rounded,
+                  iconColor: const Color(0xFFD4AF37),
+                  title: 'دعم وتطوير التطبيق (بدون إعلانات)',
+                  subtitle: 'المساهمة في استمرار التطبيق وتطويره صدقة جارية',
+                  trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
+                  onTap: () => Get.toNamed(AppRoutes.supportApp),
+                ),
+                SettingsTile(
                   icon: Icons.info_rounded,
                   title: 'عن التطبيق والمطور',
                   subtitle: 'معلومات الترخيص والمراجع ومشاركة الأجر',
@@ -271,16 +284,24 @@ class SettingsView extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 54,
-            height: 54,
+            width: 56,
+            height: 56,
             decoration: BoxDecoration(
-              color: colors.primary,
-              shape: BoxShape.circle,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: colors.primary.withOpacity(0.25),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
             ),
-            child: const Icon(
-              Icons.menu_book_rounded,
-              size: 28,
-              color: Colors.white,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.asset(
+                AssetsData.taqarrabLogo,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
           AppSpacing.horizontalMd,
@@ -289,10 +310,10 @@ class SettingsView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'تطبيق القرآن الكريم والأذكار',
+                  'تطبيق تَقَرُّب (خالٍ من الإعلانات)',
                   style: TextStyle(
                     fontFamily: AppTypography.decorativeFont,
-                    fontSize: 20,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: colors.primary,
                   ),
@@ -310,6 +331,105 @@ class SettingsView extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSupportBanner(BuildContext context, AppColorsExtension colors) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            const Color(0xFFD4AF37).withOpacity(0.16),
+            colors.primary.withOpacity(0.10),
+          ],
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
+        ),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(
+          color: const Color(0xFFD4AF37).withOpacity(0.4),
+          width: 1.2,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => Get.toNamed(AppRoutes.supportApp),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD4AF37).withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.volunteer_activism_rounded,
+                    color: Color(0xFFD4AF37),
+                    size: 22,
+                  ),
+                ),
+                AppSpacing.horizontalMd,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              'ادعم استمرار التطبيق بدون إعلانات',
+                              style: TextStyle(
+                                fontFamily: AppTypography.decorativeFont,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                color: colors.text,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: colors.primary,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Text(
+                              'صدقة جارية',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        'ساهم في خوادم التطوير وتحديث الميزات مجاناً للجميع',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: colors.textMuted,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 14,
+                  color: Color(0xFFD4AF37),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

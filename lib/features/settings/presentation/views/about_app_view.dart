@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../../../core/util/routes/routes.dart';
 import '../../../../core/util/share_helper.dart';
 import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_radius.dart';
@@ -151,6 +153,20 @@ class AboutAppView extends StatelessWidget {
                         sharePositionOrigin: getSharePositionOrigin(context),
                       );
                     },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFD4AF37),
+                      foregroundColor: Colors.black,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: AppRadius.borderMd),
+                    ),
+                    icon: const Icon(Icons.volunteer_activism_rounded, size: 18),
+                    label: const Text('ادعم التطبيق', style: TextStyle(fontWeight: FontWeight.bold)),
+                    onPressed: () => Get.toNamed(AppRoutes.supportApp),
                   ),
                 ),
               ],

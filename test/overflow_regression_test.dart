@@ -12,6 +12,7 @@ import 'package:quran_app_android/features/ramadan/presentation/views/ramadan_ca
 import 'package:quran_app_android/features/ramadan/presentation/views/ramadan_hub_view.dart';
 import 'package:quran_app_android/features/ramadan/presentation/views/ramadan_khatma_view.dart';
 import 'package:quran_app_android/features/reminders/presentation/views/reminders_debug_view.dart';
+import 'package:quran_app_android/features/settings/presentation/views/support_app_view.dart';
 import 'package:quran_app_android/features/stats/presentation/views/achievements_dashboard_view.dart';
 
 void main() {
@@ -281,6 +282,42 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
       await tester.pump(const Duration(milliseconds: 300));
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('SupportAppView renders adaptively on 320dp and 1024dp without overflow', (tester) async {
+      // 1. Small phone with 1.35x text scale
+      await tester.binding.setSurfaceSize(const Size(320, 640));
+      await tester.pumpWidget(
+        buildTestWidget(
+          child: const SupportAppView(),
+          width: 320,
+          height: 640,
+          textScale: 1.35,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.textContaining('01064053764'), findsWidgets);
+
+      // Scroll to and tap copy button
+      final copyBtn = find.textContaining('نسخ');
+      expect(copyBtn, findsWidgets);
+      await tester.ensureVisible(copyBtn.first);
+      await tester.tap(copyBtn.first);
+      await tester.pump(const Duration(seconds: 5));
+      expect(tester.takeException(), isNull);
+
+      // 2. Large iPad / Tablet landscape
+      await tester.binding.setSurfaceSize(const Size(1024, 768));
+      await tester.pumpWidget(
+        buildTestWidget(
+          child: const SupportAppView(),
+          width: 1024,
+          height: 768,
+        ),
+      );
+      await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });
   });
