@@ -15,6 +15,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.GestureDetector
+import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
@@ -43,6 +44,7 @@ class AdhanAlertActivity : AppCompatActivity() {
     private lateinit var gestureDetector: GestureDetector
 
     private var adhanCompletedReceiver: BroadcastReceiver? = null
+    private var screenOffReceiver: BroadcastReceiver? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,7 +75,10 @@ class AdhanAlertActivity : AppCompatActivity() {
         // 7. Register receiver for audio completion to reveal Du'a
         registerAdhanCompletionReceiver()
 
-        // 8. Auto-dismiss timeout
+        // 8. Register receiver for screen off (Power button) to silence adhan
+        registerScreenOffReceiver()
+
+        // 9. Auto-dismiss timeout
         handler.postDelayed(autoDismissRunnable, AUTO_DISMISS_DELAY_MS)
     }
 
@@ -225,19 +230,90 @@ class AdhanAlertActivity : AppCompatActivity() {
         }
     }
 
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (event.action == KeyEvent.ACTION_DOWN) {
+            when (event.keyCode) {
+                KeyEvent.KEYCODE_VOLUME_UP,
+                KeyEvent.KEYCODE_VOLUME_DOWN,
+                KeyEvent.KEYCODE_VOLUME_MUTE -> {
+                    Log.i(TAG, "Hardware volume key pressed (${event.keyCode}) -> Silencing Adhan")
+                    silenceAdhanByHardwareButton("Volume Button")
+                    return true // Consume event so volume HUD/beeps are suppressed
+                }
+                KeyEvent.KEYCODE_POWER -> {
+                    Log.i(TAG, "Hardware power key pressed -> Silencing Adhan")
+                    silenceAdhanByHardwareButton("Power Button")
+                    return super.dispatchKeyEvent(event)
+                }
+            }
+        }
+        return super.dispatchKeyEvent(event)
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        when (keyCode) {
+            KeyEvent.KEYCODE_VOLUME_UP,
+            KeyEvent.KEYCODE_VOLUME_DOWN,
+            KeyEvent.KEYCODE_VOLUME_MUTE -> {
+                Log.i(TAG, "onKeyDown volume key pressed ($keyCode) -> Silencing Adhan")
+                silenceAdhanByHardwareButton("Volume Button")
+                return true
+            }
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
+    private fun silenceAdhanByHardwareButton(source: String) {
+        Log.i(TAG, "Silencing Adhan via $source")
+        stopAdhanService()
+        val cardDua = findViewById<View>(R.id.cardDua)
+        revealDuaCard(cardDua)
+        val btnStopAdhan = findViewById<Button>(R.id.btnStopAdhan)
+        btnStopAdhan.isEnabled = false
+        btnStopAdhan.text = "تم كتم الصوت 🔕"
+        btnStopAdhan.alpha = 0.6f
+    }
+
+    private fun registerScreenOffReceiver() {
+        if (screenOffReceiver != null) return
+        screenOffReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                if (intent?.action == Intent.ACTION_SCREEN_OFF) {
+                    Log.i(TAG, "Screen off broadcast received (Power button pressed) -> Silencing Adhan")
+                    silenceAdhanByHardwareButton("Power Button (Screen Off)")
+                    handler.removeCallbacks(autoDismissRunnable)
+                    if (!isFinishing) {
+                        finish()
+                    }
+                }
+            }
+        }
+        val filter = IntentFilter(Intent.ACTION_SCREEN_OFF)
+        androidx.core.content.ContextCompat.registerReceiver(
+            this,
+            screenOffReceiver,
+            filter,
+            androidx.core.content.ContextCompat.RECEIVER_EXPORTED
+        )
+    }
+
     private fun registerAdhanCompletionReceiver() {
         adhanCompletedReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                Log.i(TAG, "Received adhan audio completion broadcast, showing Du'a")
+                val action = intent?.action
+                Log.i(TAG, "Received broadcast: $action, showing Du'a")
                 val cardDua = findViewById<View>(R.id.cardDua)
                 revealDuaCard(cardDua)
                 val btnStop = findViewById<Button>(R.id.btnStopAdhan)
                 btnStop.isEnabled = false
-                btnStop.text = "انتهى الأذان"
+                btnStop.text = if (action == AdhanService.ACTION_ADHAN_SILENCED) "تم كتم الصوت 🔕" else "انتهى الأذان"
                 btnStop.alpha = 0.5f
             }
         }
-        val filter = IntentFilter(AdhanService.ACTION_ADHAN_COMPLETED)
+        val filter = IntentFilter().apply {
+            addAction(AdhanService.ACTION_ADHAN_COMPLETED)
+            addAction(AdhanService.ACTION_ADHAN_SILENCED)
+        }
         androidx.core.content.ContextCompat.registerReceiver(
             this,
             adhanCompletedReceiver,
@@ -295,6 +371,9 @@ class AdhanAlertActivity : AppCompatActivity() {
         nextPrayerTimer?.cancel()
         handler.removeCallbacks(autoDismissRunnable)
         adhanCompletedReceiver?.let {
+            try { unregisterReceiver(it) } catch (_: Exception) {}
+        }
+        screenOffReceiver?.let {
             try { unregisterReceiver(it) } catch (_: Exception) {}
         }
         super.onDestroy()

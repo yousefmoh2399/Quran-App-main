@@ -7,5 +7,6 @@ struct MyHomeWidgetBundle: WidgetBundle {
         MyHomeWidget()
         PrayerTimesWidget()
         WirdKhatmaWidget()
+        RamadanWidget()
     }
 }

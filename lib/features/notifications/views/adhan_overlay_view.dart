@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:quran_app_android/core/data/models/user_models.dart';
 import 'package:quran_app_android/core/data/repositories/user_repository.dart';
+import 'package:quran_app_android/core/native/native_adhan_bridge.dart';
 import 'package:quran_app_android/core/service/settings/notifications_services.dart';
 import 'package:quran_app_android/core/util/arabic_date_formatter.dart';
 import 'package:quran_app_android/core/util/assets.dart';
@@ -216,6 +217,7 @@ class AdhanOverlayView extends StatelessWidget {
   }
 
   void _closeOverlay(int? notificationId) {
+    NativeAdhanBridge.stopAdhan();
     if (notificationId != null) {
       NotifyHelper().flutterLocalNotificationsPlugin.cancel(notificationId);
     }

@@ -6,4 +6,5 @@
     <string name="widget_azkar_large_desc">كارت الأذكار الشامل ومواقيت الصلوات الخمس اليومية (كبير 4x4)</string>
     <string name="widget_prayer_desc">مواقيت الصلاة الخمس مع العد التنازلي للصلاة القادمة (4x2)</string>
     <string name="widget_wird_desc">متابعة الورد القرآني والختمة وأيام الالتزام ومتابعة القراءة (4x2)</string>
+    <string name="widget_ramadan_desc">مواقيت الإمساك والإفطار والعد التنازلي وأدعية شهر رمضان المبارك (4x2)</string>
 </resources>

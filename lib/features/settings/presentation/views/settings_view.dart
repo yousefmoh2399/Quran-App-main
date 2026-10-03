@@ -53,10 +53,12 @@ class SettingsView extends StatelessWidget {
                   onTap: () => Get.toNamed(AppRoutes.islamicCalendar),
                 ),
                 SettingsTile(
-                  icon: Icons.nights_stay_rounded,
-                  title: 'إمساكية شهر رمضان المبارك',
-                  subtitle: 'مواقيت الإمساك والإفطار للشهر الفضيل',
-                  onTap: () => Get.toNamed(AppRoutes.ramadanImsakia),
+                  icon: Icons.nightlight_round,
+                  iconColor: const Color(0xFFD4AF37),
+                  title: 'واحة رمضان المبارك',
+                  subtitle: 'الإمساكية، الختمة، مدفع الإفطار، التراويح، وحاسبة الزكاة',
+                  trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
+                  onTap: () => Get.toNamed(AppRoutes.ramadanHub),
                 ),
                 SettingsTile(
                   icon: Icons.radio_button_checked_rounded,

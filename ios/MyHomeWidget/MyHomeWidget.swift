@@ -599,3 +599,205 @@ struct WirdKhatmaWidget: Widget {
         .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular])
     }
 }
+
+// MARK: - Ramadan Widget for iOS (WidgetKit)
+struct RamadanWidgetEntry: TimelineEntry {
+    let date: Date
+    let dayNumber: Int
+    let dayTitle: String
+    let eventTitle: String
+    let countdownText: String
+    let imsakTime: String
+    let iftarTime: String
+    let dailyDua: String
+}
+
+struct RamadanWidgetTimelineProvider: TimelineProvider {
+    func placeholder(in context: Context) -> RamadanWidgetEntry {
+        RamadanWidgetEntry(
+            date: Date(),
+            dayNumber: 1,
+            dayTitle: "اليوم 1 من رمضان",
+            eventTitle: "متبقي على موعد الإفطار",
+            countdownText: "02:45:10",
+            imsakTime: "04:15 ص",
+            iftarTime: "06:05 م",
+            dailyDua: "ذَهَبَ الظَّمَأُ، وَابْتَلَّتِ الْعُرُوقُ، وَثَبَتَ الأَجْرُ إِنْ شَاءَ اللَّهُ."
+        )
+    }
+
+    func getSnapshot(in context: Context, completion: @escaping (RamadanWidgetEntry) -> Void) {
+        completion(loadSharedRamadan())
+    }
+
+    func getTimeline(in context: Context, completion: @escaping (Timeline<RamadanWidgetEntry>) -> Void) {
+        let entry = loadSharedRamadan()
+        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 15, to: Date()) ?? Date().addingTimeInterval(900)
+        let timeline = Timeline(entries: [entry], policy: .after(nextUpdate))
+        completion(timeline)
+    }
+
+    private func loadSharedRamadan() -> RamadanWidgetEntry {
+        let defaults = UserDefaults(suiteName: "group.com.homeScreenApp")
+        let day = max(1, defaults?.integer(forKey: "ramadan_day") ?? 1)
+        let dayTitle = defaults?.string(forKey: "ramadan_day_title") ?? "اليوم \(day) من رمضان"
+        let eventTitle = defaults?.string(forKey: "ramadan_event_title") ?? "متبقي على موعد الإفطار"
+        let countdown = defaults?.string(forKey: "ramadan_countdown") ?? "00:00:00"
+        let imsak = defaults?.string(forKey: "ramadan_imsak_time") ?? "04:15 ص"
+        let iftar = defaults?.string(forKey: "ramadan_iftar_time") ?? "06:05 م"
+        let dua = defaults?.string(forKey: "ramadan_daily_dua") ?? "ذَهَبَ الظَّمَأُ، وَابْتَلَّتِ الْعُرُوقُ، وَثَبَتَ الأَجْرُ إِنْ شَاءَ اللَّهُ."
+
+        return RamadanWidgetEntry(
+            date: Date(),
+            dayNumber: day,
+            dayTitle: dayTitle,
+            eventTitle: eventTitle,
+            countdownText: countdown,
+            imsakTime: imsak,
+            iftarTime: iftar,
+            dailyDua: dua
+        )
+    }
+}
+
+struct RamadanWidgetEntryView: View {
+    var entry: RamadanWidgetTimelineProvider.Entry
+    @Environment(\.widgetFamily) var family
+
+    var body: some View {
+        switch family {
+        case .accessoryRectangular:
+            VStack(alignment: .trailing, spacing: 2) {
+                Text("🌙 \(entry.dayTitle)")
+                    .font(.system(size: 11, weight: .bold))
+                Text("\(entry.eventTitle): \(entry.countdownText)")
+                    .font(.system(size: 12, weight: .semibold))
+                Text("الإمساك: \(entry.imsakTime) | الإفطار: \(entry.iftarTime)")
+                    .font(.system(size: 9))
+            }
+        case .systemSmall:
+            VStack(alignment: .trailing, spacing: 6) {
+                HStack {
+                    Text("🌙")
+                    Spacer()
+                    Text(entry.dayTitle)
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(Color(red: 0.89, green: 0.75, blue: 0.47))
+                }
+                Spacer()
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(entry.eventTitle)
+                        .font(.system(size: 10))
+                        .foregroundColor(Color(red: 0.65, green: 0.79, blue: 0.73))
+                    Text(entry.countdownText)
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.white)
+                }
+                HStack {
+                    Text("الإفطار: \(entry.iftarTime)")
+                        .font(.system(size: 9, weight: .semibold))
+                        .foregroundColor(Color(red: 0.89, green: 0.75, blue: 0.47))
+                    Spacer()
+                    Text("الإمساك: \(entry.imsakTime)")
+                        .font(.system(size: 9))
+                        .foregroundColor(Color(red: 0.65, green: 0.79, blue: 0.73))
+                }
+            }
+            .padding(12)
+            .background(
+                LinearGradient(
+                    colors: [Color(red: 0.05, green: 0.16, blue: 0.12), Color(red: 0.03, green: 0.09, blue: 0.07)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+        default:
+            VStack(alignment: .trailing, spacing: 8) {
+                // Header
+                HStack {
+                    Text(entry.countdownText)
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(Color(red: 0.36, green: 0.86, blue: 0.71))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Color.white.opacity(0.1))
+                        .cornerRadius(8)
+                    Spacer()
+                    Text("\(entry.dayTitle) 🌙")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(Color(red: 0.89, green: 0.75, blue: 0.47))
+                }
+
+                Spacer()
+
+                // Center Dual Times Card
+                HStack(spacing: 8) {
+                    // Imsak Box
+                    VStack(spacing: 2) {
+                        Text("موعد الإمساك")
+                            .font(.system(size: 10))
+                            .foregroundColor(Color(red: 0.65, green: 0.79, blue: 0.73))
+                        Text(entry.imsakTime)
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 6)
+                    .background(Color.white.opacity(0.06))
+                    .cornerRadius(8)
+
+                    // Iftar Box
+                    VStack(spacing: 2) {
+                        Text("موعد الإفطار 🌙")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundColor(Color(red: 0.89, green: 0.75, blue: 0.47))
+                        Text(entry.iftarTime)
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundColor(Color(red: 0.89, green: 0.75, blue: 0.47))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 6)
+                    .background(Color.white.opacity(0.06))
+                    .cornerRadius(8)
+                }
+
+                Spacer()
+
+                // Dua Footer
+                HStack {
+                    Text("«\(entry.dailyDua)»")
+                        .font(.system(size: 10))
+                        .foregroundColor(Color(red: 0.65, green: 0.79, blue: 0.73))
+                        .lineLimit(1)
+                }
+            }
+            .padding(14)
+            .background(
+                LinearGradient(
+                    colors: [Color(red: 0.05, green: 0.16, blue: 0.12), Color(red: 0.03, green: 0.09, blue: 0.07)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+        }
+    }
+}
+
+struct RamadanWidget: Widget {
+    let kind: String = "RamadanWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: RamadanWidgetTimelineProvider()) { entry in
+            if #available(iOS 17.0, *) {
+                RamadanWidgetEntryView(entry: entry)
+                    .containerBackground(.fill.tertiary, for: .widget)
+            } else {
+                RamadanWidgetEntryView(entry: entry)
+            }
+        }
+        .configurationDisplayName("واحة رمضان المبارك")
+        .description("مواقيت الإمساك والإفطار والعد التنازلي وأدعية شهر رمضان المبارك.")
+        .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular])
+    }
+}
+

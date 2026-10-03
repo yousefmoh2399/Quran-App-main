@@ -23,6 +23,11 @@ class HomeQuickShortcuts extends StatelessWidget {
 
   static final List<_ShortcutItem> _shortcuts = [
     _ShortcutItem(
+      title: 'رمضان المبارك',
+      icon: Icons.nightlight_round,
+      route: AppRoutes.ramadanHub,
+    ),
+    _ShortcutItem(
       title: 'القبلة',
       icon: Icons.explore_rounded,
       route: AppRoutes.qiblah,

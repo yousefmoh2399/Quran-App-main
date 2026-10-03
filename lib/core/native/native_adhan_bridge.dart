@@ -149,4 +149,15 @@ class NativeAdhanBridge {
       return false;
     }
   }
+
+  /// Stops any currently playing Adhan audio service.
+  static Future<bool> stopAdhan() async {
+    try {
+      await _channel.invokeMethod('stopAdhan');
+      return true;
+    } catch (e) {
+      debugPrint('NativeAdhanBridge.stopAdhan error: $e');
+      return false;
+    }
+  }
 }

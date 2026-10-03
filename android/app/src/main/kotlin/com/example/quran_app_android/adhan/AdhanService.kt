@@ -5,8 +5,10 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
@@ -24,6 +26,7 @@ class AdhanService : Service(), AudioManager.OnAudioFocusChangeListener {
         const val ACTION_STOP_ADHAN = "STOP_ADHAN"
         const val ACTION_PRAYED = "PRAYED"
         const val ACTION_ADHAN_COMPLETED = "com.example.quran_app_android.ADHAN_COMPLETED"
+        const val ACTION_ADHAN_SILENCED = "com.example.quran_app_android.ADHAN_SILENCED"
         const val CHANNEL_ID = "adhan_playback_channel"
         private const val NOTIFICATION_ID = 1001
         private const val TAG = "AdhanService"
@@ -121,24 +124,92 @@ class AdhanService : Service(), AudioManager.OnAudioFocusChangeListener {
                 isLooping = false
                 setOnCompletionListener {
                     Log.i(TAG, "Adhan audio playback finished smoothly")
-                    sendBroadcast(Intent(ACTION_ADHAN_COMPLETED))
+                    unregisterHardwareButtonReceiver()
+                    try {
+                        sendBroadcast(Intent(ACTION_ADHAN_COMPLETED).apply { setPackage(packageName) })
+                    } catch (_: Exception) {}
                     abandonAudioFocus()
                     stopForeground(false)
                     stopSelf()
                 }
+                playbackStartTime = System.currentTimeMillis()
                 start()
+                registerHardwareButtonReceiver()
             }
             Log.i(TAG, "Playback started successfully")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to start media player: ${e.message}", e)
+            unregisterHardwareButtonReceiver()
             abandonAudioFocus()
             stopForeground(false)
             stopSelf()
         }
     }
 
+    private var hardwareButtonReceiver: BroadcastReceiver? = null
+    private var playbackStartTime: Long = 0L
+
+    private fun registerHardwareButtonReceiver() {
+        if (hardwareButtonReceiver != null) return
+
+        hardwareButtonReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                val action = intent?.action ?: return
+                val elapsed = System.currentTimeMillis() - playbackStartTime
+                if (elapsed < 400L) {
+                    // Ignore startup volume events in first 400ms
+                    return
+                }
+
+                if (action == "android.media.VOLUME_CHANGED_ACTION" ||
+                    action == Intent.ACTION_SCREEN_OFF ||
+                    action == Intent.ACTION_SCREEN_ON) {
+                    Log.i(TAG, "🔕 Hardware button press detected via broadcast [$action] -> Silencing Adhan")
+                    silenceAdhan()
+                }
+            }
+        }
+
+        val filter = IntentFilter().apply {
+            addAction("android.media.VOLUME_CHANGED_ACTION")
+            addAction(Intent.ACTION_SCREEN_OFF)
+            addAction(Intent.ACTION_SCREEN_ON)
+        }
+
+        try {
+            androidx.core.content.ContextCompat.registerReceiver(
+                this,
+                hardwareButtonReceiver,
+                filter,
+                androidx.core.content.ContextCompat.RECEIVER_EXPORTED
+            )
+            Log.i(TAG, "Hardware button receiver registered successfully in AdhanService")
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to register hardware button receiver in AdhanService: ${e.message}")
+        }
+    }
+
+    private fun unregisterHardwareButtonReceiver() {
+        hardwareButtonReceiver?.let {
+            try {
+                unregisterReceiver(it)
+            } catch (_: Exception) {}
+            hardwareButtonReceiver = null
+        }
+    }
+
+    private fun silenceAdhan() {
+        stopPlayback()
+        try {
+            sendBroadcast(Intent(ACTION_ADHAN_SILENCED).apply { setPackage(packageName) })
+        } catch (_: Exception) {}
+        stopForeground(true)
+        stopSelf()
+    }
+
     private fun stopPlayback() {
         try {
+            unregisterHardwareButtonReceiver()
             player?.let {
                 if (it.isPlaying) {
                     it.stop()

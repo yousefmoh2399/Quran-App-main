@@ -521,6 +521,20 @@ class NotifyHelper {
       }
       return;
     }
+    if (payload.startsWith('ramadan|')) {
+      final parts = payload.split('|');
+      final sub = parts.length > 1 ? parts[1] : '';
+      if (sub == 'cannon' || sub == 'suhoor') {
+        await Get.toNamed(AppRoutes.ramadanCannonSuhoor);
+      } else if (sub == 'khatma') {
+        await Get.toNamed(AppRoutes.ramadanKhatma);
+      } else if (sub == 'imsakia') {
+        await Get.toNamed(AppRoutes.ramadanImsakia);
+      } else {
+        await Get.toNamed(AppRoutes.ramadanHub);
+      }
+      return;
+    }
     try {
       await Get.toNamed(payload);
     } catch (e) {

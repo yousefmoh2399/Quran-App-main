@@ -40,6 +40,12 @@ import 'package:quran_app_android/features/prayers_tracker/presentation/views/pr
 import 'package:quran_app_android/features/prayers_tracker/presentation/views/post_prayer_azkar_view.dart';
 import 'package:quran_app_android/features/calendar/presentation/views/islamic_calendar_view.dart';
 import 'package:quran_app_android/features/calendar/presentation/views/ramadan_imsakia_view.dart';
+import 'package:quran_app_android/features/ramadan/presentation/views/ramadan_hub_view.dart';
+import 'package:quran_app_android/features/ramadan/presentation/views/ramadan_khatma_view.dart';
+import 'package:quran_app_android/features/ramadan/presentation/views/ramadan_cannon_suhoor_view.dart';
+import 'package:quran_app_android/features/ramadan/presentation/views/ramadan_taraweeh_view.dart';
+import 'package:quran_app_android/features/ramadan/presentation/views/ramadan_duas_view.dart';
+import 'package:quran_app_android/features/ramadan/presentation/views/ramadan_zakat_view.dart';
 import 'package:quran_app_android/features/stats/presentation/views/achievements_dashboard_view.dart';
 import 'package:quran_app_android/features/splash/presentation/views/splash_screen_view.dart';
 import 'package:quran_app_android/features/tafsser/presentation/views/tafseer_details_view.dart';
@@ -264,6 +270,42 @@ class AppRoutes {
       transitionDuration: kTransitionDuration,
     ),
     GetPage(
+      name: ramadanHub,
+      page: () => const RamadanHubView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: ramadanKhatma,
+      page: () => const RamadanKhatmaView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: ramadanCannonSuhoor,
+      page: () => const RamadanCannonSuhoorView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: ramadanTaraweeh,
+      page: () => const RamadanTaraweehView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: ramadanDuas,
+      page: () => const RamadanDuasView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: ramadanZakat,
+      page: () => const RamadanZakatView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
       name: achievements,
       page: () => const AchievementsDashboardView(),
       transition: Transition.cupertino,
@@ -333,6 +375,12 @@ class AppRoutes {
   static String postPrayerAzkar = '/postPrayerAzkar';
   static String islamicCalendar = '/islamicCalendar';
   static String ramadanImsakia = '/ramadanImsakia';
+  static String ramadanHub = '/ramadanHub';
+  static String ramadanKhatma = '/ramadanKhatma';
+  static String ramadanCannonSuhoor = '/ramadanCannonSuhoor';
+  static String ramadanTaraweeh = '/ramadanTaraweeh';
+  static String ramadanDuas = '/ramadanDuas';
+  static String ramadanZakat = '/ramadanZakat';
   static String achievements = '/achievements';
   static String backupRestore = '/backupRestore';
   static String privacyPolicy = '/privacyPolicy';

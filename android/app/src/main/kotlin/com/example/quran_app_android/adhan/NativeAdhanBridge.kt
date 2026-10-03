@@ -208,6 +208,18 @@ object NativeAdhanBridge : MethodChannel.MethodCallHandler {
                 }
             }
 
+            "stopAdhan" -> {
+                try {
+                    val stopIntent = android.content.Intent(context, AdhanService::class.java).apply {
+                        action = AdhanService.ACTION_STOP_ADHAN
+                    }
+                    context.startService(stopIntent)
+                    result.success(true)
+                } catch (e: Exception) {
+                    result.error("STOP_ADHAN_ERROR", e.message, null)
+                }
+            }
+
             else -> result.notImplemented()
         }
     }

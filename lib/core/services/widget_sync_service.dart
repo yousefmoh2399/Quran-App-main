@@ -9,6 +9,8 @@ class WidgetSyncService {
   static const String iOSWirdWidget = 'WirdKhatmaWidget';
   static const String androidPrayerWidget = 'PrayerTimesWidgetProvider';
   static const String iOSPrayerWidget = 'PrayerTimesWidget';
+  static const String androidRamadanWidget = 'RamadanWidgetProvider';
+  static const String iOSRamadanWidget = 'RamadanWidget';
 
   static Future<void> init() async {
     try {
@@ -79,4 +81,50 @@ class WidgetSyncService {
       debugPrint('Error syncing prayer times to home widget: $e');
     }
   }
+
+  /// Synchronize Ramadan Imsak, Iftar, countdown, and Dua across home screen widgets
+  static Future<void> syncRamadanData({
+    required int dayNumber,
+    required String dayTitle,
+    required String eventTitle,
+    required String countdownText,
+    required String imsakTime,
+    required String iftarTime,
+    required String dailyDua,
+  }) async {
+    try {
+      await HomeWidget.setAppGroupId(appGroupId);
+
+      // Save for iOS WidgetKit
+      await HomeWidget.saveWidgetData<int>('ramadan_day', dayNumber);
+      await HomeWidget.saveWidgetData<String>('ramadan_day_title', dayTitle);
+      await HomeWidget.saveWidgetData<String>('ramadan_event_title', eventTitle);
+      await HomeWidget.saveWidgetData<String>('ramadan_countdown', countdownText);
+      await HomeWidget.saveWidgetData<String>('ramadan_imsak_time', imsakTime);
+      await HomeWidget.saveWidgetData<String>('ramadan_iftar_time', iftarTime);
+      await HomeWidget.saveWidgetData<String>('ramadan_daily_dua', dailyDua);
+
+      // Save for Android Native SharedPreferences
+      if (Platform.isAndroid) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt('ramadan_day', dayNumber);
+        await prefs.setString('ramadan_day_title', dayTitle);
+        await prefs.setString('ramadan_event_title', eventTitle);
+        await prefs.setString('ramadan_countdown', countdownText);
+        await prefs.setString('ramadan_imsak_time', imsakTime);
+        await prefs.setString('ramadan_iftar_time', iftarTime);
+        await prefs.setString('ramadan_daily_dua', dailyDua);
+      }
+
+      // Trigger widget update
+      await HomeWidget.updateWidget(
+        name: androidRamadanWidget,
+        androidName: androidRamadanWidget,
+        iOSName: iOSRamadanWidget,
+      );
+    } catch (e) {
+      debugPrint('Error syncing ramadan data to home widget: $e');
+    }
+  }
 }
+

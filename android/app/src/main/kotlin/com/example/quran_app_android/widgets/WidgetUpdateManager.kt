@@ -71,6 +71,9 @@ object WidgetUpdateManager {
             // 5. Wird & Khatma Widget
             updateWirdWidgets(context, appWidgetManager)
 
+            // 6. Ramadan Widget
+            updateRamadanWidgets(context, appWidgetManager, prayerData)
+
             // Ensure next 10-minute inexact alarm is scheduled
             scheduleNextPeriodicUpdate(context)
 
@@ -229,6 +232,71 @@ object WidgetUpdateManager {
             )
             views.setOnClickPendingIntent(R.id.widget_root_wird, pendingIntent)
             views.setOnClickPendingIntent(R.id.wird_btn_continue, pendingIntent)
+
+            manager.updateAppWidget(widgetId, views)
+        }
+    }
+
+    private fun updateRamadanWidgets(context: Context, manager: AppWidgetManager, prayerData: PrayerWidgetData) {
+        val ids = manager.getAppWidgetIds(ComponentName(context, RamadanWidgetProvider::class.java))
+        if (ids.isEmpty()) return
+
+        // 1. Try reading synced values from SharedPreferences
+        val flutterPrefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+        val homeWidgetPrefs = context.getSharedPreferences("group.com.homeScreenApp", Context.MODE_PRIVATE)
+
+        val dayNumber = flutterPrefs.getInt("flutter.ramadan_day", homeWidgetPrefs.getInt("ramadan_day", 1))
+        val dayTitle = flutterPrefs.getString("flutter.ramadan_day_title", null)
+            ?: homeWidgetPrefs.getString("ramadan_day_title", "اليوم $dayNumber")
+            ?: "اليوم $dayNumber"
+
+        val eventTitle = flutterPrefs.getString("flutter.ramadan_event_title", null)
+            ?: homeWidgetPrefs.getString("ramadan_event_title", null)
+
+        val countdownStr = flutterPrefs.getString("flutter.ramadan_countdown", null)
+            ?: homeWidgetPrefs.getString("ramadan_countdown", null)
+
+        val imsakTime = flutterPrefs.getString("flutter.ramadan_imsak_time", null)
+            ?: homeWidgetPrefs.getString("ramadan_imsak_time", null)
+            ?: run {
+                if (prayerData.fajrTime != "--:--") prayerData.fajrTime else "04:15 ص"
+            }
+
+        val iftarTime = flutterPrefs.getString("flutter.ramadan_iftar_time", null)
+            ?: homeWidgetPrefs.getString("ramadan_iftar_time", null)
+            ?: prayerData.maghribTime
+
+        val dua = flutterPrefs.getString("flutter.ramadan_daily_dua", null)
+            ?: homeWidgetPrefs.getString("ramadan_daily_dua", null)
+            ?: "«ذَهَبَ الظَّمَأُ، وَابْتَلَّتِ الْعُرُوقُ، وَثَبَتَ الأَجْرُ إِنْ شَاءَ اللَّهُ»"
+
+        val headerText = if (!eventTitle.isNullOrEmpty() && !countdownStr.isNullOrEmpty()) {
+            "$eventTitle: $countdownStr"
+        } else {
+            "موعد الإفطار: $iftarTime"
+        }
+
+        for (widgetId in ids) {
+            val views = RemoteViews(context.packageName, R.layout.widget_ramadan)
+            views.setTextViewText(R.id.ramadan_widget_title, "شهر رمضان المبارك 🌙")
+            views.setTextViewText(R.id.ramadan_widget_day, dayTitle)
+            views.setTextViewText(R.id.ramadan_widget_countdown, headerText)
+            views.setTextViewText(R.id.ramadan_widget_imsak, imsakTime)
+            views.setTextViewText(R.id.ramadan_widget_iftar, iftarTime)
+            views.setTextViewText(R.id.ramadan_widget_dua, dua)
+
+            val intent = Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                putExtra("route", "/ramadan_hub")
+                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
+            }
+            val pendingIntent = PendingIntent.getActivity(
+                context,
+                widgetId,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            views.setOnClickPendingIntent(R.id.widget_root_ramadan, pendingIntent)
 
             manager.updateAppWidget(widgetId, views)
         }

@@ -141,6 +141,13 @@
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_wird_khatma_info" />
         </receiver>
 
+        <receiver android:name=".widgets.RamadanWidgetProvider" android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_ramadan_info" />
+        </receiver>
+
         <receiver android:name=".widgets.WidgetActionReceiver" android:exported="true">
             <intent-filter>
                 <action android:name="com.example.quran_app_android.ACTION_NEXT_DHIKR" />
