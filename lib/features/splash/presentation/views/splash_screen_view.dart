@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:quran_app_android/core/design/app_typography.dart';
 import 'package:quran_app_android/core/service/navigation/app_navigation_service.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
+import 'package:quran_app_android/core/util/assets.dart';
 import 'package:quran_app_android/core/util/routes/routes.dart';
 
 class SplashScreenView extends StatefulWidget {
@@ -148,7 +149,7 @@ class _SplashScreenViewState extends State<SplashScreenView>
                             ],
                           ),
                           child: Image.asset(
-                            'assets/images/taqarrab_logo.png',
+                            AssetsData.taqarrabLogo,
                             width: 140,
                             height: 140,
                             fit: BoxFit.contain,
