@@ -27,14 +27,14 @@ class NotifyHelper {
   static const String _azkarChannelId = 'azkar_channel';
   static const String _prayerChannelId = 'prayer_channel';
   static const String _wirdChannelId = 'wird_channel';
-  static const String _prayerBannerChannelId = 'prayer_banner_channel';
+  static const String _prayerBannerChannelId = 'prayer_banner_channel_v2';
 
   static final AndroidNotificationChannel _prayerBannerChannel =
       AndroidNotificationChannel(
         _prayerBannerChannelId,
-        'شريط مواقيت الصلاة الدائم',
-        description: 'عرض مستمر وأنيق لمواقيت الصلاة اليومية والعد التنازلي',
-        importance: Importance.low,
+        'شريط مواقيت الصلاة وشاشة القفل',
+        description: 'عرض مستمر وأنيق لمواقيت الصلاة، الورد القرآني، والأذكار على شاشة القفل',
+        importance: Importance.defaultImportance,
         playSound: false,
         enableVibration: false,
         showBadge: false,
@@ -144,12 +144,14 @@ class NotifyHelper {
       _prayerBannerChannel.id,
       _prayerBannerChannel.name,
       channelDescription: _prayerBannerChannel.description,
-      importance: Importance.low,
-      priority: Priority.low,
+      importance: Importance.defaultImportance,
+      priority: Priority.defaultPriority,
       ongoing: true,
       autoCancel: false,
       showWhen: false,
-      icon: 'icon',
+      icon: 'ic_mosque',
+      category: AndroidNotificationCategory.status,
+      visibility: NotificationVisibility.public,
       styleInformation: BigTextStyleInformation(
         '$allPrayersLine\n📍 المدينة: $cityName',
         contentTitle: '🕌 الصلاة القادمة: $nextPrayerName $nextPrayerTime ($countdownStr)',

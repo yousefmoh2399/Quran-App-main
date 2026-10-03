@@ -1,3 +1,4 @@
+import 'package:adhan/adhan.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:quran_app_android/core/service/settings/lock_screen_banner_service.dart';
@@ -303,17 +304,18 @@ class _LockScreenBannerSettingsViewState
   Widget _buildLockScreenMockup(bool isDark, Color primary) {
     final now = DateTime.now();
     final timeStr = DateFormat('hh:mm').format(now);
+    final data = _previewData;
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF0F1E19),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white12, width: 1.5),
+        color: const Color(0xFF081410),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFD4AF37).withOpacity(0.3), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.4),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -321,96 +323,199 @@ class _LockScreenBannerSettingsViewState
       child: Column(
         children: [
           // Lock Screen Status Bar & Clock
-          const Icon(Icons.lock_rounded, size: 18, color: Colors.white70),
-          const SizedBox(height: 8),
+          const Icon(Icons.lock_outline_rounded, size: 20, color: Color(0xFFD4AF37)),
+          const SizedBox(height: 6),
           Text(
             timeStr,
             style: const TextStyle(
-              fontSize: 38,
-              fontWeight: FontWeight.w300,
+              fontSize: 42,
+              fontWeight: FontWeight.w200,
               color: Colors.white,
               letterSpacing: 2,
             ),
           ),
-          if (_previewData != null && _previewData!.hijriLine.isNotEmpty)
-            Text(
-              _previewData!.hijriLine,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.white70,
+          if (data != null && data.hijriLine.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 2.0, bottom: 4.0),
+              child: Text(
+                data.hijriLine,
+                style: const TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFFD4AF37),
+                ),
               ),
             ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 16),
 
           // The Notification Banner Card
-          if (_model.isEnabled && _previewData != null)
+          if (_model.isEnabled && data != null)
             Container(
               decoration: BoxDecoration(
-                color: const Color(0xFF162B24),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.white.withOpacity(0.12)),
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFF0E2E24),
+                    Color(0xFF071D16),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: const Color(0xFFD4AF37).withOpacity(0.25), width: 1.2),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               padding: const EdgeInsets.all(14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header
+                  // Notification Header
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(4),
+                        padding: const EdgeInsets.all(5),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1B4D3E),
-                          borderRadius: BorderRadius.circular(6),
+                          color: const Color(0xFFD4AF37).withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Icon(Icons.star_rounded,
-                            size: 14, color: Colors.white),
+                        child: const Icon(Icons.mosque_rounded,
+                            size: 15, color: Color(0xFFD4AF37)),
                       ),
                       const SizedBox(width: 8),
-                      const Text(
-                        'تطبيق تقرّب • شاشة القفل',
-                        style: TextStyle(
-                          fontSize: 11.5,
+                      Text(
+                        'تقرّب • ${data.cityName}',
+                        style: const TextStyle(
+                          fontSize: 12,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white70,
+                          color: Color(0xFFD4AF37),
                         ),
                       ),
                       const Spacer(),
                       const Text(
                         'الآن',
                         style: TextStyle(
-                          fontSize: 10,
+                          fontSize: 10.5,
                           color: Colors.white38,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 12),
 
-                  // Main Title
-                  Text(
-                    _previewData!.title,
-                    style: const TextStyle(
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                  // Next Prayer Highlight Card
+                  if (_model.showNextPrayer)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFD4AF37).withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFD4AF37).withOpacity(0.35)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.access_time_filled_rounded,
+                              size: 18, color: Color(0xFFD4AF37)),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'الصلاة القادمة: ${data.nextPrayerName} ${data.nextPrayerTimeStr}',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFD4AF37),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              data.nextPrayerCountdown,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF071D16),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 6),
 
-                  // Body Content
-                  Text(
-                    _previewData!.bigContentText,
-                    style: const TextStyle(
-                      fontSize: 11.5,
-                      color: Colors.white70,
-                      height: 1.45,
+                  // 5 Prayer Times Grid
+                  if (_model.showAllPrayers && data.prayerTimesMap.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.25),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          _buildMockPrayerPill('الفجر', data.prayerTimesMap['fajr'] ?? '', data.actualNextPrayer == Prayer.fajr),
+                          _buildMockPrayerPill('الظهر', data.prayerTimesMap['dhuhr'] ?? '', data.actualNextPrayer == Prayer.dhuhr),
+                          _buildMockPrayerPill('العصر', data.prayerTimesMap['asr'] ?? '', data.actualNextPrayer == Prayer.asr),
+                          _buildMockPrayerPill('المغرب', data.prayerTimesMap['maghrib'] ?? '', data.actualNextPrayer == Prayer.maghrib),
+                          _buildMockPrayerPill('العشاء', data.prayerTimesMap['isha'] ?? '', data.actualNextPrayer == Prayer.isha),
+                        ],
+                      ),
                     ),
-                  ),
+                  ],
+
+                  // Quran Wird Progress
+                  if (_model.showWirdProgress && data.wirdLine.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        const Icon(Icons.menu_book_rounded, size: 16, color: Color(0xFF4CAF50)),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            data.wirdLine,
+                            style: const TextStyle(
+                              fontSize: 11.5,
+                              color: Colors.white70,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+
+                  // Daily Dhikr
+                  if (_model.showDailyZikr && data.zikrLine.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        const Icon(Icons.spa_rounded, size: 16, color: Color(0xFFD4AF37)),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            '«${data.zikrLine}»',
+                            style: const TextStyle(
+                              fontSize: 11.5,
+                              color: Color(0xFFD4AF37),
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
 
                   // Action Buttons
                   if (_model.showQuickActions) ...[
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 14),
                     Row(
                       children: [
                         _buildMockActionButton('📖 الورد'),
@@ -426,7 +531,7 @@ class _LockScreenBannerSettingsViewState
             )
           else
             Container(
-              padding: const EdgeInsets.symmetric(vertical: 20),
+              padding: const EdgeInsets.symmetric(vertical: 24),
               alignment: Alignment.center,
               child: const Text(
                 'البانر معطل حالياً من المفتاح أعلاه',
@@ -438,19 +543,58 @@ class _LockScreenBannerSettingsViewState
     );
   }
 
-  Widget _buildMockActionButton(String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
+  Widget _buildMockPrayerPill(String name, String time, bool isNext) {
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 2),
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        decoration: BoxDecoration(
+          color: isNext ? const Color(0xFFD4AF37).withOpacity(0.25) : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          border: isNext ? Border.all(color: const Color(0xFFD4AF37), width: 1.0) : null,
+        ),
+        child: Column(
+          children: [
+            Text(
+              name,
+              style: TextStyle(
+                fontSize: 10,
+                color: isNext ? const Color(0xFFD4AF37) : Colors.white60,
+                fontWeight: isNext ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              time,
+              style: TextStyle(
+                fontSize: 10,
+                color: isNext ? Colors.white : Colors.white70,
+                fontWeight: isNext ? FontWeight.bold : FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
       ),
-      child: Text(
-        label,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 11,
-          fontWeight: FontWeight.bold,
+    );
+  }
+
+  Widget _buildMockActionButton(String label) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.white12),
+        ),
+        child: Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 11.5,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );

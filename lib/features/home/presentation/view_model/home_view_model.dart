@@ -7,6 +7,7 @@ import 'package:quran_app_android/core/data/repositories/user_repository.dart';
 import 'package:quran_app_android/core/native/native_adhan_bridge.dart';
 import 'package:quran_app_android/core/native/native_azkar_bridge.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
+import 'package:quran_app_android/core/service/settings/lock_screen_banner_service.dart';
 import 'package:quran_app_android/core/service/settings/notifications_services.dart';
 import 'package:quran_app_android/core/util/assets.dart';
 import 'package:quran_app_android/core/util/constant/static_vars.dart';
@@ -41,6 +42,9 @@ class HomeViewModel extends GetxController {
     await NativeAdhanBridge.scheduleDailyReset();
     try {
       await _userRepo.syncNativePrayedLogs();
+    } catch (_) {}
+    try {
+      await LockScreenBannerService.instance.updateBanner();
     } catch (_) {}
   }
 
@@ -83,6 +87,9 @@ class HomeViewModel extends GetxController {
     if (updated != null) {
       currentWirdPlan.value = updated;
       await NotifyHelper().cancelWirdNotifications();
+      try {
+        await LockScreenBannerService.instance.updateBanner();
+      } catch (_) {}
       update();
     }
   }
@@ -95,6 +102,9 @@ class HomeViewModel extends GetxController {
     } else {
       await NotifyHelper().cancelWirdNotifications();
     }
+    try {
+      await LockScreenBannerService.instance.updateBanner();
+    } catch (_) {}
     update();
   }
 
