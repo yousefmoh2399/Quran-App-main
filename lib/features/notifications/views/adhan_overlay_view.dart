@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
+import 'package:quran_app_android/core/data/models/user_models.dart';
+import 'package:quran_app_android/core/data/repositories/user_repository.dart';
 import 'package:quran_app_android/core/service/settings/notifications_services.dart';
 import 'package:quran_app_android/core/util/arabic_date_formatter.dart';
 import 'package:quran_app_android/core/util/assets.dart';
@@ -54,7 +57,7 @@ class AdhanOverlayView extends StatelessWidget {
                     Lottie.asset(
                       AssetsData.coming,
                       repeat: true,
-                      height: 200,
+                      height: 180,
                     ),
                     const SizedBox(height: 20),
                     Text(
@@ -75,9 +78,10 @@ class AdhanOverlayView extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'افتح التطبيق لقراءة الأذكار بعد الصلاة أو لمتابعة وردك اليومي.',
+                      '«حَافِظُوا عَلَى الصَّلَوَاتِ وَالصَّلَاةِ الْوُسْطَىٰ وَقُومُوا لِلَّهِ قَانِتِينَ»',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Colors.grey.shade700,
+                            fontStyle: FontStyle.italic,
                             height: 1.5,
                           ),
                       textAlign: TextAlign.center,
@@ -86,42 +90,78 @@ class AdhanOverlayView extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              Row(
+              Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.kPrimaryColor,
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 14,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF0F5C4A),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          onPressed: () => _recordPrayedAndClose(
+                            context,
+                            prayerKey: prayerKey,
+                            prayerName: prayerName,
+                            status: PrayerStatus.onTime,
+                            notificationId: notificationId,
+                          ),
+                          icon: const Icon(Icons.check_circle_rounded, size: 20),
+                          label: const Text(
+                            'صليت في وقتها',
+                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                          ),
                         ),
                       ),
-                      onPressed: () => _closeOverlay(notificationId),
-                      icon: const Icon(Icons.done_all_rounded, size: 22),
-                      label: const Text(
-                        'تم الاستجابة',
-                        style: TextStyle(fontSize: 16),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF1E824C),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          onPressed: () => _recordPrayedAndClose(
+                            context,
+                            prayerKey: prayerKey,
+                            prayerName: prayerName,
+                            status: PrayerStatus.jamaah,
+                            notificationId: notificationId,
+                          ),
+                          icon: const Icon(Icons.groups_rounded, size: 20),
+                          label: const Text(
+                            'صليت جماعة',
+                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
                     child: OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
-                        padding:
-                            const EdgeInsets.symmetric(vertical: 14),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        side: BorderSide(color: Colors.grey.shade400),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
                       onPressed: () => _closeOverlay(notificationId),
-                      icon: const Icon(Icons.notifications_off_outlined),
+                      icon: const Icon(Icons.volume_off_rounded, size: 18, color: Colors.black54),
                       label: const Text(
-                        'إيقاف الأذان',
-                        style: TextStyle(fontSize: 16),
+                        'إيقاف الأذان فقط',
+                        style: TextStyle(fontSize: 14, color: Colors.black87),
                       ),
                     ),
                   ),
@@ -132,6 +172,47 @@ class AdhanOverlayView extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _recordPrayedAndClose(
+    BuildContext context, {
+    required String prayerKey,
+    required String prayerName,
+    required PrayerStatus status,
+    int? notificationId,
+  }) async {
+    try {
+      final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      final effectiveKey = prayerKey.isNotEmpty ? prayerKey : _guessCurrentPrayerKey();
+      await UserRepository().savePrayerLog(PrayerLog(
+        date: todayStr,
+        prayer: effectiveKey,
+        status: status,
+      ));
+      Get.snackbar(
+        'تقبل الله طاعتكم 🤲',
+        'تم تسجيل $prayerName (${status.labelAr}) في سجل صلواتك بنجاح.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFF0F5C4A),
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+        margin: const EdgeInsets.all(16),
+        borderRadius: 12,
+      );
+    } catch (e) {
+      debugPrint('Error recording prayer from overlay: $e');
+    }
+    _closeOverlay(notificationId);
+  }
+
+  String _guessCurrentPrayerKey() {
+    final now = DateTime.now();
+    final hour = now.hour;
+    if (hour >= 4 && hour < 11) return 'fajr';
+    if (hour >= 11 && hour < 15) return 'dhuhr';
+    if (hour >= 15 && hour < 17) return 'asr';
+    if (hour >= 17 && hour < 20) return 'maghrib';
+    return 'isha';
   }
 
   void _closeOverlay(int? notificationId) {

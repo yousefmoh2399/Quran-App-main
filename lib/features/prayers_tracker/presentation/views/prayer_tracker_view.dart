@@ -42,6 +42,9 @@ class _PrayerTrackerViewState extends State<PrayerTrackerView> {
   }
 
   Future<void> _loadData() async {
+    try {
+      await _userRepo.syncNativePrayedLogs();
+    } catch (_) {}
     final dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate);
     final logs = await _userRepo.getPrayerLogsForDate(dateStr);
     final qadaa = await _userRepo.getQadaaCounts();

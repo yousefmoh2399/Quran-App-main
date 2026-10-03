@@ -41,6 +41,9 @@ class AdhanService : Service(), AudioManager.OnAudioFocusChangeListener {
         Log.i(TAG, "AdhanService created")
     }
 
+    private var currentPrayerKey: String = "fajr"
+    private var currentPrayerName: String = "الصلاة"
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val action = intent?.action ?: ACTION_START_ADHAN
 
@@ -53,7 +56,10 @@ class AdhanService : Service(), AudioManager.OnAudioFocusChangeListener {
                 return START_NOT_STICKY
             }
             ACTION_PRAYED -> {
-                Log.i(TAG, "Prayed action received")
+                Log.i(TAG, "Prayed action received from notification button")
+                val key = intent?.getStringExtra("prayer_key") ?: currentPrayerKey
+                val name = intent?.getStringExtra("prayer_name") ?: currentPrayerName
+                recordPrayerCompleted(key, name)
                 stopPlayback()
                 stopForeground(true)
                 stopSelf()
@@ -62,6 +68,8 @@ class AdhanService : Service(), AudioManager.OnAudioFocusChangeListener {
             ACTION_START_ADHAN -> {
                 val prayerKey = intent?.getStringExtra("prayer_key") ?: "fajr"
                 val prayerName = intent?.getStringExtra("prayer_name") ?: "الصلاة"
+                currentPrayerKey = prayerKey
+                currentPrayerName = prayerName
                 val adhanSound = intent?.getStringExtra("adhan_sound") ?: "default"
                 val cityName = intent?.getStringExtra("city_name") ?: ""
                 val scheduledMillis = intent?.getLongExtra("scheduled_millis", System.currentTimeMillis()) ?: System.currentTimeMillis()
@@ -220,6 +228,8 @@ class AdhanService : Service(), AudioManager.OnAudioFocusChangeListener {
         // Action: Prayed
         val prayedIntent = Intent(this, AdhanService::class.java).apply {
             action = ACTION_PRAYED
+            putExtra("prayer_key", prayerKey)
+            putExtra("prayer_name", prayerName)
         }
         val prayedPending = PendingIntent.getService(
             this,
@@ -243,6 +253,18 @@ class AdhanService : Service(), AudioManager.OnAudioFocusChangeListener {
             .addAction(R.drawable.ic_mosque, "إيقاف", stopPending)
             .addAction(R.drawable.ic_mosque, "صلّيت", prayedPending)
             .build()
+    }
+
+    private fun recordPrayerCompleted(prayerKey: String, prayerName: String) {
+        try {
+            val prefs = getSharedPreferences("prayer_logs", Context.MODE_PRIVATE)
+            val today = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date())
+            val key = "${today}_${prayerKey}"
+            prefs.edit().putBoolean(key, true).putLong("${key}_timestamp", System.currentTimeMillis()).apply()
+            Log.i(TAG, "Recorded prayer completed from notification: $key ($prayerName)")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to record prayer from notification: ${e.message}")
+        }
     }
 
     private fun createNotificationChannel() {

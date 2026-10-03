@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:sqflite/sqflite.dart';
 import '../../native/native_reminders_bridge.dart';
+import '../../native/native_adhan_bridge.dart';
 import '../../../features/quran/data/models/juz_model.dart';
 import '../models/quran_marks_models.dart';
 import '../models/user_models.dart';
@@ -678,6 +679,54 @@ class UserRepository {
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
     await evaluateAchievements();
+    // Also notify native adhan bridge so native state/widgets reflect completion
+    try {
+      await NativeAdhanBridge.markPrayerAsPrayed(log.prayer, status: log.status.key);
+    } catch (_) {}
+  }
+
+  /// Synchronizes any prayer completions recorded via the native lockscreen or notification
+  /// into the SQLite user database.
+  Future<int> syncNativePrayedLogs() async {
+    try {
+      final pending = await NativeAdhanBridge.getPendingPrayedLogs();
+      if (pending.isEmpty) return 0;
+
+      final db = await _db;
+      final syncedKeys = <String>[];
+      for (final item in pending) {
+        final key = item['key'] as String?;
+        final date = item['date'] as String?;
+        final prayer = item['prayer'] as String?;
+        final statusKey = item['status'] as String? ?? 'on_time';
+
+        if (date != null && prayer != null && date.isNotEmpty && prayer.isNotEmpty) {
+          final status = PrayerStatus.fromKey(statusKey);
+          final log = PrayerLog(
+            date: date,
+            prayer: prayer,
+            status: status,
+          );
+          await db.insert(
+            'prayer_logs',
+            log.toMap(),
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        }
+
+        if (key != null && key.isNotEmpty) {
+          syncedKeys.add(key);
+        }
+      }
+
+      if (syncedKeys.isNotEmpty) {
+        await NativeAdhanBridge.clearPendingPrayedLogs(syncedKeys);
+        await evaluateAchievements();
+      }
+      return syncedKeys.length;
+    } catch (_) {
+      return 0;
+    }
   }
 
   Future<Map<String, PrayerLog>> getPrayerLogsForDate(String date) async {

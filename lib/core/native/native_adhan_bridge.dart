@@ -114,4 +114,39 @@ class NativeAdhanBridge {
       debugPrint('scheduleTestReset error: $e');
     }
   }
+
+  /// Retrieves any prayer marked as completed via the native lockscreen or notification.
+  static Future<List<Map<String, dynamic>>> getPendingPrayedLogs() async {
+    try {
+      final res = await _channel.invokeMethod<List>('getPendingPrayedLogs');
+      if (res == null) return [];
+      return res.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+    } catch (e) {
+      debugPrint('getPendingPrayedLogs error: $e');
+      return [];
+    }
+  }
+
+  /// Clears synced prayer log entries from native SharedPreferences.
+  static Future<void> clearPendingPrayedLogs(List<String> keys) async {
+    try {
+      await _channel.invokeMethod('clearPendingPrayedLogs', keys);
+    } catch (e) {
+      debugPrint('clearPendingPrayedLogs error: $e');
+    }
+  }
+
+  /// Manually marks a prayer as completed on the native side.
+  static Future<bool> markPrayerAsPrayed(String prayerKey, {String status = 'on_time'}) async {
+    try {
+      await _channel.invokeMethod('markPrayerAsPrayed', {
+        'prayerKey': prayerKey,
+        'status': status,
+      });
+      return true;
+    } catch (e) {
+      debugPrint('markPrayerAsPrayed error: $e');
+      return false;
+    }
+  }
 }

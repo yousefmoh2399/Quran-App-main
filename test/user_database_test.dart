@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_app_android/core/data/models/user_models.dart';
 import 'package:quran_app_android/core/data/repositories/user_repository.dart';
@@ -177,6 +178,68 @@ void main() {
       expect(completed!.streak, equals(1));
       expect(completed.startPage, equals(11));
       expect(completed.endPage, equals(20));
+    });
+  });
+
+  group('UserRepository Prayer Tracking & Sync Tests', () {
+    test('savePrayerLog and getPrayerLogsForDate correctly persist and retrieve logs', () async {
+      final logFajr = PrayerLog(
+        date: '2026-10-03',
+        prayer: 'fajr',
+        status: PrayerStatus.onTime,
+      );
+      await userRepo.savePrayerLog(logFajr);
+
+      final logs = await userRepo.getPrayerLogsForDate('2026-10-03');
+      expect(logs.containsKey('fajr'), isTrue);
+      expect(logs['fajr']!.status, equals(PrayerStatus.onTime));
+      expect(logs['fajr']!.prayer, equals('fajr'));
+    });
+
+    test('syncNativePrayedLogs imports logs from native and clears pending keys', () async {
+      final clearedKeys = <String>[];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        const MethodChannel('native_adhan_bridge'),
+        (MethodCall methodCall) async {
+          if (methodCall.method == 'getPendingPrayedLogs') {
+            return [
+              {
+                'key': '2026-10-03_asr',
+                'date': '2026-10-03',
+                'prayer': 'asr',
+                'status': 'jamaah',
+              },
+              {
+                'key': '2026-10-03_maghrib',
+                'date': '2026-10-03',
+                'prayer': 'maghrib',
+                'status': 'on_time',
+              },
+            ];
+          } else if (methodCall.method == 'clearPendingPrayedLogs') {
+            clearedKeys.addAll(List<String>.from(methodCall.arguments as List));
+            return null;
+          } else if (methodCall.method == 'markPrayerAsPrayed') {
+            return true;
+          }
+          return null;
+        },
+      );
+
+      final syncedCount = await userRepo.syncNativePrayedLogs();
+      expect(syncedCount, equals(2));
+      expect(clearedKeys, containsAll(['2026-10-03_asr', '2026-10-03_maghrib']));
+
+      final logs = await userRepo.getPrayerLogsForDate('2026-10-03');
+      expect(logs.containsKey('asr'), isTrue);
+      expect(logs['asr']!.status, equals(PrayerStatus.jamaah));
+      expect(logs.containsKey('maghrib'), isTrue);
+      expect(logs['maghrib']!.status, equals(PrayerStatus.onTime));
+
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        const MethodChannel('native_adhan_bridge'),
+        null,
+      );
     });
   });
 }

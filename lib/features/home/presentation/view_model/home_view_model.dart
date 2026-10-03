@@ -39,6 +39,9 @@ class HomeViewModel extends GetxController {
     await _setupHomeWidget();
     await NativeAzkarBridge.scheduleDailyAzkar(2);
     await NativeAdhanBridge.scheduleDailyReset();
+    try {
+      await _userRepo.syncNativePrayedLogs();
+    } catch (_) {}
   }
 
   Future<void> getLastRead() async {

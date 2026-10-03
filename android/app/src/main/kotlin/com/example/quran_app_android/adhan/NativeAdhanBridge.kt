@@ -149,6 +149,65 @@ object NativeAdhanBridge : MethodChannel.MethodCallHandler {
                 result.success(true)
             }
 
+            "getPendingPrayedLogs" -> {
+                try {
+                    val prefs = context.getSharedPreferences("prayer_logs", Context.MODE_PRIVATE)
+                    val allEntries = prefs.all
+                    val list = mutableListOf<Map<String, Any>>()
+                    for ((k, v) in allEntries) {
+                        if (v == true && k.contains("_") && !k.endsWith("_timestamp")) {
+                            val parts = k.split("_")
+                            if (parts.size >= 2) {
+                                val date = parts[0]
+                                val prayer = parts[1]
+                                list.add(mapOf(
+                                    "key" to k,
+                                    "date" to date,
+                                    "prayer" to prayer,
+                                    "status" to "on_time"
+                                ))
+                            }
+                        }
+                    }
+                    result.success(list)
+                } catch (e: Exception) {
+                    result.error("GET_LOGS_ERROR", e.message, null)
+                }
+            }
+
+            "clearPendingPrayedLogs" -> {
+                try {
+                    val keys = call.arguments as? List<String>
+                    val prefs = context.getSharedPreferences("prayer_logs", Context.MODE_PRIVATE)
+                    val editor = prefs.edit()
+                    if (keys != null) {
+                        for (k in keys) {
+                            editor.remove(k)
+                            editor.remove("${k}_timestamp")
+                        }
+                    } else {
+                        editor.clear()
+                    }
+                    editor.apply()
+                    result.success(true)
+                } catch (e: Exception) {
+                    result.error("CLEAR_LOGS_ERROR", e.message, null)
+                }
+            }
+
+            "markPrayerAsPrayed" -> {
+                try {
+                    val prayerKey = call.argument<String>("prayerKey") ?: "fajr"
+                    val today = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date())
+                    val prefs = context.getSharedPreferences("prayer_logs", Context.MODE_PRIVATE)
+                    val key = "${today}_${prayerKey}"
+                    prefs.edit().putBoolean(key, true).putLong("${key}_timestamp", System.currentTimeMillis()).apply()
+                    result.success(true)
+                } catch (e: Exception) {
+                    result.error("MARK_PRAYER_ERROR", e.message, null)
+                }
+            }
+
             else -> result.notImplemented()
         }
     }
