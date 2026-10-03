@@ -13,7 +13,9 @@ import 'package:quran_app_android/features/home/presentation/view_model/home_vie
 import 'package:quran_app_android/features/mushaf/presentation/utils/mushaf_utils.dart';
 
 class DailyWirdCard extends StatelessWidget {
-  const DailyWirdCard({super.key});
+  final EdgeInsetsGeometry? margin;
+
+  const DailyWirdCard({super.key, this.margin});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +30,7 @@ class DailyWirdCard extends StatelessWidget {
       if (plan == null) {
         return AppCard(
           variant: AppCardVariant.elevated,
-          margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          margin: margin ?? EdgeInsets.zero,
           padding: AppSpacing.paddingLg,
           backgroundColor: colors.surface,
           child: Column(
@@ -109,7 +111,7 @@ class DailyWirdCard extends StatelessWidget {
 
       return AppCard(
         variant: AppCardVariant.elevated,
-        margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+        margin: margin ?? EdgeInsets.zero,
         padding: AppSpacing.paddingLg,
         backgroundColor: colors.surface,
         child: Column(
