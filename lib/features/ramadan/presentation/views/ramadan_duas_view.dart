@@ -5,6 +5,7 @@ import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_radius.dart';
 import '../../../../core/design/app_spacing.dart';
 import '../../../../core/design/app_typography.dart';
+import '../../../../core/design/responsive.dart';
 import '../../data/ramadan_service.dart';
 
 class RamadanDuasView extends StatefulWidget {
@@ -68,14 +69,16 @@ class _RamadanDuasViewState extends State<RamadanDuasView> with SingleTickerProv
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildDuasList(_service.getDuasByCategory('daily')),
-          _buildDuasList(_service.getDuasByCategory('last_ten')),
-          _buildDuasList(_service.getDuasByCategory('qunut')),
-          _buildDuasList(_service.getDuasByCategory('fasting_sunnah')),
-        ],
+      body: MaxWidthContainer(
+        child: TabBarView(
+          controller: _tabController,
+          children: [
+            _buildDuasList(_service.getDuasByCategory('daily')),
+            _buildDuasList(_service.getDuasByCategory('last_ten')),
+            _buildDuasList(_service.getDuasByCategory('qunut')),
+            _buildDuasList(_service.getDuasByCategory('fasting_sunnah')),
+          ],
+        ),
       ),
     );
   }

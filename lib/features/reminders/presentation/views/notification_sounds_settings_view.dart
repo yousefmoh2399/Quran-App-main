@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quran_app_android/core/design/responsive.dart';
 import 'package:quran_app_android/core/util/app_snackbar.dart';
 import 'package:quran_app_android/features/reminders/data/notification_sounds_service.dart';
 
@@ -77,8 +78,9 @@ class _NotificationSoundsSettingsViewState
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: const EdgeInsets.all(16),
+          : MaxWidthContainer(
+              child: ListView(
+                padding: const EdgeInsets.all(16),
               children: [
                 // Intro Info Card
                 Container(
@@ -290,6 +292,7 @@ class _NotificationSoundsSettingsViewState
                 ],
               ],
             ),
+          ),
     );
   }
 

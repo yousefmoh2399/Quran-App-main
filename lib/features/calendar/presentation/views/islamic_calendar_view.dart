@@ -8,6 +8,7 @@ import '../../../../core/design/app_radius.dart';
 import '../../../../core/design/app_spacing.dart';
 import '../../../../core/design/app_typography.dart';
 import '../../../../core/design/components/app_card.dart';
+import '../../../../core/design/components/app_scaffold.dart';
 import '../../data/islamic_calendar_service.dart';
 import 'ramadan_imsakia_view.dart';
 
@@ -84,24 +85,21 @@ class _IslamicCalendarViewState extends State<IslamicCalendarView> {
     final todayEvent = _calendarService.getEventForDate(todayHijri.hMonth, todayHijri.hDay);
     final fastingAdvice = _calendarService.getFastingRecommendation(DateTime.now());
 
-    return Scaffold(
-      backgroundColor: colors.bg,
-      appBar: AppBar(
-        title: const Text('التقويم الهجري والمناسبات'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.swap_horiz_rounded),
-            tooltip: 'محول التاريخ',
-            onPressed: () => _showDateConverterDialog(context),
-          ),
-          IconButton(
-            icon: const Icon(Icons.nightlight_outlined),
-            tooltip: 'إمساكية رمضان',
-            onPressed: () => Get.to(() => const RamadanImsakiaView()),
-          ),
-        ],
-      ),
+    return AppScaffold(
+      title: 'التقويم الهجري والمناسبات',
+      constrainContentWidth: true,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.swap_horiz_rounded),
+          tooltip: 'محول التاريخ',
+          onPressed: () => _showDateConverterDialog(context),
+        ),
+        IconButton(
+          icon: const Icon(Icons.nightlight_outlined),
+          tooltip: 'إمساكية رمضان',
+          onPressed: () => Get.to(() => const RamadanImsakiaView()),
+        ),
+      ],
       body: SingleChildScrollView(
         padding: AppSpacing.screen,
         child: Column(

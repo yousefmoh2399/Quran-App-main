@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_spacing.dart';
 import '../../../../core/design/app_typography.dart';
+import '../../../../core/design/components/app_scaffold.dart';
 import 'package:quran_app_android/features/ramadan/data/ramadan_service.dart';
 
 class RamadanImsakiaView extends StatefulWidget {
@@ -143,19 +144,16 @@ class _RamadanImsakiaViewState extends State<RamadanImsakiaView> {
   Widget build(BuildContext context) {
     final colors = context.appColors;
 
-    return Scaffold(
-      backgroundColor: colors.bg,
-      appBar: AppBar(
-        title: Text('إمساكية رمضان $_ramadanYear هـ'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            tooltip: 'الانتقال إلى اليوم',
-            onPressed: _scrollToToday,
-            icon: const Icon(Icons.my_location_rounded),
-          ),
-        ],
-      ),
+    return AppScaffold(
+      title: 'إمساكية رمضان $_ramadanYear هـ',
+      constrainContentWidth: true,
+      actions: [
+        IconButton(
+          tooltip: 'الانتقال إلى اليوم',
+          onPressed: _scrollToToday,
+          icon: const Icon(Icons.my_location_rounded),
+        ),
+      ],
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(

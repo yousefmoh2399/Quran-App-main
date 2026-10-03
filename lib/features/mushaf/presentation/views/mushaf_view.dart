@@ -301,6 +301,8 @@ class _MushafViewState extends State<MushafView> {
                   surahName.isNotEmpty
                       ? 'سورة $surahName  •  صـ ${toArabicDigits(currentPage)}'
                       : 'المصحف الشريف  •  صـ ${toArabicDigits(currentPage)}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: AppTypography.decorativeFont,
                     fontSize: 16.5,

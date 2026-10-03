@@ -5,6 +5,7 @@ import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_radius.dart';
 import '../../../../core/design/app_spacing.dart';
 import '../../../../core/design/app_typography.dart';
+import '../../../../core/design/components/app_scaffold.dart';
 import '../../../../core/util/routes/routes.dart';
 import '../../data/ramadan_service.dart';
 
@@ -134,12 +135,9 @@ class _RamadanKhatmaViewState extends State<RamadanKhatmaView> {
     final dailyPagesRequired = (_targetKhatmas * 20.13).ceil(); // ~20 pages per khatma per 30 days
     final pagesPerPrayer = (dailyPagesRequired / 5).ceil();
 
-    return Scaffold(
-      backgroundColor: colors.bg,
-      appBar: AppBar(
-        title: const Text('مخطط ختمة رمضان'),
-        centerTitle: true,
-      ),
+    return AppScaffold(
+      title: 'مخطط ختمة رمضان',
+      constrainContentWidth: true,
       body: SingleChildScrollView(
         padding: AppSpacing.paddingLg,
         child: Column(
@@ -163,13 +161,15 @@ class _RamadanKhatmaViewState extends State<RamadanKhatmaView> {
                     children: [
                       Icon(Icons.flag_rounded, color: colors.primary, size: 22),
                       const SizedBox(width: 8),
-                      Text(
-                        'اختر هدف الختم في رمضان',
-                        style: TextStyle(
-                          fontFamily: AppTypography.uiFont,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          color: colors.text,
+                      Expanded(
+                        child: Text(
+                          'اختر هدف الختم في رمضان',
+                          style: TextStyle(
+                            fontFamily: AppTypography.uiFont,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: colors.text,
+                          ),
                         ),
                       ),
                     ],
@@ -208,37 +208,42 @@ class _RamadanKhatmaViewState extends State<RamadanKhatmaView> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'نسبة إنجاز الختمة',
-                            style: TextStyle(color: Colors.white70, fontSize: 13),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '$percentage%',
-                            style: const TextStyle(
-                              color: Color(0xFFD4AF37),
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'نسبة إنجاز الختمة',
+                              style: TextStyle(color: Colors.white70, fontSize: 13),
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 4),
+                            Text(
+                              '$percentage%',
+                              style: const TextStyle(
+                                color: Color(0xFFD4AF37),
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            'الصفحة الحالية: $_currentPage',
-                            style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'المتبقي: ${totalTargetPages - _completedPages} صفحة',
-                            style: const TextStyle(color: Colors.white60, fontSize: 12),
-                          ),
-                        ],
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              'الصفحة الحالية: $_currentPage',
+                              style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'المتبقي: ${totalTargetPages - _completedPages} صفحة',
+                              style: const TextStyle(color: Colors.white60, fontSize: 12),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -289,13 +294,15 @@ class _RamadanKhatmaViewState extends State<RamadanKhatmaView> {
                     children: [
                       Icon(Icons.calendar_today_rounded, color: colors.primary, size: 20),
                       const SizedBox(width: 8),
-                      Text(
-                        'جدول الورد بعد كل صلاة اليوم',
-                        style: TextStyle(
-                          fontFamily: AppTypography.uiFont,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          color: colors.text,
+                      Expanded(
+                        child: Text(
+                          'جدول الورد بعد كل صلاة اليوم',
+                          style: TextStyle(
+                            fontFamily: AppTypography.uiFont,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: colors.text,
+                          ),
                         ),
                       ),
                     ],
@@ -308,29 +315,32 @@ class _RamadanKhatmaViewState extends State<RamadanKhatmaView> {
                   const SizedBox(height: 12),
                   ..._prayerChecklist.keys.map((prayer) {
                     final done = _prayerChecklist[prayer] ?? false;
-                    return CheckboxListTile(
-                      contentPadding: EdgeInsets.zero,
-                      activeColor: colors.primary,
-                      title: Text(
-                        'بعد صلاة $prayer ($pagesPerPrayer صفحات)',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: done ? FontWeight.bold : FontWeight.normal,
-                          decoration: done ? TextDecoration.lineThrough : null,
-                          color: done ? colors.primary : colors.text,
+                    return Material(
+                      color: Colors.transparent,
+                      child: CheckboxListTile(
+                        contentPadding: EdgeInsets.zero,
+                        activeColor: colors.primary,
+                        title: Text(
+                          'بعد صلاة $prayer ($pagesPerPrayer صفحات)',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: done ? FontWeight.bold : FontWeight.normal,
+                            decoration: done ? TextDecoration.lineThrough : null,
+                            color: done ? colors.primary : colors.text,
+                          ),
                         ),
+                        value: done,
+                        onChanged: (val) {
+                          setState(() {
+                            _prayerChecklist[prayer] = val ?? false;
+                          });
+                          if (val == true) {
+                            _addPages(pagesPerPrayer);
+                          } else {
+                            _addPages(-pagesPerPrayer);
+                          }
+                        },
                       ),
-                      value: done,
-                      onChanged: (val) {
-                        setState(() {
-                          _prayerChecklist[prayer] = val ?? false;
-                        });
-                        if (val == true) {
-                          _addPages(pagesPerPrayer);
-                        } else {
-                          _addPages(-pagesPerPrayer);
-                        }
-                      },
                     );
                   }),
                 ],

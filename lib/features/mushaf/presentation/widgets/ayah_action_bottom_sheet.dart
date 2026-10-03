@@ -252,21 +252,26 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-                  decoration: BoxDecoration(
-                    color: colors.primary.withOpacity(0.12),
-                    borderRadius: AppRadius.borderSm,
-                    border: Border.all(color: colors.primary.withOpacity(0.3)),
-                  ),
-                  child: Text(
-                    'سورة ${widget.surahName}  •  آية ${toArabicDigits(widget.ayahNumber)}  •  صـ ${toArabicDigits(widget.pageNumber)}',
-                    style: textTheme.labelLarge?.copyWith(
-                      color: colors.primary,
-                      fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+                    decoration: BoxDecoration(
+                      color: colors.primary.withOpacity(0.12),
+                      borderRadius: AppRadius.borderSm,
+                      border: Border.all(color: colors.primary.withOpacity(0.3)),
+                    ),
+                    child: Text(
+                      'سورة ${widget.surahName}  •  آية ${toArabicDigits(widget.ayahNumber)}  •  صـ ${toArabicDigits(widget.pageNumber)}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: textTheme.labelLarge?.copyWith(
+                        color: colors.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
+                const SizedBox(width: 8),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -392,19 +397,26 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          Icon(Icons.bookmark_rounded, size: 18.0, color: colors.accent),
-                          AppSpacing.horizontalXs,
-                          Text(
-                            'علامة مرجعية بلون مخصص',
-                            style: textTheme.titleSmall?.copyWith(
-                              color: colors.accent,
-                              fontWeight: FontWeight.bold,
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Icon(Icons.bookmark_rounded, size: 18.0, color: colors.accent),
+                            AppSpacing.horizontalXs,
+                            Expanded(
+                              child: Text(
+                                'علامة مرجعية بلون مخصص',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: textTheme.titleSmall?.copyWith(
+                                  color: colors.accent,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
+                      const SizedBox(width: 8),
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [

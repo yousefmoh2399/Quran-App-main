@@ -2,15 +2,38 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:quran_app_android/core/data/user_database.dart';
 import 'package:quran_app_android/core/design/app_theme.dart';
 import 'package:quran_app_android/features/adhan/presentation/views/adhan_debug_view.dart';
 import 'package:quran_app_android/features/azkar/presentation/views/widgets/zikr_image_share_dialog.dart';
+import 'package:quran_app_android/features/ramadan/presentation/views/ramadan_cannon_suhoor_view.dart';
+import 'package:quran_app_android/features/ramadan/presentation/views/ramadan_hub_view.dart';
+import 'package:quran_app_android/features/ramadan/presentation/views/ramadan_khatma_view.dart';
 import 'package:quran_app_android/features/reminders/presentation/views/reminders_debug_view.dart';
+import 'package:quran_app_android/features/stats/presentation/views/achievements_dashboard_view.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  sqfliteFfiInit();
+  databaseFactory = databaseFactoryFfi;
+
+  late Database testDb;
+
+  setUpAll(() async {
+    testDb = await databaseFactoryFfi.openDatabase(inMemoryDatabasePath);
+    await UserDatabase.createTablesForTest(testDb);
+    UserDatabase.customDatabaseForTesting = testDb;
+  });
+
+  tearDownAll(() async {
+    await testDb.close();
+    UserDatabase.customDatabaseForTesting = null;
+  });
 
   setUp(() {
+    SharedPreferences.setMockInitialValues({});
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       const MethodChannel('native_adhan_bridge'),
       (MethodCall methodCall) async {
@@ -170,6 +193,94 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('RamadanKhatmaView renders without overflow on 320dp width and textScale 1.35', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(320, 640));
+      await tester.pumpWidget(
+        buildTestWidget(
+          child: const RamadanKhatmaView(),
+          width: 320,
+          height: 640,
+          textScale: 1.35,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('RamadanHubView renders adaptively on 320dp small phone and 768dp tablet', (tester) async {
+      // 1. Small phone
+      await tester.binding.setSurfaceSize(const Size(320, 640));
+      await tester.pumpWidget(
+        buildTestWidget(
+          child: const RamadanHubView(),
+          width: 320,
+          height: 640,
+          textScale: 1.3,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      // 2. Tablet
+      await tester.binding.setSurfaceSize(const Size(768, 1024));
+      await tester.pumpWidget(
+        buildTestWidget(
+          child: const RamadanHubView(),
+          width: 768,
+          height: 1024,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('RamadanCannonSuhoorView renders without overflow on 320dp width and textScale 1.3', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(320, 640));
+      await tester.pumpWidget(
+        buildTestWidget(
+          child: const RamadanCannonSuhoorView(),
+          width: 320,
+          height: 640,
+          textScale: 1.3,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('AchievementsDashboardView renders adaptively on 320dp and 1024dp', (tester) async {
+      // 1. Small phone with scaled text
+      await tester.binding.setSurfaceSize(const Size(320, 640));
+      await tester.pumpWidget(
+        buildTestWidget(
+          child: const AchievementsDashboardView(),
+          width: 320,
+          height: 640,
+          textScale: 1.3,
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(tester.takeException(), isNull);
+
+      // 2. Large iPad / Tablet landscape
+      await tester.binding.setSurfaceSize(const Size(1024, 768));
+      await tester.pumpWidget(
+        buildTestWidget(
+          child: const AchievementsDashboardView(),
+          width: 1024,
+          height: 768,
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pump(const Duration(milliseconds: 300));
       expect(tester.takeException(), isNull);
     });
   });

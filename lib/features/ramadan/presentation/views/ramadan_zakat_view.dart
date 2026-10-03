@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_radius.dart';
 import '../../../../core/design/app_spacing.dart';
+import '../../../../core/design/responsive.dart';
 import '../../data/ramadan_service.dart';
 
 class RamadanZakatView extends StatefulWidget {
@@ -65,12 +66,14 @@ class _RamadanZakatViewState extends State<RamadanZakatView> with SingleTickerPr
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildZakatFitrTab(),
-          _buildZakatMalTab(),
-        ],
+      body: MaxWidthContainer(
+        child: TabBarView(
+          controller: _tabController,
+          children: [
+            _buildZakatFitrTab(),
+            _buildZakatMalTab(),
+          ],
+        ),
       ),
     );
   }

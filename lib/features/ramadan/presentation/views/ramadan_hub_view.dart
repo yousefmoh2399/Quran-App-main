@@ -6,6 +6,7 @@ import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_radius.dart';
 import '../../../../core/design/app_spacing.dart';
 import '../../../../core/design/app_typography.dart';
+import '../../../../core/design/components/app_scaffold.dart';
 import '../../../../core/util/routes/routes.dart';
 import '../../../calendar/data/islamic_calendar_service.dart';
 import '../../data/ramadan_notification_service.dart';
@@ -84,12 +85,9 @@ class _RamadanHubViewState extends State<RamadanHubView> {
   Widget build(BuildContext context) {
     final colors = context.appColors;
 
-    return Scaffold(
-      backgroundColor: colors.bg,
-      appBar: AppBar(
-        title: const Text('واحة رمضان المبارك'),
-        centerTitle: true,
-      ),
+    return AppScaffold(
+      title: 'واحة رمضان المبارك',
+      constrainContentWidth: true,
       body: SingleChildScrollView(
         padding: AppSpacing.paddingLg,
         child: Column(
@@ -118,27 +116,30 @@ class _RamadanHubViewState extends State<RamadanHubView> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _isCurrentlyRamadan
-                                ? 'اليوم $_currentRamadanDay من رمضان $_ramadanYear هـ'
-                                : 'رمضان المبارك $_ramadanYear هـ',
-                            style: const TextStyle(
-                              color: Color(0xFFD4AF37),
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: AppTypography.decorativeFont,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _isCurrentlyRamadan
+                                  ? 'اليوم $_currentRamadanDay من رمضان $_ramadanYear هـ'
+                                  : 'رمضان المبارك $_ramadanYear هـ',
+                              style: const TextStyle(
+                                color: Color(0xFFD4AF37),
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: AppTypography.decorativeFont,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'مبارك عليكم الشهر الفضيل وتقبل الله طاعتكم 🌙',
-                            style: TextStyle(color: Colors.white70, fontSize: 12),
-                          ),
-                        ],
+                            const SizedBox(height: 4),
+                            const Text(
+                              'مبارك عليكم الشهر الفضيل وتقبل الله طاعتكم 🌙',
+                              style: TextStyle(color: Colors.white70, fontSize: 12),
+                            ),
+                          ],
+                        ),
                       ),
+                      const SizedBox(width: 8),
                       const Text('🏮', style: TextStyle(fontSize: 32)),
                     ],
                   ),
@@ -146,41 +147,79 @@ class _RamadanHubViewState extends State<RamadanHubView> {
 
                   // Countdown Box
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.08),
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(color: const Color(0xFFD4AF37).withOpacity(0.3)),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Row(
+                    child: LayoutBuilder(
+                      builder: (context, boxConstraints) {
+                        final isNarrow = boxConstraints.maxWidth < 260;
+                        if (isNarrow) {
+                          return Column(
                             children: [
-                              const Icon(Icons.timer_outlined, color: Color(0xFFD4AF37), size: 22),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  _countdownTitle,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(Icons.timer_outlined, color: Color(0xFFD4AF37), size: 18),
+                                  const SizedBox(width: 6),
+                                  Flexible(
+                                    child: Text(
+                                      _countdownTitle,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _countdownText,
+                                style: const TextStyle(
+                                  color: Color(0xFFD4AF37),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.1,
                                 ),
                               ),
                             ],
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          _countdownText,
-                          style: const TextStyle(
-                            color: Color(0xFFD4AF37),
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                      ],
+                          );
+                        }
+                        return Row(
+                          children: [
+                            const Icon(Icons.timer_outlined, color: Color(0xFFD4AF37), size: 20),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                _countdownTitle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              _countdownText,
+                              style: const TextStyle(
+                                color: Color(0xFFD4AF37),
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.1,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ),
                 ],
@@ -256,63 +295,73 @@ class _RamadanHubViewState extends State<RamadanHubView> {
             ),
             const SizedBox(height: 12),
 
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 1.15,
-              children: [
-                _buildMenuCard(
-                  title: 'إمساكية رمضان الذكية',
-                  subtitle: 'جدول الـ 30 يوماً ومواعيد الإمساك والإفطار',
-                  icon: Icons.calendar_month_rounded,
-                  iconColor: Colors.teal,
-                  badgeEmoji: '🌙',
-                  onTap: () => Get.toNamed(AppRoutes.ramadanImsakia),
-                ),
-                _buildMenuCard(
-                  title: 'مخطط ختمة رمضان',
-                  subtitle: 'متابعة الورد اليومي والصفحات والتقدم',
-                  icon: Icons.auto_stories_rounded,
-                  iconColor: Colors.amber.shade800,
-                  badgeEmoji: '📖',
-                  onTap: () => Get.toNamed(AppRoutes.ramadanKhatma),
-                ),
-                _buildMenuCard(
-                  title: 'مدفع الإفطار وتنبيه السحور',
-                  subtitle: 'مدفع رمضان التراثي ومنبه وقت السحور',
-                  icon: Icons.notifications_active_rounded,
-                  iconColor: Colors.deepOrange,
-                  badgeEmoji: '💥',
-                  onTap: () => Get.toNamed(AppRoutes.ramadanCannonSuhoor),
-                ),
-                _buildMenuCard(
-                  title: 'عدّاد صلاة التراويح',
-                  subtitle: 'متابعة ركعات التراويح والشفع والوتر',
-                  icon: Icons.fingerprint_rounded,
-                  iconColor: Colors.indigo,
-                  badgeEmoji: '📿',
-                  onTap: () => Get.toNamed(AppRoutes.ramadanTaraweeh),
-                ),
-                _buildMenuCard(
-                  title: 'أدعية رمضان وليلة القدر',
-                  subtitle: 'أدعية الأيام الـ 30 والعشر الأواخر والقنوت',
-                  icon: Icons.menu_book_rounded,
-                  iconColor: Colors.purple,
-                  badgeEmoji: '🤲',
-                  onTap: () => Get.toNamed(AppRoutes.ramadanDuas),
-                ),
-                _buildMenuCard(
-                  title: 'حاسبة الزكاة الذكية',
-                  subtitle: 'حساب زكاة الفطر وزكاة المال بدون إنترنت',
-                  icon: Icons.calculate_rounded,
-                  iconColor: Colors.green.shade700,
-                  badgeEmoji: '⚖️',
-                  onTap: () => Get.toNamed(AppRoutes.ramadanZakat),
-                ),
-              ],
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final width = constraints.maxWidth;
+                final int crossAxisCount = width > 840
+                    ? 4
+                    : (width > 560 ? 3 : 2);
+                final double aspectRatio = width < 360 ? 1.05 : (width > 560 ? 1.25 : 1.15);
+
+                return GridView.count(
+                  crossAxisCount: crossAxisCount,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: aspectRatio,
+                  children: [
+                    _buildMenuCard(
+                      title: 'إمساكية رمضان الذكية',
+                      subtitle: 'جدول الـ 30 يوماً ومواعيد الإمساك والإفطار',
+                      icon: Icons.calendar_month_rounded,
+                      iconColor: Colors.teal,
+                      badgeEmoji: '🌙',
+                      onTap: () => Get.toNamed(AppRoutes.ramadanImsakia),
+                    ),
+                    _buildMenuCard(
+                      title: 'مخطط ختمة رمضان',
+                      subtitle: 'متابعة الورد اليومي والصفحات والتقدم',
+                      icon: Icons.auto_stories_rounded,
+                      iconColor: Colors.amber.shade800,
+                      badgeEmoji: '📖',
+                      onTap: () => Get.toNamed(AppRoutes.ramadanKhatma),
+                    ),
+                    _buildMenuCard(
+                      title: 'مدفع الإفطار وتنبيه السحور',
+                      subtitle: 'مدفع رمضان التراثي ومنبه وقت السحور',
+                      icon: Icons.notifications_active_rounded,
+                      iconColor: Colors.deepOrange,
+                      badgeEmoji: '💥',
+                      onTap: () => Get.toNamed(AppRoutes.ramadanCannonSuhoor),
+                    ),
+                    _buildMenuCard(
+                      title: 'عدّاد صلاة التراويح',
+                      subtitle: 'متابعة ركعات التراويح والشفع والوتر',
+                      icon: Icons.fingerprint_rounded,
+                      iconColor: Colors.indigo,
+                      badgeEmoji: '📿',
+                      onTap: () => Get.toNamed(AppRoutes.ramadanTaraweeh),
+                    ),
+                    _buildMenuCard(
+                      title: 'أدعية رمضان وليلة القدر',
+                      subtitle: 'أدعية الأيام الـ 30 والعشر الأواخر والقنوت',
+                      icon: Icons.menu_book_rounded,
+                      iconColor: Colors.purple,
+                      badgeEmoji: '🤲',
+                      onTap: () => Get.toNamed(AppRoutes.ramadanDuas),
+                    ),
+                    _buildMenuCard(
+                      title: 'حاسبة الزكاة الذكية',
+                      subtitle: 'حساب زكاة الفطر وزكاة المال بدون إنترنت',
+                      icon: Icons.calculate_rounded,
+                      iconColor: Colors.green.shade700,
+                      badgeEmoji: '⚖️',
+                      onTap: () => Get.toNamed(AppRoutes.ramadanZakat),
+                    ),
+                  ],
+                );
+              },
             ),
           ],
         ),

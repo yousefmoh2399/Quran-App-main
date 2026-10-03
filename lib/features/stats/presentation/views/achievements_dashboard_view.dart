@@ -6,6 +6,7 @@ import '../../../../core/design/app_radius.dart';
 import '../../../../core/design/app_spacing.dart';
 import '../../../../core/design/app_typography.dart';
 import '../../../../core/design/components/app_card.dart';
+import '../../../../core/design/components/app_scaffold.dart';
 
 class AchievementsDashboardView extends StatefulWidget {
   const AchievementsDashboardView({super.key});
@@ -52,12 +53,9 @@ class _AchievementsDashboardViewState extends State<AchievementsDashboardView> {
     final totalDays = _readingStats['totalDays'] ?? 0;
     final currentStreak = _wirdPlan?.streak ?? 0;
 
-    return Scaffold(
-      backgroundColor: colors.bg,
-      appBar: AppBar(
-        title: const Text('الإحصائيات والإنجازات'),
-        centerTitle: true,
-      ),
+    return AppScaffold(
+      title: 'الإحصائيات والإنجازات',
+      constrainContentWidth: true,
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -144,17 +142,25 @@ class _AchievementsDashboardViewState extends State<AchievementsDashboardView> {
                   AppSpacing.verticalLg,
 
                   // Badges Grid
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: AchievementBadge.all.length,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                      childAspectRatio: 1.15,
-                    ),
-                    itemBuilder: (context, index) {
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final width = constraints.maxWidth;
+                      final int crossAxisCount = width > 840
+                          ? 4
+                          : (width > 560 ? 3 : 2);
+                      final double aspectRatio = width < 360 ? 0.95 : (width > 560 ? 1.25 : 1.12);
+
+                      return GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: AchievementBadge.all.length,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: crossAxisCount,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                          childAspectRatio: aspectRatio,
+                        ),
+                        itemBuilder: (context, index) {
                       final badge = AchievementBadge.all[index];
                       final isUnlocked = _unlockedBadges.contains(badge.id);
 
@@ -201,7 +207,9 @@ class _AchievementsDashboardViewState extends State<AchievementsDashboardView> {
                         ),
                       );
                     },
-                  ),
+                  );
+                },
+              ),
                 ],
               ),
             ),

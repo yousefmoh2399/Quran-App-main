@@ -6,6 +6,7 @@ import 'package:quran_app_android/core/design/app_colors.dart';
 import 'package:quran_app_android/core/design/app_radius.dart';
 import 'package:quran_app_android/core/design/app_spacing.dart';
 import 'package:quran_app_android/core/design/app_typography.dart';
+import 'package:quran_app_android/core/design/responsive.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
 import 'package:quran_app_android/core/service/settings/notifications_services.dart';
 import 'package:quran_app_android/core/util/routes/routes.dart';
@@ -53,10 +54,11 @@ class AdhanSettingsView extends StatelessWidget {
 
         final settings = controller.settings.value;
 
-        return ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-          children: [
-            if (settings.latitude == 0.0 && settings.longitude == 0.0) ...[
+        return MaxWidthContainer(
+          child: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+            children: [
+              if (settings.latitude == 0.0 && settings.longitude == 0.0) ...[
               Container(
                 margin: const EdgeInsets.only(bottom: 14.0),
                 padding: const EdgeInsets.all(12.0),
@@ -532,10 +534,11 @@ class AdhanSettingsView extends StatelessWidget {
 
             AppSpacing.verticalXl,
           ],
-        );
-      }),
-    );
-  }
+        ),
+      );
+    }),
+  );
+}
 
   String _sanitizeMethod(String method) {
     const valid = [

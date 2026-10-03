@@ -176,11 +176,13 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
                   children: [
                     const Text('🕋', style: TextStyle(fontSize: 14)),
                     AppSpacing.horizontalXs,
-                    Text(
-                      'المسافة إلى مكة المكرمة: ${distanceKm.toStringAsFixed(0)} كم',
-                      style: textTheme.labelMedium?.copyWith(
-                        color: colors.primary,
-                        fontWeight: FontWeight.bold,
+                    Flexible(
+                      child: Text(
+                        'المسافة إلى مكة المكرمة: ${distanceKm.toStringAsFixed(0)} كم',
+                        style: textTheme.labelMedium?.copyWith(
+                          color: colors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],
@@ -208,13 +210,16 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
                       size: 22,
                     ),
                     AppSpacing.horizontalSm,
-                    Text(
-                      isAligned
-                          ? 'أنت باتجاه القبلة المشرفة الآن 🕋'
-                          : 'أدر الهاتف حتى يتطابق المؤشر مع الكعبة',
-                      style: textTheme.labelLarge?.copyWith(
-                        color: isAligned ? colors.primary : colors.text,
-                        fontWeight: FontWeight.bold,
+                    Flexible(
+                      child: Text(
+                        isAligned
+                            ? 'أنت باتجاه القبلة المشرفة الآن 🕋'
+                            : 'أدر الهاتف حتى يتطابق المؤشر مع الكعبة',
+                        textAlign: TextAlign.center,
+                        style: textTheme.labelLarge?.copyWith(
+                          color: isAligned ? colors.primary : colors.text,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],

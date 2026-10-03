@@ -5,6 +5,7 @@ import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_radius.dart';
 import '../../../../core/design/app_spacing.dart';
 import '../../../../core/design/app_typography.dart';
+import '../../../../core/design/components/app_scaffold.dart';
 import '../../data/ramadan_service.dart';
 
 class RamadanTaraweehView extends StatefulWidget {
@@ -103,32 +104,29 @@ class _RamadanTaraweehViewState extends State<RamadanTaraweehView> {
     final isCompleted = _currentRakat >= _targetRakats;
     final progress = (_currentRakat / _targetRakats).clamp(0.0, 1.0);
 
-    return Scaffold(
-      backgroundColor: colors.bg,
-      appBar: AppBar(
-        title: const Text('عدّاد صلاة التراويح والتهجد'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            tooltip: 'إعادة الضبط',
-            onPressed: () {
-              Get.defaultDialog(
-                title: 'إعادة ضبط العداد؟',
-                middleText: 'هل تريد إعادة ضبط ركعات التراويح والشفع والوتر لليلة جديدة؟',
-                textConfirm: 'نعم، إعادة ضبط',
-                textCancel: 'إلغاء',
-                confirmTextColor: Colors.white,
-                buttonColor: colors.primary,
-                onConfirm: () {
-                  Get.back();
-                  _resetCounter();
-                },
-              );
-            },
-            icon: const Icon(Icons.refresh_rounded),
-          ),
-        ],
-      ),
+    return AppScaffold(
+      title: 'عدّاد صلاة التراويح والتهجد',
+      constrainContentWidth: true,
+      actions: [
+        IconButton(
+          tooltip: 'إعادة الضبط',
+          onPressed: () {
+            Get.defaultDialog(
+              title: 'إعادة ضبط العداد؟',
+              middleText: 'هل تريد إعادة ضبط ركعات التراويح والشفع والوتر لليلة جديدة؟',
+              textConfirm: 'نعم، إعادة ضبط',
+              textCancel: 'إلغاء',
+              confirmTextColor: Colors.white,
+              buttonColor: colors.primary,
+              onConfirm: () {
+                Get.back();
+                _resetCounter();
+              },
+            );
+          },
+          icon: const Icon(Icons.refresh_rounded),
+        ),
+      ],
       body: SingleChildScrollView(
         padding: AppSpacing.paddingLg,
         child: Column(

@@ -43,6 +43,7 @@ class AdhanView extends StatelessWidget {
 
     return AppScaffold(
       title: 'مواقيت الصلاة',
+      constrainContentWidth: true,
       actions: [
         if (kDebugMode)
           IconButton(

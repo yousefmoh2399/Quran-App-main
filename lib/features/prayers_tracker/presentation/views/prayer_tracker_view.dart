@@ -8,6 +8,7 @@ import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_radius.dart';
 import '../../../../core/design/app_spacing.dart';
 import '../../../../core/design/components/app_card.dart';
+import '../../../../core/design/components/app_scaffold.dart';
 import '../../../../core/util/arabic_date_formatter.dart';
 import 'post_prayer_azkar_view.dart';
 
@@ -95,19 +96,16 @@ class _PrayerTrackerViewState extends State<PrayerTrackerView> {
     final totalWeeklyPrayers = _weeklyLogs.where((l) => l.status == PrayerStatus.onTime || l.status == PrayerStatus.jamaah).length;
     final weeklyPercent = ((totalWeeklyPrayers / 35) * 100).clamp(0, 100).toInt();
 
-    return Scaffold(
-      backgroundColor: colors.bg,
-      appBar: AppBar(
-        title: const Text('سجل الصلوات والفوائت'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.touch_app_outlined),
-            tooltip: 'أذكار بعد الصلاة',
-            onPressed: () => Get.to(() => const PostPrayerAzkarView()),
-          ),
-        ],
-      ),
+    return AppScaffold(
+      title: 'سجل الصلوات والفوائت',
+      constrainContentWidth: true,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.touch_app_outlined),
+          tooltip: 'أذكار بعد الصلاة',
+          onPressed: () => Get.to(() => const PostPrayerAzkarView()),
+        ),
+      ],
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(

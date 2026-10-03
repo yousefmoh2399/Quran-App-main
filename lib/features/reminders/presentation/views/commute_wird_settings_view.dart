@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:quran_app_android/core/design/responsive.dart';
 import 'package:quran_app_android/core/native/native_reminders_bridge.dart';
 import 'package:quran_app_android/core/util/app_snackbar.dart';
 import 'package:quran_app_android/features/reminders/data/commute_wird_repository.dart';
@@ -176,8 +177,9 @@ class _CommuteWirdSettingsViewState extends State<CommuteWirdSettingsView> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: const EdgeInsets.all(16),
+          : MaxWidthContainer(
+              child: ListView(
+                padding: const EdgeInsets.all(16),
               children: [
                 // Streak & Progress Card
                 Container(
@@ -437,6 +439,7 @@ class _CommuteWirdSettingsViewState extends State<CommuteWirdSettingsView> {
                 ),
               ],
             ),
+          ),
     );
   }
 }

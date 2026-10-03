@@ -4,6 +4,7 @@ import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_radius.dart';
 import '../../../../core/design/app_spacing.dart';
 import '../../../../core/design/app_typography.dart';
+import '../../../../core/design/components/app_scaffold.dart';
 import '../../../../core/native/native_reminders_bridge.dart';
 import '../../data/ramadan_notification_service.dart';
 import '../../data/ramadan_service.dart';
@@ -107,12 +108,9 @@ class _RamadanCannonSuhoorViewState extends State<RamadanCannonSuhoorView> {
       );
     }
 
-    return Scaffold(
-      backgroundColor: colors.bg,
-      appBar: AppBar(
-        title: const Text('مدفع الإفطار وتنبيه السحور'),
-        centerTitle: true,
-      ),
+    return AppScaffold(
+      title: 'مدفع الإفطار وتنبيه السحور',
+      constrainContentWidth: true,
       body: SingleChildScrollView(
         padding: AppSpacing.paddingLg,
         child: Column(
@@ -138,20 +136,26 @@ class _RamadanCannonSuhoorViewState extends State<RamadanCannonSuhoorView> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: const [
-                          Text('💥', style: TextStyle(fontSize: 24)),
-                          SizedBox(width: 8),
-                          Text(
-                            'مدفع الإفطار التفاعلي',
-                            style: TextStyle(
-                              color: Color(0xFFD4AF37),
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                      Expanded(
+                        child: Row(
+                          children: const [
+                            Text('💥', style: TextStyle(fontSize: 24)),
+                            SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'مدفع الإفطار التفاعلي',
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: Color(0xFFD4AF37),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
+                      const SizedBox(width: 8),
                       Switch.adaptive(
                         value: _cannonEnabled,
                         activeColor: const Color(0xFFD4AF37),
@@ -200,21 +204,27 @@ class _RamadanCannonSuhoorViewState extends State<RamadanCannonSuhoorView> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          Icon(Icons.alarm_on_rounded, color: colors.primary, size: 22),
-                          const SizedBox(width: 8),
-                          Text(
-                            'منبه وتنبيه السحور المخصص',
-                            style: TextStyle(
-                              fontFamily: AppTypography.uiFont,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                              color: colors.text,
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Icon(Icons.alarm_on_rounded, color: colors.primary, size: 22),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'منبه وتنبيه السحور المخصص',
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontFamily: AppTypography.uiFont,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                  color: colors.text,
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
+                      const SizedBox(width: 8),
                       Switch.adaptive(
                         value: _suhoorEnabled,
                         activeColor: colors.primary,
@@ -284,13 +294,15 @@ class _RamadanCannonSuhoorViewState extends State<RamadanCannonSuhoorView> {
                     children: [
                       Icon(Icons.notification_add_rounded, color: colors.primary, size: 22),
                       const SizedBox(width: 8),
-                      Text(
-                        'فحص واختبار الإشعارات المباشرة',
-                        style: TextStyle(
-                          fontFamily: AppTypography.uiFont,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          color: colors.text,
+                      Expanded(
+                        child: Text(
+                          'فحص واختبار الإشعارات المباشرة',
+                          style: TextStyle(
+                            fontFamily: AppTypography.uiFont,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: colors.text,
+                          ),
                         ),
                       ),
                     ],
@@ -371,12 +383,14 @@ class _RamadanCannonSuhoorViewState extends State<RamadanCannonSuhoorView> {
                     children: [
                       const Text('🤲', style: TextStyle(fontSize: 22)),
                       const SizedBox(width: 8),
-                      Text(
-                        'دعاء الإفطار المأثور',
-                        style: TextStyle(
-                          color: colors.isDark ? const Color(0xFFD4AF37) : const Color(0xFF09261E),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                      Expanded(
+                        child: Text(
+                          'دعاء الإفطار المأثور',
+                          style: TextStyle(
+                            color: colors.isDark ? const Color(0xFFD4AF37) : const Color(0xFF09261E),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
                     ],

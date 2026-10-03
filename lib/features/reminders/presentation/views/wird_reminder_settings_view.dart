@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quran_app_android/core/data/models/user_models.dart';
 import 'package:quran_app_android/core/data/repositories/user_repository.dart';
+import 'package:quran_app_android/core/design/responsive.dart';
 import 'package:quran_app_android/core/native/native_reminders_bridge.dart';
 
 class WirdReminderSettingsView extends StatefulWidget {
@@ -115,8 +116,9 @@ class _WirdReminderSettingsViewState extends State<WirdReminderSettingsView> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: const EdgeInsets.all(16),
+          : MaxWidthContainer(
+              child: ListView(
+                padding: const EdgeInsets.all(16),
               children: [
                 // Info Card
                 Container(
@@ -250,6 +252,7 @@ class _WirdReminderSettingsViewState extends State<WirdReminderSettingsView> {
                 ),
               ],
             ),
+          ),
     );
   }
 }

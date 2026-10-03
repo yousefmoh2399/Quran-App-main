@@ -22,6 +22,7 @@ class SettingsView extends StatelessWidget {
 
     return AppScaffold(
       title: 'المزيد',
+      constrainContentWidth: true,
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.symmetric(

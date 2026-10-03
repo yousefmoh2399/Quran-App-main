@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quran_app_android/core/native/native_reminders_bridge.dart';
 import 'package:quran_app_android/core/util/app_snackbar.dart';
+import 'package:quran_app_android/core/design/responsive.dart';
 import 'package:quran_app_android/core/util/routes/routes.dart';
 
 class MyRemindersView extends StatefulWidget {
@@ -170,9 +171,10 @@ class _MyRemindersViewState extends State<MyRemindersView> {
             ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
+      body: MaxWidthContainer(
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : RefreshIndicator(
               onRefresh: _loadReminders,
               child: ListView(
                 padding: const EdgeInsets.all(16),
@@ -385,6 +387,7 @@ class _MyRemindersViewState extends State<MyRemindersView> {
                 ],
               ),
             ),
+      ),
     );
   }
 

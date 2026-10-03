@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_radius.dart';
 import '../../../../core/design/app_typography.dart';
+import '../../../../core/design/responsive.dart';
 import '../controllers/bookmarks_controller.dart';
 import '../widgets/bookmarks_tab.dart';
 import '../widgets/memorized_tab.dart';
@@ -122,13 +123,15 @@ class BookmarksView extends StatelessWidget {
         return RefreshIndicator(
           onRefresh: controller.loadAll,
           color: colors.primary,
-          child: TabBarView(
-            controller: controller.tabController,
-            children: [
-              BookmarksTab(controller: controller),
-              MemorizedTab(controller: controller),
-              ReadingLogTab(controller: controller),
-            ],
+          child: MaxWidthContainer(
+            child: TabBarView(
+              controller: controller.tabController,
+              children: [
+                BookmarksTab(controller: controller),
+                MemorizedTab(controller: controller),
+                ReadingLogTab(controller: controller),
+              ],
+            ),
           ),
         );
       }),

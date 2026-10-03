@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:quran_app_android/core/design/responsive.dart';
 import 'package:quran_app_android/core/native/native_reminders_bridge.dart';
 
 class SadaqahSettingsView extends StatefulWidget {
@@ -107,8 +108,9 @@ class _SadaqahSettingsViewState extends State<SadaqahSettingsView> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: const EdgeInsets.all(16),
+          : MaxWidthContainer(
+              child: ListView(
+                padding: const EdgeInsets.all(16),
               children: [
                 // Enable Toggle Card
                 Card(
@@ -310,6 +312,7 @@ class _SadaqahSettingsViewState extends State<SadaqahSettingsView> {
                 ),
               ],
             ),
+          ),
     );
   }
 }
