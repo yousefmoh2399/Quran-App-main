@@ -113,6 +113,7 @@ class HadithCard extends StatelessWidget {
               // Bookmark button
               TextButton.icon(
                 onPressed: () {
+                  HapticFeedback.mediumImpact();
                   controller.addCurrentIndex(itemIndex);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -142,6 +143,7 @@ class HadithCard extends StatelessWidget {
               // Copy button
               TextButton.icon(
                 onPressed: () {
+                  HapticFeedback.lightImpact();
                   Clipboard.setData(
                     ClipboardData(text: '$chapterName\n\n$hadithText'),
                   );
@@ -174,6 +176,7 @@ class HadithCard extends StatelessWidget {
               Builder(
                 builder: (btnContext) => TextButton.icon(
                   onPressed: () async {
+                    HapticFeedback.lightImpact();
                     await Share.share(
                       '📜 من موطأ الإمام مالك\n$chapterName\n\n$hadithText',
                       sharePositionOrigin: getSharePositionOrigin(btnContext),

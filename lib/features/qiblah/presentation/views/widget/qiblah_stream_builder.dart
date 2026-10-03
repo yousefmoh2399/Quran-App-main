@@ -106,9 +106,10 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
         final bool isAligned = diffDeg < 4 || diffDeg > 356;
 
         if (isAligned && !_hasVibrated) {
-          HapticFeedback.mediumImpact();
+          HapticFeedback.heavyImpact();
+          HapticFeedback.vibrate();
           _hasVibrated = true;
-        } else if (!isAligned) {
+        } else if (!isAligned && (diffDeg >= 6 && diffDeg <= 354)) {
           _hasVibrated = false;
         }
 

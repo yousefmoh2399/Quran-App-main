@@ -35,10 +35,15 @@ class AzkarCircularCounter extends StatelessWidget {
         GestureDetector(
           onTap: () {
             if (!isCompleted) {
-              HapticFeedback.lightImpact();
+              if (remainingCount <= 1) {
+                HapticFeedback.heavyImpact();
+                HapticFeedback.vibrate();
+              } else {
+                HapticFeedback.lightImpact();
+              }
               onTap();
             } else {
-              HapticFeedback.mediumImpact();
+              HapticFeedback.selectionClick();
             }
           },
           child: Stack(

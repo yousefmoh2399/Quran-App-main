@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_radius.dart';
@@ -44,6 +45,7 @@ class BookmarksView extends StatelessWidget {
               border: Border.all(color: colors.divider),
             ),
             child: TabBar(
+              onTap: (_) => HapticFeedback.selectionClick(),
               controller: controller.tabController,
               labelPadding: const EdgeInsets.symmetric(horizontal: 2.0),
               indicator: BoxDecoration(

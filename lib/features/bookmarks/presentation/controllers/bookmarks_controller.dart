@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../../core/data/models/user_models.dart';
 import '../../../../core/data/repositories/quran_repository.dart';
@@ -87,11 +88,13 @@ class BookmarksController extends GetxController with GetSingleTickerProviderSta
   }
 
   Future<void> toggleHadithMemorized(String id) async {
+    HapticFeedback.mediumImpact();
     await _hadithRepo.toggleMemorized(id);
     await _loadHadithBookmarks();
   }
 
   Future<void> deleteHadithBookmark(String id) async {
+    HapticFeedback.lightImpact();
     await _hadithRepo.removeBookmark(id);
     await _loadHadithBookmarks();
   }
@@ -130,6 +133,7 @@ class BookmarksController extends GetxController with GetSingleTickerProviderSta
 
   Future<void> deleteBookmark(BookmarkItem item) async {
     if (item.id != null) {
+      HapticFeedback.lightImpact();
       await _userRepo.deleteBookmark(item.id!);
       bookmarks.removeWhere((b) => b.id == item.id);
       _applyFilter();
@@ -138,6 +142,7 @@ class BookmarksController extends GetxController with GetSingleTickerProviderSta
 
   Future<void> deleteMemorized(MemorizedItem item) async {
     if (item.id != null) {
+      HapticFeedback.lightImpact();
       await _userRepo.deleteMemorized(item.id!);
       memorizedList.removeWhere((m) => m.id == item.id);
       final stats = await _userRepo.getMemorizationStats();
@@ -146,6 +151,7 @@ class BookmarksController extends GetxController with GetSingleTickerProviderSta
   }
 
   Future<void> updateMemorizeStatus(MemorizedItem item, MemorizeStatus? newStatus) async {
+    HapticFeedback.selectionClick();
     if (newStatus == null) {
       await deleteMemorized(item);
     } else {
@@ -156,6 +162,7 @@ class BookmarksController extends GetxController with GetSingleTickerProviderSta
   }
 
   void openMushaf({required int page, int? surah, int? ayah}) {
+    HapticFeedback.selectionClick();
     Get.toNamed(
       AppRoutes.mushaf,
       arguments: {

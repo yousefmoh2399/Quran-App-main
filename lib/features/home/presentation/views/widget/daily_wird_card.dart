@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:quran_app_android/core/data/models/user_models.dart';
 import 'package:quran_app_android/core/data/repositories/user_repository.dart';
@@ -273,6 +274,8 @@ class DailyWirdCard extends StatelessWidget {
                       ),
                     ),
                     onPressed: () async {
+                      HapticFeedback.heavyImpact();
+                      HapticFeedback.vibrate();
                       await homeVM.markWirdCompleted();
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(

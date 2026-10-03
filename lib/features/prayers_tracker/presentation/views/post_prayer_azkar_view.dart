@@ -72,19 +72,22 @@ class _PostPrayerAzkarViewState extends State<PostPrayerAzkarView> {
   bool _isAllCompleted = false;
 
   void _increment() {
-    HapticFeedback.lightImpact();
     final zikr = _azkarList[_currentIndex];
 
     setState(() {
       _currentCount++;
       if (_currentCount >= zikr.count) {
-        HapticFeedback.mediumImpact();
         if (_currentIndex < _azkarList.length - 1) {
+          HapticFeedback.mediumImpact();
           _currentIndex++;
           _currentCount = 0;
         } else {
+          HapticFeedback.heavyImpact();
+          HapticFeedback.vibrate();
           _isAllCompleted = true;
         }
+      } else {
+        HapticFeedback.lightImpact();
       }
     });
   }

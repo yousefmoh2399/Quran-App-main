@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../../core/data/models/ayah_entity.dart';
 import '../../../../core/data/models/mushaf_models.dart';
@@ -586,6 +587,8 @@ class MushafController extends GetxController {
         countTowardsMain: commuteCountTowardsMain.value,
       );
       isCommuteCompleted.value = true;
+      HapticFeedback.heavyImpact();
+      HapticFeedback.vibrate();
 
       Get.dialog(
         AlertDialog(

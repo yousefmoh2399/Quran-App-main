@@ -70,7 +70,8 @@ class PngTreeViewModel extends GetxController {
     if (counter >= targetCount) {
       counterTree += 1;
       counter = 0;
-      HapticFeedback.mediumImpact();
+      HapticFeedback.heavyImpact();
+      HapticFeedback.vibrate();
     }
     await saveData();
     update();

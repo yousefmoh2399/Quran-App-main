@@ -104,6 +104,7 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet> {
   Future<void> _toggleBookmark() async {
     final note = _noteController.text.trim();
     if (_isBookmarked) {
+      HapticFeedback.lightImpact();
       await _controller.removeAyahBookmark(
         widget.surahNumber,
         widget.ayahNumber,
@@ -112,6 +113,7 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet> {
       setState(() => _isBookmarked = false);
       _showFeedback('تمت إزالة العلامة المرجعية للآية');
     } else {
+      HapticFeedback.mediumImpact();
       _controller.selectedAyahColor.value = _selectedColor;
       await _controller.setAyahBookmark(
         surah: widget.surahNumber,
@@ -126,6 +128,7 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet> {
   }
 
   Future<void> _updateColor(BookmarkColor color) async {
+    HapticFeedback.selectionClick();
     setState(() => _selectedColor = color);
     _controller.selectedAyahColor.value = color;
     if (_isBookmarked) {
@@ -141,6 +144,11 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet> {
   }
 
   Future<void> _updateMemorizeStatus(MemorizeStatus? status) async {
+    if (status == MemorizeStatus.memorized) {
+      HapticFeedback.mediumImpact();
+    } else {
+      HapticFeedback.selectionClick();
+    }
     setState(() => _selectedStatus = status);
     await _controller.setAyahMemorizeStatus(
       surah: widget.surahNumber,
@@ -155,6 +163,7 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet> {
   }
 
   Future<void> _saveNote() async {
+    HapticFeedback.lightImpact();
     final note = _noteController.text.trim();
     if (_isBookmarked) {
       await _controller.setAyahBookmark(
@@ -169,6 +178,7 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet> {
   }
 
   void _copyAyah() {
+    HapticFeedback.lightImpact();
     final text = widget.ayahEntity?.textAr ?? '';
     final copyContent = '﴿$text﴾ [سورة ${widget.surahName}: ${widget.ayahNumber}]';
     Clipboard.setData(ClipboardData(text: copyContent));
