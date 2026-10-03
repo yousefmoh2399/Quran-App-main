@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -218,6 +219,32 @@ class _MyRemindersViewState extends State<MyRemindersView> {
                                   color: isDark ? Colors.white70 : Colors.black54,
                                 ),
                               ),
+                              if (Platform.isIOS) ...[
+                                const SizedBox(height: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.amber.withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: Colors.amber.withOpacity(0.4)),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.info_outline_rounded, size: 16, color: Colors.amber),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          'ملاحظة لـ iOS: التذكير لا يُلغى تلقائياً لو قرأت والتطبيق مغلق، بل يتم تحديثه وإلغاؤه فور فتحك للتطبيق. الحد الأقصى للمجدول 64 إشعاراً تُجدد تلقائياً.',
+                                          style: TextStyle(
+                                            fontSize: 11.0,
+                                            color: isDark ? Colors.amber.shade200 : Colors.amber.shade900,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                         ),
