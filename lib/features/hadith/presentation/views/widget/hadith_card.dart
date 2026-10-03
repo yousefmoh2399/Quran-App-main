@@ -8,6 +8,7 @@ import 'package:quran_app_android/core/design/components/app_card.dart';
 import 'package:quran_app_android/features/hadith/data/models/hadith_model_malek.dart';
 import 'package:quran_app_android/features/hadith/presentation/view_model/hadith_view_model.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:quran_app_android/core/util/share_helper.dart';
 
 class HadithCard extends StatelessWidget {
   final HadithsModel model;
@@ -170,22 +171,21 @@ class HadithCard extends StatelessWidget {
               ),
               Container(width: 1, height: 20, color: colors.divider),
               // Share button
-              TextButton.icon(
-                onPressed: () async {
-                  await Share.share(
-                    '📜 من موطأ الإمام مالك\n$chapterName\n\n$hadithText',
-                    sharePositionOrigin: Rect.fromPoints(
-                      const Offset(2, 2),
-                      const Offset(3, 3),
+              Builder(
+                builder: (btnContext) => TextButton.icon(
+                  onPressed: () async {
+                    await Share.share(
+                      '📜 من موطأ الإمام مالك\n$chapterName\n\n$hadithText',
+                      sharePositionOrigin: getSharePositionOrigin(btnContext),
+                    );
+                  },
+                  icon: Icon(Icons.share_rounded, size: 18, color: colors.primary),
+                  label: Text(
+                    'مشاركة',
+                    style: textTheme.labelMedium?.copyWith(
+                      color: colors.primary,
+                      fontWeight: FontWeight.bold,
                     ),
-                  );
-                },
-                icon: Icon(Icons.share_rounded, size: 18, color: colors.primary),
-                label: Text(
-                  'مشاركة',
-                  style: textTheme.labelMedium?.copyWith(
-                    color: colors.primary,
-                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),

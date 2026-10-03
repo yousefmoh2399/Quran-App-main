@@ -7,6 +7,7 @@ import 'package:quran_app_android/core/design/app_typography.dart';
 import 'package:quran_app_android/core/design/components/app_bottom_sheet.dart';
 import 'package:quran_app_android/features/nameOfAllah/data/models/Names_Of_Allah_model.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:quran_app_android/core/util/share_helper.dart';
 
 class NameOfAllahDetailSheet extends StatefulWidget {
   final List<NamesOfAllahModel> namesList;
@@ -173,22 +174,21 @@ class _NameOfAllahDetailSheetState extends State<NameOfAllahDetailSheet> {
                     ),
                   ),
                   AppSpacing.horizontalSm,
-                  TextButton.icon(
-                    onPressed: () async {
-                      await Share.share(
-                        '✨ ${item.name} ✨\n\n${item.text}',
-                        sharePositionOrigin: Rect.fromPoints(
-                          const Offset(2, 2),
-                          const Offset(3, 3),
+                  Builder(
+                    builder: (btnContext) => TextButton.icon(
+                      onPressed: () async {
+                        await Share.share(
+                          '✨ ${item.name} ✨\n\n${item.text}',
+                          sharePositionOrigin: getSharePositionOrigin(btnContext),
+                        );
+                      },
+                      icon: Icon(Icons.share_rounded, size: 18, color: colors.primary),
+                      label: Text(
+                        'مشاركة',
+                        style: textTheme.labelMedium?.copyWith(
+                          color: colors.primary,
+                          fontWeight: FontWeight.bold,
                         ),
-                      );
-                    },
-                    icon: Icon(Icons.share_rounded, size: 18, color: colors.primary),
-                    label: Text(
-                      'مشاركة',
-                      style: textTheme.labelMedium?.copyWith(
-                        color: colors.primary,
-                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:quran_app_android/core/util/share_helper.dart';
 import 'package:quran_app_android/core/design/app_colors.dart';
 import 'package:quran_app_android/core/design/app_radius.dart';
 import 'package:quran_app_android/core/design/app_typography.dart';
@@ -154,7 +155,10 @@ class ZikrShareHelper {
                       shareText.write('\n\n$virtue');
                     }
                     shareText.write('\n\n— من تطبيق تقرّب');
-                    Share.share(shareText.toString());
+                    Share.share(
+                      shareText.toString(),
+                      sharePositionOrigin: getSharePositionOrigin(bottomSheetContext),
+                    );
                   },
                 ),
               ],
@@ -188,6 +192,7 @@ class _ZikrImageShareDialogState extends State<ZikrImageShareDialog> {
   bool _isSharing = false;
 
   Future<void> _captureAndShare() async {
+    final shareOrigin = getSharePositionOrigin(context);
     setState(() => _isSharing = true);
 
     try {
@@ -208,6 +213,7 @@ class _ZikrImageShareDialogState extends State<ZikrImageShareDialog> {
         await Share.shareXFiles(
           [xfile],
           text: '${widget.zikrText}\n— تطبيق تقرّب',
+          sharePositionOrigin: shareOrigin,
         );
       }
     } catch (e) {

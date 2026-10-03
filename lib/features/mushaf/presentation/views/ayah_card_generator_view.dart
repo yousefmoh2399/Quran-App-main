@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../../../core/util/share_helper.dart';
 import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_radius.dart';
 import '../../../../core/design/app_spacing.dart';
@@ -79,6 +80,7 @@ class _AyahCardGeneratorViewState extends State<AyahCardGeneratorView> {
   bool _isExporting = false;
 
   Future<void> _captureAndShare() async {
+    final shareOrigin = getSharePositionOrigin(context);
     setState(() => _isExporting = true);
 
     try {
@@ -98,6 +100,7 @@ class _AyahCardGeneratorViewState extends State<AyahCardGeneratorView> {
         await Share.shareXFiles(
           [xfile],
           text: '﴿${widget.ayahText}﴾ [${widget.surahName}: ${widget.ayahNumber}]',
+          sharePositionOrigin: shareOrigin,
         );
       }
     } catch (e) {

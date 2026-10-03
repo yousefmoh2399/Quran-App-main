@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../../../core/util/share_helper.dart';
 import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_radius.dart';
 import '../../../../core/design/app_spacing.dart';
@@ -139,6 +140,7 @@ class AboutAppView extends StatelessWidget {
                     onPressed: () {
                       Share.share(
                         'حمّل تطبيق "تقرّب" لقراءة القرآن الكريم ومواقيت الصلاة والأذكار بدون إعلانات وبحجم خفيف جداً.\nhttps://play.google.com/store/apps/details?id=com.taqarrab.quran',
+                        sharePositionOrigin: getSharePositionOrigin(context),
                       );
                     },
                   ),

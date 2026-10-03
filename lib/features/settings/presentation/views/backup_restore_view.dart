@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../../../core/util/share_helper.dart';
 import '../../../../core/data/repositories/user_repository.dart';
 import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_radius.dart';
@@ -24,6 +25,7 @@ class _BackupRestoreViewState extends State<BackupRestoreView> {
   bool _isSuccess = true;
 
   Future<void> _exportBackup() async {
+    final shareOrigin = getSharePositionOrigin(context);
     setState(() {
       _isProcessing = true;
       _statusMessage = null;
@@ -42,6 +44,7 @@ class _BackupRestoreViewState extends State<BackupRestoreView> {
         [xfile],
         subject: 'نسخة احتياطية لتطبيق تقرب ($timeStr)',
         text: 'ملف النسخة الاحتياطية لبيانات الورد والعلامات والصلوات في تطبيق تقرب.',
+        sharePositionOrigin: shareOrigin,
       );
 
       setState(() {

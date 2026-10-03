@@ -5,6 +5,7 @@ import 'package:quran_app_android/core/util/color.dart';
 import 'package:quran_app_android/core/util/widgets/custom_toast.dart';
 
 import 'package:share_plus/share_plus.dart';
+import 'package:quran_app_android/core/util/share_helper.dart';
 
 class SectionsBottom extends StatelessWidget {
   const SectionsBottom({super.key,required this.model});
@@ -15,17 +16,19 @@ class SectionsBottom extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        GestureDetector(
-          onTap: () async {
-            await Share.share(
-                sharePositionOrigin:
-                    Rect.fromPoints(const Offset(2, 2), const Offset(3, 3)),
-                model.text.toString().replaceFirst(':', ''));
-          },
-          child: const Icon(
-            Icons.share,
-            size: 25.0,
-            color: AppColors.kPrimaryColor,
+        Builder(
+          builder: (btnContext) => GestureDetector(
+            onTap: () async {
+              await Share.share(
+                model.text.toString().replaceFirst(':', ''),
+                sharePositionOrigin: getSharePositionOrigin(btnContext),
+              );
+            },
+            child: const Icon(
+              Icons.share,
+              size: 25.0,
+              color: AppColors.kPrimaryColor,
+            ),
           ),
         ),
         const SizedBox(width: 20.0),
