@@ -14,6 +14,26 @@ class MushafRasterCache {
   // Map maintaining insertion order (LinkedHashMap in Dart)
   final Map<String, ui.Image> _cache = {};
 
+  int _hits = 0;
+  int _misses = 0;
+
+  int get hits => _hits;
+  int get misses => _misses;
+  double get hitRatio => (_hits + _misses) > 0 ? _hits / (_hits + _misses) : 0.0;
+
+  /// Returns estimated GPU/RAM memory in bytes for all cached textures.
+  /// (RGBA = 4 bytes per pixel)
+  int get estimatedMemoryBytes {
+    int bytes = 0;
+    for (final img in _cache.values) {
+      bytes += img.width * img.height * 4;
+    }
+    return bytes;
+  }
+
+  /// Estimated memory in MegaBytes (MB)
+  double get estimatedMemoryMB => estimatedMemoryBytes / (1024.0 * 1024.0);
+
   String _key(int pageNumber, MushafThemeMode mode) => '${pageNumber}_${mode.name}';
 
   /// Returns cached image for the given page and theme, or null if not cached.
@@ -23,8 +43,10 @@ class MushafRasterCache {
     final image = _cache.remove(key);
     if (image != null) {
       _cache[key] = image;
+      _hits++;
       return image;
     }
+    _misses++;
     return null;
   }
 
@@ -68,6 +90,8 @@ class MushafRasterCache {
       image.dispose();
     }
     _cache.clear();
+    _hits = 0;
+    _misses = 0;
   }
 
   /// Current number of cached raster pages.

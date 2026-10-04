@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import '../../../../core/data/models/mushaf_models.dart';
 import '../../../../core/data/models/user_models.dart';
 import '../../../../core/design/app_typography.dart';
 import '../../../../core/mushaf/mushaf_font_manager.dart';
+import '../../../../core/mushaf/mushaf_raster_cache.dart';
 import '../models/mushaf_theme_model.dart';
 import '../utils/mushaf_utils.dart';
 import 'mushaf_frame_painter.dart';
@@ -15,7 +17,7 @@ import 'page_ribbon_widget.dart';
 /// - Silk corner ribbon indicator on bookmarked or memorized pages.
 /// - Persistent tinting on bookmarked and memorized verses.
 /// - Mini progress bar at footer showing progress towards Khatma (Page X of 604).
-/// - 60fps/120fps raster image caching via [MushafRasterCache] when moving.
+/// - Automatic offscreen texture rasterization and LRU caching via [MushafRasterCache].
 class MushafPageWidget extends StatefulWidget {
   final MushafPage page;
   final MushafThemeConfig theme;
@@ -60,14 +62,44 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
   void initState() {
     super.initState();
     _fontLoadingFuture = _ensurePageFonts(widget.page);
+    if (_isFontPreloaded) {
+      _tryCaptureRaster();
+    } else {
+      _fontLoadingFuture.then((_) {
+        if (mounted) _tryCaptureRaster();
+      });
+    }
   }
 
   @override
   void didUpdateWidget(covariant MushafPageWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.page.pageNumber != widget.page.pageNumber) {
+    if (oldWidget.page.pageNumber != widget.page.pageNumber ||
+        oldWidget.theme.mode != widget.theme.mode) {
       _fontLoadingFuture = _ensurePageFonts(widget.page);
+      _fontLoadingFuture.then((_) {
+        if (mounted) _tryCaptureRaster();
+      });
+    } else if (_isFontPreloaded) {
+      _tryCaptureRaster();
     }
+  }
+
+  void _tryCaptureRaster() {
+    if (widget.isMoving) return;
+    if (MushafRasterCache.instance.has(widget.page.pageNumber, widget.theme.mode)) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted || widget.isMoving) return;
+      try {
+        final boundary = _boundaryKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+        if (boundary != null && boundary.hasSize) {
+          final dpr = (MediaQuery.maybeOf(context)?.devicePixelRatio ?? 2.0).clamp(1.0, 2.5);
+          final image = await boundary.toImage(pixelRatio: dpr);
+          MushafRasterCache.instance.put(widget.page.pageNumber, widget.theme.mode, image);
+        }
+      } catch (_) {}
+    });
   }
 
   bool get _isFontPreloaded {

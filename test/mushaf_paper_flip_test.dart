@@ -78,6 +78,7 @@ void main() {
               getAyahBookmarkColors: () => {},
               getAyahMemorizeStatuses: () => {},
               controller: controller,
+              enablePrewarm: false,
             ),
           ),
         ),
