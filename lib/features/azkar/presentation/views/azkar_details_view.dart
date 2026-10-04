@@ -53,6 +53,7 @@ class DetailesAzkarView extends StatelessWidget {
                           controller: ctrl,
                           itemIndex: itemIndex,
                           totalItems: azkarList.length,
+                          categoryTitle: categoryModel.category,
                         );
                       },
                     ),

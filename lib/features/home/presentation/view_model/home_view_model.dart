@@ -36,17 +36,17 @@ class HomeViewModel extends GetxController {
   String dataKey = 'currentZekr';
 
   Future<void> _init() async {
-    await getLastRead();
-    await loadUserQuranData();
-    await _setupHomeWidget();
-    await NativeAzkarBridge.scheduleDailyAzkar(2);
-    await NativeAdhanBridge.scheduleDailyReset();
-    try {
-      await _userRepo.syncNativePrayedLogs();
-    } catch (_) {}
-    try {
-      await LockScreenBannerService.instance.updateBanner();
-    } catch (_) {}
+    await Future.wait([
+      getLastRead(),
+      loadUserQuranData(),
+    ]);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _setupHomeWidget();
+      NativeAzkarBridge.scheduleDailyAzkar(2);
+      NativeAdhanBridge.scheduleDailyReset();
+      _userRepo.syncNativePrayedLogs().catchError((_) => 0);
+      LockScreenBannerService.instance.updateBanner().catchError((_) {});
+    });
   }
 
   Future<void> getLastRead() async {

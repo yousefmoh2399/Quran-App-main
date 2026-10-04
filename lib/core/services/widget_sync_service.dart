@@ -5,11 +5,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class WidgetSyncService {
   static const String appGroupId = 'group.com.homeScreenApp';
-  static const String androidWirdWidget = 'WirdKhatmaWidgetProvider';
+  static const String androidWirdWidget = 'com.example.quran_app_android.widgets.WirdKhatmaWidgetProvider';
   static const String iOSWirdWidget = 'WirdKhatmaWidget';
-  static const String androidPrayerWidget = 'PrayerTimesWidgetProvider';
+  static const String androidPrayerWidget = 'com.example.quran_app_android.widgets.PrayerTimesWidgetProvider';
   static const String iOSPrayerWidget = 'PrayerTimesWidget';
-  static const String androidRamadanWidget = 'RamadanWidgetProvider';
+  static const String androidRamadanWidget = 'com.example.quran_app_android.widgets.RamadanWidgetProvider';
   static const String iOSRamadanWidget = 'RamadanWidget';
 
   static Future<void> init() async {

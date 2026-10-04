@@ -8,14 +8,14 @@ import 'package:quran_app_android/core/design/components/app_card.dart';
 import 'package:quran_app_android/features/azkar/data/models/azkar_model.dart';
 import 'package:quran_app_android/features/azkar/presentation/view_model/azkar_view_model.dart';
 import 'package:quran_app_android/features/azkar/presentation/views/widget/azkar_circular_counter.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:quran_app_android/core/util/share_helper.dart';
+import 'package:quran_app_android/features/azkar/presentation/views/widgets/zikr_image_share_dialog.dart';
 
 class AzkarItemCard extends StatefulWidget {
   final ArrayAzkarModel model;
   final AzkarViewModel controller;
   final int itemIndex;
   final int totalItems;
+  final String? categoryTitle;
 
   const AzkarItemCard({
     super.key,
@@ -23,6 +23,7 @@ class AzkarItemCard extends StatefulWidget {
     required this.controller,
     required this.itemIndex,
     required this.totalItems,
+    this.categoryTitle,
   });
 
   @override
@@ -146,7 +147,7 @@ class _AzkarItemCardState extends State<AzkarItemCard> {
           AppSpacing.verticalMd,
           Divider(color: colors.divider, height: 1),
           AppSpacing.verticalSm,
-          // Bottom action buttons: share & copy
+          // Bottom action buttons: copy, share as image, and share options
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -178,12 +179,33 @@ class _AzkarItemCardState extends State<AzkarItemCard> {
                 ),
               ),
               Container(width: 1, height: 20, color: colors.divider),
+              TextButton.icon(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (_) => ZikrImageShareDialog(
+                      zikrText: cleanedText,
+                      categoryTitle: widget.categoryTitle ?? 'أذكار وأدعية',
+                    ),
+                  );
+                },
+                icon: Icon(Icons.image_outlined, size: 18, color: colors.primary),
+                label: Text(
+                  'مشاركة كصورة',
+                  style: textTheme.labelMedium?.copyWith(
+                    color: colors.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Container(width: 1, height: 20, color: colors.divider),
               Builder(
                 builder: (btnContext) => TextButton.icon(
-                  onPressed: () async {
-                    await Share.share(
-                      cleanedText,
-                      sharePositionOrigin: getSharePositionOrigin(btnContext),
+                  onPressed: () {
+                    ZikrShareHelper.showShareOptions(
+                      context,
+                      zikrText: cleanedText,
+                      categoryTitle: widget.categoryTitle ?? 'أذكار وأدعية',
                     );
                   },
                   icon: Icon(Icons.share_rounded, size: 18, color: colors.primary),

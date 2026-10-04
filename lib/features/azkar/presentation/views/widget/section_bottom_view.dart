@@ -4,8 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:quran_app_android/core/util/color.dart';
 import 'package:quran_app_android/core/util/widgets/custom_toast.dart';
 
-import 'package:share_plus/share_plus.dart';
-import 'package:quran_app_android/core/util/share_helper.dart';
+import 'package:quran_app_android/features/azkar/presentation/views/widgets/zikr_image_share_dialog.dart';
 
 class SectionsBottom extends StatelessWidget {
   const SectionsBottom({super.key,required this.model});
@@ -18,10 +17,32 @@ class SectionsBottom extends StatelessWidget {
       children: [
         Builder(
           builder: (btnContext) => GestureDetector(
-            onTap: () async {
-              await Share.share(
-                model.text.toString().replaceFirst(':', ''),
-                sharePositionOrigin: getSharePositionOrigin(btnContext),
+            onTap: () {
+              final text = model.text.toString().replaceFirst(':', '');
+              showDialog(
+                context: context,
+                builder: (_) => ZikrImageShareDialog(
+                  zikrText: text,
+                  categoryTitle: 'أذكار وأدعية',
+                ),
+              );
+            },
+            child: const Icon(
+              Icons.image_outlined,
+              size: 25.0,
+              color: AppColors.kPrimaryColor,
+            ),
+          ),
+        ),
+        const SizedBox(width: 15.0),
+        Builder(
+          builder: (btnContext) => GestureDetector(
+            onTap: () {
+              final text = model.text.toString().replaceFirst(':', '');
+              ZikrShareHelper.showShareOptions(
+                context,
+                zikrText: text,
+                categoryTitle: 'أذكار وأدعية',
               );
             },
             child: const Icon(
