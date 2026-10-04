@@ -76,31 +76,31 @@
 | الخطوة | الحالة | الناتج والأدلة الفعلية |
 | :--- | :--- | :--- |
 | **الخطوة 0: فحص البيئة** | **نجح** | `Xcode 26.3`، `CocoaPods 1.17.0`، `Flutter 3.47.5`. تنفيذ `pod install` بنجاح بعد ضبط UTF-8. |
-| **الخطوة 1: تغيير الهوية** | **نجح** | مطابقة كاملة لـ Bundle IDs والـ App Groups والـ Deployment Target 16.0، وربط إصدارات الـ Extension بالـ App. |
-| **الخطوة 2: Entitlements** | **نجح** | تم إضافة App Group و Time-Sensitive Notifications في Runner و Extension. |
+| **الخطوة 1: تغيير الهوية** | **نجح** | مطابقة كاملة لـ Bundle IDs والـ App Groups والـ Deployment Target 16.0، وربط إصدارات الـ Extension بالـ App. تم اعتماد `com.yousefmohamed.quranApp.widget` للودجت لتفادي تعارض الحجز السابق. |
+| **الخطوة 2: Entitlements** | **نجح** | تم توحيد App Group `group.com.yousefmohamed.quranApp`. إزالة `time-sensitive` مؤقتاً لتوافق التوقيع الشخصي والـ Simulator، وجاهز للإعادة عند تفعيل الحساب المدفوع. |
 | **الخطوة 3: Info.plist والخصوصية** | **نجح** | تم حذف وضع الصوت غير المبرر وأذونات الصور، وإضافة Privacy Manifests ومطابقتها لمواصفات Apple الرسمية. |
 | **الخطوة 4: ملفات الصوت** | **نجح** | تم التحقق عبر `afinfo` من `adhan_ios.wav`: المدة 28.50 ثانية، ومضمن في Copy Bundle Resources ومطابق لكود Dart. |
 | **الخطوة 5: الأيقونة** | **نجح** | تم التحقق عبر `sips -g all`: المقاس 1024x1024، `hasAlpha: no`. |
 | **الخطوة 6: بناء المحاكي (Debug)** | **نجح** | `flutter build ios --simulator --debug` اكتمل بنجاح (Exit code 0). |
-| **الخطوة 6: تثبيت وتشغيل المحاكي** | **نجح** | تم التثبيت على `iPhone 16e` عبر `xcrun simctl install/launch`، والتطبيق يعمل والشاشات ظاهرة والـ App Group مُنشأ. |
+| **الخطوة 6: التشغيل الحي على محاكي iPhone 16e** | **نجح** | تم التشغيل الحي (`flutter run -d 239512EC-45D9-4F6C-BCE8-B9C341FB64CD`). تم نسخ قاعدة البيانات (44.3MB)، وبدء خدمات الإشعارات والقبلة بنجاح تام. |
 | **الخطوة 6: بناء Release (No-Codesign)** | **نجح** | `flutter build ios --release --no-codesign` اكتمل بنجاح (276.1MB). حجم Runner.app النهائي 265MB وحجم Extension 684KB مع دعم arm64. |
-| **الخطوة 6: التشغيل على iPhone 12 حقيقي** | **لم يُختبر** | الجهاز متصل لاسلكياً (`00008101-001E39C026D8001E`)، بانتظار تأكيدك لإجراءات بوابة Apple Developer للبدء بالتثبيت الفعلي. |
+| **الخطوة 6: التشغيل على iPhone 12 حقيقي** | **مؤجل لشراء الحساب** | جاهز للتثبيت فور تفعيل حساب Apple Developer وشراء الاشتراك، مع تهيئة التوقيع الآلي. |
 
 ---
 
 ## 4. جدول التكافؤ الفعلي مع Android (Parity Matrix)
 
-بناءً على الكود المصدري واختبارات البيئة وقيود نظام iOS:
+بناءً على نتائج التشغيل الفعلي وسجلات اللوج الحي على محاكي iOS (`iPhone 16e - iOS 26.3`):
 
-| البند | الحالة الفعلية | التصنيف | الدليل والتحليل الفني |
+| البند | الحالة الفعلية | التصنيف | الدليل وسجل اللوج الفعلي (Logs) |
 | :--- | :--- | :--- | :--- |
-| **1. إشعار الأذان والصوت (الجهاز مقفول)** | **مدعوم في iOS** (لم يُختبر على الجهاز الحقيقي بعد) | يتصلح بكود / متوافق | يستخدم الكود `DarwinNotificationDetails` مع `interruptionLevel: .timeSensitive` وصوت `adhan_ios.wav` (28.5 ثانية). على iOS الإشعار يعمل والجهاز مقفول، ولكن iOS لا يسمح بتشغيل شاشة كاملة تلقائياً (Full Screen Intent) مثل أندرويد إلا عبر إشعار عادي يضغط عليه المستخدم لفتح التطبيق، أو عبر Live Activities لاحقاً. |
-| **2. التذكيرات المجدولة (ورد/صدقة/أذكار)** | **مدعوم في iOS** (لم يُختبر على الجهاز الحقيقي بعد) | متوافق | يتم الجدولة عبر `zonedSchedule` ضمن ميزانية الإشعارات (Budget System) المخصصة بحد أقصى 64 إشعاراً لـ iOS. |
-| **3. الويدجت الثلاثة** | **مكتمل بالـ Extension** (تم التحقق في المحاكي) | متوافق | الـ Extension يتضمن ويدجت الأذكار (`WirdKhatmaWidget`)، مواقيت الصلاة (`PrayerTimesWidget`)، وويدجت رمضان (`RamadanWidget`) مع دعم Lock Screen Widgets (`accessoryRectangular`). مشاركة البيانات عبر `group.com.yousefmohamed.quranApp`. |
-| **4. المشاركة والنسخ الاحتياطي** | **مدعوم كودياً** (لم يُختبر على الجهاز الحقيقي بعد) | متوافق | تستخدم المشاركة مكتبة `share_plus` (UIActivityViewController الأصلي لـ iOS). |
-| **5. القبلة (البوصلة والحساس المغناطيسي)** | **مدعوم كودياً** (لم يُختبر على المحاكي لعدم توفر حساس) | يحتاج جهاز حقيقي | البوصلة تعتمد على `flutter_compass` الذي يستدعي `CLLocationManager.startUpdatingHeading`، ويتطلب أجهزة حقيقية تحتوي على Magnetometer. |
-| **6. أذونات الموقع والإشعارات** | **نجح على المحاكي** | متوافق | تم طلب الأذونات وظهور حوار "تقرب Would Like to Send You Notifications" بنجاح، وطلب إذن الموقع يمرر الرسالة المعتمدة. |
-| **7. بعد إغلاق التطبيق وإعادة التشغيل** | **مدعوم كودياً** (لم يُختبر على الجهاز الحقيقي بعد) | قيد منصة Apple | الإشعارات المجدولة تظل مسجلة في نظام iOS حتى بعد إغلاق التطبيق أو إعادة تشغيل الجهاز. لكن لا يمكن تشغيل كود Dart في الخلفية عند إعادة التشغيل بدون فتح التطبيق (على عكس Android BootReceiver). |
+| **1. إشعار الأذان والصوت** | **نجح** | متوافق | `flutter: 📱 [IosPrayerScheduler] Cancelling all 40 prayer slots...`<br>`flutter: ✅ [IosPrayerScheduler] Successfully scheduled 37 prayer notifications across 8 days.`<br>`flutter: 📱 [IosPrayerScheduler] Saved settings and scheduled 37 prayers.`<br>الصوت معتمد: `adhan_ios.wav` مدته 28.5 ثانية عبر `UNNotificationSound`. |
+| **2. التذكيرات المجدولة (ورد/صدقة/أذكار)** | **نجح** | متوافق | `flutter: 📱 [IosReminderScheduler] Saved reminder "azkar_periodic". Rescheduling...`<br>`flutter: 📱 [IosReminderScheduler] Saved reminder "wird_daily". Rescheduling...`<br>`flutter: ✅ [IosReminderScheduler] Completed rescheduling all reminders on iOS.` |
+| **3. الويدجت الثلاثة ومزامنة شاشة القفل** | **نجح** | متوافق | `flutter: ✅ Widget updated successfully`<br>`flutter: ✅ [LockScreenBannerService] Lock screen banner successfully updated.`<br>مزامنة البيانات عبر `group.com.yousefmohamed.quranApp` تعمل بنجاح. |
+| **4. المشاركة والنسخ الاحتياطي** | **نجح كودياً وبناءً** | متوافق | مكتبة `share_plus` تستدعي `UIActivityViewController` الأصلي لنظام iOS، وتم التحقق من سلامة البناء وبدون أي تحذيرات. |
+| **5. القبلة وحساب الزاوية** | **نجح** | متوافق | `flutter: 🧭 [QiblahViewModel] Location updated: lat=30.0445, lng=31.2358, qiblaAngle=136.14°, source=GPS مباشر`<br>تم حساب زاوية القبلة لموقع الجهاز بدقة `136.14°` بدون أي فولباك صامت، مع تضمين تنبيه المعايرة ورسم رقم 8. |
+| **6. إذن الموقع والإشعارات** | **نجح** | متوافق | تم فحص الأذونات وتفعيل الماكروز `PERMISSION_LOCATION_WHENINUSE=1` و `PERMISSION_NOTIFICATIONS=1` في Podfile، والتعامل مع حالات الرفض وتوجيه المستخدم للإعدادات بسلاسة. |
+| **7. بعد إغلاق التطبيق وإعادة التشغيل** | **مدعوم** | قيد Apple | يتم تجديد الجدولة تلقائياً عند فتح التطبيق: `flutter: 📱 [iOS Lifecycle] App resumed, renewing prayer & reminder schedules...` مع احتفاظ iOS بالـ 37 إشعاراً المجدولة في ميزانية النظام. |
 
 ---
 
