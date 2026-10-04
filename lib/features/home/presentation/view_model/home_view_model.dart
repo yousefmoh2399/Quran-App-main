@@ -30,7 +30,7 @@ class HomeViewModel extends GetxController {
   final RxInt todayPagesRead = 0.obs;
 
   String currentZekr = 'سبحان الله';
-  String appGroupId = 'group.com.homeScreenApp';
+  String appGroupId = 'group.com.yousefmohamed.quranApp';
   String iOSWidgetName = 'MyHomeWidget';
   String androidWidgetName = 'MyHomeWidget';
   String dataKey = 'currentZekr';
