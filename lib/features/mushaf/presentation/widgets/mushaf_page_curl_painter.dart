@@ -5,13 +5,15 @@ import '../models/mushaf_theme_model.dart';
 
 /// High-performance 3D Cylindrical Page Curl Painter for authentic Madinah Mushaf paper.
 ///
-/// Refined Natural Paper Shading:
-/// - True physical paper texture on both front and back (no pitch black fills or solid dark blocks).
-/// - Natural warm parchment back-face that preserves the bright cream paper tone (92%+ paper luminance).
-/// - Delicate Gaussian-soft cast shadow onto the underlying page (max 15% opacity, localized to fold).
-/// - Subtle matte paper highlight along the cylinder crest (no metallic gloss).
-/// - Fine paper edge and margin outline giving the unmistakable appearance of authentic Quran paper.
-/// - Zero widget rebuilds: renders exclusively via GPU hardware-accelerated Canvas draw calls (<0.8ms).
+/// Mathematical Principles:
+/// - True cylindrical fold line that advances across the page with gesture progress [progress].
+/// - Dynamic curvature radius R(t) = R_base + R_max * sin(pi * t) that mimics natural paper elasticity.
+/// - Surface normal projection:
+///   * Angle theta < pi/2: Front face of paper visible, catching ambient light with a specular highlight crest.
+///   * Angle theta >= pi/2: Reverse back-side of parchment sheet revealed as it curls over the fold.
+/// - Dynamic soft cast drop shadow projected onto the underlying revealed page.
+/// - Perspective foreshortening: paper edges taper realistically towards 3D vanishing depth.
+/// - Zero widget rebuilds: renders exclusively via GPU hardware-accelerated Canvas draw calls (<0.8ms per frame).
 class MushafPageCurlPainter extends CustomPainter {
   final ui.Image? frontImage;
   final ui.Image? backImage;
@@ -22,7 +24,7 @@ class MushafPageCurlPainter extends CustomPainter {
 
   static const int _sliceCount = 28;
   static const double _rBase = 12.0;
-  static const double _rMax = 34.0;
+  static const double _rMax = 36.0;
   static const double _camDistance = 1400.0;
 
   MushafPageCurlPainter({
@@ -33,9 +35,6 @@ class MushafPageCurlPainter extends CustomPainter {
     required this.theme,
     required this.isRightPage,
   });
-
-  Color get _warmShadowColor =>
-      theme.isDark ? const Color(0xFF101416) : const Color(0xFF4A3B28);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -59,7 +58,6 @@ class MushafPageCurlPainter extends CustomPainter {
     // Dynamic cylinder radius
     final radius = _rBase + _rMax * math.sin(math.pi * t);
     final cHalf = math.pi * radius; // Semi-circumference around 180-degree half curl
-    final warmShadow = _warmShadowColor;
 
     if (isForward) {
       // Forward RTL Turn: Next Page (e.g. 100 -> 101)
@@ -69,28 +67,26 @@ class MushafPageCurlPainter extends CustomPainter {
       // 1. Draw Revealed Base Layer Underneath (Page 101)
       _drawFlatPage(canvas, size, backImage, 0.0, width);
 
-      // 2. Draw Soft, Localized Dynamic Cast Drop Shadow onto the revealed page
-      // Width is proportional to cylinder radius, opacity is gentle (max 0.15)
-      final shadowWidth = (radius * 1.3).clamp(10.0, 35.0);
-      final shadowOpacity = (0.15 * math.sin(math.pi * t)).clamp(0.0, 0.15);
+      // 2. Draw Soft Dynamic Cast Drop Shadow onto the revealed page
+      final shadowWidth = (width * 0.40 * math.sin(math.pi * t)).clamp(12.0, width * 0.60);
+      final shadowOpacity = (0.42 * math.sin(math.pi * t)).clamp(0.0, 0.42);
       final shadowRect = Rect.fromLTRB(
         (xFold - shadowWidth).clamp(0.0, width),
         0.0,
         xFold.clamp(0.0, width),
         height,
       );
-      if (shadowRect.width > 0 && shadowOpacity > 0.005) {
+      if (shadowRect.width > 0) {
         final shadowPaint = Paint()
           ..shader = ui.Gradient.linear(
             Offset(shadowRect.left, 0),
             Offset(shadowRect.right, 0),
             [
-              Colors.transparent,
-              warmShadow.withOpacity(shadowOpacity * 0.20),
-              warmShadow.withOpacity(shadowOpacity * 0.55),
-              warmShadow.withOpacity(shadowOpacity),
+              Colors.black.withOpacity(0.0),
+              Colors.black.withOpacity(shadowOpacity * 0.35),
+              Colors.black.withOpacity(shadowOpacity),
             ],
-            const [0.0, 0.45, 0.78, 1.0],
+            const [0.0, 0.65, 1.0],
           );
         canvas.drawRect(shadowRect, shadowPaint);
       }
@@ -100,7 +96,7 @@ class MushafPageCurlPainter extends CustomPainter {
         _drawPartialPage(canvas, size, frontImage, xFold, width, xFold, width);
       }
 
-      // 4. Draw 3D Cylindrical Curled Region (with natural cream parchment back)
+      // 4. Draw 3D Cylindrical Curled Region (x from xFold - cHalf to xFold)
       _drawCurledCylinderForward(canvas, size, xFold, radius, cHalf, t);
 
       // 5. Draw Right Spine Gutter Shadow (كعب المصحف الشريف)
@@ -114,26 +110,25 @@ class MushafPageCurlPainter extends CustomPainter {
       _drawFlatPage(canvas, size, frontImage, 0.0, width);
 
       // 2. Draw Cast Drop Shadow onto the current page
-      final shadowWidth = (radius * 1.3).clamp(10.0, 35.0);
-      final shadowOpacity = (0.15 * math.sin(math.pi * t)).clamp(0.0, 0.15);
+      final shadowWidth = (width * 0.40 * math.sin(math.pi * t)).clamp(12.0, width * 0.60);
+      final shadowOpacity = (0.42 * math.sin(math.pi * t)).clamp(0.0, 0.42);
       final shadowRect = Rect.fromLTRB(
         xFold.clamp(0.0, width),
         0.0,
         (xFold + shadowWidth).clamp(0.0, width),
         height,
       );
-      if (shadowRect.width > 0 && shadowOpacity > 0.005) {
+      if (shadowRect.width > 0) {
         final shadowPaint = Paint()
           ..shader = ui.Gradient.linear(
             Offset(shadowRect.right, 0),
             Offset(shadowRect.left, 0),
             [
-              Colors.transparent,
-              warmShadow.withOpacity(shadowOpacity * 0.20),
-              warmShadow.withOpacity(shadowOpacity * 0.55),
-              warmShadow.withOpacity(shadowOpacity),
+              Colors.black.withOpacity(0.0),
+              Colors.black.withOpacity(shadowOpacity * 0.35),
+              Colors.black.withOpacity(shadowOpacity),
             ],
-            const [0.0, 0.45, 0.78, 1.0],
+            const [0.0, 0.65, 1.0],
           );
         canvas.drawRect(shadowRect, shadowPaint);
       }
@@ -164,15 +159,16 @@ class MushafPageCurlPainter extends CustomPainter {
     final height = size.height;
     final sliceArc = cHalf / _sliceCount;
     final liftProgress = math.sin(math.pi * t);
-    final warmShadow = _warmShadowColor;
 
+    // Front paint for texture slices
     final texturePaint = Paint()
       ..isAntiAlias = true
       ..filterQuality = FilterQuality.medium;
 
-    // Authentic parchment paper tone for the back face (matches pageBg, NEVER black)
+    // Back parchment paper paint
     final backPaperColor = theme.pageBg;
 
+    // Iterate through cylindrical slices from fold root (s=0, theta=0) to peak/back (s=cHalf, theta=pi)
     for (int i = 0; i < _sliceCount; i++) {
       final s0 = i * sliceArc;
       final s1 = (i + 1) * sliceArc;
@@ -204,6 +200,7 @@ class MushafPageCurlPainter extends CustomPainter {
 
       final sliceDstRect = Rect.fromLTRB(dstLeft, dstTop, dstRight, dstBottom);
 
+      // Check surface normal
       if (midTheta < math.pi / 2.0) {
         // Front of page is visible
         if (frontImage != null) {
@@ -225,41 +222,40 @@ class MushafPageCurlPainter extends CustomPainter {
           canvas.drawRect(sliceDstRect, Paint()..color = theme.pageBg);
         }
 
-        // Delicate specular highlight along the curl crest (subtle matte paper sheen)
-        final highlight = math.exp(-math.pow(midTheta - (math.pi / 2.0), 2) / 0.18);
-        if (highlight > 0.08) {
+        // Apply specular highlight & crease shadow along the curl
+        final highlight = math.exp(-math.pow(midTheta - (math.pi / 2.0), 2) / 0.16);
+        if (highlight > 0.05) {
           final highlightPaint = Paint()
             ..color = Colors.white.withOpacity(
-              (0.20 * highlight * liftProgress).clamp(0.0, 0.22),
+              (0.42 * highlight * liftProgress).clamp(0.0, 0.45),
             );
           canvas.drawRect(sliceDstRect, highlightPaint);
         }
 
-        // Soft crease shadow right at the fold root (theta < 0.25)
-        if (midTheta < 0.25) {
-          final creaseOpacity = (1.0 - (midTheta / 0.25)) * 0.08 * t;
+        // Crease shadow near fold root (theta near 0)
+        if (midTheta < 0.35) {
+          final creaseOpacity = (1.0 - (midTheta / 0.35)) * 0.30 * t;
           canvas.drawRect(
             sliceDstRect,
-            Paint()..color = warmShadow.withOpacity(creaseOpacity.clamp(0.0, 0.08)),
+            Paint()..color = Colors.black.withOpacity(creaseOpacity.clamp(0.0, 0.35)),
           );
         }
       } else {
         // Back of turning page is visible (theta >= pi/2)
-        // 1. Draw natural parchment paper background (matches pageBg)
+        // Authentic parchment back tone
+        final backNormal = math.cos(midTheta).abs();
+        final shade = (0.18 * (1.0 - backNormal)).clamp(0.0, 0.25);
         canvas.drawRect(sliceDstRect, Paint()..color = backPaperColor);
 
-        // 2. Extremely subtle ambient shading (max 6-8% warm opacity, NEVER black)
-        final backNormal = math.cos(midTheta).abs();
-        final shade = (0.07 * (1.0 - backNormal)).clamp(0.0, 0.08);
+        // Soft back shading gradient
         canvas.drawRect(
           sliceDstRect,
-          Paint()..color = warmShadow.withOpacity(shade),
+          Paint()..color = Colors.black.withOpacity(shade * 0.8),
         );
       }
     }
 
-    // 6. Draw Flat Reversed Flap (when peeled distance > cHalf)
-    // Rendered as clean, bright paper with a delicate edge line (NO black rectangle)
+    // 6. Draw Flat Reversed Flap (if peeled distance > cHalf)
     if (xFold > cHalf) {
       final sFlat = xFold - cHalf;
       final flapLeft = xFold;
@@ -267,34 +263,21 @@ class MushafPageCurlPainter extends CustomPainter {
 
       if (flapRight > flapLeft) {
         final flapRect = Rect.fromLTRB(flapLeft, 0.0, flapRight, height);
-
-        // Fill with authentic parchment paper color
         canvas.drawRect(flapRect, Paint()..color = backPaperColor);
 
-        // Very subtle edge shadow at the contact seam (width 6pt, max 6% opacity)
-        final seamWidth = math.min(10.0, flapRect.width);
-        final seamRect = Rect.fromLTRB(flapLeft, 0.0, flapLeft + seamWidth, height);
-        final seamPaint = Paint()
+        // Flap shadow fading towards outer edge
+        final flapPaint = Paint()
           ..shader = ui.Gradient.linear(
             Offset(flapLeft, 0),
-            Offset(flapLeft + seamWidth, 0),
+            Offset(flapRight, 0),
             [
-              warmShadow.withOpacity(0.06 * (1.0 - t)),
+              Colors.black.withOpacity(0.22 * (1.0 - t)),
+              Colors.black.withOpacity(0.06 * (1.0 - t)),
               Colors.transparent,
             ],
+            const [0.0, 0.45, 1.0],
           );
-        canvas.drawRect(seamRect, seamPaint);
-
-        // Fine outer paper edge line
-        final edgeLinePaint = Paint()
-          ..color = theme.frameBorderOuter.withOpacity(0.12)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 0.8;
-        canvas.drawLine(
-          Offset(flapRight, 0.0),
-          Offset(flapRight, height),
-          edgeLinePaint,
-        );
+        canvas.drawRect(flapRect, flapPaint);
       }
     }
   }
@@ -312,7 +295,6 @@ class MushafPageCurlPainter extends CustomPainter {
     final height = size.height;
     final sliceArc = cHalf / _sliceCount;
     final liftProgress = math.sin(math.pi * t);
-    final warmShadow = _warmShadowColor;
 
     final texturePaint = Paint()
       ..isAntiAlias = true
@@ -372,22 +354,22 @@ class MushafPageCurlPainter extends CustomPainter {
         }
 
         // Specular apex highlight
-        final highlight = math.exp(-math.pow(midTheta - (math.pi / 2.0), 2) / 0.18);
-        if (highlight > 0.08) {
+        final highlight = math.exp(-math.pow(midTheta - (math.pi / 2.0), 2) / 0.16);
+        if (highlight > 0.05) {
           final highlightPaint = Paint()
             ..color = Colors.white.withOpacity(
-              (0.20 * highlight * liftProgress).clamp(0.0, 0.22),
+              (0.42 * highlight * liftProgress).clamp(0.0, 0.45),
             );
           canvas.drawRect(sliceDstRect, highlightPaint);
         }
       } else {
-        // Back of page visible: clean parchment with gentle warm ambient shade
-        canvas.drawRect(sliceDstRect, Paint()..color = backPaperColor);
+        // Back of page visible
         final backNormal = math.cos(midTheta).abs();
-        final shade = (0.07 * (1.0 - backNormal)).clamp(0.0, 0.08);
+        final shade = (0.18 * (1.0 - backNormal)).clamp(0.0, 0.25);
+        canvas.drawRect(sliceDstRect, Paint()..color = backPaperColor);
         canvas.drawRect(
           sliceDstRect,
-          Paint()..color = warmShadow.withOpacity(shade),
+          Paint()..color = Colors.black.withOpacity(shade * 0.8),
         );
       }
     }
@@ -424,9 +406,9 @@ class MushafPageCurlPainter extends CustomPainter {
       // Clean parchment fallback: fills with authentic paper color
       canvas.drawRect(dstRect, Paint()..color = theme.pageBg);
       final borderPaint = Paint()
-        ..color = theme.frameBorderOuter.withOpacity(0.18)
+        ..color = theme.frameBorderOuter.withOpacity(0.20)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.2;
+        ..strokeWidth = 1.5;
       canvas.drawRect(
         Rect.fromLTRB(left + 16, 16, right - 16, height - 16),
         borderPaint,
@@ -472,16 +454,15 @@ class MushafPageCurlPainter extends CustomPainter {
 
   /// Authentic Quran book spine gutter depth shadow (كعب المصحف الشريف).
   void _drawSpineGutter(Canvas canvas, Size size) {
-    const gutterWidth = 16.0;
-    final warmShadow = _warmShadowColor;
+    const gutterWidth = 18.0;
     final spineRect = Rect.fromLTRB(size.width - gutterWidth, 0.0, size.width, size.height);
     final spinePaint = Paint()
       ..shader = ui.Gradient.linear(
         Offset(size.width, 0),
         Offset(size.width - gutterWidth, 0),
         [
-          warmShadow.withOpacity(0.14),
-          warmShadow.withOpacity(0.04),
+          Colors.black.withOpacity(0.26),
+          Colors.black.withOpacity(0.08),
           Colors.transparent,
         ],
         const [0.0, 0.40, 1.0],
