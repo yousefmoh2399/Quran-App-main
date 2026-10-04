@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'app_permission_status.dart';
 import 'app_permission_type.dart';
 
@@ -37,7 +38,14 @@ class LivePermissionPlatformAdapter implements PermissionPlatformAdapter {
       switch (type) {
         case AppPermissionType.location:
           final status = await Permission.location.status;
-          return _mapPermissionHandlerStatus(status);
+          if (!kIsWeb && Platform.isIOS && status.isDenied) {
+            final prefs = await SharedPreferences.getInstance();
+            final wasRequested = prefs.getBool('$_requestedPrefix${type.name}') ?? false;
+            if (wasRequested) {
+              return AppPermissionStatus.permanentlyDenied;
+            }
+          }
+          return _mapPermissionHandlerStatus(status, type: type);
 
         case AppPermissionType.notification:
           if (!kIsWeb && Platform.isAndroid) {
@@ -49,7 +57,14 @@ class LivePermissionPlatformAdapter implements PermissionPlatformAdapter {
                 : AppPermissionStatus.denied;
           }
           final status = await Permission.notification.status;
-          return _mapPermissionHandlerStatus(status);
+          if (!kIsWeb && Platform.isIOS && status.isDenied) {
+            final prefs = await SharedPreferences.getInstance();
+            final wasRequested = prefs.getBool('$_requestedPrefix${type.name}') ?? false;
+            if (wasRequested) {
+              return AppPermissionStatus.permanentlyDenied;
+            }
+          }
+          return _mapPermissionHandlerStatus(status, type: type);
 
         case AppPermissionType.exactAlarm:
           if (!kIsWeb && Platform.isAndroid) {
@@ -90,6 +105,8 @@ class LivePermissionPlatformAdapter implements PermissionPlatformAdapter {
     }
   }
 
+  static const String _requestedPrefix = 'permission_already_requested_ios_';
+
   @override
   Future<AppPermissionStatus> request(AppPermissionType type) async {
     if (!isApplicable(type)) {
@@ -97,10 +114,18 @@ class LivePermissionPlatformAdapter implements PermissionPlatformAdapter {
     }
 
     try {
+      if (!kIsWeb && Platform.isIOS) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('$_requestedPrefix${type.name}', true);
+      }
+
       switch (type) {
         case AppPermissionType.location:
           final status = await Permission.location.request();
-          return _mapPermissionHandlerStatus(status);
+          if (!kIsWeb && Platform.isIOS && status.isDenied) {
+            return AppPermissionStatus.permanentlyDenied;
+          }
+          return _mapPermissionHandlerStatus(status, type: type);
 
         case AppPermissionType.notification:
           if (!kIsWeb && Platform.isAndroid) {
@@ -113,7 +138,10 @@ class LivePermissionPlatformAdapter implements PermissionPlatformAdapter {
                 : AppPermissionStatus.denied;
           }
           final status = await Permission.notification.request();
-          return _mapPermissionHandlerStatus(status);
+          if (!kIsWeb && Platform.isIOS && status.isDenied) {
+            return AppPermissionStatus.permanentlyDenied;
+          }
+          return _mapPermissionHandlerStatus(status, type: type);
 
         case AppPermissionType.exactAlarm:
           if (!kIsWeb && Platform.isAndroid) {
@@ -200,7 +228,10 @@ class LivePermissionPlatformAdapter implements PermissionPlatformAdapter {
     return false;
   }
 
-  AppPermissionStatus _mapPermissionHandlerStatus(PermissionStatus status) {
+  AppPermissionStatus _mapPermissionHandlerStatus(
+    PermissionStatus status, {
+    AppPermissionType? type,
+  }) {
     switch (status) {
       case PermissionStatus.granted:
       case PermissionStatus.limited:
