@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../../../core/data/models/mushaf_models.dart';
 import '../../../../core/data/models/user_models.dart';
 import '../../../../core/design/app_typography.dart';
 import '../../../../core/mushaf/mushaf_font_manager.dart';
+import '../../../../core/services/app_haptics_service.dart';
 import '../models/mushaf_theme_model.dart';
 
 /// Renders a single line of the 15 lines of a Madinah Mushaf page.
@@ -239,7 +239,7 @@ class MushafLineWidget extends StatelessWidget {
             onTapPage?.call();
           },
           onLongPress: () {
-            HapticFeedback.mediumImpact();
+            AppHaptics.itemCompleted();
             if (onAyahTapped != null) {
               onAyahTapped!(word.surahNumber, word.ayahNumber);
             }

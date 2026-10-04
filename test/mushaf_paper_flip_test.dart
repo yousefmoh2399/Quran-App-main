@@ -188,7 +188,7 @@ void main() {
       Get.delete<MushafController>();
     });
 
-    testWidgets('horizontal swipe left turns forward to exactly single page + 1', (tester) async {
+    testWidgets('horizontal swipe right in Arabic turns forward to next page + 1', (tester) async {
       final controller = Get.put(MushafController());
       final page1 = createDummyPage(1);
       final page2 = createDummyPage(2);
@@ -221,11 +221,92 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Swipe left across the screen (drag by -300px)
-      await tester.drag(find.byType(MushafPaperFlipView), const Offset(-300, 0));
+      // Swipe right across the screen (drag by +300px in Arabic RTL to turn forward)
+      await tester.drag(find.byType(MushafPaperFlipView), const Offset(300, 0));
       await tester.pumpAndSettle();
 
       expect(changedTo, equals(2));
+
+      Get.delete<MushafController>();
+    });
+
+    testWidgets('horizontal swipe left in Arabic turns backward to previous page - 1', (tester) async {
+      final controller = Get.put(MushafController());
+      final page2 = createDummyPage(2);
+      final page1 = createDummyPage(1);
+      final pagesCache = <int, MushafPage>{2: page2, 1: page1};
+
+      int? changedTo;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MushafPaperFlipView(
+              currentPage: 2,
+              theme: MushafThemeConfig.light,
+              pagesCache: pagesCache,
+              getPage: (p) async => createDummyPage(p),
+              onPageChanged: (newPage) {
+                changedTo = newPage;
+              },
+              onAyahTapped: (_, __) {},
+              onTapPage: () {},
+              getPageBookmarkColor: (_) => null,
+              getPageMemorizeStatus: (_) => null,
+              getAyahBookmarkColors: () => {},
+              getAyahMemorizeStatuses: () => {},
+              controller: controller,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Swipe left across the screen (drag by -300px in Arabic RTL to turn backward)
+      await tester.drag(find.byType(MushafPaperFlipView), const Offset(-300, 0));
+      await tester.pumpAndSettle();
+
+      expect(changedTo, equals(1));
+
+      Get.delete<MushafController>();
+    });
+
+    testWidgets('tapping page toggles overlay', (tester) async {
+      final controller = Get.put(MushafController());
+      final page1 = createDummyPage(1);
+      final pagesCache = <int, MushafPage>{1: page1};
+
+      bool overlayToggled = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MushafPaperFlipView(
+              currentPage: 1,
+              theme: MushafThemeConfig.light,
+              pagesCache: pagesCache,
+              getPage: (p) async => createDummyPage(p),
+              onPageChanged: (newPage) {},
+              onAyahTapped: (_, __) {},
+              onTapPage: () {
+                overlayToggled = true;
+              },
+              getPageBookmarkColor: (_) => null,
+              getPageMemorizeStatus: (_) => null,
+              getAyahBookmarkColors: () => {},
+              getAyahMemorizeStatuses: () => {},
+              controller: controller,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(MushafPaperFlipView));
+      await tester.pumpAndSettle();
+      expect(overlayToggled, isTrue);
 
       Get.delete<MushafController>();
     });

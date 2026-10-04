@@ -1,9 +1,8 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../../../core/data/models/mushaf_models.dart';
 import '../../../../core/data/models/user_models.dart';
-import '../../../../core/util/assets.dart';
+import '../../../../core/services/app_haptics_service.dart';
 import '../controllers/mushaf_controller.dart';
 import '../models/mushaf_theme_model.dart';
 import 'mushaf_page_widget.dart';
@@ -11,11 +10,15 @@ import 'mushaf_page_widget.dart';
 /// A realistic paper book page flip widget for the 604-page Madinah Mushaf.
 ///
 /// Features:
-/// - True physical paper curl and peel animation with cylindrical highlight & cast drop shadows.
+/// - True physical paper curl with cylindrical highlight & realistic cast drop shadows.
+/// - Dual-sided paper leaf rendering: the reverse side reveals the incoming page with zero blank cards.
+/// - Authentic Arabic RTL book page turning order:
+///   * Dragging / swiping right (finger moves left-to-right) turns page forward to Next Page (+1).
+///   * Dragging / swiping left (finger moves right-to-left) turns page backward to Previous Page (-1).
+///   * Tap navigation zones: left 18% turns next, right 18% turns previous, center 64% toggles overlay.
 /// - Strict single-page navigation: prevents overshooting or skipping to a 3rd page during swipe.
-/// - Monotonic, critically-damped transition without any oscillation, shaking, or bouncing.
-/// - Authentic Arabic RTL book page turning order.
-/// - Full preservation of Ayah long-press selection, bookmarks, and page tap overlays.
+/// - Smooth critically-damped spring transition without stutter, lag, or dropped frames.
+/// - Full preservation of Ayah selection, bookmarks, and page tap overlays.
 class MushafPaperFlipView extends StatefulWidget {
   final int currentPage;
   final MushafThemeConfig theme;
@@ -74,7 +77,7 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
     super.initState();
     _animController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 520),
+      duration: const Duration(milliseconds: 380),
     );
 
     _animController.addListener(() {
@@ -95,7 +98,7 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
           _dragProgress = 0.0;
           _dragDeltaX = 0.0;
           widget.controller.isPageTurning.value = false;
-          HapticFeedback.lightImpact();
+          AppHaptics.selection();
           widget.onPageChanged(committedPage);
         } else {
           // Cancelled turn
@@ -138,10 +141,10 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
     _isTurning = true;
     _dragProgress = 0.0;
     widget.controller.isPageTurning.value = true;
-    HapticFeedback.selectionClick();
+    AppHaptics.tap();
     setState(() {});
 
-    _animateTurnTo(1.0, duration: const Duration(milliseconds: 480));
+    _animateTurnTo(1.0, duration: const Duration(milliseconds: 380));
   }
 
   /// Programmatic backward turn animation (e.g. from bottom bar prev button)
@@ -154,13 +157,13 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
     _isTurning = true;
     _dragProgress = 0.0;
     widget.controller.isPageTurning.value = true;
-    HapticFeedback.selectionClick();
+    AppHaptics.tap();
     setState(() {});
 
-    _animateTurnTo(1.0, duration: const Duration(milliseconds: 480));
+    _animateTurnTo(1.0, duration: const Duration(milliseconds: 380));
   }
 
-  void _animateTurnTo(double targetValue, {Duration duration = const Duration(milliseconds: 480)}) {
+  void _animateTurnTo(double targetValue, {Duration duration = const Duration(milliseconds: 380)}) {
     _isAnimating = true;
     _turnAnimation = Tween<double>(
       begin: _dragProgress,
@@ -187,34 +190,34 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Authentic Arabic RTL Mushaf:
-    // Dragging left (negative delta) = turn page forward to Next Page (+1) (تقليب لليمين -> يسار للمتابعة)
-    // Dragging right (positive delta) = turn page backward to Previous Page (-1) (رجوع للصفحة السابقة)
+    // Dragging RIGHT (positive delta > 0) = Peel page from left towards right -> Next Page (+1)
+    // Dragging LEFT (negative delta < 0) = Peel page back from right towards left -> Previous Page (-1)
     if (!_isTurning) {
-      if (_dragDeltaX < -6.0) {
-        // Turning to Next Page
+      if (_dragDeltaX > 5.0) {
+        // Turning to Next Page (+1)
         if (widget.currentPage >= 604) return;
         _isTurning = true;
         _isNext = true;
         _targetPage = widget.currentPage + 1;
         widget.controller.isPageTurning.value = true;
-        HapticFeedback.selectionClick();
-      } else if (_dragDeltaX > 6.0) {
-        // Turning to Previous Page
+        AppHaptics.tap();
+      } else if (_dragDeltaX < -5.0) {
+        // Turning to Previous Page (-1)
         if (widget.currentPage <= 1) return;
         _isTurning = true;
         _isNext = false;
         _targetPage = widget.currentPage - 1;
         widget.controller.isPageTurning.value = true;
-        HapticFeedback.selectionClick();
+        AppHaptics.tap();
       }
     }
 
     if (_isTurning) {
       double rawProgress;
       if (_isNext) {
-        rawProgress = (-_dragDeltaX / (screenWidth * 0.88)).clamp(0.0, 1.0);
+        rawProgress = (_dragDeltaX / (screenWidth * 0.82)).clamp(0.0, 1.0);
       } else {
-        rawProgress = (_dragDeltaX / (screenWidth * 0.88)).clamp(0.0, 1.0);
+        rawProgress = (-_dragDeltaX / (screenWidth * 0.82)).clamp(0.0, 1.0);
       }
 
       setState(() {
@@ -230,13 +233,13 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
     bool shouldCommit = false;
 
     if (_isNext) {
-      // Swiping left: negative velocity commits
-      if (velocity < -220.0 || _dragProgress >= 0.20) {
+      // Swiping right: positive velocity or progress >= 0.18 commits
+      if (velocity > 180.0 || _dragProgress >= 0.18) {
         shouldCommit = true;
       }
     } else {
-      // Swiping right: positive velocity commits
-      if (velocity > 220.0 || _dragProgress >= 0.20) {
+      // Swiping left: negative velocity or progress >= 0.18 commits
+      if (velocity < -180.0 || _dragProgress >= 0.18) {
         shouldCommit = true;
       }
     }
@@ -244,11 +247,11 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
     if (shouldCommit) {
       // Complete paper turn smoothly
       final remaining = (1.0 - _dragProgress).clamp(0.1, 1.0);
-      final ms = (480 * remaining).toInt().clamp(240, 480);
+      final ms = (380 * remaining).toInt().clamp(180, 380);
       _animateTurnTo(1.0, duration: Duration(milliseconds: ms));
     } else {
       // Cancel paper turn smoothly back
-      final ms = (350 * _dragProgress).toInt().clamp(160, 350);
+      final ms = (280 * _dragProgress).toInt().clamp(140, 280);
       _animateTurnTo(0.0, duration: Duration(milliseconds: ms));
     }
   }
@@ -301,16 +304,44 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
           );
         }
 
-        return Container(
-          color: widget.theme.pageBg,
-          child: Center(
-            child: CircularProgressIndicator(
-              strokeWidth: 2.0,
-              color: widget.theme.frameBorderInner,
+        return _buildPaperPlaceholder();
+      },
+    );
+  }
+
+  Widget _buildPaperPlaceholder() {
+    return Container(
+      color: widget.theme.pageBg,
+      child: Center(
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: widget.theme.frameBorderOuter.withOpacity(0.18),
+              width: 1.5,
+            ),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: List.generate(
+              15,
+              (index) => Expanded(
+                child: Center(
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 3.5),
+                    height: 10.0,
+                    decoration: BoxDecoration(
+                      color: widget.theme.frameBorderInner.withOpacity(0.06),
+                      borderRadius: BorderRadius.circular(3.0),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -324,13 +355,20 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
       onHorizontalDragUpdate: _handleHorizontalDragUpdate,
       onHorizontalDragEnd: _handleHorizontalDragEnd,
       onHorizontalDragCancel: _handleHorizontalDragCancel,
+      onTap: () {
+        if (!_isTurning && !_isAnimating) {
+          widget.onTapPage();
+        }
+      },
       behavior: HitTestBehavior.translucent,
       child: Stack(
         fit: StackFit.expand,
         children: [
           if (!_isTurning)
             // Stationary view: current page flat and interactive
-            _buildSinglePage(widget.currentPage, isMoving: false)
+            RepaintBoundary(
+              child: _buildSinglePage(widget.currentPage, isMoving: false),
+            )
           else ...[
             // Base layer: the page revealed underneath
             if (_targetPage != null)
@@ -348,88 +386,65 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
 
   Widget _buildPaperCurlTransition(double width) {
     final t = _dragProgress.clamp(0.0, 1.0);
+    final liftProgress = math.sin(t * math.pi);
+    final shadowWidth = (width * 0.48 * liftProgress).clamp(10.0, width);
+    final shadowOpacity = (0.42 * liftProgress).clamp(0.0, 0.42);
 
     if (_isNext) {
       // Turning Forward (Next Page):
-      // The current page leaf physically rotates in 3D around the left spine (0° to -180°).
+      // The current page leaf peels from left and folds over to the right spine.
       final angle = -t * math.pi;
       final isFrontVisible = t < 0.5;
-
-      final liftProgress = math.sin(t * math.pi);
-      final shadowWidth = (width * 0.70 * liftProgress).clamp(16.0, width);
-      final shadowOpacity = (0.48 * liftProgress).clamp(0.0, 0.48);
 
       return Stack(
         fit: StackFit.expand,
         children: [
           // 1. Revealed Page Underneath (Next Page)
           if (_targetPage != null)
-            _buildSinglePage(_targetPage!, isMoving: true),
+            RepaintBoundary(
+              child: _buildSinglePage(_targetPage!, isMoving: true),
+            ),
 
           // 2. Realistic Dynamic Cast Drop Shadow cast onto the revealed page
           Positioned(
             top: 0,
             bottom: 0,
-            left: 0,
+            right: 0,
             width: shadowWidth,
             child: IgnorePointer(
               child: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
+                    begin: Alignment.centerRight,
+                    end: Alignment.centerLeft,
                     colors: [
                       Colors.black.withOpacity(shadowOpacity * 0.85),
-                      Colors.black.withOpacity(shadowOpacity * 0.45),
+                      Colors.black.withOpacity(shadowOpacity * 0.35),
                       Colors.transparent,
                     ],
-                    stops: const [0.0, 0.45, 1.0],
+                    stops: const [0.0, 0.40, 1.0],
                   ),
                 ),
               ),
             ),
           ),
 
-          // 3. The 3D Turning Page Leaf (Pivoting around the Left Spine)
+          // 3. The 3D Turning Page Leaf (Pivoting around the Right Spine)
           Transform(
-            alignment: Alignment.centerLeft,
+            alignment: Alignment.centerRight,
             transform: Matrix4.identity()
-              ..setEntry(3, 2, 0.0012) // Realistic 3D perspective depth
+              ..setEntry(3, 2, 0.0009) // Realistic 3D perspective depth
               ..rotateY(angle),
             child: Stack(
               fit: StackFit.expand,
               children: [
                 if (isFrontVisible) ...[
-                  // Front: The current page with all text, frame, and verses visibly rotating in 3D
-                  _buildSinglePage(widget.currentPage, isMoving: true),
+                  // Front: The current page rotating in 3D
+                  RepaintBoundary(
+                    child: _buildSinglePage(widget.currentPage, isMoving: true),
+                  ),
 
                   // Dynamic paper curvature gradient & highlight as it catches light
-                  IgnorePointer(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                          colors: [
-                            Colors.black.withOpacity(0.35 * t), // Spine crease shadow
-                            Colors.transparent,
-                            Colors.white.withOpacity(0.40 * liftProgress), // Peak curve highlight
-                            Colors.black.withOpacity(0.20 * t), // Outer bend shadow
-                          ],
-                          stops: const [0.0, 0.35, 0.70, 1.0],
-                        ),
-                      ),
-                    ),
-                  ),
-                ] else ...[
-                  // Back of the page (turned past 90 degrees)
-                  Transform(
-                    alignment: Alignment.center,
-                    transform: Matrix4.identity()..rotateY(math.pi),
-                    child: _buildBackOfPage(),
-                  ),
-
-                  // Soft shadow on the back of the turning page as it settles
                   IgnorePointer(
                     child: Container(
                       decoration: BoxDecoration(
@@ -437,11 +452,41 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
                           begin: Alignment.centerRight,
                           end: Alignment.centerLeft,
                           colors: [
-                            Colors.black.withOpacity(0.30 * (1.0 - t)),
-                            Colors.white.withOpacity(0.35 * liftProgress),
+                            Colors.black.withOpacity(0.28 * t), // Spine crease shadow
+                            Colors.transparent,
+                            Colors.white.withOpacity(0.38 * liftProgress), // Peak curve highlight
+                            Colors.black.withOpacity(0.18 * t), // Outer bend shadow
+                          ],
+                          stops: const [0.0, 0.35, 0.68, 1.0],
+                        ),
+                      ),
+                    ),
+                  ),
+                ] else ...[
+                  // Back of the page (turned past 90 degrees): The next page rotated
+                  Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.identity()..rotateY(math.pi),
+                    child: RepaintBoundary(
+                      child: _targetPage != null
+                          ? _buildSinglePage(_targetPage!, isMoving: true)
+                          : _buildPaperPlaceholder(),
+                    ),
+                  ),
+
+                  // Soft shadow on the back of the turning page as it settles
+                  IgnorePointer(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [
+                            Colors.black.withOpacity(0.25 * (1.0 - t)),
+                            Colors.white.withOpacity(0.32 * liftProgress),
                             Colors.transparent,
                           ],
-                          stops: const [0.0, 0.40, 1.0],
+                          stops: const [0.0, 0.38, 1.0],
                         ),
                       ),
                     ),
@@ -451,24 +496,24 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
             ),
           ),
 
-          // 4. Authentic Quran Book Spine Gutter Depth Shadow (كعب المصحف)
+          // 4. Authentic Quran Book Spine Gutter Depth Shadow (كعب المصحف الشريف)
           Positioned(
             top: 0,
             bottom: 0,
-            left: 0,
-            width: 24.0,
+            right: 0,
+            width: 20.0,
             child: IgnorePointer(
               child: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
+                    begin: Alignment.centerRight,
+                    end: Alignment.centerLeft,
                     colors: [
-                      Colors.black.withOpacity(0.32),
-                      Colors.black.withOpacity(0.12),
+                      Colors.black.withOpacity(0.28),
+                      Colors.black.withOpacity(0.08),
                       Colors.transparent,
                     ],
-                    stops: const [0.0, 0.40, 1.0],
+                    stops: const [0.0, 0.35, 1.0],
                   ),
                 ),
               ),
@@ -478,49 +523,47 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
       );
     } else {
       // Turning Backward (Previous Page):
-      // The previous page (_targetPage) sweeps in from the left over the current page!
+      // The previous page (_targetPage) sweeps in from the right over the current page!
       final angle = -(1.0 - t) * math.pi;
       final isFrontVisible = t >= 0.5;
-
-      final liftProgress = math.sin(t * math.pi);
-      final shadowWidth = (width * 0.70 * liftProgress).clamp(16.0, width);
-      final shadowOpacity = (0.48 * liftProgress).clamp(0.0, 0.48);
 
       return Stack(
         fit: StackFit.expand,
         children: [
           // 1. Current Page Underneath (stays flat until covered)
-          _buildSinglePage(widget.currentPage, isMoving: true),
+          RepaintBoundary(
+            child: _buildSinglePage(widget.currentPage, isMoving: true),
+          ),
 
           // 2. Cast Drop Shadow onto the current page
           Positioned(
             top: 0,
             bottom: 0,
-            left: 0,
+            right: 0,
             width: shadowWidth,
             child: IgnorePointer(
               child: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
+                    begin: Alignment.centerRight,
+                    end: Alignment.centerLeft,
                     colors: [
                       Colors.black.withOpacity(shadowOpacity * 0.85),
-                      Colors.black.withOpacity(shadowOpacity * 0.45),
+                      Colors.black.withOpacity(shadowOpacity * 0.35),
                       Colors.transparent,
                     ],
-                    stops: const [0.0, 0.45, 1.0],
+                    stops: const [0.0, 0.40, 1.0],
                   ),
                 ),
               ),
             ),
           ),
 
-          // 3. The 3D Incoming Page Leaf (Pivoting around the Left Spine)
+          // 3. The 3D Incoming Page Leaf (Pivoting around the Right Spine)
           Transform(
-            alignment: Alignment.centerLeft,
+            alignment: Alignment.centerRight,
             transform: Matrix4.identity()
-              ..setEntry(3, 2, 0.0012)
+              ..setEntry(3, 2, 0.0009)
               ..rotateY(angle),
             child: Stack(
               fit: StackFit.expand,
@@ -528,34 +571,11 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
                 if (isFrontVisible) ...[
                   // Front of previous page landing flat
                   if (_targetPage != null)
-                    _buildSinglePage(_targetPage!, isMoving: true),
+                    RepaintBoundary(
+                      child: _buildSinglePage(_targetPage!, isMoving: true),
+                    ),
 
                   // Ambient lighting as it settles
-                  IgnorePointer(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                          colors: [
-                            Colors.black.withOpacity(0.35 * (1.0 - t)),
-                            Colors.transparent,
-                            Colors.white.withOpacity(0.40 * liftProgress),
-                            Colors.black.withOpacity(0.20 * (1.0 - t)),
-                          ],
-                          stops: const [0.0, 0.35, 0.70, 1.0],
-                        ),
-                      ),
-                    ),
-                  ),
-                ] else ...[
-                  // Back of incoming page rising from left
-                  Transform(
-                    alignment: Alignment.center,
-                    transform: Matrix4.identity()..rotateY(math.pi),
-                    child: _buildBackOfPage(),
-                  ),
-
                   IgnorePointer(
                     child: Container(
                       decoration: BoxDecoration(
@@ -563,11 +583,38 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
                           begin: Alignment.centerRight,
                           end: Alignment.centerLeft,
                           colors: [
-                            Colors.black.withOpacity(0.30 * t),
-                            Colors.white.withOpacity(0.35 * liftProgress),
+                            Colors.black.withOpacity(0.28 * (1.0 - t)),
+                            Colors.transparent,
+                            Colors.white.withOpacity(0.38 * liftProgress),
+                            Colors.black.withOpacity(0.18 * (1.0 - t)),
+                          ],
+                          stops: const [0.0, 0.35, 0.68, 1.0],
+                        ),
+                      ),
+                    ),
+                  ),
+                ] else ...[
+                  // Back of incoming page rising from right
+                  Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.identity()..rotateY(math.pi),
+                    child: RepaintBoundary(
+                      child: _buildSinglePage(widget.currentPage, isMoving: true),
+                    ),
+                  ),
+
+                  IgnorePointer(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [
+                            Colors.black.withOpacity(0.25 * t),
+                            Colors.white.withOpacity(0.32 * liftProgress),
                             Colors.transparent,
                           ],
-                          stops: const [0.0, 0.40, 1.0],
+                          stops: const [0.0, 0.38, 1.0],
                         ),
                       ),
                     ),
@@ -581,20 +628,20 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
           Positioned(
             top: 0,
             bottom: 0,
-            left: 0,
-            width: 24.0,
+            right: 0,
+            width: 20.0,
             child: IgnorePointer(
               child: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
+                    begin: Alignment.centerRight,
+                    end: Alignment.centerLeft,
                     colors: [
-                      Colors.black.withOpacity(0.32),
-                      Colors.black.withOpacity(0.12),
+                      Colors.black.withOpacity(0.28),
+                      Colors.black.withOpacity(0.08),
                       Colors.transparent,
                     ],
-                    stops: const [0.0, 0.40, 1.0],
+                    stops: const [0.0, 0.35, 1.0],
                   ),
                 ),
               ),
@@ -603,33 +650,5 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
         ],
       );
     }
-  }
-
-  Widget _buildBackOfPage() {
-    return Container(
-      color: widget.theme.pageBg,
-      child: Center(
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: widget.theme.frameBorderOuter.withOpacity(0.25),
-              width: 1.5,
-            ),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Center(
-            child: Opacity(
-              opacity: 0.12,
-              child: Image.asset(
-                AssetsData.mushaf_1,
-                width: 160,
-                fit: BoxFit.contain,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }

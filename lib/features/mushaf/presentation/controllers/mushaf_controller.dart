@@ -191,16 +191,16 @@ class MushafController extends GetxController {
 
   void _preloadAdjacentPages(int pageNumber) {
     final targets = <int>[];
-    if (pageNumber > 1) targets.add(pageNumber - 1);
-    if (pageNumber < 604) targets.add(pageNumber + 1);
-    if (pageNumber > 2) targets.add(pageNumber - 2);
-    if (pageNumber < 603) targets.add(pageNumber + 2);
+    for (int i = 1; i <= 4; i++) {
+      if (pageNumber - i >= 1) targets.add(pageNumber - i);
+      if (pageNumber + i <= 604) targets.add(pageNumber + i);
+    }
 
     for (final target in targets) {
       _loadPage(target);
     }
 
-    // Queue adjacent +-2 pages that need offscreen rasterization
+    // Queue adjacent pages that need offscreen rasterization
     final needingRaster = targets.where(
       (p) => !MushafRasterCache.instance.has(p, currentTheme.value),
     ).toList();
