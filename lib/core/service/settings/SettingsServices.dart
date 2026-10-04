@@ -16,9 +16,6 @@ class SettingsServices extends GetxService {
   SharedPreferences? sharedPref;
   Future<SettingsServices> init() async {
     sharedPref = await SharedPreferences.getInstance();
-    // Workmanager().initialize(callbackDispatcher);
-    // Initialize notifications but defer heavy scheduling to after app start
-    await NotifyHelper().initializeNotification();
     sharedPref!.setBool('enable', true);
     sharedPref!.setBool('stop_noti', true);
     return this;

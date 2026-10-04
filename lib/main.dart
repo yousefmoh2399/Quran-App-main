@@ -21,10 +21,6 @@ void main() {
   runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
-      await initializeDateFormatting('ar', null);
-      await SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-      ]);
 
       // Global error handling to catch uncaught Flutter errors and zone errors
       FlutterError.onError = (FlutterErrorDetails details) {
@@ -33,10 +29,21 @@ void main() {
           'FlutterError caught: ${details.exception}\n${details.stack}',
         );
       };
-      await initService();
-      final notify = NotifyHelper();
-      await notify.initializeNotification(); // ← أضف دي هنا
+
+      // Critical essentials needed before first frame (SharedPreferences & orientation)
+      await Future.wait([
+        SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp,
+        ]),
+        Get.putAsync(() => SettingsServices().init()),
+      ]);
+      Get.put(ThemeController());
+
+      // Mount UI immediately
       runApp(const MyApp());
+
+      // Run remaining background services concurrently during splash screen
+      unawaited(_initBackgroundServices());
     },
     (error, stack) {
       debugPrint('Uncaught zone error: $error\n$stack');
@@ -44,11 +51,18 @@ void main() {
   );
 }
 
-Future initService() async {
-  await Get.putAsync(() => SettingsServices().init());
-  Get.put(ThemeController());
-  await PermissionService.instance.init();
-  await AppNavigationService.instance.init();
+Future<void> _initBackgroundServices() async {
+  try {
+    await Future.wait([
+      initializeDateFormatting('ar', null),
+      NotifyHelper().initializeNotification(),
+      PermissionService.instance.init(),
+      AppNavigationService.instance.init(),
+    ]);
+    debugPrint('🚀 [Startup] Background services initialized successfully');
+  } catch (e, st) {
+    debugPrint('⚠️ [Startup] Error in background services initialization: $e\n$st');
+  }
 }
 
 class MyApp extends StatefulWidget {

@@ -28,7 +28,7 @@ class _SplashScreenViewState extends State<SplashScreenView>
 
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2300),
+      duration: const Duration(milliseconds: 1400),
     );
 
     // Smooth logo emergence from native splash center

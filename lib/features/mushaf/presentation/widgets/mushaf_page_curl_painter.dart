@@ -36,6 +36,16 @@ class MushafPageCurlPainter extends CustomPainter {
     required this.isRightPage,
   });
 
+  Color get _backPaperColor {
+    if (theme.mode == MushafThemeMode.dark) {
+      return const Color(0xFF2D3E37);
+    }
+    if (theme.mode == MushafThemeMode.readingNight) {
+      return const Color(0xFF332B22);
+    }
+    return theme.pageBg;
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
     final width = size.width;
@@ -165,8 +175,8 @@ class MushafPageCurlPainter extends CustomPainter {
       ..isAntiAlias = true
       ..filterQuality = FilterQuality.medium;
 
-    // Back parchment paper paint
-    final backPaperColor = theme.pageBg;
+    // Back parchment paper paint (slightly lightened in dark mode for natural sheet visibility)
+    final backPaperColor = _backPaperColor;
 
     // Iterate through cylindrical slices from fold root (s=0, theta=0) to peak/back (s=cHalf, theta=pi)
     for (int i = 0; i < _sliceCount; i++) {
@@ -300,7 +310,7 @@ class MushafPageCurlPainter extends CustomPainter {
       ..isAntiAlias = true
       ..filterQuality = FilterQuality.medium;
 
-    final backPaperColor = theme.pageBg;
+    final backPaperColor = _backPaperColor;
 
     for (int i = 0; i < _sliceCount; i++) {
       final s0 = i * sliceArc;

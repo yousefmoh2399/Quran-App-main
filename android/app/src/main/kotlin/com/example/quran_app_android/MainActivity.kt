@@ -32,12 +32,18 @@ class MainActivity : FlutterActivity() {
             initialNavData = it
         }
         createAdhanNotificationChannel()
-        if (NativePrayerManager.hasValidLocation(this)) {
-            PrayerScheduler.scheduleRollingWindow(this)
-        }
-        com.example.quran_app_android.widgets.WidgetUpdateManager.updateAll(this)
-        com.example.quran_app_android.reminders.ReminderChannels.createChannels(this)
-        com.example.quran_app_android.reminders.UnifiedReminderScheduler.scheduleNext(this)
+        Thread {
+            try {
+                if (NativePrayerManager.hasValidLocation(this)) {
+                    PrayerScheduler.scheduleRollingWindow(this)
+                }
+                com.example.quran_app_android.widgets.WidgetUpdateManager.updateAll(this)
+                com.example.quran_app_android.reminders.ReminderChannels.createChannels(this)
+                com.example.quran_app_android.reminders.UnifiedReminderScheduler.scheduleNext(this)
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Background startup tasks error", e)
+            }
+        }.start()
     }
 
     override fun onNewIntent(intent: Intent) {
