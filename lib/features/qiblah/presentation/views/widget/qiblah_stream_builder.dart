@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_compass/flutter_compass.dart';
@@ -34,6 +35,9 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
   static double _lastKnownHeading = 0.0;
   static bool _hasReceivedHeading = false;
 
+  Timer? _sensorTimeoutTimer;
+  bool _sensorUnavailable = false;
+
   late Animation<double> animation;
   double begin = 0.0;
   bool _hasVibrated = false;
@@ -43,6 +47,22 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
   void initState() {
     super.initState();
     animation = Tween<double>(begin: begin, end: begin).animate(widget.animationController);
+
+    // If running on simulator or device without heading updates within 2 seconds,
+    // fallback gracefully to showing calculated Qiblah angle rather than infinite loading spinner.
+    _sensorTimeoutTimer = Timer(const Duration(milliseconds: 2000), () {
+      if (!_hasReceivedHeading && mounted) {
+        setState(() {
+          _sensorUnavailable = true;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _sensorTimeoutTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -53,7 +73,9 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
     return StreamBuilder<CompassEvent>(
       stream: FlutterCompass.events,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting && !_hasReceivedHeading) {
+        if (snapshot.connectionState == ConnectionState.waiting &&
+            !_hasReceivedHeading &&
+            !_sensorUnavailable) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -76,7 +98,7 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
           );
         }
 
-        if (snapshot.hasError) {
+        if (snapshot.hasError && !_hasReceivedHeading && !_sensorUnavailable) {
           return const EmptyState(
             icon: Icons.error_outline_rounded,
             title: 'خطأ في قراءة البوصلة',
@@ -88,15 +110,9 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
         if (compassEvent?.heading != null) {
           _lastKnownHeading = compassEvent!.heading!;
           _hasReceivedHeading = true;
-        } else if (!_hasReceivedHeading) {
-          return const EmptyState(
-            icon: Icons.explore_off_rounded,
-            title: 'مستشعر البوصلة غير متوفر',
-            message: 'تعذر الحصول على قراءات اتجاه الهاتف حالياً',
-          );
         }
 
-        final double currentHeading = _lastKnownHeading;
+        final double currentHeading = _hasReceivedHeading ? _lastKnownHeading : 0.0;
         final double headingRad = currentHeading * (pi / 180);
         final double qiblaRad = widget.qiblaDirection * (pi / 180);
         final double diffAngle = qiblaRad - headingRad;
@@ -189,7 +205,33 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
                 ),
               ),
               AppSpacing.verticalMd,
-              if (compassEvent?.accuracy != null && compassEvent!.accuracy! > 15) ...[
+              if (!_hasReceivedHeading) ...[
+                Container(
+                  margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: colors.primary.withOpacity(0.08),
+                    borderRadius: AppRadius.borderMd,
+                    border: Border.all(color: colors.primary.withOpacity(0.25)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.explore_outlined, size: 20, color: colors.primary),
+                      AppSpacing.horizontalSm,
+                      Expanded(
+                        child: Text(
+                          'المستشعر المغناطيسي غير متوفر على المحاكي. تم توجيه السهم نحو زاوية القبلة لموقعك (${widget.qiblaDirection.toInt()}° بالنسبة للشمال).',
+                          style: textTheme.bodySmall?.copyWith(
+                            color: colors.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              if (_hasReceivedHeading && compassEvent?.accuracy != null && compassEvent!.accuracy! > 15) ...[
                 Container(
                   margin: const EdgeInsets.only(bottom: AppSpacing.sm),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

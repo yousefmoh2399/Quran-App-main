@@ -320,10 +320,19 @@ class _CommuteWirdSettingsViewState extends State<CommuteWirdSettingsView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('مواعيد وفترات الطريق اليومية', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                            const Expanded(
+                              child: Text(
+                                'مواعيد وفترات الطريق اليومية',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
                             TextButton.icon(
+                              style: TextButton.styleFrom(
+                                visualDensity: VisualDensity.compact,
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              ),
                               icon: const Icon(Icons.add_rounded, size: 18),
                               label: const Text('إضافة موعد'),
                               onPressed: _addSlot,
@@ -371,8 +380,11 @@ class _CommuteWirdSettingsViewState extends State<CommuteWirdSettingsView> {
                                   ],
                                 ),
                                 const Divider(height: 16),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                Wrap(
+                                  alignment: WrapAlignment.spaceBetween,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  spacing: 8,
+                                  runSpacing: 8,
                                   children: [
                                     OutlinedButton.icon(
                                       icon: const Icon(Icons.access_time_rounded, size: 16),
@@ -380,6 +392,7 @@ class _CommuteWirdSettingsViewState extends State<CommuteWirdSettingsView> {
                                       onPressed: () => _editSlotTime(slot),
                                     ),
                                     Row(
+                                      mainAxisSize: MainAxisSize.min,
                                       children: [
                                         const Text('الهدف: ', style: TextStyle(fontSize: 13)),
                                         DropdownButton<int>(
