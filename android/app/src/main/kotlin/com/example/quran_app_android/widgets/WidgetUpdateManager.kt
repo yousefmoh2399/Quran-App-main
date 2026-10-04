@@ -427,8 +427,23 @@ object WidgetUpdateManager {
             Triple("العشاء", isha, shortTimeFormat.format(Date(isha)))
         )
 
-        val next = prayerList.firstOrNull { it.second > now } ?: prayerList.first()
-        val diffMillis = Math.max(0L, next.second - now)
+        val nextTriple = prayerList.firstOrNull { it.second > now }
+        val (nextName, nextTimeMs, nextTimeStr) = if (nextTriple != null) {
+            Triple(nextTriple.first, nextTriple.second, timeFormat.format(Date(nextTriple.second)))
+        } else {
+            // All prayers today have passed (after Isha): next prayer is tomorrow's Fajr
+            val tomorrowCal = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 1) }
+            val tomorrowPt = NativePrayerManager.calculatePrayerTimesForDate(
+                settings,
+                tomorrowCal.get(Calendar.YEAR),
+                tomorrowCal.get(Calendar.MONTH) + 1,
+                tomorrowCal.get(Calendar.DAY_OF_MONTH)
+            )
+            val tomorrowFajr = tomorrowPt?.fajr?.time ?: (fajr + 24 * 3600 * 1000L)
+            Triple("الفجر", tomorrowFajr, timeFormat.format(Date(tomorrowFajr)))
+        }
+
+        val diffMillis = Math.max(0L, nextTimeMs - now)
         val hours = diffMillis / (1000 * 60 * 60)
         val minutes = (diffMillis % (1000 * 60 * 60)) / (1000 * 60)
 
@@ -440,8 +455,8 @@ object WidgetUpdateManager {
 
         return PrayerWidgetData(
             cityName = cityName,
-            nextPrayerName = next.first,
-            nextPrayerTimeStr = timeFormat.format(Date(next.second)),
+            nextPrayerName = nextName,
+            nextPrayerTimeStr = nextTimeStr,
             remainingCountdown = countdownStr,
             fajrTime = prayerList[0].third,
             dhuhrTime = prayerList[1].third,

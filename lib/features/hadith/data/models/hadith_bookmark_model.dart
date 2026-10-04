@@ -2,6 +2,8 @@ import 'dart:convert';
 
 class HadithBookmarkModel {
   final String id;
+  final int chapterIndex;
+  final int itemIndex;
   final String chapterName;
   final int hadithNumber;
   final String text;
@@ -11,6 +13,8 @@ class HadithBookmarkModel {
 
   HadithBookmarkModel({
     required this.id,
+    this.chapterIndex = 0,
+    this.itemIndex = 0,
     required this.chapterName,
     required this.hadithNumber,
     required this.text,
@@ -21,6 +25,8 @@ class HadithBookmarkModel {
 
   HadithBookmarkModel copyWith({
     String? id,
+    int? chapterIndex,
+    int? itemIndex,
     String? chapterName,
     int? hadithNumber,
     String? text,
@@ -30,6 +36,8 @@ class HadithBookmarkModel {
   }) {
     return HadithBookmarkModel(
       id: id ?? this.id,
+      chapterIndex: chapterIndex ?? this.chapterIndex,
+      itemIndex: itemIndex ?? this.itemIndex,
       chapterName: chapterName ?? this.chapterName,
       hadithNumber: hadithNumber ?? this.hadithNumber,
       text: text ?? this.text,
@@ -42,6 +50,8 @@ class HadithBookmarkModel {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'chapterIndex': chapterIndex,
+      'itemIndex': itemIndex,
       'chapterName': chapterName,
       'hadithNumber': hadithNumber,
       'text': text,
@@ -54,6 +64,8 @@ class HadithBookmarkModel {
   factory HadithBookmarkModel.fromMap(Map<String, dynamic> map) {
     return HadithBookmarkModel(
       id: map['id']?.toString() ?? '',
+      chapterIndex: (map['chapterIndex'] as num?)?.toInt() ?? 0,
+      itemIndex: (map['itemIndex'] as num?)?.toInt() ?? 0,
       chapterName: map['chapterName']?.toString() ?? '',
       hadithNumber: (map['hadithNumber'] as num?)?.toInt() ?? 0,
       text: map['text']?.toString() ?? '',

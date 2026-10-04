@@ -109,6 +109,7 @@ class MainActivity : FlutterActivity() {
         NativeAzkarBridge.register(flutterEngine, this)
         NativeVibrationBridge.register(flutterEngine, this)
         com.example.quran_app_android.reminders.NativeRemindersBridge.registerWith(flutterEngine.dartExecutor.binaryMessenger, this)
+        com.example.quran_app_android.util.NativeUrlBridge.register(flutterEngine.dartExecutor.binaryMessenger, this)
 
         navChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, NAV_CHANNEL).apply {
             setMethodCallHandler { call, result ->

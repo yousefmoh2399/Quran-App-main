@@ -37,6 +37,7 @@ import 'package:quran_app_android/features/settings/presentation/views/backup_re
 import 'package:quran_app_android/features/settings/presentation/views/privacy_policy_view.dart';
 import 'package:quran_app_android/features/settings/presentation/views/about_app_view.dart';
 import 'package:quran_app_android/features/settings/presentation/views/support_app_view.dart';
+import 'package:quran_app_android/features/share/presentation/views/app_share_view.dart';
 import 'package:quran_app_android/features/prayers_tracker/presentation/views/prayer_tracker_view.dart';
 import 'package:quran_app_android/features/prayers_tracker/presentation/views/post_prayer_azkar_view.dart';
 import 'package:quran_app_android/features/calendar/presentation/views/islamic_calendar_view.dart';
@@ -342,6 +343,12 @@ class AppRoutes {
       transition: Transition.cupertino,
       transitionDuration: kTransitionDuration,
     ),
+    GetPage(
+      name: appShare,
+      page: () => const AppShareView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
     if (kDebugMode) ...[
       GetPage(
         name: adhanDebug,
@@ -393,6 +400,7 @@ class AppRoutes {
   static String privacyPolicy = '/privacyPolicy';
   static String aboutApp = '/aboutApp';
   static String supportApp = '/supportApp';
+  static String appShare = '/appShare';
   static String adhan = '/adhan';
   static String adhanSettings = '/adhanSettings';
   static String adhanDebug = '/adhanDebug';

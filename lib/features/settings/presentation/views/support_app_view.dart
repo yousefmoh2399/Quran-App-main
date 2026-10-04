@@ -9,7 +9,9 @@ import '../../../../core/design/app_spacing.dart';
 import '../../../../core/design/app_typography.dart';
 import '../../../../core/design/components/app_card.dart';
 import '../../../../core/design/components/app_scaffold.dart';
+import 'package:get/get.dart';
 import '../../../../core/util/assets.dart';
+import '../../../../core/util/routes/routes.dart';
 import '../../../../core/util/share_helper.dart';
 
 class SupportAppView extends StatefulWidget {
@@ -624,7 +626,7 @@ class _SupportAppViewState extends State<SupportAppView> {
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
               shape: RoundedRectangleBorder(borderRadius: AppRadius.borderMd),
             ),
-            onPressed: () => _shareApp(context),
+            onPressed: () => Get.toNamed(AppRoutes.appShare),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

@@ -145,15 +145,9 @@ class LockScreenBannerService {
       hijriLine = 'التقويم الهجري المبارك';
     }
 
-    // 2. City Name
-    String cityName = 'القاهرة';
-    if (Get.isRegistered<AdhanViewModel>()) {
-      final vm = Get.find<AdhanViewModel>();
-      if (vm.cityName.isNotEmpty) cityName = vm.cityName;
-    } else {
-      final prefs = await SharedPreferences.getInstance();
-      cityName = prefs.getString('city_name') ?? 'القاهرة';
-    }
+    // 2. City Name & Accurate Config
+    final config = await _resolveConfig();
+    final cityName = config.cityName;
 
     // 3. Prayer Times & Next Prayer Calculation
     String nextPrayerCountdown = '';
@@ -167,9 +161,27 @@ class LockScreenBannerService {
     try {
       final pt = await _resolvePrayerTimes();
       if (pt != null) {
-        final next = pt.nextPrayer();
-        actualNext = next == Prayer.none ? Prayer.fajr : next;
-        final nextTime = pt.timeForPrayer(actualNext) ?? DateTime.now();
+        final now = DateTime.now();
+        var next = pt.nextPrayer();
+        DateTime nextTime;
+        PrayerTimes? tomorrowPt;
+
+        if (next == Prayer.none) {
+          // After Isha: next prayer is tomorrow's Fajr
+          actualNext = Prayer.fajr;
+          tomorrowPt = await _resolveTomorrowPrayerTimes();
+          nextTime = tomorrowPt?.fajr ?? pt.fajr.add(const Duration(days: 1));
+        } else {
+          actualNext = next;
+          final time = pt.timeForPrayer(actualNext);
+          if (time == null || time.isBefore(now)) {
+            actualNext = Prayer.fajr;
+            tomorrowPt = await _resolveTomorrowPrayerTimes();
+            nextTime = tomorrowPt?.fajr ?? pt.fajr.add(const Duration(days: 1));
+          } else {
+            nextTime = time;
+          }
+        }
 
         String pName(Prayer p) {
           switch (p) {
@@ -200,14 +212,18 @@ class LockScreenBannerService {
         prayerTimesMap['maghrib'] = fTime(pt.maghrib);
         prayerTimesMap['isha'] = fTime(pt.isha);
 
-        final diff = nextTime.difference(DateTime.now());
-        final hours = diff.inHours;
-        final minutes = diff.inMinutes % 60;
-        final countdownStr = hours > 0
-            ? '$hours س و $minutes د'
-            : (minutes > 0 ? '$minutes د' : 'الآن');
-
-        nextPrayerCountdown = 'متبقي $countdownStr';
+        final diff = nextTime.difference(now);
+        final totalSeconds = diff.inSeconds;
+        if (totalSeconds <= 0) {
+          nextPrayerCountdown = 'الآن';
+        } else {
+          final hours = totalSeconds ~/ 3600;
+          final minutes = (totalSeconds % 3600) ~/ 60;
+          final countdownStr = hours > 0
+              ? '$hours س و $minutes د'
+              : (minutes > 0 ? '$minutes د' : 'أقل من دقيقة');
+          nextPrayerCountdown = 'متبقي $countdownStr';
+        }
 
         String formatPlainPrayer(Prayer p) {
           final name = pName(p);
@@ -715,29 +731,65 @@ class LockScreenBannerService {
 
   void _startAutoRefreshTimer() {
     _autoRefreshTimer?.cancel();
-    _autoRefreshTimer = Timer.periodic(const Duration(minutes: 15), (_) {
+    _autoRefreshTimer = Timer.periodic(const Duration(minutes: 5), (_) {
       updateBanner();
     });
   }
 
-  Future<PrayerTimes?> _resolvePrayerTimes() async {
+  Future<({Coordinates coords, CalculationParameters params, String cityName})> _resolveConfig() async {
+    double lat = 30.0444;
+    double lng = 31.2357;
+    String cityName = '';
+    String method = 'EGYPTIAN';
+    String madhab = 'SHAFI';
+    int fajrOff = 0, sunriseOff = 0, dhuhrOff = 0, asrOff = 0, maghribOff = 0, ishaOff = 0;
+
     if (Get.isRegistered<AdhanViewModel>()) {
       final vm = Get.find<AdhanViewModel>();
-      if (vm.prayerTimes != null) return vm.prayerTimes;
+      if (vm.cityName.isNotEmpty) cityName = vm.cityName;
+      if (vm.latitude != null && vm.longitude != null && vm.latitude != 0.0) {
+        lat = vm.latitude!;
+        lng = vm.longitude!;
+      }
+      final s = vm.currentSettings;
+      if (s != null) {
+        method = s.calculationMethod;
+        madhab = s.madhab;
+        fajrOff = s.fajrOffset;
+        sunriseOff = s.sunriseOffset;
+        dhuhrOff = s.dhuhrOffset;
+        asrOff = s.asrOffset;
+        maghribOff = s.maghribOffset;
+        ishaOff = s.ishaOffset;
+      }
     }
 
-    final nativeMap = await NativeAdhanBridge.getSettings();
-    double lat = 30.0444; // Cairo default
-    double lng = 31.2357;
-    if (nativeMap != null && nativeMap.containsKey('latitude')) {
-      final nLat = (nativeMap['latitude'] as num?)?.toDouble() ?? 0.0;
-      final nLng = (nativeMap['longitude'] as num?)?.toDouble() ?? 0.0;
-      if (nLat != 0.0 && nLng != 0.0) {
-        lat = nLat;
-        lng = nLng;
+    try {
+      final nativeMap = await NativeAdhanBridge.getSettings();
+      if (nativeMap != null) {
+        if (cityName.isEmpty && nativeMap['cityName'] != null && (nativeMap['cityName'] as String).isNotEmpty) {
+          cityName = nativeMap['cityName'] as String;
+        }
+        final nLat = (nativeMap['latitude'] as num?)?.toDouble() ?? 0.0;
+        final nLng = (nativeMap['longitude'] as num?)?.toDouble() ?? 0.0;
+        if (nLat != 0.0 && nLng != 0.0) {
+          lat = nLat;
+          lng = nLng;
+        }
+        if (nativeMap['calculationMethod'] != null) method = nativeMap['calculationMethod'].toString();
+        if (nativeMap['madhab'] != null) madhab = nativeMap['madhab'].toString();
+        fajrOff = (nativeMap['fajrOffset'] as num?)?.toInt() ?? fajrOff;
+        sunriseOff = (nativeMap['sunriseOffset'] as num?)?.toInt() ?? sunriseOff;
+        dhuhrOff = (nativeMap['dhuhrOffset'] as num?)?.toInt() ?? dhuhrOff;
+        asrOff = (nativeMap['asrOffset'] as num?)?.toInt() ?? asrOff;
+        maghribOff = (nativeMap['maghribOffset'] as num?)?.toInt() ?? maghribOff;
+        ishaOff = (nativeMap['ishaOffset'] as num?)?.toInt() ?? ishaOff;
       }
-    } else {
+    } catch (_) {}
+
+    if (cityName.isEmpty) {
       final prefs = await SharedPreferences.getInstance();
+      cityName = prefs.getString('cityName') ?? prefs.getString('city_name') ?? 'القاهرة';
       final pLat = prefs.getDouble('lat') ?? 0.0;
       final pLng = prefs.getDouble('lng') ?? 0.0;
       if (pLat != 0.0 && pLng != 0.0) {
@@ -746,10 +798,75 @@ class LockScreenBannerService {
       }
     }
 
-    final coords = Coordinates(lat, lng);
-    final params = CalculationMethod.egyptian.getParameters();
-    params.madhab = Madhab.shafi;
-    return PrayerTimes.today(coords, params);
+    CalculationParameters params;
+    switch (method.toUpperCase()) {
+      case 'UMM_AL_QURA':
+      case 'UMMALQURA':
+        params = CalculationMethod.umm_al_qura.getParameters();
+        break;
+      case 'MUSLIM_WORLD_LEAGUE':
+      case 'MWL':
+        params = CalculationMethod.muslim_world_league.getParameters();
+        break;
+      case 'KARACHI':
+        params = CalculationMethod.karachi.getParameters();
+        break;
+      case 'NORTH_AMERICA':
+      case 'ISNA':
+        params = CalculationMethod.north_america.getParameters();
+        break;
+      case 'DUBAI':
+        params = CalculationMethod.dubai.getParameters();
+        break;
+      case 'KUWAIT':
+        params = CalculationMethod.kuwait.getParameters();
+        break;
+      case 'QATAR':
+        params = CalculationMethod.qatar.getParameters();
+        break;
+      case 'SINGAPORE':
+        params = CalculationMethod.singapore.getParameters();
+        break;
+      case 'MOON_SIGHTING_COMMITTEE':
+        params = CalculationMethod.moon_sighting_committee.getParameters();
+        break;
+      case 'EGYPTIAN':
+      default:
+        params = CalculationMethod.egyptian.getParameters();
+        break;
+    }
+    params.madhab = madhab.toUpperCase() == 'HANAFI' ? Madhab.hanafi : Madhab.shafi;
+    params.adjustments.fajr = fajrOff;
+    params.adjustments.sunrise = sunriseOff;
+    params.adjustments.dhuhr = dhuhrOff;
+    params.adjustments.asr = asrOff;
+    params.adjustments.maghrib = maghribOff;
+    params.adjustments.isha = ishaOff;
+
+    return (
+      coords: Coordinates(lat, lng),
+      params: params,
+      cityName: cityName.isNotEmpty ? cityName : 'القاهرة',
+    );
+  }
+
+  Future<PrayerTimes?> _resolvePrayerTimes() async {
+    if (Get.isRegistered<AdhanViewModel>()) {
+      final vm = Get.find<AdhanViewModel>();
+      if (vm.prayerTimes != null) return vm.prayerTimes;
+    }
+    final config = await _resolveConfig();
+    return PrayerTimes.today(config.coords, config.params);
+  }
+
+  Future<PrayerTimes?> _resolveTomorrowPrayerTimes() async {
+    final config = await _resolveConfig();
+    final tomorrow = DateTime.now().add(const Duration(days: 1));
+    return PrayerTimes(
+      config.coords,
+      DateComponents.from(tomorrow),
+      config.params,
+    );
   }
 
   int _getLastReadPage() {

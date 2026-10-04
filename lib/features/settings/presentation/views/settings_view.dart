@@ -183,6 +183,14 @@ class SettingsView extends StatelessWidget {
                   onTap: () => Get.toNamed(AppRoutes.supportApp),
                 ),
                 SettingsTile(
+                  icon: Icons.share_rounded,
+                  iconColor: const Color(0xFF25D366),
+                  title: 'نشر التطبيق ومشاركة الأجر 📢',
+                  subtitle: 'مشاركة عبر واتساب، ماسنجر، فيسبوك، تيليجرام، ولينكد إن',
+                  trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
+                  onTap: () => Get.toNamed(AppRoutes.appShare),
+                ),
+                SettingsTile(
                   icon: Icons.info_rounded,
                   title: 'عن التطبيق والمطور',
                   subtitle: 'معلومات الترخيص والمراجع ومشاركة الأجر',
