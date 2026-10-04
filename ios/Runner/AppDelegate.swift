@@ -28,6 +28,17 @@ import AudioToolbox
           result(FlutterMethodNotImplemented)
         }
       }
+
+      let navChannel = FlutterMethodChannel(name: "com.taqarrab.quran/app_navigation", binaryMessenger: controller)
+      navChannel.setMethodCallHandler { (call: FlutterMethodCall, result: @escaping FlutterResult) in
+        if call.method == "getInitialNavigation" {
+          result(nil)
+        } else if call.method == "setSystemGestureExclusion" {
+          result(true)
+        } else {
+          result(FlutterMethodNotImplemented)
+        }
+      }
     }
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)

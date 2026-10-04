@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -31,9 +33,11 @@ class _MushafViewState extends State<MushafView> {
   Orientation? _lastOrientation;
 
   void _setGestureExclusion(bool enabled) {
-    try {
-      _navChannel.invokeMethod('setSystemGestureExclusion', {'enabled': enabled});
-    } catch (_) {}
+    if (!kIsWeb && Platform.isAndroid) {
+      try {
+        _navChannel.invokeMethod('setSystemGestureExclusion', {'enabled': enabled}).catchError((_) {});
+      } catch (_) {}
+    }
   }
 
   @override

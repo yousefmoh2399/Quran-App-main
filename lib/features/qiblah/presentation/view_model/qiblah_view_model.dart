@@ -1,4 +1,5 @@
 import 'package:adhan/adhan.dart';
+import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -128,6 +129,7 @@ class QiblahViewModel extends GetxController {
     final coords = Coordinates(lat, lng);
     qiblaDirection.value = Qibla(coords).direction;
     hasLocation.value = true;
+    debugPrint('🧭 [QiblahViewModel] Location updated: lat=$lat, lng=$lng, qiblaAngle=${qiblaDirection.value.toStringAsFixed(2)}°, source=$source');
     update();
   }
 
