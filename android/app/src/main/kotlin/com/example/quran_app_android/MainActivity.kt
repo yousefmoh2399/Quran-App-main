@@ -15,6 +15,7 @@ import com.example.quran_app_android.azkar.NativeAzkarBridge
 
 import com.example.quran_app_android.adhan.PrayerScheduler
 import com.example.quran_app_android.adhan.NativePrayerManager
+import com.example.quran_app_android.vibration.NativeVibrationBridge
 
 class MainActivity : FlutterActivity() {
 
@@ -106,6 +107,7 @@ class MainActivity : FlutterActivity() {
         NativeAdhanBridge.register(flutterEngine, this)
         PermissionsBridge.register(flutterEngine, this)
         NativeAzkarBridge.register(flutterEngine, this)
+        NativeVibrationBridge.register(flutterEngine, this)
         com.example.quran_app_android.reminders.NativeRemindersBridge.registerWith(flutterEngine.dartExecutor.binaryMessenger, this)
 
         navChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, NAV_CHANNEL).apply {

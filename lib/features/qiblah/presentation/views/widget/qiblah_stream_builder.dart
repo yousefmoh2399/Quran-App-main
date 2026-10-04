@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:quran_app_android/core/design/app_colors.dart';
@@ -9,6 +8,7 @@ import 'package:quran_app_android/core/design/app_spacing.dart';
 import 'package:quran_app_android/core/design/app_typography.dart';
 import 'package:quran_app_android/core/design/components/app_card.dart';
 import 'package:quran_app_android/core/design/components/empty_state.dart';
+import 'package:quran_app_android/core/services/app_haptics_service.dart';
 
 class QiblahStreamBuilder extends StatefulWidget {
   final AnimationController animationController;
@@ -106,8 +106,7 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
         final bool isAligned = diffDeg < 4 || diffDeg > 356;
 
         if (isAligned && !_hasVibrated) {
-          HapticFeedback.heavyImpact();
-          HapticFeedback.vibrate();
+          AppHaptics.qiblaAligned();
           _hasVibrated = true;
         } else if (!isAligned && (diffDeg >= 6 && diffDeg <= 354)) {
           _hasVibrated = false;

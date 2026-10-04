@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:quran_app_android/core/data/models/user_models.dart';
 import 'package:quran_app_android/core/data/repositories/user_repository.dart';
@@ -9,6 +8,7 @@ import 'package:quran_app_android/core/design/app_spacing.dart';
 import 'package:quran_app_android/core/design/app_typography.dart';
 import 'package:quran_app_android/core/design/components/app_card.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
+import 'package:quran_app_android/core/services/app_haptics_service.dart';
 import 'package:quran_app_android/core/util/routes/routes.dart';
 import 'package:quran_app_android/features/home/presentation/view_model/home_view_model.dart';
 import 'package:quran_app_android/features/mushaf/presentation/utils/mushaf_utils.dart';
@@ -274,8 +274,7 @@ class DailyWirdCard extends StatelessWidget {
                       ),
                     ),
                     onPressed: () async {
-                      HapticFeedback.heavyImpact();
-                      HapticFeedback.vibrate();
+                      AppHaptics.cycleCompleted();
                       await homeVM.markWirdCompleted();
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(

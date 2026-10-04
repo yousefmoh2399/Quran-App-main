@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_radius.dart';
 import '../../../../core/design/app_spacing.dart';
 import '../../../../core/design/app_typography.dart';
 import '../../../../core/design/components/app_card.dart';
+import '../../../../core/services/app_haptics_service.dart';
 
 class PostPrayerZikr {
   final String text;
@@ -78,16 +78,15 @@ class _PostPrayerAzkarViewState extends State<PostPrayerAzkarView> {
       _currentCount++;
       if (_currentCount >= zikr.count) {
         if (_currentIndex < _azkarList.length - 1) {
-          HapticFeedback.mediumImpact();
+          AppHaptics.itemCompleted();
           _currentIndex++;
           _currentCount = 0;
         } else {
-          HapticFeedback.heavyImpact();
-          HapticFeedback.vibrate();
+          AppHaptics.cycleCompleted();
           _isAllCompleted = true;
         }
       } else {
-        HapticFeedback.lightImpact();
+        AppHaptics.tap();
       }
     });
   }

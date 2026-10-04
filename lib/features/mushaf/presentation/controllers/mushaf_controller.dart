@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../../core/data/models/ayah_entity.dart';
 import '../../../../core/data/models/mushaf_models.dart';
@@ -13,6 +12,7 @@ import '../../../../core/mushaf/mushaf_raster_cache.dart';
 import '../../../../core/service/settings/SettingsServices.dart';
 import '../../../home/presentation/view_model/home_view_model.dart';
 import 'package:quran_app_android/features/reminders/data/commute_wird_repository.dart';
+import '../../../../core/services/app_haptics_service.dart';
 import '../models/mushaf_theme_model.dart';
 import '../widgets/mushaf_paper_flip_view.dart';
 
@@ -587,8 +587,7 @@ class MushafController extends GetxController {
         countTowardsMain: commuteCountTowardsMain.value,
       );
       isCommuteCompleted.value = true;
-      HapticFeedback.heavyImpact();
-      HapticFeedback.vibrate();
+      AppHaptics.cycleCompleted();
 
       Get.dialog(
         AlertDialog(

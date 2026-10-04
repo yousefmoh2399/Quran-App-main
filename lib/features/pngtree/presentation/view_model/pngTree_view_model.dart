@@ -1,6 +1,6 @@
 // ignore_for_file: file_names
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:quran_app_android/core/services/app_haptics_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PngTreeViewModel extends GetxController {
@@ -65,13 +65,12 @@ class PngTreeViewModel extends GetxController {
 
   void increaseCounter() async {
     counter++;
-    HapticFeedback.lightImpact();
+    AppHaptics.tap();
 
     if (counter >= targetCount) {
       counterTree += 1;
       counter = 0;
-      HapticFeedback.heavyImpact();
-      HapticFeedback.vibrate();
+      AppHaptics.cycleCompleted();
     }
     await saveData();
     update();
@@ -80,7 +79,7 @@ class PngTreeViewModel extends GetxController {
   void decreaseCounter() async {
     if (counter > 0) {
       counter--;
-      HapticFeedback.selectionClick();
+      AppHaptics.selection();
       await saveData();
       update();
     }
@@ -89,7 +88,7 @@ class PngTreeViewModel extends GetxController {
   void clearCounter() async {
     counter = 0;
     counterTree = 0;
-    HapticFeedback.vibrate();
+    AppHaptics.itemCompleted();
     await saveData();
     update();
   }

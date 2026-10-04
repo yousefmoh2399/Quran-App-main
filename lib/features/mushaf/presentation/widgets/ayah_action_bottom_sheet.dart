@@ -13,6 +13,7 @@ import '../controllers/mushaf_controller.dart';
 import '../models/mushaf_theme_model.dart';
 import '../utils/mushaf_utils.dart';
 import '../views/ayah_card_generator_view.dart';
+import '../../../../core/services/app_haptics_service.dart';
 import '../../../tafsser/data/tafsir_repository.dart';
 
 /// Interactive action sheet displayed when an Ayah is tapped in the Mushaf.
@@ -104,7 +105,7 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet> {
   Future<void> _toggleBookmark() async {
     final note = _noteController.text.trim();
     if (_isBookmarked) {
-      HapticFeedback.lightImpact();
+      AppHaptics.selection();
       await _controller.removeAyahBookmark(
         widget.surahNumber,
         widget.ayahNumber,
@@ -113,7 +114,7 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet> {
       setState(() => _isBookmarked = false);
       _showFeedback('تمت إزالة العلامة المرجعية للآية');
     } else {
-      HapticFeedback.mediumImpact();
+      AppHaptics.itemCompleted();
       _controller.selectedAyahColor.value = _selectedColor;
       await _controller.setAyahBookmark(
         surah: widget.surahNumber,
@@ -128,7 +129,7 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet> {
   }
 
   Future<void> _updateColor(BookmarkColor color) async {
-    HapticFeedback.selectionClick();
+    AppHaptics.selection();
     setState(() => _selectedColor = color);
     _controller.selectedAyahColor.value = color;
     if (_isBookmarked) {
@@ -145,9 +146,9 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet> {
 
   Future<void> _updateMemorizeStatus(MemorizeStatus? status) async {
     if (status == MemorizeStatus.memorized) {
-      HapticFeedback.mediumImpact();
+      AppHaptics.cycleCompleted();
     } else {
-      HapticFeedback.selectionClick();
+      AppHaptics.selection();
     }
     setState(() => _selectedStatus = status);
     await _controller.setAyahMemorizeStatus(

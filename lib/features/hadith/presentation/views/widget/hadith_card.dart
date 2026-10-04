@@ -8,6 +8,7 @@ import 'package:quran_app_android/core/design/components/app_card.dart';
 import 'package:quran_app_android/features/hadith/data/models/hadith_model_malek.dart';
 import 'package:quran_app_android/features/hadith/presentation/view_model/hadith_view_model.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:quran_app_android/core/services/app_haptics_service.dart';
 import 'package:quran_app_android/core/util/share_helper.dart';
 
 class HadithCard extends StatelessWidget {
@@ -113,7 +114,7 @@ class HadithCard extends StatelessWidget {
               // Bookmark button
               TextButton.icon(
                 onPressed: () {
-                  HapticFeedback.mediumImpact();
+                  AppHaptics.itemCompleted();
                   controller.addCurrentIndex(itemIndex);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -143,7 +144,7 @@ class HadithCard extends StatelessWidget {
               // Copy button
               TextButton.icon(
                 onPressed: () {
-                  HapticFeedback.lightImpact();
+                  AppHaptics.selection();
                   Clipboard.setData(
                     ClipboardData(text: '$chapterName\n\n$hadithText'),
                   );
@@ -176,7 +177,7 @@ class HadithCard extends StatelessWidget {
               Builder(
                 builder: (btnContext) => TextButton.icon(
                   onPressed: () async {
-                    HapticFeedback.lightImpact();
+                    AppHaptics.selection();
                     await Share.share(
                       '📜 من موطأ الإمام مالك\n$chapterName\n\n$hadithText',
                       sharePositionOrigin: getSharePositionOrigin(btnContext),
