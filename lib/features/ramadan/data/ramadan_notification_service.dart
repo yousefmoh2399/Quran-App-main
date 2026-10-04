@@ -181,6 +181,8 @@ class RamadanNotificationService {
         sound: RawResourceAndroidNotificationSound(soundFile),
         enableVibration: true,
         category: AndroidNotificationCategory.alarm,
+        icon: 'icon',
+        largeIcon: const DrawableResourceAndroidBitmap('icon'),
       );
     } else {
       androidDetails = const AndroidNotificationDetails(
@@ -191,6 +193,8 @@ class RamadanNotificationService {
         priority: Priority.high,
         playSound: true,
         enableVibration: true,
+        icon: 'icon',
+        largeIcon: DrawableResourceAndroidBitmap('icon'),
       );
     }
 
@@ -238,6 +242,8 @@ class RamadanNotificationService {
       playSound: true,
       sound: const RawResourceAndroidNotificationSound('azkar_1'),
       enableVibration: true,
+      icon: 'icon',
+      largeIcon: const DrawableResourceAndroidBitmap('icon'),
     );
 
     const iosDetails = DarwinNotificationDetails(
@@ -269,6 +275,8 @@ class RamadanNotificationService {
       playSound: true,
       sound: const RawResourceAndroidNotificationSound('adhan'),
       enableVibration: true,
+      icon: 'icon',
+      largeIcon: const DrawableResourceAndroidBitmap('icon'),
     );
 
     const iosDetails = DarwinNotificationDetails(
@@ -300,6 +308,8 @@ class RamadanNotificationService {
       playSound: true,
       sound: const RawResourceAndroidNotificationSound('azkar_1'),
       enableVibration: true,
+      icon: 'icon',
+      largeIcon: const DrawableResourceAndroidBitmap('icon'),
     );
 
     const iosDetails = DarwinNotificationDetails(
@@ -331,6 +341,8 @@ class RamadanNotificationService {
       playSound: true,
       sound: const RawResourceAndroidNotificationSound('azkar_1'),
       enableVibration: true,
+      icon: 'icon',
+      largeIcon: const DrawableResourceAndroidBitmap('icon'),
     );
 
     const iosDetails = DarwinNotificationDetails(

@@ -229,7 +229,7 @@ class AdhanService : Service(), AudioManager.OnAudioFocusChangeListener {
             )
 
             val appIconBitmap = try {
-                BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher)
+                BitmapFactory.decodeResource(resources, R.drawable.icon)
             } catch (_: Exception) {
                 null
             }
@@ -418,7 +418,7 @@ class AdhanService : Service(), AudioManager.OnAudioFocusChangeListener {
 
         val citySuffix = if (cityName.isNotEmpty()) " • $cityName" else ""
         val appIconBitmap = try {
-            BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher)
+            BitmapFactory.decodeResource(resources, R.drawable.icon)
         } catch (_: Exception) {
             null
         }

@@ -117,7 +117,11 @@ class UnifiedReminderReceiver : BroadcastReceiver() {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
 
-        val appIconBitmap = BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher)
+        val appIconBitmap = try {
+            BitmapFactory.decodeResource(context.resources, R.drawable.icon)
+        } catch (_: Exception) {
+            null
+        }
         val builder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_crescent_moon)
             .setLargeIcon(appIconBitmap)

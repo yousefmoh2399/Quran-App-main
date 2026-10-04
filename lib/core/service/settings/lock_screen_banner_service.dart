@@ -1,17 +1,18 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:adhan/adhan.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:hijri/hijri_calendar.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:quran_app_android/core/data/repositories/user_repository.dart';
 import 'package:quran_app_android/core/native/native_adhan_bridge.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
 import 'package:quran_app_android/core/service/settings/notifications_services.dart';
+import 'package:quran_app_android/core/util/assets.dart';
 import 'package:quran_app_android/core/util/constant/static_vars.dart';
 import 'package:quran_app_android/core/services/widget_sync_service.dart';
 import 'package:quran_app_android/features/adhan/presentation/view_model/adhan_view_model.dart';
@@ -501,6 +502,31 @@ class LockScreenBannerService {
 
       double curY = 20.0;
 
+      // Draw Taqarrab Logo on the left side of header
+      try {
+        final logo = await _getLogoImage();
+        if (logo != null) {
+          final logoRect = const Rect.fromLTWH(24, 14, 40, 40);
+          final clipRRect = RRect.fromRectAndRadius(logoRect, const Radius.circular(10));
+          canvas.save();
+          canvas.clipRRect(clipRRect);
+          canvas.drawImageRect(
+            logo,
+            Rect.fromLTWH(0, 0, logo.width.toDouble(), logo.height.toDouble()),
+            logoRect,
+            Paint()..filterQuality = FilterQuality.high,
+          );
+          canvas.restore();
+          canvas.drawRRect(
+            clipRRect,
+            Paint()
+              ..color = const Color(0xFFD4AF37).withOpacity(0.5)
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 1.0,
+          );
+        }
+      } catch (_) {}
+
       // 3. Header: App title, City, Date
       final headerSpan = TextSpan(
         children: [
@@ -525,7 +551,7 @@ class LockScreenBannerService {
       final headerPainter = TextPainter(
         text: headerSpan,
         textDirection: TextDirection.rtl,
-      )..layout(maxWidth: 680);
+      )..layout(maxWidth: 620);
       headerPainter.paint(canvas, Offset(700 - headerPainter.width, curY));
       curY += headerPainter.height + 16.0;
 
@@ -725,6 +751,21 @@ class LockScreenBannerService {
       return byteData?.buffer.asUint8List();
     } catch (e) {
       debugPrint('⚠️ Error generating banner bitmap: $e');
+      return null;
+    }
+  }
+
+  static ui.Image? _cachedLogoImage;
+  static Future<ui.Image?> _getLogoImage() async {
+    if (_cachedLogoImage != null) return _cachedLogoImage;
+    try {
+      final data = await rootBundle.load(AssetsData.taqarrabLogo);
+      final codec = await ui.instantiateImageCodec(data.buffer.asUint8List(), targetWidth: 84, targetHeight: 84);
+      final frame = await codec.getNextFrame();
+      _cachedLogoImage = frame.image;
+      return _cachedLogoImage;
+    } catch (e) {
+      debugPrint('⚠️ Could not load logo image for banner: $e');
       return null;
     }
   }

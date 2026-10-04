@@ -140,7 +140,7 @@ class AlarmReceiver : BroadcastReceiver() {
 
         val locationSuffix = if (cityName.isNotEmpty()) " في $cityName" else ""
         val appIconBitmap = try {
-            BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher)
+            BitmapFactory.decodeResource(context.resources, R.drawable.icon)
         } catch (_: Exception) {
             null
         }
