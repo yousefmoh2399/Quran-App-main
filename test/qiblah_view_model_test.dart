@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,6 +10,17 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('flutter.baseflow.com/geolocator'),
+      (MethodCall methodCall) async {
+        if (methodCall.method == 'isLocationServiceEnabled') {
+          return true;
+        }
+        return null;
+      },
+    );
+
     SharedPreferences.setMockInitialValues({
       'lat': 30.0444,
       'lng': 31.2357,
@@ -18,8 +30,9 @@ void main() {
   });
 
   group('QiblahViewModel Fast Loading & Calculation Tests', () {
-    test('initializes immediately with valid coordinates and calculates Qibla direction', () async {
+    test('initializes with saved coordinates and calculates Qibla direction', () async {
       final vm = QiblahViewModel();
+      await vm.initLocationAndQibla();
       expect(vm.hasLocation.value, isTrue);
       expect(vm.userLatitude.value, 30.0444);
       expect(vm.userLongitude.value, 31.2357);
@@ -32,7 +45,8 @@ void main() {
       final vm = QiblahViewModel();
 
       // Alexandria: ~31.2001, 29.9187 -> Qibla is roughly 135.5°
-      vm.initLocationAndQibla();
+      vm.setManualCity('الإسكندرية', 31.2001, 29.9187);
+      expect(vm.hasLocation.value, isTrue);
       expect(vm.qiblaDirection.value, greaterThan(130.0));
       expect(vm.qiblaDirection.value, lessThan(145.0));
     });

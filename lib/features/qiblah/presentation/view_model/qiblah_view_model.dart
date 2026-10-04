@@ -1,6 +1,4 @@
 import 'package:adhan/adhan.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,12 +8,15 @@ import '../../../adhan/presentation/view_model/adhan_view_model.dart';
 
 class QiblahViewModel extends GetxController {
   final RxBool isDone = false.obs;
-  final RxDouble userLatitude = 30.0444.obs;
-  final RxDouble userLongitude = 31.2357.obs;
-  final RxDouble qiblaDirection = 136.0.obs;
-  final RxBool hasLocation = true.obs;
+  final RxDouble userLatitude = 0.0.obs;
+  final RxDouble userLongitude = 0.0.obs;
+  final RxDouble qiblaDirection = 0.0.obs;
+  final RxBool hasLocation = false.obs;
   final RxBool isRefreshingLocation = false.obs;
-  final RxString locationSource = 'افتراضي'.obs;
+  final RxString locationSource = ''.obs;
+
+  final RxBool isLocationServiceEnabled = true.obs;
+  final RxBool isPermanentlyDenied = false.obs;
 
   @override
   void onInit() {
@@ -23,81 +24,100 @@ class QiblahViewModel extends GetxController {
     initLocationAndQibla();
   }
 
-  /// Instantly resolves the best available location and initiates non-blocking GPS refinement.
-  Future<void> initLocationAndQibla({BuildContext? context}) async {
-    // 1. Instant Synchronous/Fast In-Memory Resolution (< 5ms)
-    _resolveFastLocation();
+  /// Instantly checks location state without silent Cairo fallback
+  Future<void> initLocationAndQibla() async {
+    // 1. Check known saved or Adhan coordinates first
+    final hasKnown = await _resolveKnownLocation();
+    if (hasKnown) {
+      hasLocation.value = true;
+      isDone.value = true;
+      update();
+    }
 
-    // 2. Check & Request permission gracefully
-    await requestLocationPermission(context: context);
-
-    // 3. Fast non-blocking Cached & Background GPS Refinement
-    _refineLocationInBackground();
+    // 2. Refresh actual GPS / permission state
+    await refreshLocationState();
   }
 
-  void _resolveFastLocation() {
-    // Check in-memory AdhanViewModel if available
+  Future<void> refreshLocationState() async {
+    // Check if device Location Services are turned on
+    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    isLocationServiceEnabled.value = serviceEnabled;
+    if (!serviceEnabled) {
+      update();
+      return;
+    }
+
+    // Check permission status
+    final service = PermissionService.instance;
+    final currentStatus = service.getStatus(AppPermissionType.location);
+
+    if (currentStatus.isGranted) {
+      isDone.value = true;
+      isPermanentlyDenied.value = false;
+      await _fetchGpsLocation();
+    } else if (currentStatus.isPermanentlyDenied) {
+      isDone.value = false;
+      isPermanentlyDenied.value = true;
+    } else {
+      isDone.value = false;
+      isPermanentlyDenied.value = false;
+      // Auto-prompt contextually if user just opened
+      await requestLocationPermission();
+    }
+    update();
+  }
+
+  Future<bool> _resolveKnownLocation() async {
+    // Check in-memory AdhanViewModel if available and non-zero
     if (Get.isRegistered<AdhanViewModel>()) {
       final adhanVM = Get.find<AdhanViewModel>();
       if (adhanVM.latitude != null &&
           adhanVM.longitude != null &&
-          adhanVM.latitude != 0.0) {
-        _setCoordinates(adhanVM.latitude!, adhanVM.longitude!, 'أوقات الصلاة');
-        return;
+          adhanVM.latitude != 0.0 &&
+          adhanVM.longitude != 0.0) {
+        _setCoordinates(adhanVM.latitude!, adhanVM.longitude!, adhanVM.cityName.isNotEmpty ? adhanVM.cityName : 'أوقات الصلاة');
+        return true;
       }
     }
 
-    // Default Cairo fallback coordinates
-    _setCoordinates(30.0444, 31.2357, 'افتراضي');
+    // Check SharedPreferences for previously saved user location
+    final prefs = await SharedPreferences.getInstance();
+    final savedLat = prefs.getDouble('lat');
+    final savedLng = prefs.getDouble('lng');
+    final savedCity = prefs.getString('cityName') ?? '';
+    if (savedLat != null && savedLng != null && savedLat != 0.0 && savedLng != 0.0) {
+      _setCoordinates(savedLat, savedLng, savedCity.isNotEmpty ? savedCity : 'الموقع المحفوظ');
+      return true;
+    }
+
+    return false;
   }
 
-  Future<void> _refineLocationInBackground() async {
+  Future<void> _fetchGpsLocation() async {
     try {
-      // Step A: Check SharedPreferences (< 10ms)
-      final prefs = await SharedPreferences.getInstance();
-      final savedLat = prefs.getDouble('lat');
-      final savedLng = prefs.getDouble('lng');
-      if (savedLat != null && savedLng != null && savedLat != 0.0) {
-        _setCoordinates(savedLat, savedLng, 'الموقع المحفوظ');
-      }
-
-      // Step B: Check System Last Known Location (~10ms, no GPS satellite spin-up needed)
+      isRefreshingLocation.value = true;
       final lastPos = await Geolocator.getLastKnownPosition();
-      if (lastPos != null) {
+      if (lastPos != null && !hasLocation.value) {
         _setCoordinates(lastPos.latitude, lastPos.longitude, 'آخر موقع معروف');
       }
 
-      // Step C: High-speed low-accuracy network/cell tower fix in background (max 3s)
-      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (serviceEnabled && isDone.value) {
-        isRefreshingLocation.value = true;
-        Position? freshPos;
-        try {
-          freshPos = await Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.low,
-            timeLimit: const Duration(seconds: 3),
-          );
-        } catch (_) {
-          if (defaultTargetPlatform == TargetPlatform.android) {
-            try {
-              freshPos = await Geolocator.getCurrentPosition(
-                locationSettings: AndroidSettings(
-                  accuracy: LocationAccuracy.low,
-                  forceLocationManager: true,
-                  timeLimit: const Duration(seconds: 3),
-                ),
-              );
-            } catch (_) {}
-          }
-        }
-        if (freshPos != null) {
-          _setCoordinates(freshPos.latitude, freshPos.longitude, 'GPS مباشر');
-        }
+      Position? freshPos;
+      try {
+        freshPos = await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.medium,
+            timeLimit: Duration(seconds: 5),
+          ),
+        );
+      } catch (_) {}
+
+      if (freshPos != null) {
+        _setCoordinates(freshPos.latitude, freshPos.longitude, 'GPS مباشر');
       }
     } catch (_) {
-      // Silently keep previous valid coordinates without disrupting user
     } finally {
       isRefreshingLocation.value = false;
+      update();
     }
   }
 
@@ -111,27 +131,35 @@ class QiblahViewModel extends GetxController {
     update();
   }
 
-  Future<void> requestLocationPermission({BuildContext? context}) async {
-    final service = PermissionService.instance;
-    final currentStatus = service.getStatus(AppPermissionType.location);
-    if (currentStatus.isGranted) {
-      isDone.value = true;
+  void setManualCity(String name, double lat, double lng) {
+    _setCoordinates(lat, lng, name);
+    isDone.value = true;
+    update();
+  }
+
+  Future<void> requestLocationPermission() async {
+    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    isLocationServiceEnabled.value = serviceEnabled;
+    if (!serviceEnabled) {
       update();
       return;
     }
 
-    if (context != null) {
-      final granted = await service.requestWithRationale(
-        context,
-        AppPermissionType.location,
-      );
-      isDone.value = granted;
-    } else {
-      final res = await service.requestPermission(AppPermissionType.location);
-      if (res.isPermanentlyDenied) {
-        await service.openSettings(AppPermissionType.location);
-      }
-      isDone.value = res.isGranted;
+    final service = PermissionService.instance;
+    final currentStatus = service.getStatus(AppPermissionType.location);
+    if (currentStatus.isGranted) {
+      isDone.value = true;
+      isPermanentlyDenied.value = false;
+      await _fetchGpsLocation();
+      update();
+      return;
+    }
+
+    final res = await service.requestPermission(AppPermissionType.location);
+    isDone.value = res.isGranted;
+    isPermanentlyDenied.value = res.isPermanentlyDenied;
+    if (res.isGranted) {
+      await _fetchGpsLocation();
     }
     update();
   }
