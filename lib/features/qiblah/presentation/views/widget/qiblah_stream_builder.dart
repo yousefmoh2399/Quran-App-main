@@ -189,6 +189,32 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
                 ),
               ),
               AppSpacing.verticalMd,
+              if (compassEvent?.accuracy != null && compassEvent!.accuracy! > 15) ...[
+                Container(
+                  margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.withOpacity(0.15),
+                    borderRadius: AppRadius.borderMd,
+                    border: Border.all(color: Colors.amber.withOpacity(0.4)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.screen_rotation_rounded, size: 18, color: Colors.amber),
+                      AppSpacing.horizontalSm,
+                      Expanded(
+                        child: Text(
+                          'دقة البوصلة منخفضة: حرّك الهاتف في الهواء على شكل رقم 8 (∞) لمعايرة المستشعر',
+                          style: textTheme.bodySmall?.copyWith(
+                            color: Colors.amber.shade900,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               // Alignment status card
               AppCard(
                 variant: isAligned ? AppCardVariant.elevated : AppCardVariant.outlined,
