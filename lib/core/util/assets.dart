@@ -10,7 +10,7 @@ class AssetsData {
   static const nameOfAllah = 'assets/images/nameofallah.webp';
   static const qiblahImage = 'assets/images/qiblahImage.webp';
   static const ramadan = 'assets/images/ramadan.webp';
-  static const taqarrabLogo = 'assets/images/taqarrab_logo.webp';
+  static const taqarrabLogo = 'assets/images/taqarrab_logo.png';
   static const coming = 'assets/images/json/coming.json';
   static const location = 'assets/images/json/location.json';
   static const notification = 'assets/images/json/noti.json';
