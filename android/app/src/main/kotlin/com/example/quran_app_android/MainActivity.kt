@@ -125,6 +125,40 @@ class MainActivity : FlutterActivity() {
                         initialNavData = null
                         result.success(data)
                     }
+                    "setSystemGestureExclusion" -> {
+                        val enabled = call.argument<Boolean>("enabled") ?: false
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            runOnUiThread {
+                                try {
+                                        val contentView = findViewById<android.view.View>(android.R.id.content)
+                                        val targetView = contentView ?: window.decorView
+                                        if (enabled) {
+                                            val metrics = resources.displayMetrics
+                                            val w = metrics.widthPixels
+                                            val h = metrics.heightPixels
+                                            val edgeWidth = (48 * metrics.density).toInt()
+                                            val zoneHeight = (200 * metrics.density).toInt()
+                                            val top = (h - zoneHeight) / 2
+                                            val bottom = top + zoneHeight
+                                            val rects = listOf(
+                                                android.graphics.Rect(0, top, edgeWidth, bottom),
+                                                android.graphics.Rect(w - edgeWidth, top, w, bottom)
+                                            )
+                                            targetView.systemGestureExclusionRects = rects
+                                            window.decorView.systemGestureExclusionRects = rects
+                                        } else {
+                                            targetView.systemGestureExclusionRects = emptyList()
+                                            window.decorView.systemGestureExclusionRects = emptyList()
+                                        }
+                                        result.success(true)
+                                } catch (e: Exception) {
+                                    result.success(false)
+                                }
+                            }
+                        } else {
+                            result.success(true)
+                        }
+                    }
                     else -> result.notImplemented()
                 }
             }

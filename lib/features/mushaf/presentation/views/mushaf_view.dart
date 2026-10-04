@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_radius.dart';
@@ -25,12 +26,20 @@ class MushafView extends StatefulWidget {
 }
 
 class _MushafViewState extends State<MushafView> {
+  static const _navChannel = MethodChannel('com.taqarrab.quran/app_navigation');
   late final MushafController controller;
   Orientation? _lastOrientation;
+
+  void _setGestureExclusion(bool enabled) {
+    try {
+      _navChannel.invokeMethod('setSystemGestureExclusion', {'enabled': enabled});
+    } catch (_) {}
+  }
 
   @override
   void initState() {
     super.initState();
+    _setGestureExclusion(true);
     if (Get.isRegistered<MushafController>()) {
       Get.delete<MushafController>();
     }
@@ -44,6 +53,7 @@ class _MushafViewState extends State<MushafView> {
 
   @override
   void dispose() {
+    _setGestureExclusion(false);
     if (Get.isRegistered<MushafController>()) {
       Get.delete<MushafController>();
     }

@@ -234,7 +234,9 @@ class _QuranSearchViewState extends State<QuranSearchView> {
         if (surah != null) 'surah': surah,
         if (ayah != null) 'ayah': ayah,
       },
-      transition: Transition.cupertino,
+      transition: Transition.fade,
+      duration: const Duration(milliseconds: 250),
+      popGesture: false,
     );
   }
 

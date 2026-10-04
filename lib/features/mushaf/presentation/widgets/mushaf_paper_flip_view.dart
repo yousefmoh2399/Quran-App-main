@@ -439,7 +439,7 @@ class MushafPaperFlipViewState extends State<MushafPaperFlipView>
           widget.onTapPage();
         }
       },
-      behavior: HitTestBehavior.translucent,
+      behavior: HitTestBehavior.opaque,
       child: Stack(
         fit: StackFit.expand,
         children: [

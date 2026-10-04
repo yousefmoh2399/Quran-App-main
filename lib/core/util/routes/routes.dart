@@ -146,14 +146,16 @@ class AppRoutes {
     GetPage(
       name: detailsScreen,
       page: () => const MushafView(),
-      transition: Transition.cupertino,
-      transitionDuration: kTransitionDuration,
+      transition: Transition.fade,
+      transitionDuration: const Duration(milliseconds: 250),
+      popGesture: false,
     ),
     GetPage(
       name: mushaf,
       page: () => const MushafView(),
-      transition: Transition.cupertino,
-      transitionDuration: kTransitionDuration,
+      transition: Transition.fade,
+      transitionDuration: const Duration(milliseconds: 250),
+      popGesture: false,
     ),
     GetPage(
       name: quranSearch,
