@@ -170,23 +170,22 @@
 
 ### الحل الجذري المنفذ:
 1. **تحديث `AppTypography` (`lib/core/design/app_typography.dart`)**:
-   * إنشاء سلسلة تراجع موحدة `fallbackFonts`:
+   * إنشاء سلسلة تراجع مخصصة للرموز والصلوات الإسلامية `fallbackFonts`:
      ```dart
      static const List<String> fallbackFonts = [
-       'Apple Color Emoji',
-       'Noto Color Emoji',
        'Amiri',
        'Cairo',
-       '.AppleSystemUIFont',
-       'sans-serif',
      ];
      ```
-   * تعيين `fontFamilyFallback: fallbackFonts` لكل أنماط النصوص الـ 15 في `createTextTheme` (`displayLarge` إلى `labelSmall`).
-   * توفير مساعدات `uiStyle` و `decorativeStyle` مع الـ fallback.
-2. **تحديث `AppTheme` (`lib/core/design/app_theme.dart`)**:
+   * تعيين `fontFamilyFallback: fallbackFonts` لكل أنماط النصوص الـ 15 في `createTextTheme` (`displayLarge` إلى `labelSmall`) لضمان ظهور الرموز (`ﷺ`, `ﷻ`, `﷽`, `۞`, `۩`, `۝`) بشكل طبيعي دون التأثير على معالجة النظام للإيموجي.
+2. **عزل نصوص المصحف الشريف (`mushaf_line_widget.dart`)**:
+   * عزل خطوط مجمع الملك فهد (QPC V2) عزلاً كاملاً عن وراثة خطوط الـ Theme بضبط `inherit: false` و `fontFamilyFallback: const []` لمنع تداخل أي خط بديل مع مسافات وأرقام الآيات.
+   * ضبط خط ترويسة السورة لعلامتي `۞` ليكون `Amiri` مباشرة حيث يحتوي على رسم المحرف الأصلي.
+3. **تحديث `AppTheme` (`lib/core/design/app_theme.dart`)**:
    * إضافة `fontFamilyFallback: AppTypography.fallbackFonts` للسمتين الفاتحة (Light) والداكنة (Dark).
-3. **تحديث `LockScreenBannerService` (`lib/core/service/settings/lock_screen_banner_service.dart`)**:
+4. **تحديث `LockScreenBannerService` (`lib/core/service/settings/lock_screen_banner_service.dart`)**:
    * تحديث دالة الرسم على الـ Canvas `_drawNotificationBanner` لتعيين `bannerStyle` محتوياً على `fontFamilyFallback: AppTypography.fallbackFonts` لكافة النصوص وعناصر الورد والأذكار والأيقونات المرسومة بالـ `TextPainter`.
-4. **تأكيد الاختبارات**:
-   * كتابة اختبارات آلية شاملة في `test/core/design/app_typography_test.dart` تتأكد من سلامة السلسلة ورسم الإيموجي والرموز الدينية بنجاح 100% دون أي أخطاء.
+5. **تأكيد الاختبارات والمحاكي**:
+   * كتابة اختبارات آلية شاملة في `test/core/design/app_typography_test.dart` بنجاح 212/212 اختباراً.
+   * التحقق البصري بالتقاط لقطات شاشة لصفحات المصحف (1 و 3 و 6) والتأكد من اختفاء علامات الاستفهام تماماً بنسبة 100%.
 
