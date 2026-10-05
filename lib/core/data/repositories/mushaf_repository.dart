@@ -13,10 +13,14 @@ class MushafRepository {
 
   Future<Database> get _db => _appDatabase.database;
 
+  static final Map<int, MushafPage> _pageMemoryCache = {};
+
   /// Retrieves the 15 lines of [pageNumber] with their words and glyphs,
   /// as well as the active Surah name and Juz number for the page header.
   Future<MushafPage> getPage(int pageNumber) async {
     assert(pageNumber >= 1 && pageNumber <= 604, 'Page must be between 1 and 604');
+    final cached = _pageMemoryCache[pageNumber];
+    if (cached != null) return cached;
     final db = await _db;
 
     // Fetch lines for this page ordered by line_number ASC
@@ -27,12 +31,13 @@ class MushafRepository {
       orderBy: 'line_number ASC',
     );
 
-    // Fetch all words for this page ordered by line_number ASC, word_index ASC
+    // Fetch all words for this page ordered by line_number ASC, id ASC
+    // Note: id reflects the exact sequential reading order in the Quran text.
     final wordRows = await db.query(
       'mushaf_words',
       where: 'page_number = ?',
       whereArgs: [pageNumber],
-      orderBy: 'line_number ASC, word_index ASC',
+      orderBy: 'line_number ASC, id ASC',
     );
 
     final wordsByLine = <int, List<MushafWord>>{};
@@ -87,13 +92,15 @@ class MushafRepository {
       juzNumber = juzRows.first['juz_number'] as int;
     }
 
-    return MushafPage(
+    final page = MushafPage(
       pageNumber: pageNumber,
       lines: lines,
       surahNumber: detectedSurah ?? 1,
       surahNameAr: surahName,
       juzNumber: juzNumber,
     );
+    _pageMemoryCache[pageNumber] = page;
+    return page;
   }
 
   /// Returns the page number where a given [surahNumber] and [ayahNumber] is located.

@@ -7,7 +7,9 @@ import 'package:quran_app_android/core/data/repositories/user_repository.dart';
 import 'package:quran_app_android/core/native/native_adhan_bridge.dart';
 import 'package:quran_app_android/core/native/native_azkar_bridge.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
+import 'package:quran_app_android/core/service/settings/lock_screen_banner_service.dart';
 import 'package:quran_app_android/core/service/settings/notifications_services.dart';
+import 'package:quran_app_android/core/services/widget_sync_service.dart';
 import 'package:quran_app_android/core/util/assets.dart';
 import 'package:quran_app_android/core/util/constant/static_vars.dart';
 import 'package:quran_app_android/core/util/routes/routes.dart';
@@ -34,11 +36,17 @@ class HomeViewModel extends GetxController {
   String dataKey = 'currentZekr';
 
   Future<void> _init() async {
-    await getLastRead();
-    await loadUserQuranData();
-    await _setupHomeWidget();
-    await NativeAzkarBridge.scheduleDailyAzkar(2);
-    await NativeAdhanBridge.scheduleDailyReset();
+    await Future.wait([
+      getLastRead(),
+      loadUserQuranData(),
+    ]);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _setupHomeWidget();
+      NativeAzkarBridge.scheduleDailyAzkar(2);
+      NativeAdhanBridge.scheduleDailyReset();
+      _userRepo.syncNativePrayedLogs().catchError((_) => 0);
+      LockScreenBannerService.instance.updateBanner().catchError((_) {});
+    });
   }
 
   Future<void> getLastRead() async {
@@ -68,6 +76,18 @@ class HomeViewModel extends GetxController {
         await NotifyHelper().scheduleDailyWirdNotification();
       }
 
+      if (plan != null) {
+        unawaited(WidgetSyncService.syncWirdProgress(
+          streak: plan.streak,
+          targetPages: plan.target,
+          completedPages: todayPagesRead.value,
+          lastPage: lastReadPage.value ?? 1,
+          planTitle: plan.type == WirdType.pagesPerDay
+              ? 'الورد اليومي'
+              : (plan.type == WirdType.khatmaInDays ? 'ختمة القرآن' : 'ورد الأجزاء'),
+        ));
+      }
+
       await getLastRead();
       update();
     } catch (e) {
@@ -80,6 +100,9 @@ class HomeViewModel extends GetxController {
     if (updated != null) {
       currentWirdPlan.value = updated;
       await NotifyHelper().cancelWirdNotifications();
+      try {
+        await LockScreenBannerService.instance.updateBanner();
+      } catch (_) {}
       update();
     }
   }
@@ -92,6 +115,9 @@ class HomeViewModel extends GetxController {
     } else {
       await NotifyHelper().cancelWirdNotifications();
     }
+    try {
+      await LockScreenBannerService.instance.updateBanner();
+    } catch (_) {}
     update();
   }
 

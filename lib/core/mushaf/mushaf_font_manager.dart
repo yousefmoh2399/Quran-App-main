@@ -36,14 +36,17 @@ class MushafFontManager {
     }
   }
 
-  /// Preload nearby pages around [currentPage] (e.g. current - 1, current + 1)
+  /// Preload nearby pages around [currentPage] (current +-1 to +-4)
   /// in the background without blocking the UI thread.
   void preloadSurroundingPages(int currentPage) {
-    if (currentPage > 1) {
-      ensurePageLoaded(currentPage - 1).catchError((_) {});
-    }
-    if (currentPage < 604) {
-      ensurePageLoaded(currentPage + 1).catchError((_) {});
+    final targets = <int>[
+      for (int i = 1; i <= 4; i++) ...[
+        if (currentPage - i >= 1) currentPage - i,
+        if (currentPage + i <= 604) currentPage + i,
+      ],
+    ];
+    for (final page in targets) {
+      ensurePageLoaded(page).catchError((_) {});
     }
   }
 

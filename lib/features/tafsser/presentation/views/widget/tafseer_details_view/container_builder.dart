@@ -1,4 +1,4 @@
-﻿// ignore_for_file: prefer_typing_uninitialized_variables
+// ignore_for_file: prefer_typing_uninitialized_variables
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
@@ -9,6 +9,7 @@ import 'package:quran_app_android/features/tafsser/presentation/view_model/tafse
 import 'package:quran_app_android/features/tafsser/presentation/views/widget/tafseer_details_view/inkwell_book_mark_builder.dart';
 
 import 'package:share_plus/share_plus.dart';
+import 'package:quran_app_android/core/util/share_helper.dart';
 
 class ContainerBuilderTafseerView extends GetWidget<TafseerDetailsViewModel> {
   const ContainerBuilderTafseerView({
@@ -61,18 +62,19 @@ class ContainerBuilderTafseerView extends GetWidget<TafseerDetailsViewModel> {
           const Spacer(),
           Container(),
           const SizedBox(width: 10.0),
-          GestureDetector(
-            onTap: () async {
-              await Share.share(
-                model.text.toString().replaceFirst(':', ''),
-                sharePositionOrigin:
-                    Rect.fromPoints(const Offset(2, 2), const Offset(3, 3)),
-              );
-            },
-            child: const Icon(
-              Icons.share,
-              size: 20.0,
-              color: AppColors.kPrimaryColor,
+          Builder(
+            builder: (btnContext) => GestureDetector(
+              onTap: () async {
+                await Share.share(
+                  model.text.toString().replaceFirst(':', ''),
+                  sharePositionOrigin: getSharePositionOrigin(btnContext),
+                );
+              },
+              child: const Icon(
+                Icons.share,
+                size: 20.0,
+                color: AppColors.kPrimaryColor,
+              ),
             ),
           ),
           const SizedBox(width: 10.0),

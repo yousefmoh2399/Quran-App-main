@@ -11,7 +11,10 @@ import '../../../../core/mushaf/mushaf_font_manager.dart';
 import '../../../../core/mushaf/mushaf_raster_cache.dart';
 import '../../../../core/service/settings/SettingsServices.dart';
 import '../../../home/presentation/view_model/home_view_model.dart';
+import 'package:quran_app_android/features/reminders/data/commute_wird_repository.dart';
+import '../../../../core/services/app_haptics_service.dart';
 import '../models/mushaf_theme_model.dart';
+import '../widgets/mushaf_paper_flip_view.dart';
 
 /// Central controller for the 604-page Madinah Mushaf experience.
 class MushafController extends GetxController {
@@ -32,6 +35,7 @@ class MushafController extends GetxController {
   final RxnInt selectedSurah = RxnInt();
   final RxnInt selectedAyah = RxnInt();
   final Rxn<AyahEntity> selectedAyahEntity = Rxn<AyahEntity>();
+  final Rx<BookmarkColor> selectedAyahColor = BookmarkColor.gold.obs;
 
   // Bookmarks & Memorization Maps
   final RxSet<int> bookmarkedPages = <int>{}.obs;
@@ -39,6 +43,22 @@ class MushafController extends GetxController {
   final RxMap<int, MemorizedItem> pageMemorizedMap = <int, MemorizedItem>{}.obs;
   final RxMap<String, BookmarkItem> ayahBookmarksMap = <String, BookmarkItem>{}.obs;
   final RxMap<String, MemorizedItem> ayahMemorizedMap = <String, MemorizedItem>{}.obs;
+  final RxInt userMarksVersion = 0.obs;
+
+  // Commute Mode Observables
+  final RxBool isCommuteMode = false.obs;
+  final RxDouble commuteZoomScale = 1.12.obs;
+  final RxBool commuteHighContrast = false.obs;
+  final RxBool commuteKeepScreenOn = true.obs;
+  final RxInt commuteTargetPages = 3.obs;
+  final RxInt commuteStartPage = 1.obs;
+  final RxInt commutePagesRead = 1.obs;
+  final RxString commuteSlotId = 'commute'.obs;
+  final RxBool commuteCountTowardsMain = true.obs;
+  final RxBool isCommuteCompleted = false.obs;
+
+  // Debounced last read timer (2 seconds after page settles)
+  Timer? _lastReadDebounce;
 
   // Reading dwell timer (5 seconds dwell triggers reading log)
   Timer? _dwellTimer;
@@ -46,8 +66,11 @@ class MushafController extends GetxController {
   // In-memory Pages Cache
   final Map<int, MushafPage> pagesCache = {};
 
-  // PageController for PageView
+  // PageController for PageView / DualView
   late PageController pageController;
+
+  // Paper flip view state handle for realistic page turning
+  MushafPaperFlipViewState? paperFlipState;
 
   static const String _prefLastPage = 'mushaf_last_page';
   static const String _prefThemeMode = 'mushaf_theme_mode';
@@ -69,11 +92,25 @@ class MushafController extends GetxController {
     });
 
     _startDwellTimer(initialPage);
+
+    // If an exact ayah was requested in arguments, select it after layout
+    final args = Get.arguments;
+    if (args is Map<String, dynamic>) {
+      final s = args['surah'] as int?;
+      final a = args['ayah'] as int?;
+      if (s != null && a != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          selectAyah(s, a);
+        });
+      }
+    }
   }
 
   @override
   void onClose() {
     _dwellTimer?.cancel();
+    _lastReadDebounce?.cancel();
+    _saveLastRead(currentPage.value);
     MushafRasterCache.instance.clear();
     pageController.dispose();
     super.dispose();
@@ -96,6 +133,23 @@ class MushafController extends GetxController {
     // 1. Check Get.arguments
     final args = Get.arguments;
     if (args is Map<String, dynamic>) {
+      if (args['commute_mode'] == true) {
+        isCommuteMode.value = true;
+        if (args.containsKey('target_pages')) {
+          commuteTargetPages.value = (args['target_pages'] as num).toInt();
+        }
+        if (args.containsKey('slot_id')) {
+          commuteSlotId.value = args['slot_id']?.toString() ?? 'commute';
+        }
+        if (args.containsKey('count_towards_main')) {
+          commuteCountTowardsMain.value = args['count_towards_main'] as bool? ?? true;
+        }
+        if (args.containsKey('page')) {
+          final p = (args['page'] as num).toInt().clamp(1, 604);
+          commuteStartPage.value = p;
+          return p;
+        }
+      }
       if (args.containsKey('pageNumber')) {
         return (args['pageNumber'] as int).clamp(1, 604);
       }
@@ -137,17 +191,17 @@ class MushafController extends GetxController {
 
   void _preloadAdjacentPages(int pageNumber) {
     final targets = <int>[];
-    if (pageNumber > 1) targets.add(pageNumber - 1);
-    if (pageNumber < 604) targets.add(pageNumber + 1);
-    if (pageNumber > 2) targets.add(pageNumber - 2);
-    if (pageNumber < 603) targets.add(pageNumber + 2);
+    for (int i = 1; i <= 4; i++) {
+      if (pageNumber - i >= 1) targets.add(pageNumber - i);
+      if (pageNumber + i <= 604) targets.add(pageNumber + i);
+    }
 
     for (final target in targets) {
       _loadPage(target);
     }
 
-    // Queue adjacent pages that need rasterization
-    final needingRaster = targets.take(2).where(
+    // Queue adjacent pages that need offscreen rasterization
+    final needingRaster = targets.where(
       (p) => !MushafRasterCache.instance.has(p, currentTheme.value),
     ).toList();
     pagesToPreload.assignAll(needingRaster);
@@ -160,6 +214,14 @@ class MushafController extends GetxController {
 
     final page = pagesCache[pageNumber];
     await prefs.setInt(_prefLastPage, pageNumber);
+
+    // Track active Wird position if reading within active plan range
+    try {
+      final wirdPlan = await _userRepo.getWirdPlan();
+      if (wirdPlan != null && wirdPlan.enabled && pageNumber >= wirdPlan.startPage && pageNumber <= wirdPlan.endPage) {
+        await prefs.setInt('wird_last_page', pageNumber);
+      }
+    } catch (_) {}
 
     if (page != null) {
       await prefs.setInt('mushaf_last_surah', page.surahNumber);
@@ -184,9 +246,14 @@ class MushafController extends GetxController {
 
     currentPage.value = clamped;
     clearAyahSelection();
-    _saveLastRead(clamped);
-    _startDwellTimer(clamped);
 
+    // 2-second debounce before persisting last read position
+    _lastReadDebounce?.cancel();
+    _lastReadDebounce = Timer(const Duration(seconds: 2), () {
+      _saveLastRead(clamped);
+    });
+
+    _startDwellTimer(clamped);
     _preloadAdjacentPages(clamped);
   }
 
@@ -227,6 +294,8 @@ class MushafController extends GetxController {
           ayahMemorizedMap['${m.surah}:${m.ayah}'] = m;
         }
       }
+      userMarksVersion.value++;
+      update();
     } catch (e) {
       debugPrint('Error loading user data in mushaf controller: $e');
     }
@@ -277,6 +346,7 @@ class MushafController extends GetxController {
       bookmarkedPages.add(pageNumber);
     }
     MushafRasterCache.instance.removePage(pageNumber);
+    userMarksVersion.value++;
     update();
   }
 
@@ -298,6 +368,7 @@ class MushafController extends GetxController {
     pageBookmarksMap[pageNumber] = item.copyWith(id: id);
     bookmarkedPages.add(pageNumber);
     MushafRasterCache.instance.removePage(pageNumber);
+    userMarksVersion.value++;
     update();
   }
 
@@ -311,6 +382,7 @@ class MushafController extends GetxController {
     pageBookmarksMap.remove(pageNumber);
     bookmarkedPages.remove(pageNumber);
     MushafRasterCache.instance.removePage(pageNumber);
+    userMarksVersion.value++;
     update();
   }
 
@@ -328,6 +400,7 @@ class MushafController extends GetxController {
       pageMemorizedMap[pageNumber] = item.copyWith(id: id);
     }
     MushafRasterCache.instance.removePage(pageNumber);
+    userMarksVersion.value++;
     update();
   }
 
@@ -348,7 +421,9 @@ class MushafController extends GetxController {
     );
     final id = await _userRepo.addBookmark(item);
     ayahBookmarksMap['$surah:$ayah'] = item.copyWith(id: id);
+    selectedAyahColor.value = color;
     MushafRasterCache.instance.removePage(page);
+    userMarksVersion.value++;
     update();
   }
 
@@ -356,6 +431,7 @@ class MushafController extends GetxController {
     await _userRepo.deleteBookmarkByAyah(surah, ayah);
     ayahBookmarksMap.remove('$surah:$ayah');
     MushafRasterCache.instance.removePage(page);
+    userMarksVersion.value++;
     update();
   }
 
@@ -380,6 +456,7 @@ class MushafController extends GetxController {
       ayahMemorizedMap['$surah:$ayah'] = item.copyWith(id: id);
     }
     MushafRasterCache.instance.removePage(page);
+    userMarksVersion.value++;
     update();
   }
 
@@ -391,6 +468,13 @@ class MushafController extends GetxController {
   Future<void> selectAyah(int surahNumber, int ayahNumber) async {
     selectedSurah.value = surahNumber;
     selectedAyah.value = ayahNumber;
+
+    final existing = getAyahBookmark(surahNumber, ayahNumber);
+    if (existing != null) {
+      selectedAyahColor.value = existing.color;
+    } else {
+      selectedAyahColor.value = BookmarkColor.gold;
+    }
 
     try {
       final ayah = await _quranRepo.getAyah(surahNumber, ayahNumber);
@@ -420,8 +504,20 @@ class MushafController extends GetxController {
   }
 
   /// Navigates to a specific page.
-  void goToPage(int pageNumber) {
+  void goToPage(int pageNumber, {bool animate = true}) {
     final clamped = pageNumber.clamp(1, 604);
+    if (clamped == currentPage.value) return;
+
+    if (animate && paperFlipState != null) {
+      if (clamped == currentPage.value + 1) {
+        paperFlipState?.turnNext();
+        return;
+      } else if (clamped == currentPage.value - 1) {
+        paperFlipState?.turnPrevious();
+        return;
+      }
+    }
+
     currentPage.value = clamped;
     if (pageController.hasClients) {
       pageController.jumpToPage(clamped - 1);
@@ -446,5 +542,115 @@ class MushafController extends GetxController {
     final page = await _mushafRepo.getPageOfAyah(surahNumber, ayahNumber) ?? 1;
     goToPage(page);
     await selectAyah(surahNumber, ayahNumber);
+  }
+
+  // Commute Mode Handlers
+  void toggleCommuteZoom() {
+    if (commuteZoomScale.value < 1.1) {
+      commuteZoomScale.value = 1.15;
+    } else if (commuteZoomScale.value < 1.2) {
+      commuteZoomScale.value = 1.25;
+    } else {
+      commuteZoomScale.value = 1.0;
+    }
+  }
+
+  void toggleCommuteContrast() {
+    commuteHighContrast.value = !commuteHighContrast.value;
+    if (commuteHighContrast.value) {
+      setThemeMode(MushafThemeMode.dark);
+    } else {
+      setThemeMode(MushafThemeMode.light);
+    }
+  }
+
+  void nextCommutePage() {
+    if (currentPage.value < 604) {
+      goToPage(currentPage.value + 1);
+    }
+  }
+
+  void prevCommutePage() {
+    if (currentPage.value > 1) {
+      goToPage(currentPage.value - 1);
+    }
+  }
+
+  Future<void> completeCommuteWird() async {
+    try {
+      final repo = CommuteWirdRepository();
+      final count = (currentPage.value - commuteStartPage.value).abs() + 1;
+      await repo.recordProgress(
+        pagesRead: count,
+        toPage: currentPage.value,
+        slotId: commuteSlotId.value,
+        countTowardsMain: commuteCountTowardsMain.value,
+      );
+      isCommuteCompleted.value = true;
+      AppHaptics.cycleCompleted();
+
+      Get.dialog(
+        AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Row(
+            children: const [
+              Text('🎉 '),
+              Text('تقبل الله طاعتكم!', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'تم تسجيل إتمام ورد المواصلات بنجاح ($count صفحات).',
+                style: const TextStyle(fontSize: 15),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1B4D3E).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: const [
+                    Icon(Icons.check_circle_rounded, color: Color(0xFF1B4D3E)),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'تم تحديث سجل قراءتك وإلغاء تذكير هذا الوقت لهذا اليوم 🌿',
+                        style: TextStyle(fontSize: 13, color: Color(0xFF1B4D3E), fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              child: const Text('متابعة القراءة', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1B4D3E),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              onPressed: () {
+                Get.back();
+                Get.back();
+              },
+              child: const Text('العودة للرئيسية'),
+            ),
+          ],
+        ),
+        barrierDismissible: true,
+      );
+    } catch (e) {
+      debugPrint('Error completing commute wird: $e');
+    }
   }
 }

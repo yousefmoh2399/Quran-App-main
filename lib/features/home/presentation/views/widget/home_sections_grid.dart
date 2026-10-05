@@ -78,6 +78,24 @@ class HomeSectionsGrid extends StatelessWidget {
       icon: Icons.bookmark_added_rounded,
       route: AppRoutes.bookmarks,
     ),
+    _SectionItem(
+      title: 'سجل الصلوات',
+      subtitle: 'تسجيل وقضاء',
+      icon: Icons.fact_check_rounded,
+      route: AppRoutes.prayerTracker,
+    ),
+    _SectionItem(
+      title: 'التقويم الهجري',
+      subtitle: 'مناسبات وصيام',
+      icon: Icons.calendar_month_rounded,
+      route: AppRoutes.islamicCalendar,
+    ),
+    _SectionItem(
+      title: 'إنجازاتي',
+      subtitle: 'شارات وأوسمة',
+      icon: Icons.military_tech_rounded,
+      route: AppRoutes.achievements,
+    ),
   ];
 
   @override

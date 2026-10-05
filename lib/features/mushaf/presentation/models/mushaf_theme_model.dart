@@ -51,6 +51,8 @@ class MushafThemeConfig {
     required this.spineShadow,
   });
 
+  bool get isDark => mode == MushafThemeMode.dark || mode == MushafThemeMode.readingNight;
+
   /// Authentic Light Parchment Theme
   static const light = MushafThemeConfig(
     mode: MushafThemeMode.light,

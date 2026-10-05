@@ -5,40 +5,139 @@ import android.util.Log
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
-import org.json.JSONObject
 
 object NativeAdhanBridge : MethodChannel.MethodCallHandler {
+
+    private const val CHANNEL_NAME = "native_adhan_bridge"
+    private const val TAG = "NativeAdhanBridge"
 
     private var channel: MethodChannel? = null
     private var appContext: Context? = null
 
     fun register(engine: FlutterEngine, context: Context) {
-        channel = MethodChannel(engine.dartExecutor.binaryMessenger, "native_adhan_bridge")
+        channel = MethodChannel(engine.dartExecutor.binaryMessenger, CHANNEL_NAME)
         channel?.setMethodCallHandler(this)
         appContext = context.applicationContext
-        Log.i("NativeAdhanBridge", "Registered native_adhan_bridge channel")
+        Log.i(TAG, "Registered native_adhan_bridge MethodChannel successfully")
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
+        val context = appContext ?: return result.error("NO_CONTEXT", "Application context is null", null)
+
         when (call.method) {
-            "schedulePrayerTimes" -> {
-                val context = appContext ?: return result.error("no_context", "Context not available", null)
-                val args = call.arguments
-                val asMap: Map<String, Any?>? = args as? Map<String, Any?>
-                if (asMap == null) return result.error("invalid_args", "Expected Map<String, int/long>", null)
-                val timesMap = asMap.mapValues { (_, v) ->
-                    when (v) {
-                        is Long -> v
-                        is Int -> v.toLong()
-                        is Number -> v.toLong()
-                        is String -> v.toLongOrNull() ?: 0L
-                        else -> 0L
-                    }
+            "saveSettings" -> {
+                val args = call.arguments as? Map<String, Any?>
+                if (args == null) {
+                    return result.error("INVALID_ARGS", "Expected Map<String, Any?>", null)
                 }
 
-                Log.i("NativeAdhanBridge", "Scheduling ${timesMap.size} prayer alarms from Flutter")
-                PrayerScheduler.scheduleAll(context, prayerTimes = timesMap)
-                saveLastPrayerTimes(context, timesMap)
+                try {
+                    val settings = AdhanSettings(
+                        latitude = (args["latitude"] as? Number)?.toDouble() ?: 0.0,
+                        longitude = (args["longitude"] as? Number)?.toDouble() ?: 0.0,
+                        cityName = (args["cityName"] as? String) ?: "",
+                        calculationMethod = (args["calculationMethod"] as? String) ?: "EGYPTIAN",
+                        madhab = (args["madhab"] as? String) ?: "SHAFI",
+                        highLatitudeRule = (args["highLatitudeRule"] as? String) ?: "MIDDLE_OF_THE_NIGHT",
+                        timeZoneId = (args["timeZoneId"] as? String) ?: "",
+                        fajrOffset = (args["fajrOffset"] as? Number)?.toInt() ?: 0,
+                        sunriseOffset = (args["sunriseOffset"] as? Number)?.toInt() ?: 0,
+                        dhuhrOffset = (args["dhuhrOffset"] as? Number)?.toInt() ?: 0,
+                        asrOffset = (args["asrOffset"] as? Number)?.toInt() ?: 0,
+                        maghribOffset = (args["maghribOffset"] as? Number)?.toInt() ?: 0,
+                        ishaOffset = (args["ishaOffset"] as? Number)?.toInt() ?: 0,
+                        fajrEnabled = (args["fajrEnabled"] as? Boolean) ?: true,
+                        dhuhrEnabled = (args["dhuhrEnabled"] as? Boolean) ?: true,
+                        asrEnabled = (args["asrEnabled"] as? Boolean) ?: true,
+                        maghribEnabled = (args["maghribEnabled"] as? Boolean) ?: true,
+                        ishaEnabled = (args["ishaEnabled"] as? Boolean) ?: true,
+                        fajrMode = (args["fajrMode"] as? String) ?: "adhan",
+                        dhuhrMode = (args["dhuhrMode"] as? String) ?: "adhan",
+                        asrMode = (args["asrMode"] as? String) ?: "adhan",
+                        maghribMode = (args["maghribMode"] as? String) ?: "adhan",
+                        ishaMode = (args["ishaMode"] as? String) ?: "adhan",
+                        adhanSound = (args["adhanSound"] as? String) ?: "default",
+                        playPostAdhanDua = (args["playPostAdhanDua"] as? Boolean) ?: true
+                    )
+
+                    NativePrayerManager.saveSettings(context, settings)
+                    val scheduledCount = PrayerScheduler.scheduleRollingWindow(context)
+                    result.success(mapOf("scheduledCount" to scheduledCount, "success" to true))
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error in saveSettings: ${e.message}", e)
+                    result.error("SAVE_SETTINGS_ERROR", e.message, null)
+                }
+            }
+
+            "getSettings" -> {
+                try {
+                    val settings = NativePrayerManager.getSettings(context)
+                    result.success(
+                        mapOf(
+                            "latitude" to settings.latitude,
+                            "longitude" to settings.longitude,
+                            "cityName" to settings.cityName,
+                            "calculationMethod" to settings.calculationMethod,
+                            "madhab" to settings.madhab,
+                            "highLatitudeRule" to settings.highLatitudeRule,
+                            "timeZoneId" to settings.timeZoneId,
+                            "fajrOffset" to settings.fajrOffset,
+                            "sunriseOffset" to settings.sunriseOffset,
+                            "dhuhrOffset" to settings.dhuhrOffset,
+                            "asrOffset" to settings.asrOffset,
+                            "maghribOffset" to settings.maghribOffset,
+                            "ishaOffset" to settings.ishaOffset,
+                            "fajrEnabled" to settings.fajrEnabled,
+                            "dhuhrEnabled" to settings.dhuhrEnabled,
+                            "asrEnabled" to settings.asrEnabled,
+                            "maghribEnabled" to settings.maghribEnabled,
+                            "ishaEnabled" to settings.ishaEnabled,
+                            "fajrMode" to settings.fajrMode,
+                            "dhuhrMode" to settings.dhuhrMode,
+                            "asrMode" to settings.asrMode,
+                            "maghribMode" to settings.maghribMode,
+                            "ishaMode" to settings.ishaMode,
+                            "adhanSound" to settings.adhanSound,
+                            "playPostAdhanDua" to settings.playPostAdhanDua
+                        )
+                    )
+                } catch (e: Exception) {
+                    result.error("GET_SETTINGS_ERROR", e.message, null)
+                }
+            }
+
+            "getUpcomingPrayers" -> {
+                try {
+                    val prayers = PrayerScheduler.getUpcomingPrayersList(context)
+                    result.success(prayers)
+                } catch (e: Exception) {
+                    result.error("GET_UPCOMING_ERROR", e.message, null)
+                }
+            }
+
+            "scheduleTestAdhan" -> {
+                val delaySeconds = (call.argument<Number>("delaySeconds"))?.toInt() ?: 10
+                val prayerName = (call.argument<String>("prayerName")) ?: "الفجر"
+                PrayerScheduler.scheduleTestAdhan(context, delaySeconds, prayerName)
+                result.success(true)
+            }
+
+            "recalculateAndSchedule" -> {
+                try {
+                    val count = PrayerScheduler.scheduleRollingWindow(context)
+                    result.success(count)
+                } catch (e: Exception) {
+                    result.error("SCHEDULE_ERROR", e.message, null)
+                }
+            }
+
+            "hasLocation" -> {
+                result.success(NativePrayerManager.hasValidLocation(context))
+            }
+
+            // Legacy compatibility
+            "schedulePrayerTimes", "scheduleDailyReset" -> {
+                val count = PrayerScheduler.scheduleRollingWindow(context)
                 result.success(true)
             }
 
@@ -46,62 +145,84 @@ object NativeAdhanBridge : MethodChannel.MethodCallHandler {
                 val args = call.arguments as? Map<String, Double>
                 val lat = args?.get("lat") ?: 0.0
                 val lng = args?.get("lng") ?: 0.0
-                saveLocation(appContext, lat, lng)
+                val current = NativePrayerManager.getSettings(context)
+                NativePrayerManager.saveSettings(context, current.copy(latitude = lat, longitude = lng))
+                PrayerScheduler.scheduleRollingWindow(context)
                 result.success(true)
             }
 
-            "scheduleDailyReset" -> {
-                val context = appContext ?: return result.error("no_context", "Context not available", null)
-                Log.i("NativeAdhanBridge", "scheduleDailyReset invoked from Flutter")
-                PrayerScheduler.scheduleDailyReset(context)
-                result.success("Daily reset scheduled")
+            "getPendingPrayedLogs" -> {
+                try {
+                    val prefs = context.getSharedPreferences("prayer_logs", Context.MODE_PRIVATE)
+                    val allEntries = prefs.all
+                    val list = mutableListOf<Map<String, Any>>()
+                    for ((k, v) in allEntries) {
+                        if (v == true && k.contains("_") && !k.endsWith("_timestamp")) {
+                            val parts = k.split("_")
+                            if (parts.size >= 2) {
+                                val date = parts[0]
+                                val prayer = parts[1]
+                                list.add(mapOf(
+                                    "key" to k,
+                                    "date" to date,
+                                    "prayer" to prayer,
+                                    "status" to "on_time"
+                                ))
+                            }
+                        }
+                    }
+                    result.success(list)
+                } catch (e: Exception) {
+                    result.error("GET_LOGS_ERROR", e.message, null)
+                }
             }
 
-            // Debug-only helper: schedule AdhanResetReceiver after 60s
-            "scheduleTestReset" -> {
-                val context = appContext ?: return result.error("no_context", "Context not available", null)
-                PrayerScheduler.scheduleTestReset(context, 60)
-                result.success(true)
+            "clearPendingPrayedLogs" -> {
+                try {
+                    val keys = call.arguments as? List<String>
+                    val prefs = context.getSharedPreferences("prayer_logs", Context.MODE_PRIVATE)
+                    val editor = prefs.edit()
+                    if (keys != null) {
+                        for (k in keys) {
+                            editor.remove(k)
+                            editor.remove("${k}_timestamp")
+                        }
+                    } else {
+                        editor.clear()
+                    }
+                    editor.apply()
+                    result.success(true)
+                } catch (e: Exception) {
+                    result.error("CLEAR_LOGS_ERROR", e.message, null)
+                }
+            }
+
+            "markPrayerAsPrayed" -> {
+                try {
+                    val prayerKey = call.argument<String>("prayerKey") ?: "fajr"
+                    val today = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date())
+                    val prefs = context.getSharedPreferences("prayer_logs", Context.MODE_PRIVATE)
+                    val key = "${today}_${prayerKey}"
+                    prefs.edit().putBoolean(key, true).putLong("${key}_timestamp", System.currentTimeMillis()).apply()
+                    result.success(true)
+                } catch (e: Exception) {
+                    result.error("MARK_PRAYER_ERROR", e.message, null)
+                }
+            }
+
+            "stopAdhan" -> {
+                try {
+                    val stopIntent = android.content.Intent(context, AdhanService::class.java).apply {
+                        action = AdhanService.ACTION_STOP_ADHAN
+                    }
+                    context.startService(stopIntent)
+                    result.success(true)
+                } catch (e: Exception) {
+                    result.error("STOP_ADHAN_ERROR", e.message, null)
+                }
             }
 
             else -> result.notImplemented()
-        }
-    }
-
-    private fun saveLocation(context: Context?, lat: Double, lng: Double) {
-        if (context == null) return
-        val prefs = context.getSharedPreferences("location_prefs", Context.MODE_PRIVATE)
-        prefs.edit().apply {
-            putFloat("lat", lat.toFloat())
-            putFloat("lng", lng.toFloat())
-            apply()
-        }
-        Log.i("NativeAdhanBridge", "Saved location lat=$lat, lng=$lng")
-    }
-
-    private fun saveLastPrayerTimes(context: Context, map: Map<String, Long>) {
-        val json = JSONObject(map)
-        val prefs = context.getSharedPreferences("prayer_prefs", Context.MODE_PRIVATE)
-        prefs.edit().putString("last_prayer_times", json.toString()).apply()
-        Log.i("NativeAdhanBridge", "Persisted last_prayer_times (${map.size} items)")
-    }
-
-    // Used by native side on boot/time change
-    fun reschedule(context: Context, lat: Double, lng: Double) {
-        try {
-            val prefs = context.getSharedPreferences("prayer_prefs", Context.MODE_PRIVATE)
-            val jsonString = prefs.getString("last_prayer_times", null)
-            if (jsonString != null) {
-                val json = JSONObject(jsonString)
-                val map = mutableMapOf<String, Long>()
-                json.keys().forEach { map[it] = json.getLong(it) }
-                PrayerScheduler.scheduleAll(context, map)
-                Log.i("NativeAdhanBridge", "Rescheduled ${map.size} prayers with saved times")
-            } else {
-                Log.w("NativeAdhanBridge", "No saved last_prayer_times; cannot reschedule")
-            }
-        } catch (e: Exception) {
-            Log.e("NativeAdhanBridge", "Reschedule error: ${e.message}")
         }
     }
 }

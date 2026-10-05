@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root_small"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg_emerald"
+    android:padding="12dp">
+
+    <!-- Header Row -->
+    <LinearLayout
+        android:id="@+id/small_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/small_widget_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="ذكر وتذكير 📿"
+            android:textColor="#5CDBB5"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:gravity="right" />
+
+        <ImageView
+            android:id="@+id/small_btn_next"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:padding="3dp"
+            android:background="@drawable/widget_badge_bg"
+            android:src="@android:drawable/ic_menu_rotate"
+            android:tint="#FFFFFF"
+            android:contentDescription="ذكر آخر" />
+    </LinearLayout>
+
+    <!-- Dhikr Text -->
+    <TextView
+        android:id="@+id/small_widget_text"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/small_header"
+        android:layout_above="@+id/small_widget_source"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="2dp"
+        android:gravity="center"
+        android:text="سُبْحَانَ اللهِ وَبِحَمْدِهِ ، سُبْحَانَ اللهِ الْعَظِيمِ"
+        android:textColor="#FFFFFF"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:fontFamily="@font/amiri_regular"
+        android:maxLines="4"
+        android:ellipsize="end" />
+
+    <!-- Source / Reference -->
+    <TextView
+        android:id="@+id/small_widget_source"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="صحيح البخاري"
+        android:textColor="#8CAFA0"
+        android:textSize="9sp"
+        android:gravity="center"
+        android:singleLine="true"
+        android:ellipsize="end" />
+
+</RelativeLayout>

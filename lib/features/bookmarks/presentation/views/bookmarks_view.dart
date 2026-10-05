@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_radius.dart';
 import '../../../../core/design/app_typography.dart';
+import '../../../../core/design/responsive.dart';
 import '../controllers/bookmarks_controller.dart';
 import '../widgets/bookmarks_tab.dart';
+import '../widgets/hadith_bookmarks_tab.dart';
 import '../widgets/memorized_tab.dart';
 import '../widgets/reading_log_tab.dart';
 
@@ -42,6 +45,7 @@ class BookmarksView extends StatelessWidget {
               border: Border.all(color: colors.divider),
             ),
             child: TabBar(
+              onTap: (_) => HapticFeedback.selectionClick(),
               controller: controller.tabController,
               labelPadding: const EdgeInsets.symmetric(horizontal: 2.0),
               indicator: BoxDecoration(
@@ -99,7 +103,21 @@ class BookmarksView extends StatelessWidget {
                       children: [
                         Icon(Icons.history_edu_rounded, size: 15.0),
                         SizedBox(width: 4.0),
-                        Text('سجل القراءة'),
+                        Text('الورد وسجل القراءة'),
+                      ],
+                    ),
+                  ),
+                ),
+                Tab(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.auto_stories_rounded, size: 15.0),
+                        SizedBox(width: 4.0),
+                        Text('الأحاديث'),
                       ],
                     ),
                   ),
@@ -122,13 +140,16 @@ class BookmarksView extends StatelessWidget {
         return RefreshIndicator(
           onRefresh: controller.loadAll,
           color: colors.primary,
-          child: TabBarView(
-            controller: controller.tabController,
-            children: [
-              BookmarksTab(controller: controller),
-              MemorizedTab(controller: controller),
-              ReadingLogTab(controller: controller),
-            ],
+          child: MaxWidthContainer(
+            child: TabBarView(
+              controller: controller.tabController,
+              children: [
+                BookmarksTab(controller: controller),
+                MemorizedTab(controller: controller),
+                ReadingLogTab(controller: controller),
+                HadithBookmarksTab(controller: controller),
+              ],
+            ),
           ),
         );
       }),

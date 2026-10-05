@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../../core/data/models/mushaf_models.dart';
+import '../../../../core/data/models/user_models.dart';
 import '../controllers/mushaf_controller.dart';
 import '../models/mushaf_theme_model.dart';
+import '../utils/mushaf_scroll_physics.dart';
 import 'mushaf_page_widget.dart';
 
 /// Renders facing dual pages side-by-side (Dual-page spread) for tablets
@@ -13,6 +16,8 @@ class MushafDualPageView extends StatefulWidget {
   final Map<int, MushafPage> pagesCache;
   final int? selectedSurah;
   final int? selectedAyah;
+  final BookmarkColor? selectedAyahColor;
+  final bool isMoving;
   final Future<MushafPage?> Function(int pageNumber) getPage;
   final void Function(int newPage) onPageChanged;
   final void Function(int surahNumber, int ayahNumber)? onAyahTapped;
@@ -27,6 +32,8 @@ class MushafDualPageView extends StatefulWidget {
     required this.onPageChanged,
     this.selectedSurah,
     this.selectedAyah,
+    this.selectedAyahColor,
+    this.isMoving = false,
     this.onAyahTapped,
     this.onTapPage,
   });
@@ -66,16 +73,20 @@ class _MushafDualPageViewState extends State<MushafDualPageView> {
   Widget build(BuildContext context) {
     // 604 pages -> 302 spreads
     const int totalSpreads = 302;
+    final disableAnimations = MediaQuery.of(context).disableAnimations;
 
     return PageView.builder(
       controller: _pageController,
       reverse: true, // RTL page turning
-      physics: const BouncingScrollPhysics(),
+      physics: disableAnimations
+          ? const PageScrollPhysics()
+          : const MushafScrollPhysics(),
       itemCount: totalSpreads,
       onPageChanged: (spreadIndex) {
         _currentSpread = spreadIndex;
         final rightPageNum = (spreadIndex * 2) + 1;
         widget.onPageChanged(rightPageNum);
+        HapticFeedback.selectionClick();
       },
       itemBuilder: (context, spreadIndex) {
         final rightPageNum = (spreadIndex * 2) + 1;
@@ -133,6 +144,7 @@ class _MushafDualPageViewState extends State<MushafDualPageView> {
       return MushafPageWidget(
         page: cached,
         theme: widget.theme,
+        isMoving: widget.isMoving,
         isRightPage: isRight,
         pageBookmarkColor: bookmarkColor,
         pageMemorizeStatus: memorizeStatus,
@@ -140,6 +152,7 @@ class _MushafDualPageViewState extends State<MushafDualPageView> {
         memorizedAyahs: ayahMemorized,
         selectedSurah: widget.selectedSurah,
         selectedAyah: widget.selectedAyah,
+        selectedAyahColor: widget.selectedAyahColor,
         onAyahTapped: widget.onAyahTapped,
         onTapPage: widget.onTapPage,
       );
@@ -152,6 +165,7 @@ class _MushafDualPageViewState extends State<MushafDualPageView> {
           return MushafPageWidget(
             page: snapshot.data!,
             theme: widget.theme,
+            isMoving: widget.isMoving,
             isRightPage: isRight,
             pageBookmarkColor: bookmarkColor,
             pageMemorizeStatus: memorizeStatus,
@@ -159,6 +173,7 @@ class _MushafDualPageViewState extends State<MushafDualPageView> {
             memorizedAyahs: ayahMemorized,
             selectedSurah: widget.selectedSurah,
             selectedAyah: widget.selectedAyah,
+            selectedAyahColor: widget.selectedAyahColor,
             onAyahTapped: widget.onAyahTapped,
             onTapPage: widget.onTapPage,
           );

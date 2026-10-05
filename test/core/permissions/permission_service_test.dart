@@ -35,6 +35,11 @@ class MockPermissionPlatformAdapter implements PermissionPlatformAdapter {
     openedSettings.add(type);
     return true;
   }
+
+  @override
+  Future<bool> openVendorAutoStart() async {
+    return true;
+  }
 }
 
 void main() {

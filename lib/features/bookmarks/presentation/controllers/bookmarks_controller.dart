@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../../core/services/app_haptics_service.dart';
 import '../../../../core/data/models/user_models.dart';
 import '../../../../core/data/repositories/quran_repository.dart';
 import '../../../../core/data/repositories/user_repository.dart';
 import '../../../../core/util/routes/routes.dart';
+import 'package:quran_app_android/features/hadith/data/models/hadith_bookmark_model.dart';
+import 'package:quran_app_android/features/hadith/data/repositories/hadith_bookmark_repository.dart';
 
 class BookmarksController extends GetxController with GetSingleTickerProviderStateMixin {
   final UserRepository _userRepo = UserRepository();
   final QuranRepository _quranRepo = QuranRepository();
+  final HadithBookmarkRepository _hadithRepo = HadithBookmarkRepository();
 
   late TabController tabController;
 
@@ -20,13 +24,14 @@ class BookmarksController extends GetxController with GetSingleTickerProviderSta
   final RxMap<String, dynamic> memorizationStats = <String, dynamic>{}.obs;
 
   final RxList<ReadingLogEntry> readingLogs = <ReadingLogEntry>[].obs;
+  final RxList<HadithBookmarkModel> hadithBookmarks = <HadithBookmarkModel>[].obs;
 
   final Map<int, String> surahNames = {};
 
   @override
   void onInit() {
     super.onInit();
-    tabController = TabController(length: 3, vsync: this);
+    tabController = TabController(length: 4, vsync: this);
     loadAll();
   }
 
@@ -50,6 +55,7 @@ class BookmarksController extends GetxController with GetSingleTickerProviderSta
         _loadBookmarks(),
         _loadMemorized(),
         _loadReadingLog(),
+        _loadHadithBookmarks(),
       ]);
     } catch (e) {
       debugPrint('Error loading bookmarks data: $e');
@@ -74,6 +80,23 @@ class BookmarksController extends GetxController with GetSingleTickerProviderSta
   Future<void> _loadReadingLog() async {
     final logs = await _userRepo.getReadingLog(limit: 60);
     readingLogs.assignAll(logs);
+  }
+
+  Future<void> _loadHadithBookmarks() async {
+    final list = await _hadithRepo.getAllBookmarks();
+    hadithBookmarks.assignAll(list);
+  }
+
+  Future<void> toggleHadithMemorized(String id) async {
+    AppHaptics.itemCompleted();
+    await _hadithRepo.toggleMemorized(id);
+    await _loadHadithBookmarks();
+  }
+
+  Future<void> deleteHadithBookmark(String id) async {
+    AppHaptics.selection();
+    await _hadithRepo.removeBookmark(id);
+    await _loadHadithBookmarks();
   }
 
   void onSearchChanged(String query) {
@@ -110,6 +133,7 @@ class BookmarksController extends GetxController with GetSingleTickerProviderSta
 
   Future<void> deleteBookmark(BookmarkItem item) async {
     if (item.id != null) {
+      AppHaptics.selection();
       await _userRepo.deleteBookmark(item.id!);
       bookmarks.removeWhere((b) => b.id == item.id);
       _applyFilter();
@@ -118,6 +142,7 @@ class BookmarksController extends GetxController with GetSingleTickerProviderSta
 
   Future<void> deleteMemorized(MemorizedItem item) async {
     if (item.id != null) {
+      AppHaptics.selection();
       await _userRepo.deleteMemorized(item.id!);
       memorizedList.removeWhere((m) => m.id == item.id);
       final stats = await _userRepo.getMemorizationStats();
@@ -129,6 +154,7 @@ class BookmarksController extends GetxController with GetSingleTickerProviderSta
     if (newStatus == null) {
       await deleteMemorized(item);
     } else {
+      AppHaptics.itemCompleted();
       final updated = item.copyWith(status: newStatus, updatedAt: DateTime.now());
       await _userRepo.setMemorized(updated);
       await _loadMemorized();
@@ -136,6 +162,7 @@ class BookmarksController extends GetxController with GetSingleTickerProviderSta
   }
 
   void openMushaf({required int page, int? surah, int? ayah}) {
+    AppHaptics.selection();
     Get.toNamed(
       AppRoutes.mushaf,
       arguments: {

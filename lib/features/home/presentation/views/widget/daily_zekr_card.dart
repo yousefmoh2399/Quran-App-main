@@ -5,6 +5,7 @@ import 'package:quran_app_android/core/design/app_radius.dart';
 import 'package:quran_app_android/core/design/app_spacing.dart';
 import 'package:quran_app_android/core/design/app_typography.dart';
 import 'package:quran_app_android/core/design/components/app_card.dart';
+import 'package:quran_app_android/features/azkar/presentation/views/widgets/zikr_image_share_dialog.dart';
 
 class DailyZekrCard extends StatelessWidget {
   const DailyZekrCard({super.key});
@@ -68,45 +69,83 @@ class DailyZekrCard extends StatelessWidget {
                   ),
                 ],
               ),
-              InkWell(
-                borderRadius: AppRadius.borderSm,
-                onTap: () {
-                  Clipboard.setData(ClipboardData(text: '$zekrText\n$zekrVirtue'));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Text(
-                        'تم نسخ الذكر إلى الحافظة بنجاح',
-                        style: TextStyle(fontFamily: AppTypography.uiFont),
-                      ),
-                      backgroundColor: colors.primary,
-                      duration: const Duration(seconds: 2),
-                      behavior: SnackBarBehavior.floating,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: AppRadius.borderMd,
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  InkWell(
+                    borderRadius: AppRadius.borderSm,
+                    onTap: () {
+                      Clipboard.setData(ClipboardData(text: '$zekrText\n$zekrVirtue'));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Text(
+                            'تم نسخ الذكر إلى الحافظة بنجاح',
+                            style: TextStyle(fontFamily: AppTypography.uiFont),
+                          ),
+                          backgroundColor: colors.primary,
+                          duration: const Duration(seconds: 2),
+                          behavior: SnackBarBehavior.floating,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: AppRadius.borderMd,
+                          ),
+                        ),
+                      );
+                    },
+                    child: Padding(
+                      padding: AppSpacing.paddingXs,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.copy_rounded,
+                            size: 16,
+                            color: colors.textMuted,
+                          ),
+                          AppSpacing.horizontalXs,
+                          Text(
+                            'نسخ',
+                            style: textTheme.labelSmall?.copyWith(
+                              color: colors.textMuted,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  );
-                },
-                child: Padding(
-                  padding: AppSpacing.paddingXs,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.copy_rounded,
-                        size: 16,
-                        color: colors.textMuted,
-                      ),
-                      AppSpacing.horizontalXs,
-                      Text(
-                        'نسخ',
-                        style: textTheme.labelSmall?.copyWith(
-                          color: colors.textMuted,
-                        ),
-                      ),
-                    ],
                   ),
-                ),
+                  const SizedBox(width: 8),
+                  InkWell(
+                    borderRadius: AppRadius.borderSm,
+                    onTap: () {
+                      ZikrShareHelper.showShareOptions(
+                        context,
+                        zikrText: zekrText,
+                        virtue: zekrVirtue,
+                        categoryTitle: 'ذكر اليوم',
+                      );
+                    },
+                    child: Padding(
+                      padding: AppSpacing.paddingXs,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.share_rounded,
+                            size: 16,
+                            color: colors.primary,
+                          ),
+                          AppSpacing.horizontalXs,
+                          Text(
+                            'مشاركة',
+                            style: textTheme.labelSmall?.copyWith(
+                              color: colors.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
