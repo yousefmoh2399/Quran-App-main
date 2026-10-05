@@ -5,12 +5,9 @@ import 'package:quran_app_android/core/design/app_typography.dart';
 
 void main() {
   group('AppTypography & AppTheme Fallback Fonts Tests', () {
-    test('AppTypography.fallbackFonts contains platform emoji and Islamic font chains', () {
-      expect(AppTypography.fallbackFonts, contains('Apple Color Emoji'));
-      expect(AppTypography.fallbackFonts, contains('Noto Color Emoji'));
+    test('AppTypography.fallbackFonts contains Islamic and UI font fallback chains', () {
       expect(AppTypography.fallbackFonts, contains('Amiri'));
       expect(AppTypography.fallbackFonts, contains('Cairo'));
-      expect(AppTypography.fallbackFonts, contains('.AppleSystemUIFont'));
     });
 
     test('All text styles in createTextTheme have fontFamilyFallback configured', () {

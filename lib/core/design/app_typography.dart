@@ -8,18 +8,12 @@ class AppTypography {
   static const String quranFont = 'uthman';
   static const String surahNameFont = 'SurahName';
 
-  /// Universal fallback font cascade ensuring correct rendering for:
-  /// - Native emojis across iOS/macOS (Apple Color Emoji) and Android (Noto Color Emoji).
+  /// Fallback font cascade ensuring correct rendering for:
   /// - Full Islamic symbols and ligatures (ﷺ, ﷻ, ﷽, ۞, ۩, ۝) via Amiri.
   /// - Arabic UI text and numerals via Cairo.
-  /// - Platform system fonts (.AppleSystemUIFont, sans-serif).
   static const List<String> fallbackFonts = [
-    'Apple Color Emoji',
-    'Noto Color Emoji',
     'Amiri',
     'Cairo',
-    '.AppleSystemUIFont',
-    'sans-serif',
   ];
 
   /// Pre-configured base TextStyle for UI elements with fallback support.
