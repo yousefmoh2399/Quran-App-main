@@ -155,3 +155,38 @@
    * **App Privacy**: أجب عن استبيان الخصوصية باختيار "لا يتم جمع أي بيانات" (مطابق لـ PrivacyInfo.xcprivacy).
    * **Screenshots**: رفع لقطات شاشة لمقاس 6.7 بوصة (iPhone 16 Pro Max / 15 Pro Max) ومقاس 6.5/5.5 بوصة، وشاشات الآيباد.
    * **App Review Notes**: توضيح لفريق المراجعة: "التطبيق إسلامي مجاني بالكامل لا يتطلب إنشاء حساب أو تسجيل دخول. يتم طلب إذن الموقع فقط لحساب مواقيت الصلاة واتجاه القبلة، ويتم جدولة إشعارات الأذان محلياً بصوت أذان مدمج مع مستوى Time-Sensitive".
+
+---
+
+## 7. معالجة الإيموجي والرموز الإسلامية على iOS (Font Fallbacks)
+
+### المشكلة:
+ظهور الإيموجي (مثل `🌙` في الترويسة الرئيسية بجوار "مساء الخير والسكينة") والرموز والصلوات الإسلامية (مثل `ﷺ`, `ﷻ`, `﷽`, `۞`, `۩`, `۝`) على هيئة علامة استفهام `?` على نظام iOS، بينما تعمل بشكل طبيعي على Android.
+
+### السبب الجذري (Root Cause):
+* محرك الخطوط في أندرويد (HarfBuzz) يقوم تلقائياً بالتراجع (Fallback) إلى خطوط النظام مثل `Noto Color Emoji` والخطوط العربية الموسعة عند غياب المحرف من خط التطبيق الأساسي (`Cairo`).
+* على نظام iOS (محرك Impeller و CoreText)، عند تحديد خط مخصص من الـ Assets مثل `Cairo` دون تمرير `fontFamilyFallback`، لا يقوم المحرك بالرجوع التلقائي لخط الإيموجي أو الرموز الدينية، ويعتبرها رموزاً مفقودة (.notdef) فيستبدلها بعلامة `?`.
+* فحص خطوط التطبيق بـ CoreText كشف أن خط `Cairo` خالي تماماً من الإيموجي ومن الرموز المركبة (`ﷺ`, `ﷻ`, `﷽`, `۞`, `۩`, `۝`)، بينما يمتلك خط `Amiri` المدمج بالتطبيق كافة هذه الرموز الإسلامية بجودة خطية عالية.
+
+### الحل الجذري المنفذ:
+1. **تحديث `AppTypography` (`lib/core/design/app_typography.dart`)**:
+   * إنشاء سلسلة تراجع موحدة `fallbackFonts`:
+     ```dart
+     static const List<String> fallbackFonts = [
+       'Apple Color Emoji',
+       'Noto Color Emoji',
+       'Amiri',
+       'Cairo',
+       '.AppleSystemUIFont',
+       'sans-serif',
+     ];
+     ```
+   * تعيين `fontFamilyFallback: fallbackFonts` لكل أنماط النصوص الـ 15 في `createTextTheme` (`displayLarge` إلى `labelSmall`).
+   * توفير مساعدات `uiStyle` و `decorativeStyle` مع الـ fallback.
+2. **تحديث `AppTheme` (`lib/core/design/app_theme.dart`)**:
+   * إضافة `fontFamilyFallback: AppTypography.fallbackFonts` للسمتين الفاتحة (Light) والداكنة (Dark).
+3. **تحديث `LockScreenBannerService` (`lib/core/service/settings/lock_screen_banner_service.dart`)**:
+   * تحديث دالة الرسم على الـ Canvas `_drawNotificationBanner` لتعيين `bannerStyle` محتوياً على `fontFamilyFallback: AppTypography.fallbackFonts` لكافة النصوص وعناصر الورد والأذكار والأيقونات المرسومة بالـ `TextPainter`.
+4. **تأكيد الاختبارات**:
+   * كتابة اختبارات آلية شاملة في `test/core/design/app_typography_test.dart` تتأكد من سلامة السلسلة ورسم الإيموجي والرموز الدينية بنجاح 100% دون أي أخطاء.
+
