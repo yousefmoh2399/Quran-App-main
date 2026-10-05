@@ -44,8 +44,10 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Custom ignores
-*.zip
-*.bak
-tools/source/
+# Keystore & Signing Secrets
+*.keystore
+*.jks
+**/android/key.properties
+**/android/local.properties
+
 

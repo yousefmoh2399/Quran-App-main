@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:quran_app_android/core/design/app_colors.dart';
 import 'package:quran_app_android/core/design/app_spacing.dart';
 import 'package:quran_app_android/core/design/app_typography.dart';
+import 'package:quran_app_android/core/design/responsive.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
 import 'package:quran_app_android/features/onboarding/data/models/onboarding_model.dart';
 import 'package:quran_app_android/features/onboarding/presentation/view_model/onboarding_view_model.dart';
@@ -22,41 +23,48 @@ class OnBoardingScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: colors.bg,
       body: SafeArea(
-        child: GetBuilder<OnBoardingViewModel>(
-          init: OnBoardingViewModel(),
-          builder: (controller) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.lg,
-                vertical: AppSpacing.md,
-              ),
-              child: Column(
-                children: [
-                  // Top Header with App Name and Skip button
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.auto_stories_rounded,
-                            size: 22,
-                            color: colors.primary,
+        child: MaxWidthContainer(
+          child: GetBuilder<OnBoardingViewModel>(
+            init: OnBoardingViewModel(),
+            builder: (controller) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.md,
+                ),
+                child: Column(
+                  children: [
+                    // Top Header with App Name and Skip button
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.auto_stories_rounded,
+                                size: 22,
+                                color: colors.primary,
+                              ),
+                              AppSpacing.horizontalXs,
+                              Expanded(
+                                child: Text(
+                                  'تطبيق القرآن الكريم',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontFamily: AppTypography.decorativeFont,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: colors.primary,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          AppSpacing.horizontalXs,
-                          Text(
-                            'تطبيق القرآن الكريم',
-                            style: TextStyle(
-                              fontFamily: AppTypography.decorativeFont,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: colors.primary,
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (!controller.isLast)
-                        TextButton(
+                        ),
+                        const SizedBox(width: 8),
+                        if (!controller.isLast)
+                          TextButton(
                           onPressed: () =>
                               controller.finishOnboarding(settingsServices),
                           child: Text(
@@ -104,6 +112,7 @@ class OnBoardingScreen extends StatelessWidget {
               ),
             );
           },
+        ),
         ),
       ),
     );

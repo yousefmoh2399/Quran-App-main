@@ -328,3 +328,199 @@ class WirdPlan {
     );
   }
 }
+
+/// Status of prayer performance
+enum PrayerStatus {
+  onTime('on_time', 'في وقتها', Color(0xFF0F5C4A)),
+  jamaah('jamaah', 'في جماعة', Color(0xFF1E824C)),
+  late('late', 'متأخرة', Color(0xFFD35400)),
+  missed('missed', 'فائتة', Color(0xFFB3261E)),
+  qadaa('qadaa', 'قضاء', Color(0xFF7B1FA2));
+
+  final String key;
+  final String labelAr;
+  final Color color;
+
+  const PrayerStatus(this.key, this.labelAr, this.color);
+
+  static PrayerStatus fromKey(String? key) {
+    for (final s in PrayerStatus.values) {
+      if (s.key == key) return s;
+    }
+    return PrayerStatus.onTime;
+  }
+}
+
+/// Daily prayer log entry
+class PrayerLog {
+  final int? id;
+  final String date; // YYYY-MM-DD
+  final String prayer; // fajr, dhuhr, asr, maghrib, isha
+  final PrayerStatus status;
+  final DateTime createdAt;
+
+  PrayerLog({
+    this.id,
+    required this.date,
+    required this.prayer,
+    required this.status,
+    DateTime? createdAt,
+  }) : createdAt = createdAt ?? DateTime.now();
+
+  Map<String, dynamic> toMap() {
+    return {
+      if (id != null) 'id': id,
+      'date': date,
+      'prayer': prayer,
+      'status': status.key,
+      'created_at': createdAt.toIso8601String(),
+    };
+  }
+
+  factory PrayerLog.fromMap(Map<String, dynamic> map) {
+    return PrayerLog(
+      id: map['id'] as int?,
+      date: map['date'] as String,
+      prayer: map['prayer'] as String,
+      status: PrayerStatus.fromKey(map['status'] as String?),
+      createdAt: DateTime.tryParse(map['created_at']?.toString() ?? '') ?? DateTime.now(),
+    );
+  }
+}
+
+/// Fasting type
+enum FastingType {
+  ramadan('ramadan', 'رمضان'),
+  whiteDays('white_days', 'الأيام البيض'),
+  mondayThursday('monday_thursday', 'الاثنين والخميس'),
+  arafah('arafah', 'عرفة'),
+  ashura('ashura', 'عاشوراء / تاسوعاء'),
+  voluntary('voluntary', 'صيام تطوع'),
+  qadaa('qadaa', 'قضاء فريضة');
+
+  final String key;
+  final String labelAr;
+
+  const FastingType(this.key, this.labelAr);
+
+  static FastingType fromKey(String? key) {
+    for (final t in FastingType.values) {
+      if (t.key == key) return t;
+    }
+    return FastingType.voluntary;
+  }
+}
+
+/// Fasting log entry
+class FastingLog {
+  final int? id;
+  final String date; // YYYY-MM-DD
+  final FastingType type;
+  final bool completed;
+  final DateTime createdAt;
+
+  FastingLog({
+    this.id,
+    required this.date,
+    required this.type,
+    this.completed = true,
+    DateTime? createdAt,
+  }) : createdAt = createdAt ?? DateTime.now();
+
+  Map<String, dynamic> toMap() {
+    return {
+      if (id != null) 'id': id,
+      'date': date,
+      'type': type.key,
+      'completed': completed ? 1 : 0,
+      'created_at': createdAt.toIso8601String(),
+    };
+  }
+
+  factory FastingLog.fromMap(Map<String, dynamic> map) {
+    return FastingLog(
+      id: map['id'] as int?,
+      date: map['date'] as String,
+      type: FastingType.fromKey(map['type'] as String?),
+      completed: (map['completed'] as int? ?? 1) == 1,
+      createdAt: DateTime.tryParse(map['created_at']?.toString() ?? '') ?? DateTime.now(),
+    );
+  }
+}
+
+/// Achievement Badge Definition
+class AchievementBadge {
+  final String id;
+  final String title;
+  final String description;
+  final IconData icon;
+  final Color color;
+
+  const AchievementBadge({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.icon,
+    required this.color,
+  });
+
+  static const List<AchievementBadge> all = [
+    AchievementBadge(
+      id: 'first_page',
+      title: 'فاتحة الخير',
+      description: 'قراءة أول صفحة من كتاب الله',
+      icon: Icons.menu_book_rounded,
+      color: Color(0xFF0F5C4A),
+    ),
+    AchievementBadge(
+      id: 'streak_3',
+      title: 'بصيرة البدايات',
+      description: '3 أيام متتالية من القراءة',
+      icon: Icons.local_fire_department_rounded,
+      color: Color(0xFFB8892B),
+    ),
+    AchievementBadge(
+      id: 'streak_7',
+      title: 'حامل الورد',
+      description: 'أسبوع كامل من المواظبة على الورد',
+      icon: Icons.stars_rounded,
+      color: Color(0xFF2980B9),
+    ),
+    AchievementBadge(
+      id: 'streak_30',
+      title: 'صاحب القرآن',
+      description: '30 يوماً من الصحبة المتواصلة',
+      icon: Icons.workspace_premium_rounded,
+      color: Color(0xFF8E44AD),
+    ),
+    AchievementBadge(
+      id: 'prayers_day',
+      title: 'حارس الفريضة',
+      description: 'تسجيل الصلوات الخمس في وقتها ليوم كامل',
+      icon: Icons.mosque_rounded,
+      color: Color(0xFF1E824C),
+    ),
+    AchievementBadge(
+      id: 'fasting_day',
+      title: 'صائم محتسب',
+      description: 'إتمام يوم صيام سنة أو فريضة',
+      icon: Icons.wb_twilight_rounded,
+      color: Color(0xFFD35400),
+    ),
+    AchievementBadge(
+      id: 'commute_reader',
+      title: 'قارئ الأوقات',
+      description: 'إنجاز قراءة في ورد التنقل والمواصلات',
+      icon: Icons.directions_transit_rounded,
+      color: Color(0xFF16A085),
+    ),
+    AchievementBadge(
+      id: 'first_khatma',
+      title: 'ختمة النور',
+      description: 'إتمام ختمة كاملة لكتاب الله المبارك',
+      icon: Icons.military_tech_rounded,
+      color: Color(0xFFD9A036),
+    ),
+  ];
+}
+

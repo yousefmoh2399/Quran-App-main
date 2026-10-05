@@ -4,6 +4,8 @@ import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_radius.dart';
 import '../../../../core/design/app_spacing.dart';
 import '../../../../core/design/app_typography.dart';
+import '../../../home/presentation/view_model/home_view_model.dart';
+import '../../../home/presentation/views/widget/daily_wird_card.dart';
 import '../../../mushaf/presentation/utils/mushaf_utils.dart';
 import '../controllers/bookmarks_controller.dart';
 
@@ -21,19 +23,29 @@ class ReadingLogTab extends StatelessWidget {
       final logs = controller.readingLogs;
 
       if (logs.isEmpty) {
-        return Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.history_edu_rounded, size: 56.0, color: colors.textMuted.withOpacity(0.5)),
-              AppSpacing.verticalSm,
-              Text(
-                'لم يتم تسجيل أي قراءة بعد\nاقرأ لمدة ٥ ثوانٍ في المصحف لتسجيل جلساتك تلقائياً',
-                textAlign: TextAlign.center,
-                style: textTheme.bodyLarge?.copyWith(color: colors.textMuted, height: 1.5),
-              ),
+        return ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+          physics: const BouncingScrollPhysics(),
+          children: [
+            if (Get.isRegistered<HomeViewModel>()) ...[
+              const DailyWirdCard(),
+              AppSpacing.verticalLg,
             ],
-          ),
+            Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.history_edu_rounded, size: 56.0, color: colors.textMuted.withOpacity(0.5)),
+                  AppSpacing.verticalSm,
+                  Text(
+                    'لم يتم تسجيل أي قراءة بعد\nاقرأ لمدة ٥ ثوانٍ في المصحف لتسجيل جلساتك تلقائياً',
+                    textAlign: TextAlign.center,
+                    style: textTheme.bodyLarge?.copyWith(color: colors.textMuted, height: 1.5),
+                  ),
+                ],
+              ),
+            ),
+          ],
         );
       }
 
@@ -46,6 +58,11 @@ class ReadingLogTab extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         physics: const BouncingScrollPhysics(),
         children: [
+          // Daily Wird Goal Card
+          if (Get.isRegistered<HomeViewModel>()) ...[
+            const DailyWirdCard(),
+            AppSpacing.verticalMd,
+          ],
           // Reading Overview Card
           Container(
             padding: const EdgeInsets.all(16.0),

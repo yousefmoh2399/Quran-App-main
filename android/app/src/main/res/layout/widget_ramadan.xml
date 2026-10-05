@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root_ramadan"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg_emerald"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <!-- Top Header: Crescent, Title and Day Badge -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="6dp">
+
+        <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/ic_crescent_moon"
+            android:tint="#E2BE78"
+            android:layout_marginEnd="6dp"
+            android:contentDescription="هلال رمضان" />
+
+        <TextView
+            android:id="@+id/ramadan_widget_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="شهر رمضان المبارك 🌙"
+            android:textColor="#E2BE78"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/ramadan_widget_day"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="اليوم 1"
+            android:textColor="#5CE1B6"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:background="@drawable/widget_card_inner"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp" />
+    </LinearLayout>
+
+    <!-- Center Card: Countdown & Imsak / Iftar Times -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:background="@drawable/widget_card_inner"
+        android:padding="8dp"
+        android:gravity="center_vertical">
+
+        <!-- Countdown Banner -->
+        <TextView
+            android:id="@+id/ramadan_widget_countdown"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="متبقي على موعد الإفطار: 00:00:00"
+            android:textColor="#FFFFFF"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="6dp" />
+
+        <!-- Dual Times Row: Imsak & Iftar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <!-- Imsak Box -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="4dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="الإمساك"
+                    android:textColor="#A0B8AD"
+                    android:textSize="10sp" />
+
+                <TextView
+                    android:id="@+id/ramadan_widget_imsak"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="04:15 ص"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Divider -->
+            <FrameLayout
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="#2C4A3E"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="2dp" />
+
+            <!-- Iftar Box -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="4dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="الإفطار 🌙"
+                    android:textColor="#E2BE78"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/ramadan_widget_iftar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="06:05 م"
+                    android:textColor="#E2BE78"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Bottom Dua Row -->
+    <TextView
+        android:id="@+id/ramadan_widget_dua"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="«ذَهَبَ الظَّمَأُ، وَابْتَلَّتِ الْعُرُوقُ، وَثَبَتَ الأَجْرُ إِنْ شَاءَ اللَّهُ»"
+        android:textColor="#A0B8AD"
+        android:textSize="10sp"
+        android:gravity="center"
+        android:singleLine="true"
+        android:ellipsize="end" />
+</LinearLayout>

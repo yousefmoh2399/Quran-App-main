@@ -146,7 +146,7 @@ void main() {
       );
 
       expect(find.text('ﭑ'), findsOneWidget);
-      await tester.tap(find.text('ﭑ'));
+      await tester.longPress(find.text('ﭑ'));
       await tester.pump();
 
       expect(tappedSurah, 2);

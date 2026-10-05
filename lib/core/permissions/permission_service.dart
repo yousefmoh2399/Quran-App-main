@@ -126,6 +126,10 @@ class PermissionService with WidgetsBindingObserver {
     return success;
   }
 
+  Future<bool> openVendorAutoStart() async {
+    return await adapter.openVendorAutoStart();
+  }
+
   /// Contextual presentation rule:
   /// - Max once per session per permission
   /// - 7-day cooldown on "later"

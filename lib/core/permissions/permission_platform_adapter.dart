@@ -9,6 +9,7 @@ abstract class PermissionPlatformAdapter {
   Future<AppPermissionStatus> checkStatus(AppPermissionType type);
   Future<AppPermissionStatus> request(AppPermissionType type);
   Future<bool> openSettings(AppPermissionType type);
+  Future<bool> openVendorAutoStart() async => false;
   bool isApplicable(AppPermissionType type);
 }
 
@@ -183,6 +184,20 @@ class LivePermissionPlatformAdapter implements PermissionPlatformAdapter {
       debugPrint('⚠️ [PermissionAdapter] error opening settings: $e');
       return await openAppSettings();
     }
+  }
+
+  @override
+  Future<bool> openVendorAutoStart() async {
+    try {
+      if (!kIsWeb && Platform.isAndroid) {
+        final success =
+            await _bridge.invokeMethod<bool>('openVendorAutoStart') ?? true;
+        return success;
+      }
+    } catch (e) {
+      debugPrint('⚠️ [PermissionAdapter] error opening vendor auto start: $e');
+    }
+    return false;
   }
 
   AppPermissionStatus _mapPermissionHandlerStatus(PermissionStatus status) {

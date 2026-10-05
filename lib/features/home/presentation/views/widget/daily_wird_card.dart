@@ -7,12 +7,16 @@ import 'package:quran_app_android/core/design/app_radius.dart';
 import 'package:quran_app_android/core/design/app_spacing.dart';
 import 'package:quran_app_android/core/design/app_typography.dart';
 import 'package:quran_app_android/core/design/components/app_card.dart';
+import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
+import 'package:quran_app_android/core/services/app_haptics_service.dart';
 import 'package:quran_app_android/core/util/routes/routes.dart';
 import 'package:quran_app_android/features/home/presentation/view_model/home_view_model.dart';
 import 'package:quran_app_android/features/mushaf/presentation/utils/mushaf_utils.dart';
 
 class DailyWirdCard extends StatelessWidget {
-  const DailyWirdCard({super.key});
+  final EdgeInsetsGeometry? margin;
+
+  const DailyWirdCard({super.key, this.margin});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +31,7 @@ class DailyWirdCard extends StatelessWidget {
       if (plan == null) {
         return AppCard(
           variant: AppCardVariant.elevated,
-          margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          margin: margin ?? EdgeInsets.zero,
           padding: AppSpacing.paddingLg,
           backgroundColor: colors.surface,
           child: Column(
@@ -92,9 +96,23 @@ class DailyWirdCard extends StatelessWidget {
       final progressRatio = (currentRead / targetPages).clamp(0.0, 1.0);
       final isCompleted = progressRatio >= 1.0;
 
+      final settings = Get.find<SettingsServices>();
+      final savedWirdPage = settings.sharedPref?.getInt('wird_last_page');
+      final lastRead = homeVM.lastReadPage.value;
+
+      int resumePage = plan.startPage;
+      if (savedWirdPage != null && savedWirdPage >= plan.startPage && savedWirdPage <= plan.endPage) {
+        resumePage = savedWirdPage;
+      } else if (lastRead != null && lastRead >= plan.startPage && lastRead <= plan.endPage) {
+        resumePage = lastRead;
+      } else if (currentRead > 0) {
+        resumePage = (plan.startPage + currentRead).clamp(plan.startPage, plan.endPage);
+      }
+      final bool hasStartedWird = (resumePage > plan.startPage) || (currentRead > 0);
+
       return AppCard(
         variant: AppCardVariant.elevated,
-        margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+        margin: margin ?? EdgeInsets.zero,
         padding: AppSpacing.paddingLg,
         backgroundColor: colors.surface,
         child: Column(
@@ -220,7 +238,7 @@ class DailyWirdCard extends StatelessWidget {
                     ),
                     icon: Icon(Icons.play_arrow_rounded, color: colors.primary, size: 20),
                     label: Text(
-                      'ابدأ الورد',
+                      hasStartedWird ? 'أكمل الورد (صـ ${toArabicDigits(resumePage)})' : 'ابدأ الورد',
                       style: TextStyle(
                         fontFamily: AppTypography.uiFont,
                         color: colors.primary,
@@ -230,7 +248,7 @@ class DailyWirdCard extends StatelessWidget {
                     onPressed: () {
                       Get.toNamed(
                         AppRoutes.mushaf,
-                        arguments: {'pageNumber': plan.startPage},
+                        arguments: {'pageNumber': resumePage},
                       )?.then((_) => homeVM.loadUserQuranData());
                     },
                   ),
@@ -256,6 +274,7 @@ class DailyWirdCard extends StatelessWidget {
                       ),
                     ),
                     onPressed: () async {
+                      AppHaptics.cycleCompleted();
                       await homeVM.markWirdCompleted();
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -285,32 +304,41 @@ class DailyWirdCard extends StatelessWidget {
     HomeViewModel homeVM, {
     WirdPlan? existingPlan,
   }) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _WirdPlanModalSheet(
-        homeVM: homeVM,
-        existingPlan: existingPlan,
-      ),
-    );
+    openWirdPlanModal(context, homeVM, existingPlan: existingPlan);
   }
 }
 
-class _WirdPlanModalSheet extends StatefulWidget {
+void openWirdPlanModal(
+  BuildContext context,
+  HomeViewModel homeVM, {
+  WirdPlan? existingPlan,
+}) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (context) => WirdPlanModalSheet(
+      homeVM: homeVM,
+      existingPlan: existingPlan,
+    ),
+  );
+}
+
+class WirdPlanModalSheet extends StatefulWidget {
   final HomeViewModel homeVM;
   final WirdPlan? existingPlan;
 
-  const _WirdPlanModalSheet({
+  const WirdPlanModalSheet({
+    super.key,
     required this.homeVM,
     this.existingPlan,
   });
 
   @override
-  State<_WirdPlanModalSheet> createState() => _WirdPlanModalSheetState();
+  State<WirdPlanModalSheet> createState() => _WirdPlanModalSheetState();
 }
 
-class _WirdPlanModalSheetState extends State<_WirdPlanModalSheet> {
+class _WirdPlanModalSheetState extends State<WirdPlanModalSheet> {
   late WirdType _selectedType;
   late int _target;
   late int _startPage;

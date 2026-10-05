@@ -6,6 +6,8 @@ export 'models/hadith_entity.dart';
 export 'models/azkar_entity.dart';
 export 'models/name_of_allah_entity.dart';
 export 'models/mushaf_models.dart';
+export 'models/quran_marks_models.dart';
+export 'models/user_models.dart';
 export 'repositories/quran_repository.dart';
 export 'repositories/mushaf_repository.dart';
 export 'repositories/hadith_repository.dart';

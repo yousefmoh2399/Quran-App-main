@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 class AppTypography {
   static const String uiFont = 'Cairo';
   static const String decorativeFont = 'Amiri';
+  static const String hadithFont = 'Amiri';
   static const String quranFont = 'uthman';
   static const String surahNameFont = 'SurahName';
 

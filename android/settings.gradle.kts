@@ -24,5 +24,3 @@ plugins {
 }
 
 include(":app")
-include(":adhan")
-project(":adhan").projectDir = File(rootProject.projectDir, "adhan")

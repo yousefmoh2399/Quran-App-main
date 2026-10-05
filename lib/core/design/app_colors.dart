@@ -23,6 +23,8 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
     required this.error,
   });
 
+  bool get isDark => bg.computeLuminance() < 0.2;
+
   /// Light theme palette
   static const light = AppColorsExtension(
     bg: Color(0xFFFAF6EC),

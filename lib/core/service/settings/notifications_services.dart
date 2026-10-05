@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:adhan/adhan.dart';
@@ -7,7 +8,9 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 
 import 'package:get/get.dart';
-import 'package:quran_app_android/core/data/repositories/user_repository.dart';
+import 'package:quran_app_android/core/native/native_adhan_bridge.dart';
+import 'package:quran_app_android/core/native/native_reminders_bridge.dart';
+import 'package:quran_app_android/core/service/navigation/app_navigation_service.dart';
 import 'package:quran_app_android/core/util/constant/static_vars.dart';
 import 'package:quran_app_android/core/util/routes/routes.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -26,6 +29,18 @@ class NotifyHelper {
   static const String _azkarChannelId = 'azkar_channel';
   static const String _prayerChannelId = 'prayer_channel';
   static const String _wirdChannelId = 'wird_channel';
+  static const String _prayerBannerChannelId = 'prayer_banner_channel_v2';
+
+  static final AndroidNotificationChannel _prayerBannerChannel =
+      AndroidNotificationChannel(
+        _prayerBannerChannelId,
+        'شريط مواقيت الصلاة وشاشة القفل',
+        description: 'عرض مستمر وأنيق لمواقيت الصلاة، الورد القرآني، والأذكار على شاشة القفل',
+        importance: Importance.defaultImportance,
+        playSound: false,
+        enableVibration: false,
+        showBadge: false,
+      );
 
   static final AndroidNotificationChannel _wirdChannel =
       AndroidNotificationChannel(
@@ -74,7 +89,28 @@ class NotifyHelper {
           requestAlertPermission: true,
           requestBadgePermission: true,
           requestSoundPermission: true,
-          requestCriticalPermission: true,
+          requestCriticalPermission: false,
+          notificationCategories: [
+            DarwinNotificationCategory(
+              'prayer_category',
+              actions: <DarwinNotificationAction>[
+                DarwinNotificationAction.plain(
+                  'action_prayed',
+                  'صلّيت',
+                  options: <DarwinNotificationActionOption>{
+                    DarwinNotificationActionOption.foreground,
+                  },
+                ),
+                DarwinNotificationAction.plain(
+                  'action_stop',
+                  'إيقاف',
+                  options: <DarwinNotificationActionOption>{
+                    DarwinNotificationActionOption.destructive,
+                  },
+                ),
+              ],
+            ),
+          ],
           onDidReceiveLocalNotification: onDidReceiveLocalNotification,
         );
     final InitializationSettings initializationSettings =
@@ -88,6 +124,13 @@ class NotifyHelper {
       onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
     );
     await _configureAndroidChannels();
+    // Cancel any legacy scheduled local notifications with static text
+    try {
+      await flutterLocalNotificationsPlugin.cancel(1);
+      await flutterLocalNotificationsPlugin.cancel(20);
+      await flutterLocalNotificationsPlugin.cancel(900);
+      await flutterLocalNotificationsPlugin.cancel(901);
+    } catch (_) {}
     await ensureSchedulingPermissions(requestIfNeeded: true);
     requestIOSPermissions();
     _initialized = true;
@@ -115,6 +158,50 @@ class NotifyHelper {
     await androidPlugin.createNotificationChannel(_azkarChannel);
     await androidPlugin.createNotificationChannel(_prayerChannel);
     await androidPlugin.createNotificationChannel(_wirdChannel);
+    await androidPlugin.createNotificationChannel(_prayerBannerChannel);
+  }
+
+  static const int prayerBannerNotificationId = 99901;
+
+  Future<void> showOngoingPrayerBanner({
+    required String nextPrayerName,
+    required String nextPrayerTime,
+    required String countdownStr,
+    required String allPrayersLine,
+    required String cityName,
+  }) async {
+    final androidDetails = AndroidNotificationDetails(
+      _prayerBannerChannel.id,
+      _prayerBannerChannel.name,
+      channelDescription: _prayerBannerChannel.description,
+      importance: Importance.defaultImportance,
+      priority: Priority.defaultPriority,
+      ongoing: true,
+      autoCancel: false,
+      showWhen: false,
+      icon: 'icon',
+      largeIcon: const DrawableResourceAndroidBitmap('icon'),
+      category: AndroidNotificationCategory.status,
+      visibility: NotificationVisibility.public,
+      styleInformation: BigTextStyleInformation(
+        '$allPrayersLine\n📍 المدينة: $cityName',
+        contentTitle: '🕌 الصلاة القادمة: $nextPrayerName $nextPrayerTime ($countdownStr)',
+        summaryText: 'مواقيت الصلاة',
+      ),
+      color: const Color(0xFF0F5C4A),
+    );
+
+    await flutterLocalNotificationsPlugin.show(
+      prayerBannerNotificationId,
+      '🕌 $nextPrayerName $nextPrayerTime • $countdownStr',
+      allPrayersLine,
+      NotificationDetails(android: androidDetails),
+      payload: 'taqarrab://prayer_times',
+    );
+  }
+
+  Future<void> cancelOngoingPrayerBanner() async {
+    await flutterLocalNotificationsPlugin.cancel(prayerBannerNotificationId);
   }
 
   Future<void> displayNotification() async {
@@ -124,6 +211,17 @@ class NotifyHelper {
       return;
     }
     final int randomIndex = Random().nextInt(adhkar.length);
+    final hour = DateTime.now().hour;
+    final String dynamicTitle = (hour >= 5 && hour < 12)
+        ? '☀️ أذكار الصباح'
+        : (hour >= 15 && hour < 21)
+            ? '🌙 أذكار المساء'
+            : (hour >= 21 || hour < 5)
+                ? '🌙 أذكار الليل والسكينة'
+                : '📿 ذكر وتذكير';
+
+    final text = adhkar[randomIndex];
+
     final AndroidNotificationDetails androidNotificationDetails =
         AndroidNotificationDetails(
           _azkarChannel.id,
@@ -131,9 +229,17 @@ class NotifyHelper {
           channelDescription: _azkarChannel.description,
           importance: Importance.high,
           priority: Priority.high,
+          icon: 'icon',
+          largeIcon: const DrawableResourceAndroidBitmap('icon'),
           playSound: true,
           enableVibration: true,
+          onlyAlertOnce: false,
           ticker: 'adhkar_reminder',
+          styleInformation: BigTextStyleInformation(
+            text,
+            contentTitle: dynamicTitle,
+            summaryText: 'حصن المسلم والأذكار',
+          ),
           sound: RawResourceAndroidNotificationSound(
             _stripExtension(soundAzkar1),
           ),
@@ -147,10 +253,11 @@ class NotifyHelper {
           interruptionLevel: InterruptionLevel.timeSensitive,
         );
 
+    final notificationId = 20 + Random().nextInt(10);
     await flutterLocalNotificationsPlugin.show(
-      20,
-      'فَذَكِّرْ',
-      adhkar[randomIndex],
+      notificationId,
+      dynamicTitle,
+      text,
       NotificationDetails(
         android: androidNotificationDetails,
         iOS: iosNotificationDetails,
@@ -159,169 +266,39 @@ class NotifyHelper {
     );
   }
 
+  /// Schedules Azkar notifications via the Unified Native Reminders Engine.
+  /// Legacy zonedSchedule calls have been removed to avoid duplicate alarms.
   Future<void> scheduleAzkar({TimeOfDay? timeOfDay}) async {
-    if (!await ensureSchedulingPermissions()) {
-      debugPrint(
-        'Unable to schedule azkar notification because required permissions are missing.',
-      );
-      return;
+    try {
+      await NativeRemindersBridge.rescheduleAll();
+      debugPrint('Azkar scheduled via Unified Native Reminders Engine.');
+    } catch (e) {
+      debugPrint('Error triggering unified reminder for azkar: $e');
     }
-
-    final List<String> adhkar = StaticVars().smallDo3a2;
-    if (adhkar.isEmpty) {
-      debugPrint('Azkar list is empty, skipping scheduled notification.');
-      return;
-    }
-    final int randomIndex = Random().nextInt(adhkar.length);
-    final TimeOfDay reminderTime =
-        timeOfDay ?? const TimeOfDay(hour: 10, minute: 10);
-
-    final AndroidNotificationDetails androidDetails =
-        AndroidNotificationDetails(
-          _azkarChannel.id,
-          _azkarChannel.name,
-          channelDescription: _azkarChannel.description,
-          importance: Importance.high,
-          priority: Priority.high,
-          playSound: true,
-          enableVibration: true,
-          showWhen: false,
-          sound: RawResourceAndroidNotificationSound(
-            _stripExtension(soundAzkar2),
-          ),
-        );
-    final DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
-      sound: soundAzkar2,
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-      interruptionLevel: InterruptionLevel.timeSensitive,
-    );
-
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-      1,
-      'أذكار الصباح',
-      adhkar[randomIndex],
-      _nextDailyInstance(timeOfDay: reminderTime),
-      NotificationDetails(android: androidDetails, iOS: iosDetails),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      payload: 'adhkar|daily',
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time,
-    );
   }
 
-  tz.TZDateTime _nextDailyInstance({required TimeOfDay timeOfDay}) {
-    final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-    tz.TZDateTime scheduledDate = tz.TZDateTime(
-      tz.local,
-      now.year,
-      now.month,
-      now.day,
-      timeOfDay.hour,
-      timeOfDay.minute,
-    );
-    if (scheduledDate.isBefore(now)) {
-      scheduledDate = scheduledDate.add(const Duration(days: 1));
-    }
-    return scheduledDate;
-  }
-
-  /// Schedules daily Wird reminders (primary reminder + smart late reminder).
+  /// Schedules daily Wird reminders via the Unified Native Reminders Engine.
+  /// Legacy zonedSchedule calls have been removed to prevent duplicate alerts.
   Future<void> scheduleDailyWirdNotification({
     TimeOfDay? reminderTime,
     TimeOfDay? lateReminderTime,
   }) async {
-    if (!await ensureSchedulingPermissions()) {
-      debugPrint('Cannot schedule wird: missing scheduling permissions.');
-      return;
+    try {
+      await NativeRemindersBridge.rescheduleAll();
+      debugPrint('Daily Wird scheduled via Unified Native Reminders Engine.');
+    } catch (e) {
+      debugPrint('Error triggering unified reminder for wird: $e');
     }
-
-    final userRepo = UserRepository();
-    final plan = await userRepo.getWirdPlan();
-    if (plan == null || !plan.enabled) {
-      return;
-    }
-
-    final today = DateTime.now().toIso8601String().substring(0, 10);
-    final isCompletedToday = plan.lastCompletedDate == today;
-    if (isCompletedToday) {
-      debugPrint('Today wird is already completed; skipping reminder notifications.');
-      await cancelWirdNotifications();
-      return;
-    }
-
-    // Parse reminder time from plan string "HH:MM"
-    TimeOfDay primaryTime = const TimeOfDay(hour: 8, minute: 0);
-    if (reminderTime != null) {
-      primaryTime = reminderTime;
-    } else {
-      final parts = plan.reminderTime.split(':');
-      if (parts.length == 2) {
-        final h = int.tryParse(parts[0]) ?? 8;
-        final m = int.tryParse(parts[1]) ?? 0;
-        primaryTime = TimeOfDay(hour: h, minute: m);
-      }
-    }
-
-    final AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-      _wirdChannel.id,
-      _wirdChannel.name,
-      channelDescription: _wirdChannel.description,
-      importance: Importance.high,
-      priority: Priority.high,
-      playSound: true,
-      enableVibration: true,
-    );
-    const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-      interruptionLevel: InterruptionLevel.timeSensitive,
-    );
-
-    // 1. Primary reminder
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-      900,
-      'الورد اليومي للقرآن',
-      'حان موعد وردك اليومي المبارك (من صـ ${plan.startPage} إلى صـ ${plan.endPage})',
-      _nextDailyInstance(timeOfDay: primaryTime),
-      NotificationDetails(android: androidDetails, iOS: iosDetails),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      payload: 'mushaf|wird|${plan.startPage}',
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time,
-    );
-
-    // 2. Smart late reminder: Reminds user if not finished yet
-    final lateTime = lateReminderTime ??
-        TimeOfDay(
-          hour: (primaryTime.hour + 3) % 24,
-          minute: primaryTime.minute,
-        );
-
-    final todayLog = await userRepo.getTodayReadingLog();
-    final readSoFar = todayLog?.pagesRead ?? 0;
-    final target = (plan.endPage - plan.startPage + 1).clamp(1, 604);
-    final remaining = (target - readSoFar).clamp(1, target);
-
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-      901,
-      'تذكير بالورد اليومي',
-      'باقي لك $remaining صفحات من وردك اليومي، داوم على ختمتك المباركة',
-      _nextDailyInstance(timeOfDay: lateTime),
-      NotificationDetails(android: androidDetails, iOS: iosDetails),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      payload: 'mushaf|wird|${plan.startPage}',
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time,
-    );
   }
 
   Future<void> cancelWirdNotifications() async {
-    await flutterLocalNotificationsPlugin.cancel(900);
-    await flutterLocalNotificationsPlugin.cancel(901);
+    try {
+      await flutterLocalNotificationsPlugin.cancel(900);
+      await flutterLocalNotificationsPlugin.cancel(901);
+      await NativeRemindersBridge.markWirdCompleted();
+    } catch (e) {
+      debugPrint('Error cancelling wird notification: $e');
+    }
   }
 
   Future<void> schedulePrayerTimeNotification({
@@ -380,6 +357,8 @@ class NotifyHelper {
           channelDescription: _prayerChannel.description,
           importance: Importance.max,
           priority: Priority.high,
+          icon: 'icon',
+          largeIcon: const DrawableResourceAndroidBitmap('icon'),
           playSound: true,
           enableVibration: true,
           fullScreenIntent: true,
@@ -501,6 +480,35 @@ class NotifyHelper {
   Future<void> onDidReceiveNotificationResponse(
     NotificationResponse notificationResponse,
   ) async {
+    final actionId = notificationResponse.actionId;
+    if (actionId != null && actionId.isNotEmpty) {
+      if (actionId == 'action_prayed') {
+        debugPrint('🕌 User tapped "صلّيت" from iOS notification action');
+        if (notificationResponse.payload != null) {
+          try {
+            final data = jsonDecode(notificationResponse.payload!) as Map;
+            final prayerKey = data['prayerKey']?.toString() ?? '';
+            if (prayerKey.isNotEmpty) {
+              await NativeAdhanBridge.markPrayerAsPrayed(prayerKey, status: 'on_time');
+            }
+          } catch (_) {}
+        }
+        return;
+      } else if (actionId == 'action_stop') {
+        debugPrint('🛑 User tapped "إيقاف" from iOS notification action');
+        await NativeAdhanBridge.stopAdhan();
+        return;
+      } else if (actionId == 'action_mushaf') {
+        await AppNavigationService.instance.handleNavigation({'target_screen': 'wird'});
+        return;
+      } else if (actionId == 'action_azkar') {
+        await AppNavigationService.instance.handleNavigation({'target_screen': 'azkar'});
+        return;
+      } else if (actionId == 'action_prayer') {
+        await AppNavigationService.instance.handleNavigation({'target_screen': 'prayer_times'});
+        return;
+      }
+    }
     await handleNotificationPayload(notificationResponse.payload);
   }
 
@@ -539,6 +547,10 @@ class NotifyHelper {
       });
       return;
     }
+    if (payload == 'taqarrab://prayer_times' || payload.startsWith('taqarrab://prayer_times')) {
+      await Get.toNamed(AppRoutes.adhan);
+      return;
+    }
     if (payload.startsWith('adhkar')) {
       await Get.toNamed(AppRoutes.azkar);
       return;
@@ -546,10 +558,32 @@ class NotifyHelper {
     if (payload.startsWith('mushaf|wird')) {
       final parts = payload.split('|');
       final page = parts.length > 2 ? int.tryParse(parts[2]) : null;
-      await Get.toNamed(AppRoutes.mushaf, arguments: {'pageNumber': page ?? 1});
+      if (page != null) {
+        await Get.toNamed(AppRoutes.mushaf, arguments: {'pageNumber': page});
+      } else {
+        await Get.toNamed(AppRoutes.mushaf);
+      }
       return;
     }
-    await Get.toNamed(payload);
+    if (payload.startsWith('ramadan|')) {
+      final parts = payload.split('|');
+      final sub = parts.length > 1 ? parts[1] : '';
+      if (sub == 'cannon' || sub == 'suhoor') {
+        await Get.toNamed(AppRoutes.ramadanCannonSuhoor);
+      } else if (sub == 'khatma') {
+        await Get.toNamed(AppRoutes.ramadanKhatma);
+      } else if (sub == 'imsakia') {
+        await Get.toNamed(AppRoutes.ramadanImsakia);
+      } else {
+        await Get.toNamed(AppRoutes.ramadanHub);
+      }
+      return;
+    }
+    try {
+      await Get.toNamed(payload);
+    } catch (e) {
+      debugPrint('⚠️ Could not navigate to notification payload route "$payload": $e');
+    }
   }
 
   void onDidReceiveLocalNotification(
@@ -576,7 +610,7 @@ class NotifyHelper {
         ?.requestPermissions(
           alert: true,
           badge: true,
-          critical: true,
+          critical: false,
           sound: true,
         );
   }

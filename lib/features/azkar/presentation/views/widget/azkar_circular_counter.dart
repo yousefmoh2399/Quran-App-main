@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:quran_app_android/core/design/app_colors.dart';
 import 'package:quran_app_android/core/design/app_radius.dart';
 import 'package:quran_app_android/core/design/app_spacing.dart';
 import 'package:quran_app_android/core/design/app_typography.dart';
+import 'package:quran_app_android/core/services/app_haptics_service.dart';
 
 class AzkarCircularCounter extends StatelessWidget {
   final int targetCount;
@@ -35,10 +35,14 @@ class AzkarCircularCounter extends StatelessWidget {
         GestureDetector(
           onTap: () {
             if (!isCompleted) {
-              HapticFeedback.lightImpact();
+              if (remainingCount <= 1) {
+                AppHaptics.itemCompleted();
+              } else {
+                AppHaptics.tap();
+              }
               onTap();
             } else {
-              HapticFeedback.mediumImpact();
+              AppHaptics.selection();
             }
           },
           child: Stack(
