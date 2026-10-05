@@ -15,7 +15,6 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
     <!-- Optional hardware features so devices/tablets without compass/camera/GPS can still install from Store/Gallery -->
     <uses-feature android:name="android.hardware.camera" android:required="false" />
@@ -52,7 +51,7 @@
 
         <activity
             android:name=".adhan.AdhanAlertActivity"
-            android:exported="true"
+            android:exported="false"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:showWhenLocked="true"
             android:turnScreenOn="true"
@@ -71,7 +70,7 @@
         <receiver
             android:name=".adhan.AlarmReceiver"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="false" />
 
         <receiver
             android:name=".adhan.BootReceiver"

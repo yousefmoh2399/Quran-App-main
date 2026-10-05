@@ -1,6 +1,6 @@
 name: quran_app_android
 description: "A new Flutter project."
-version: 1.0.0+1
+version: 1.0.1+4010
 
 environment:
   sdk: ^3.7.2

@@ -10,9 +10,23 @@ plugins {
 
 val keystorePropertiesFile = rootProject.file("key.properties")
 val keystoreProperties = Properties()
-if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+val isKeystoreFileValid = keystorePropertiesFile.exists() && keystorePropertiesFile.length() > 0
+
+if (isKeystoreFileValid) {
+    keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
 }
+
+val storeFilePath = keystoreProperties.getProperty("storeFile")
+val resolvedStoreFile = if (!storeFilePath.isNullOrBlank()) {
+    val f = file(storeFilePath)
+    if (f.exists()) f else rootProject.file(storeFilePath)
+} else null
+
+val isReleaseSigningConfigured = isKeystoreFileValid &&
+    !keystoreProperties.getProperty("keyAlias").isNullOrBlank() &&
+    !keystoreProperties.getProperty("keyPassword").isNullOrBlank() &&
+    !keystoreProperties.getProperty("storePassword").isNullOrBlank() &&
+    (resolvedStoreFile != null && resolvedStoreFile.exists())
 
 android {
     namespace = "com.example.quran_app_android"
@@ -41,11 +55,11 @@ android {
 
     signingConfigs {
         create("release") {
-            if (keystorePropertiesFile.exists()) {
-                keyAlias = keystoreProperties["keyAlias"] as String
-                keyPassword = keystoreProperties["keyPassword"] as String
-                storeFile = file(keystoreProperties["storeFile"] as String)
-                storePassword = keystoreProperties["storePassword"] as String
+            if (isReleaseSigningConfigured) {
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+                storeFile = resolvedStoreFile
+                storePassword = keystoreProperties.getProperty("storePassword")
             }
         }
     }
@@ -58,11 +72,16 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            if (keystorePropertiesFile.exists()) {
+            if (isReleaseSigningConfigured) {
                 signingConfig = signingConfigs.getByName("release")
             } else {
-                // Fallback to debug key when building locally without key.properties
-                signingConfig = signingConfigs.getByName("debug")
+                // Do NOT silently fall back to debug signing for production release.
+                // An unsigned AAB prevents accidental upload of debug-signed artifacts to Google Play.
+                println("\n==========================================================================")
+                println("⚠️ [CRITICAL PRODUCTION NOTICE] android/key.properties is not configured!")
+                println("⚠️ AAB will NOT be signed with debug key to protect Google Play release.")
+                println("⚠️ To sign for Google Play, create upload keystore and fill android/key.properties.")
+                println("==========================================================================\n")
             }
         }
     }

@@ -16,7 +16,7 @@ class AppShareView extends StatelessWidget {
   const AppShareView({super.key});
 
   static const String appDownloadUrl =
-      'https://play.google.com/store/apps/details?id=com.example.quran_app_android';
+      'https://play.google.com/store/apps/details?id=com.taqarrab.quran';
 
   static const String shareMessage =
       '✨ أنصحكم بتحميل تطبيق «تَقَرُّب» 🕌\n'
