@@ -348,28 +348,31 @@ class AdhanSettingsView extends StatelessWidget {
                 borderRadius: AppRadius.borderLg,
                 border: Border.all(color: colors.divider),
               ),
-              child: SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(
-                  'دعاء ما بعد الأذان (الشيخ الشعراوي)',
-                  style: TextStyle(
-                    fontFamily: AppTypography.uiFont,
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.bold,
-                    color: colors.text,
+              child: Material(
+                color: Colors.transparent,
+                child: SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(
+                    'دعاء ما بعد الأذان (الشيخ الشعراوي)',
+                    style: TextStyle(
+                      fontFamily: AppTypography.uiFont,
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.bold,
+                      color: colors.text,
+                    ),
                   ),
-                ),
-                subtitle: Text(
-                  'تشغيل دعاء «اللهم رب هذه الدعوة التامة...» بصوت فضيلة الشيخ محمد متولي الشعراوي تلقائياً بعد انتهاء الأذان مباشرة',
-                  style: TextStyle(
-                    fontFamily: AppTypography.uiFont,
-                    fontSize: 11.5,
-                    color: colors.textMuted,
+                  subtitle: Text(
+                    'تشغيل دعاء «اللهم رب هذه الدعوة التامة...» بصوت فضيلة الشيخ محمد متولي الشعراوي تلقائياً بعد انتهاء الأذان مباشرة',
+                    style: TextStyle(
+                      fontFamily: AppTypography.uiFont,
+                      fontSize: 11.5,
+                      color: colors.textMuted,
+                    ),
                   ),
+                  value: settings.playPostAdhanDua,
+                  activeColor: colors.primary,
+                  onChanged: (val) => controller.updatePlayPostAdhanDua(val),
                 ),
-                value: settings.playPostAdhanDua,
-                activeColor: colors.primary,
-                onChanged: (val) => controller.updatePlayPostAdhanDua(val),
               ),
             ),
 

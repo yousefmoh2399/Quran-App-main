@@ -20,24 +20,27 @@ class PrayerTimeItem extends StatelessWidget {
             color: isCurrent == false
                 ? AppColors.kbackGroundColor
                 : AppColors.kPrimaryColor),
-        child: ListTile(
-          trailing: Text(
-            title,
-            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  fontFamily: 'BalooBhaijaan2',
-                  color: isCurrent == false ? Colors.black : Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                ),
-          ),
-          title: Text(
-            time,
-            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  fontFamily: 'BalooBhaijaan2',
-                  color: isCurrent == false ? Colors.black : Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                ),
+        child: Material(
+          color: Colors.transparent,
+          child: ListTile(
+            trailing: Text(
+              title,
+              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                    fontFamily: 'BalooBhaijaan2',
+                    color: isCurrent == false ? Colors.black : Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+            ),
+            title: Text(
+              time,
+              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                    fontFamily: 'BalooBhaijaan2',
+                    color: isCurrent == false ? Colors.black : Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+            ),
           ),
         ),
       ),
