@@ -98,6 +98,10 @@ class AppNavigationService {
         await Get.toNamed(AppRoutes.adhan);
         return;
 
+      case 'adhan_settings':
+        await Get.toNamed(AppRoutes.adhanSettings);
+        return;
+
       case 'mushaf':
         final page = openPage ?? _getLastReadPage();
         await Get.toNamed(AppRoutes.mushaf, arguments: {'pageNumber': page});

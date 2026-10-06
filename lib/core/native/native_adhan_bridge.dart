@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../notifications/ios_prayer_scheduler.dart';
+import 'native_reminders_bridge.dart';
 
 class NativeAdhanBridge {
   static const _channel = MethodChannel('native_adhan_bridge');
@@ -63,10 +64,13 @@ class NativeAdhanBridge {
   }) async {
     if (Platform.isIOS) {
       debugPrint('📱 [iOS NativeAdhanBridge] Routing scheduleTestAdhan to IosPrayerNotificationScheduler...');
-      return IosPrayerNotificationScheduler.instance.scheduleTestAdhan(
+      final scheduled = await IosPrayerNotificationScheduler.instance.scheduleTestAdhan(
         delaySeconds: delaySeconds,
         prayerName: prayerName,
       );
+      // Play native adhan sound preview through AVAudioPlayer so user hears audio in simulator / foreground
+      await NativeRemindersBridge.previewSound('adhan');
+      return scheduled;
     }
     try {
       await _channel.invokeMethod('scheduleTestAdhan', {
@@ -205,6 +209,7 @@ class NativeAdhanBridge {
   static Future<bool> stopAdhan() async {
     if (Platform.isIOS) {
       debugPrint('📱 [iOS NativeAdhanBridge] stopAdhan called on iOS.');
+      await NativeRemindersBridge.stopSound();
       return true;
     }
     try {

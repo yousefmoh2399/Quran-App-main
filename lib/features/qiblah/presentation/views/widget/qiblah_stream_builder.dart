@@ -10,6 +10,7 @@ import 'package:quran_app_android/core/design/app_typography.dart';
 import 'package:quran_app_android/core/design/components/app_card.dart';
 import 'package:quran_app_android/core/design/components/empty_state.dart';
 import 'package:quran_app_android/core/services/app_haptics_service.dart';
+import 'package:quran_app_android/core/util/widgets/kaaba_icon.dart';
 
 class QiblahStreamBuilder extends StatefulWidget {
   final AnimationController animationController;
@@ -190,11 +191,11 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.mosque_rounded, size: 16, color: colors.primary),
+                    const KaabaIcon(size: 18),
                     AppSpacing.horizontalXs,
                     Flexible(
                       child: Text(
-                        'المسافة إلى مكة المكرمة: ${distanceKm.toStringAsFixed(0)} كم',
+                        'المسافة إلى الكعبة المشرفة: ${distanceKm.toStringAsFixed(0)} كم',
                         style: textTheme.labelMedium?.copyWith(
                           color: colors.primary,
                           fontWeight: FontWeight.bold,
@@ -466,29 +467,34 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Container(
-                            padding: AppSpacing.paddingXs,
+                            padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(
-                              color: colors.primary,
+                              color: isAligned ? colors.primary.withOpacity(0.15) : colors.surface,
                               shape: BoxShape.circle,
+                              border: Border.all(
+                                color: isAligned ? colors.primary : colors.divider,
+                                width: 2,
+                              ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: colors.primary.withOpacity(0.3),
-                                  blurRadius: 8,
+                                  color: (isAligned ? colors.primary : Colors.black)
+                                      .withOpacity(0.18),
+                                  blurRadius: 10,
                                 ),
                               ],
                             ),
-                            child: const Icon(
-                              Icons.navigation_rounded,
-                              color: Colors.white,
-                              size: 28,
+                            child: KaabaIcon(
+                              size: 30,
+                              hasGlow: isAligned,
+                              glowColor: colors.primary,
                             ),
                           ),
                           AppSpacing.verticalXs,
                           Container(
                             width: 4,
-                            height: 50,
+                            height: 44,
                             decoration: BoxDecoration(
-                              color: colors.primary,
+                              color: isAligned ? colors.primary : colors.accent,
                               borderRadius: AppRadius.borderFull,
                             ),
                           ),
@@ -583,7 +589,11 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
                                   ),
                                 ],
                               ),
-                              child: const Icon(Icons.mosque_rounded, size: 20, color: Colors.white),
+                              child: KaabaIcon(
+                                size: 22,
+                                hasGlow: isAligned,
+                                glowColor: colors.primary,
+                              ),
                             ),
                             Container(
                               width: 3,

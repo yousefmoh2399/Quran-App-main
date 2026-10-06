@@ -297,23 +297,40 @@ class AdhanSettingsView extends StatelessWidget {
                   AppSpacing.verticalSm,
                   SizedBox(
                     width: double.infinity,
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: colors.primary),
-                        shape: const RoundedRectangleBorder(borderRadius: AppRadius.borderMd),
-                        padding: const EdgeInsets.symmetric(vertical: 10.0),
-                      ),
-                      icon: Icon(Icons.play_circle_filled_rounded, color: colors.primary),
-                      label: Text(
-                        'تشغيل تجريبي للأذان الآن',
-                        style: TextStyle(
-                          fontFamily: AppTypography.uiFont,
-                          fontWeight: FontWeight.bold,
-                          color: colors.primary,
+                    child: Obx(() {
+                      final isPlaying = controller.isPlayingTestAdhan.value;
+                      return OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(
+                            color: isPlaying ? Colors.redAccent : colors.primary,
+                          ),
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: AppRadius.borderMd,
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 10.0),
+                          backgroundColor: isPlaying
+                              ? Colors.redAccent.withOpacity(0.08)
+                              : null,
                         ),
-                      ),
-                      onPressed: () => controller.testAdhanSound('الفجر'),
-                    ),
+                        icon: Icon(
+                          isPlaying
+                              ? Icons.stop_circle_rounded
+                              : Icons.play_circle_filled_rounded,
+                          color: isPlaying ? Colors.redAccent : colors.primary,
+                        ),
+                        label: Text(
+                          isPlaying
+                              ? 'إيقاف صوت الأذان التجريبي'
+                              : 'تشغيل تجريبي للأذان الآن',
+                          style: TextStyle(
+                            fontFamily: AppTypography.uiFont,
+                            fontWeight: FontWeight.bold,
+                            color: isPlaying ? Colors.redAccent : colors.primary,
+                          ),
+                        ),
+                        onPressed: () => controller.testAdhanSound('الفجر'),
+                      );
+                    }),
                   ),
                 ],
               ),
