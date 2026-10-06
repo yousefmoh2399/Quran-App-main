@@ -254,7 +254,7 @@ class LockScreenBannerService {
         final remaining = (plan.endPage - lastRead).clamp(0, 604);
         if (remaining == 0) {
           wirdLine = 'أتممت ورد اليوم المبارك (ص ${plan.startPage} - ${plan.endPage}) تقبل الله!';
-          wirdShort = 'ورد اليوم: تم بحمد الله 🌿';
+          wirdShort = 'ورد اليوم: تم بحمد الله';
         } else {
           wirdLine = 'ص ${plan.startPage} إلى ${plan.endPage} • متبقي $remaining صفحات';
           wirdShort = 'الورد: ص $lastRead (متبقي $remaining)';
@@ -284,17 +284,17 @@ class LockScreenBannerService {
     // Construct Title
     String bannerTitle = 'تطبيق تقرّب';
     if (model.showNextPrayer && nextPrayerCountdown.isNotEmpty) {
-      bannerTitle = '🕌 الصلاة القادمة: $nextPrayerName • $nextPrayerTimeStr ($nextPrayerCountdown)';
+      bannerTitle = 'الصلاة القادمة: $nextPrayerName • $nextPrayerTimeStr ($nextPrayerCountdown)';
     } else if (model.showHijriDate && hijriLine.isNotEmpty) {
-      bannerTitle = '📅 $hijriLine';
+      bannerTitle = hijriLine;
     } else if (model.showWirdProgress && wirdShort.isNotEmpty) {
-      bannerTitle = '📖 $wirdShort';
+      bannerTitle = wirdShort;
     }
 
     // Collapsed 1-line text for compact view
     String collapsedText = '';
     if (nextPrayerCountdown.isNotEmpty) {
-      collapsedText = '⏳ $nextPrayerCountdown  │  $wirdShort';
+      collapsedText = '$nextPrayerCountdown  │  $wirdShort';
     } else {
       collapsedText = '$cityName  •  $hijriLine';
     }
@@ -303,26 +303,26 @@ class LockScreenBannerService {
     final plainBuffer = StringBuffer();
 
     if (model.showAllPrayers && allPrayersPlainLine1.isNotEmpty) {
-      plainBuffer.writeln('🕌 مواقيت الصلاة اليوم:');
+      plainBuffer.writeln('مواقيت الصلاة اليوم:');
       plainBuffer.writeln('   $allPrayersPlainLine1');
       plainBuffer.writeln('   $allPrayersPlainLine2');
       plainBuffer.writeln('');
     }
 
     if (model.showWirdProgress && wirdLine.isNotEmpty) {
-      plainBuffer.writeln('📖 الورد: $wirdLine');
+      plainBuffer.writeln('الورد: $wirdLine');
     }
 
     if (model.showDailyZikr && zikrLine.isNotEmpty) {
-      plainBuffer.writeln('📿 ذكر الوقت: «$zikrLine»');
+      plainBuffer.writeln('ذكر الوقت: «$zikrLine»');
     }
 
     if (model.showHijriDate && hijriLine.isNotEmpty) {
-      plainBuffer.writeln('📅 $hijriLine');
+      plainBuffer.writeln(hijriLine);
     }
 
     if (plainBuffer.isEmpty) {
-      plainBuffer.writeln('ألا بذكر الله تطمئن القلوب 🌿');
+      plainBuffer.writeln('ألا بذكر الله تطمئن القلوب');
     }
 
     final allPrayersUnified = '$allPrayersPlainLine1 • $allPrayersPlainLine2';
@@ -383,19 +383,19 @@ class LockScreenBannerService {
       actions.addAll([
         const AndroidNotificationAction(
           'action_mushaf',
-          '📖 الورد',
+          'الورد',
           showsUserInterface: true,
           cancelNotification: false,
         ),
         const AndroidNotificationAction(
           'action_azkar',
-          '📿 الأذكار',
+          'الأذكار',
           showsUserInterface: true,
           cancelNotification: false,
         ),
         const AndroidNotificationAction(
           'action_prayer',
-          '🕌 المواقيت',
+          'المواقيت',
           showsUserInterface: true,
           cancelNotification: false,
         ),
@@ -544,7 +544,7 @@ class LockScreenBannerService {
       final headerSpan = TextSpan(
         children: [
           TextSpan(
-            text: '🕌 تطبيق تقرّب  •  ',
+            text: 'تطبيق تقرّب  •  ',
             style: bannerStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -706,7 +706,7 @@ class LockScreenBannerService {
         final wirdSpan = TextSpan(
           children: [
             TextSpan(
-              text: '📖 الورد: ',
+              text: 'الورد: ',
               style: bannerStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -735,7 +735,7 @@ class LockScreenBannerService {
         final zikrSpan = TextSpan(
           children: [
             TextSpan(
-              text: '📿 ذكر الوقت: ',
+              text: 'ذكر الوقت: ',
               style: bannerStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,

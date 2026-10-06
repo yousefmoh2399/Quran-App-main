@@ -19,12 +19,12 @@ class AppShareView extends StatelessWidget {
       'https://play.google.com/store/apps/details?id=com.taqarrab.quran';
 
   static const String shareMessage =
-      '✨ أنصحكم بتحميل تطبيق «تَقَرُّب» 🕌\n'
+      'أنصحكم بتحميل تطبيق «تَقَرُّب»\n'
       'رفيقك اليومي للتلاوة والذكر ومواقيت الصلاة • تطبيق مجاني تماماً وبدون أي إعلانات!\n\n'
-      '📖 مصحف إلكتروني متكامل بالرسم العثماني مع تقليب صفحات واقعي وسلس\n'
-      '🕌 مواقيت الصلاة الدقيقة، أصوات الأذان العذبة، وبانر دائم لشاشة القفل\n'
-      '📿 أذكار الصباح والمساء، الورد القرآني اليومي، وتنبيهات مخصصة\n'
-      '🌙 واحة رمضان المبارك، ختمات التلاوة، وحاسبة الزكاة\n\n'
+      '• مصحف إلكتروني متكامل بالرسم العثماني مع تقليب صفحات واقعي وسلس\n'
+      '• مواقيت الصلاة الدقيقة، أصوات الأذان العذبة، وبانر دائم لشاشة القفل\n'
+      '• أذكار الصباح والمساء، الورد القرآني اليومي، وتنبيهات مخصصة\n'
+      '• واحة رمضان المبارك، ختمات التلاوة، وحاسبة الزكاة\n\n'
       'حمّل التطبيق الآن واكسب صدقة جارية بنشره:\n'
       '$appDownloadUrl';
 
@@ -63,7 +63,7 @@ class AppShareView extends StatelessWidget {
     if (context.mounted) {
       _showToast(
         context,
-        'تم نسخ نص ورابط المشاركة! جاري فتح إنستغرام للصقه في القصة أو الرسائل ✨',
+        'تم نسخ نص ورابط المشاركة! جاري فتح إنستغرام للصقه في القصة أو الرسائل',
       );
     }
 
@@ -267,7 +267,7 @@ class AppShareView extends StatelessWidget {
                             AppHaptics.selection();
                             Clipboard.setData(
                                 const ClipboardData(text: shareMessage));
-                            _showToast(context, 'تم نسخ الرسالة بالكامل بنجاح 📋');
+                            _showToast(context, 'تم نسخ الرسالة بالكامل بنجاح');
                           },
                           icon: const Icon(Icons.copy_rounded, size: 16),
                           label: const Text('نسخ الرسالة'),
@@ -280,7 +280,7 @@ class AppShareView extends StatelessWidget {
                             AppHaptics.selection();
                             Clipboard.setData(
                                 const ClipboardData(text: appDownloadUrl));
-                            _showToast(context, 'تم نسخ رابط التطبيق بنجاح 🔗');
+                            _showToast(context, 'تم نسخ رابط التطبيق بنجاح');
                           },
                           icon: const Icon(Icons.link_rounded, size: 16),
                           label: const Text('نسخ الرابط فقط'),
@@ -440,7 +440,7 @@ class AppShareView extends StatelessWidget {
                   AppHaptics.selection();
                   await Share.share(
                     shareMessage,
-                    subject: 'تطبيق تقرّب القرآني 🕌',
+                    subject: 'تطبيق تقرّب القرآني',
                     sharePositionOrigin: getSharePositionOrigin(btnContext),
                   );
                 },

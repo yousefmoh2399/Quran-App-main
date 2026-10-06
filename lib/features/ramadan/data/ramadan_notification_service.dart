@@ -82,7 +82,7 @@ class RamadanNotificationService {
         if (suhoorTime.isAfter(now)) {
           await _scheduleNotification(
             id: idSuhoor,
-            title: '🌙 موعد السحور المبارك',
+            title: 'موعد السحور المبارك',
             body: 'قال رسول الله ﷺ: «تسحروا فإن في السحور بركة» - متبقي على الفجر $suhoorMinutes دقيقة.',
             scheduledDate: suhoorTime,
             payload: 'ramadan|suhoor',
@@ -103,7 +103,7 @@ class RamadanNotificationService {
       if (imsakTime.isAfter(now)) {
         await _scheduleNotification(
           id: idImsak,
-          title: '⏳ حان وقت الإمساك',
+          title: 'حان وقت الإمساك',
           body: 'أمسك عن الطعام والشراب، وأقبل على ذكر الله والاستعداد لأذان الفجر.',
           scheduledDate: imsakTime,
           payload: 'ramadan|imsakia',
@@ -122,8 +122,8 @@ class RamadanNotificationService {
         if (iftarTime.isAfter(now)) {
           await _scheduleNotification(
             id: idIftarCannon,
-            title: '💥 مدفع الإفطار.. ذهب الظمأ!',
-            body: '«ذَهَبَ الظَّمَأُ، وَابْتَلَّتِ الْعُرُوقُ، وَثَبَتَ الأَجْرُ إِنْ شَاءَ اللَّهُ» 🌙 تقبل الله صيامكم.',
+            title: 'مدفع الإفطار.. ذهب الظمأ!',
+            body: '«ذَهَبَ الظَّمَأُ، وَابْتَلَّتِ الْعُرُوقُ، وَثَبَتَ الأَجْرُ إِنْ شَاءَ اللَّهُ» تقبل الله صيامكم.',
             scheduledDate: iftarTime,
             payload: 'ramadan|cannon',
             soundFile: 'cannon',
@@ -255,7 +255,7 @@ class RamadanNotificationService {
 
     await _plugin.show(
       idSuhoor,
-      '🌙 تجربة تنبيه السحور المبارك',
+      'تجربة تنبيه السحور المبارك',
       'قال رسول الله ﷺ: «تسحروا فإن في السحور بركة» - متبقي على الفجر $minutes دقيقة.',
       NotificationDetails(android: androidDetails, iOS: iosDetails),
       payload: 'ramadan|suhoor',
@@ -288,8 +288,8 @@ class RamadanNotificationService {
 
     await _plugin.show(
       idIftarCannon,
-      '💥 تجربة مدفع الإفطار.. ذهب الظمأ!',
-      '«ذَهَبَ الظَّمَأُ، وَابْتَلَّتِ الْعُرُوقُ، وَثَبَتَ الأَجْرُ إِنْ شَاءَ اللَّهُ» 🌙 تقبل الله صيامكم.',
+      'تجربة مدفع الإفطار.. ذهب الظمأ!',
+      '«ذَهَبَ الظَّمَأُ، وَابْتَلَّتِ الْعُرُوقُ، وَثَبَتَ الأَجْرُ إِنْ شَاءَ اللَّهُ» تقبل الله صيامكم.',
       NotificationDetails(android: androidDetails, iOS: iosDetails),
       payload: 'ramadan|cannon',
     );
@@ -321,7 +321,7 @@ class RamadanNotificationService {
 
     await _plugin.show(
       idImsak,
-      '⏳ تجربة تنبيه الإمساك',
+      'تجربة تنبيه الإمساك',
       'أمسك عن الطعام والشراب، وأقبل على ذكر الله والاستعداد لأذان الفجر.',
       NotificationDetails(android: androidDetails, iOS: iosDetails),
       payload: 'ramadan|imsakia',
@@ -354,8 +354,8 @@ class RamadanNotificationService {
 
     await _plugin.show(
       idKhatma,
-      '📖 تجربة ورد ختمة رمضان',
-      'لا تنسَ قراءة وردك القرآني اليومي ومتابعة صفحاتك نحو ختم كتاب الله 🤲',
+      'تجربة ورد ختمة رمضان',
+      'لا تنسَ قراءة وردك القرآني اليومي ومتابعة صفحاتك نحو ختم كتاب الله',
       NotificationDetails(android: androidDetails, iOS: iosDetails),
       payload: 'ramadan|khatma',
     );

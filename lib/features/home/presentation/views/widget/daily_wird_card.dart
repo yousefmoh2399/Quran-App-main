@@ -156,14 +156,21 @@ class DailyWirdCard extends StatelessWidget {
                                 borderRadius: AppRadius.borderSm,
                                 border: Border.all(color: colors.accent.withOpacity(0.4)),
                               ),
-                              child: Text(
-                                '🔥 ${toArabicDigits(plan.streak)} يوم',
-                                style: TextStyle(
-                                  fontFamily: AppTypography.uiFont,
-                                  fontSize: 11.0,
-                                  fontWeight: FontWeight.bold,
-                                  color: colors.accent,
-                                ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.local_fire_department_rounded, size: 13, color: colors.accent),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    '${toArabicDigits(plan.streak)} يوم',
+                                    style: TextStyle(
+                                      fontFamily: AppTypography.uiFont,
+                                      fontSize: 11.0,
+                                      fontWeight: FontWeight.bold,
+                                      color: colors.accent,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                         ],
@@ -192,7 +199,7 @@ class DailyWirdCard extends StatelessWidget {
               children: [
                 Text(
                   isCompleted
-                      ? '🎉 تم إنجاز ورد اليوم مباركاً!'
+                      ? 'تم إنجاز ورد اليوم مباركاً!'
                       : 'قُرئ ${toArabicDigits(currentRead)} من ${toArabicDigits(targetPages)} صفحة',
                   style: textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeight.bold,

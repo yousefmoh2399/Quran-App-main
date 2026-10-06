@@ -65,7 +65,7 @@ class _RamadanHubViewState extends State<RamadanHubView> {
 
     if (diff.isNegative) {
       setState(() {
-        _countdownTitle = 'حان الآن الموعد مبارك 🌙';
+        _countdownTitle = 'حان الآن الموعد مبارك';
         _countdownText = '00:00:00';
       });
       return;
@@ -133,14 +133,14 @@ class _RamadanHubViewState extends State<RamadanHubView> {
                             ),
                             const SizedBox(height: 4),
                             const Text(
-                              'مبارك عليكم الشهر الفضيل وتقبل الله طاعتكم 🌙',
+                              'مبارك عليكم الشهر الفضيل وتقبل الله طاعتكم',
                               style: TextStyle(color: Colors.white70, fontSize: 12),
                             ),
                           ],
                         ),
                       ),
                       const SizedBox(width: 8),
-                      const Text('🏮', style: TextStyle(fontSize: 32)),
+                      const Icon(Icons.nights_stay_rounded, color: Color(0xFFD4AF37), size: 32),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -237,7 +237,11 @@ class _RamadanHubViewState extends State<RamadanHubView> {
               ),
               child: Row(
                 children: [
-                  const Text('🤲', style: TextStyle(fontSize: 24)),
+                  Icon(
+                    Icons.volunteer_activism_rounded,
+                    color: colors.isDark ? const Color(0xFFD4AF37) : const Color(0xFF09261E),
+                    size: 24,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Column(
@@ -316,7 +320,7 @@ class _RamadanHubViewState extends State<RamadanHubView> {
                       subtitle: 'جدول الـ 30 يوماً ومواعيد الإمساك والإفطار',
                       icon: Icons.calendar_month_rounded,
                       iconColor: Colors.teal,
-                      badgeEmoji: '🌙',
+                      badgeIcon: Icons.nights_stay_rounded,
                       onTap: () => Get.toNamed(AppRoutes.ramadanImsakia),
                     ),
                     _buildMenuCard(
@@ -324,7 +328,7 @@ class _RamadanHubViewState extends State<RamadanHubView> {
                       subtitle: 'متابعة الورد اليومي والصفحات والتقدم',
                       icon: Icons.auto_stories_rounded,
                       iconColor: Colors.amber.shade800,
-                      badgeEmoji: '📖',
+                      badgeIcon: Icons.menu_book_rounded,
                       onTap: () => Get.toNamed(AppRoutes.ramadanKhatma),
                     ),
                     _buildMenuCard(
@@ -332,7 +336,7 @@ class _RamadanHubViewState extends State<RamadanHubView> {
                       subtitle: 'مدفع رمضان التراثي ومنبه وقت السحور',
                       icon: Icons.notifications_active_rounded,
                       iconColor: Colors.deepOrange,
-                      badgeEmoji: '💥',
+                      badgeIcon: Icons.flare_rounded,
                       onTap: () => Get.toNamed(AppRoutes.ramadanCannonSuhoor),
                     ),
                     _buildMenuCard(
@@ -340,7 +344,7 @@ class _RamadanHubViewState extends State<RamadanHubView> {
                       subtitle: 'متابعة ركعات التراويح والشفع والوتر',
                       icon: Icons.fingerprint_rounded,
                       iconColor: Colors.indigo,
-                      badgeEmoji: '📿',
+                      badgeIcon: Icons.accessibility_new_rounded,
                       onTap: () => Get.toNamed(AppRoutes.ramadanTaraweeh),
                     ),
                     _buildMenuCard(
@@ -348,7 +352,7 @@ class _RamadanHubViewState extends State<RamadanHubView> {
                       subtitle: 'أدعية الأيام الـ 30 والعشر الأواخر والقنوت',
                       icon: Icons.menu_book_rounded,
                       iconColor: Colors.purple,
-                      badgeEmoji: '🤲',
+                      badgeIcon: Icons.volunteer_activism_rounded,
                       onTap: () => Get.toNamed(AppRoutes.ramadanDuas),
                     ),
                     _buildMenuCard(
@@ -356,7 +360,7 @@ class _RamadanHubViewState extends State<RamadanHubView> {
                       subtitle: 'حساب زكاة الفطر وزكاة المال بدون إنترنت',
                       icon: Icons.calculate_rounded,
                       iconColor: Colors.green.shade700,
-                      badgeEmoji: '⚖️',
+                      badgeIcon: Icons.balance_rounded,
                       onTap: () => Get.toNamed(AppRoutes.ramadanZakat),
                     ),
                   ],
@@ -374,7 +378,7 @@ class _RamadanHubViewState extends State<RamadanHubView> {
     required String subtitle,
     required IconData icon,
     required Color iconColor,
-    required String badgeEmoji,
+    required IconData badgeIcon,
     required VoidCallback onTap,
   }) {
     final colors = context.appColors;
@@ -411,7 +415,7 @@ class _RamadanHubViewState extends State<RamadanHubView> {
                     ),
                     child: Icon(icon, color: iconColor, size: 22),
                   ),
-                  Text(badgeEmoji, style: const TextStyle(fontSize: 18)),
+                  Icon(badgeIcon, color: iconColor.withOpacity(0.6), size: 18),
                 ],
               ),
               Column(

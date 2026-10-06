@@ -60,7 +60,7 @@ class _RamadanTaraweehViewState extends State<RamadanTaraweehView> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text(
-            '🌟 هنيئاً! أتممت التراويح، يتبقى ركعات الشفع والوتر 🤲',
+            'هنيئاً! أتممت التراويح، يتبقى ركعات الشفع والوتر',
             style: TextStyle(color: Color(0xFFD4AF37), fontWeight: FontWeight.bold),
           ),
           backgroundColor: const Color(0xFF09261E),
@@ -197,7 +197,7 @@ class _RamadanTaraweehViewState extends State<RamadanTaraweehView> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Text(
-                            'اكتملت التراويح 🤲',
+                            'اكتملت التراويح',
                             style: TextStyle(color: Color(0xFF09261E), fontSize: 11, fontWeight: FontWeight.bold),
                           ),
                         ),
@@ -287,7 +287,7 @@ class _RamadanTaraweehViewState extends State<RamadanTaraweehView> {
                 children: [
                   Row(
                     children: const [
-                      Text('📿', style: TextStyle(fontSize: 20)),
+                      Icon(Icons.accessibility_new_rounded, size: 20, color: Color(0xFF09261E)),
                       SizedBox(width: 8),
                       Text(
                         'ذكر واستراحة ما بين الركعات (الترويحة)',

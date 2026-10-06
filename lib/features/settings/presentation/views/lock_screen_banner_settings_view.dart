@@ -401,27 +401,42 @@ class _LockScreenBannerSettingsViewState
 
                   // Notification Title (Next Prayer & Countdown)
                   if (_model.showNextPrayer) ...[
-                    Text(
-                      '🕌 الصلاة القادمة: ${data.nextPrayerName} • ${data.nextPrayerTimeStr} (${data.nextPrayerCountdown})',
-                      style: const TextStyle(
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        height: 1.3,
-                      ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.mosque_rounded, size: 16, color: Colors.white),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            'الصلاة القادمة: ${data.nextPrayerName} • ${data.nextPrayerTimeStr} (${data.nextPrayerCountdown})',
+                            style: const TextStyle(
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              height: 1.3,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 8),
                   ],
 
                   // Prayer Times Lines
                   if (_model.showAllPrayers && data.allPrayersLine1.isNotEmpty) ...[
-                    const Text(
-                      '🕌 مواقيت الصلاة اليوم:',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFFD4AF37),
-                      ),
+                    Row(
+                      children: const [
+                        Icon(Icons.access_time_rounded, size: 14, color: Color(0xFFD4AF37)),
+                        SizedBox(width: 6),
+                        Text(
+                          'مواقيت الصلاة اليوم:',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFFD4AF37),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 4),
                     Padding(
@@ -451,26 +466,44 @@ class _LockScreenBannerSettingsViewState
 
                   // Quran Wird Progress
                   if (_model.showWirdProgress && data.wirdLine.isNotEmpty) ...[
-                    Text(
-                      '📖 الورد: ${data.wirdLine}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.white70,
-                        height: 1.3,
-                      ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.menu_book_rounded, size: 14, color: Colors.white70),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            'الورد: ${data.wirdLine}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.white70,
+                              height: 1.3,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 6),
                   ],
 
                   // Daily Dhikr
                   if (_model.showDailyZikr && data.zikrLine.isNotEmpty) ...[
-                    Text(
-                      '📿 ذكر الوقت: «${data.zikrLine}»',
-                      style: const TextStyle(
-                        fontSize: 11.5,
-                        color: Color(0xFFD4AF37),
-                        height: 1.3,
-                      ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.fingerprint_rounded, size: 14, color: Color(0xFFD4AF37)),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            'ذكر الوقت: «${data.zikrLine}»',
+                            style: const TextStyle(
+                              fontSize: 11.5,
+                              color: Color(0xFFD4AF37),
+                              height: 1.3,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 6),
                   ],
@@ -481,11 +514,11 @@ class _LockScreenBannerSettingsViewState
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        _buildMockActionButton('📖 الورد'),
+                        _buildMockActionButton(Icons.menu_book_rounded, 'الورد'),
                         const SizedBox(width: 8),
-                        _buildMockActionButton('📿 الأذكار'),
+                        _buildMockActionButton(Icons.fingerprint_rounded, 'الأذكار'),
                         const SizedBox(width: 8),
-                        _buildMockActionButton('🕌 المواقيت'),
+                        _buildMockActionButton(Icons.mosque_rounded, 'المواقيت'),
                       ],
                     ),
                   ],
@@ -506,7 +539,7 @@ class _LockScreenBannerSettingsViewState
     );
   }
 
-  Widget _buildMockActionButton(String label) {
+  Widget _buildMockActionButton(IconData icon, String label) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 6),
@@ -516,13 +549,21 @@ class _LockScreenBannerSettingsViewState
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: Colors.white12),
         ),
-        child: Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 11.5,
-            fontWeight: FontWeight.bold,
-          ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 12, color: Colors.white),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 11.5,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
       ),
     );

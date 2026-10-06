@@ -84,7 +84,7 @@ class _HadithViewState extends State<HadithView> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'الأحاديث المحفوظة 🔖',
+                        'الأحاديث المحفوظة',
                         style: textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: colors.text,

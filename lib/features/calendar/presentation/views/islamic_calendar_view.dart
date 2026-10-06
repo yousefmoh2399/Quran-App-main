@@ -255,7 +255,7 @@ class _IslamicCalendarViewState extends State<IslamicCalendarView> {
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        isFasted ? 'صائم ✓' : 'سجّل صيامك',
+                        isFasted ? 'صائم' : 'سجّل صيامك',
                         style: TextStyle(
                           color: isFasted ? Colors.black87 : Colors.white,
                           fontSize: 11,

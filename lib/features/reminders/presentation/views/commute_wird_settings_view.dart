@@ -199,7 +199,8 @@ class _CommuteWirdSettingsViewState extends State<CommuteWirdSettingsView> {
                         children: [
                           Row(
                             children: [
-                              const Text('🔥 ', style: TextStyle(fontSize: 20)),
+                              const Icon(Icons.local_fire_department_rounded, color: Colors.orange, size: 24),
+                              const SizedBox(width: 4),
                               Text(
                                 '${_state?.streak ?? 0}',
                                 style: TextStyle(

@@ -56,7 +56,7 @@ class AdhanSettingsController extends GetxController {
         }
         AppSnackbar.show(
           'تم حفظ الإعدادات',
-          'تم تحديث مواقيت الصلاة وجدولة الـ 7 أيام القادمة بنجاح 🕌',
+          'تم تحديث مواقيت الصلاة وجدولة الـ 7 أيام القادمة بنجاح',
           backgroundColor: const Color(0xFF0F5C4A),
         );
       }
@@ -176,7 +176,7 @@ class AdhanSettingsController extends GetxController {
     );
     AppSnackbar.show(
       'تشغيل تجريبي للأذان',
-      'تم إطلاق الأذان التجريبي لصلاة $prayerName 🕌',
+      'تم إطلاق الأذان التجريبي لصلاة $prayerName',
       backgroundColor: const Color(0xFF0F5C4A),
       duration: const Duration(seconds: 3),
     );

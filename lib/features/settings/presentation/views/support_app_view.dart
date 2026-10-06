@@ -463,7 +463,7 @@ class _SupportAppViewState extends State<SupportAppView> {
           ),
           AppSpacing.verticalSm,
           Text(
-            '💡 يمكنك التحويل عبر أي تطبيق محفظة (فودافون كاش، أورنج كاش، وي باي، إتصالات كاش، إنستاباي، أو محفظة بنكك الإلكترونية).',
+            'يمكنك التحويل عبر أي تطبيق محفظة (فودافون كاش، أورنج كاش، وي باي، إتصالات كاش، إنستاباي، أو محفظة بنكك الإلكترونية).',
             style: TextStyle(
               fontSize: 11,
               height: 1.5,
@@ -615,9 +615,9 @@ class _SupportAppViewState extends State<SupportAppView> {
             style: TextStyle(fontSize: 12, color: colors.textMuted),
           ),
           AppSpacing.verticalSm,
-          _buildAlternativeItem('🤲 الدعاء للقائمين على التطبيق بالتوفيق والقبول والإخلاص.'),
-          _buildAlternativeItem('⭐ تقييم التطبيق 5 نجوم على المتجر لمساعدتنا على الوصول لمسلمين أكثر.'),
-          _buildAlternativeItem('📢 مشاركة التطبيق مع أهلك وأصدقائك (الدال على الخير كفاعله).'),
+          _buildAlternativeItem(Icons.volunteer_activism_rounded, 'الدعاء للقائمين على التطبيق بالتوفيق والقبول والإخلاص.', colors),
+          _buildAlternativeItem(Icons.star_rounded, 'تقييم التطبيق 5 نجوم على المتجر لمساعدتنا على الوصول لمسلمين أكثر.', colors),
+          _buildAlternativeItem(Icons.share_rounded, 'مشاركة التطبيق مع أهلك وأصدقائك (الدال على الخير كفاعله).', colors),
           AppSpacing.verticalMd,
           OutlinedButton(
             style: OutlinedButton.styleFrom(
@@ -647,12 +647,21 @@ class _SupportAppViewState extends State<SupportAppView> {
     );
   }
 
-  Widget _buildAlternativeItem(String text) {
+  Widget _buildAlternativeItem(IconData icon, String text, AppColorsExtension colors) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Text(
-        text,
-        style: const TextStyle(fontSize: 12, height: 1.4),
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 16, color: colors.primary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 12, height: 1.4),
+            ),
+          ),
+        ],
       ),
     );
   }

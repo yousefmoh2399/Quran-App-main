@@ -79,7 +79,7 @@ class _RamadanCannonSuhoorViewState extends State<RamadanCannonSuhoorView> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text(
-            '💥 مدفع الإفطار.. اضرررررب! تقبل الله صيامكم وطاعتكم 🌙',
+            'مدفع الإفطار.. اضرررررب! تقبل الله صيامكم وطاعتكم',
             style: TextStyle(color: Color(0xFFD4AF37), fontWeight: FontWeight.bold),
           ),
           backgroundColor: const Color(0xFF09261E),
@@ -139,7 +139,7 @@ class _RamadanCannonSuhoorViewState extends State<RamadanCannonSuhoorView> {
                       Expanded(
                         child: Row(
                           children: const [
-                            Text('💥', style: TextStyle(fontSize: 24)),
+                            Icon(Icons.flare_rounded, color: Color(0xFFD4AF37), size: 24),
                             SizedBox(width: 8),
                             Expanded(
                               child: Text(
@@ -327,14 +327,14 @@ class _RamadanCannonSuhoorViewState extends State<RamadanCannonSuhoorView> {
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content: Text('🔔 تم إرسال تجربة إشعار السحور المبارك'),
+                                      content: Text('تم إرسال تجربة إشعار السحور المبارك'),
                                       behavior: SnackBarBehavior.floating,
                                       duration: Duration(seconds: 3),
                                     ),
                                   );
                                 }
                               },
-                              icon: const Text('🌙'),
+                              icon: const Icon(Icons.nights_stay_rounded, size: 18),
                               label: const Text('إشعار السحور', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                             ),
                           ),
@@ -351,14 +351,14 @@ class _RamadanCannonSuhoorViewState extends State<RamadanCannonSuhoorView> {
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content: Text('💥 تم إرسال تجربة إشعار مدفع الإفطار'),
+                                      content: Text('تم إرسال تجربة إشعار مدفع الإفطار'),
                                       behavior: SnackBarBehavior.floating,
                                       duration: Duration(seconds: 3),
                                     ),
                                   );
                                 }
                               },
-                              icon: const Text('💥'),
+                              icon: const Icon(Icons.flare_rounded, size: 18),
                               label: const Text('إشعار الإفطار', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                             ),
                           ),
@@ -381,7 +381,11 @@ class _RamadanCannonSuhoorViewState extends State<RamadanCannonSuhoorView> {
                 children: [
                   Row(
                     children: [
-                      const Text('🤲', style: TextStyle(fontSize: 22)),
+                      Icon(
+                        Icons.volunteer_activism_rounded,
+                        color: colors.isDark ? const Color(0xFFD4AF37) : const Color(0xFF09261E),
+                        size: 22,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -441,7 +445,7 @@ class _RamadanCannonSuhoorViewState extends State<RamadanCannonSuhoorView> {
                           ));
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('✅ تم نسخ دعاء الإفطار إلى الحافظة'),
+                              content: Text('تم نسخ دعاء الإفطار إلى الحافظة'),
                               behavior: SnackBarBehavior.floating,
                               duration: Duration(seconds: 2),
                             ),

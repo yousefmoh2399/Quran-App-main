@@ -161,7 +161,7 @@ class HadithCard extends StatelessWidget {
                       SnackBar(
                         content: Text(
                           saved
-                              ? 'تم حفظ موضع الحديث في المحفوظات بنجاح 🔖'
+                              ? 'تم حفظ موضع الحديث في المحفوظات بنجاح'
                               : 'تمت إزالة الحديث من المحفوظات',
                           style: const TextStyle(
                             fontFamily: AppTypography.uiFont,
@@ -232,7 +232,7 @@ class HadithCard extends StatelessWidget {
                   onPressed: () async {
                     AppHaptics.selection();
                     await Share.share(
-                      '📜 من موطأ الإمام مالك\n$chapterName\n\n$hadithText',
+                      'من موطأ الإمام مالك\n$chapterName\n\n$hadithText',
                       sharePositionOrigin: getSharePositionOrigin(btnContext),
                     );
                   },

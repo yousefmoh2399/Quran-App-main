@@ -228,14 +228,21 @@ class ContinueReadingWirdCard extends StatelessWidget {
                       color: colors.accent.withOpacity(0.15),
                       borderRadius: AppRadius.borderSm,
                     ),
-                    child: Text(
-                      '🔥 ${toArabicDigits(plan.streak)} يوم',
-                      style: TextStyle(
-                        fontFamily: AppTypography.uiFont,
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.bold,
-                        color: colors.accent,
-                      ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.local_fire_department_rounded, size: 12, color: colors.accent),
+                        const SizedBox(width: 2),
+                        Text(
+                          '${toArabicDigits(plan.streak)} يوم',
+                          style: TextStyle(
+                            fontFamily: AppTypography.uiFont,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.bold,
+                            color: colors.accent,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -285,7 +292,7 @@ class ContinueReadingWirdCard extends StatelessWidget {
             Expanded(
               child: Text(
                 isCompleted
-                    ? '🎉 تم إنجاز ورد اليوم مباركاً'
+                    ? 'تم إنجاز ورد اليوم مباركاً'
                     : 'من صـ ${toArabicDigits(plan.startPage)} إلى صـ ${toArabicDigits(plan.endPage)}',
                 style: textTheme.bodySmall?.copyWith(
                   color: isCompleted ? colors.primary : colors.textMuted,

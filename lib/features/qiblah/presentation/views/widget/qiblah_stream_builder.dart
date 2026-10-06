@@ -190,7 +190,7 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text('🕋', style: TextStyle(fontSize: 14)),
+                    Icon(Icons.mosque_rounded, size: 16, color: colors.primary),
                     AppSpacing.horizontalXs,
                     Flexible(
                       child: Text(
@@ -281,7 +281,7 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
                     Flexible(
                       child: Text(
                         isAligned
-                            ? 'أنت باتجاه القبلة المشرفة الآن 🕋'
+                            ? 'أنت باتجاه القبلة المشرفة الآن'
                             : 'أدر الهاتف حتى يتطابق المؤشر مع الكعبة',
                         textAlign: TextAlign.center,
                         style: textTheme.labelLarge?.copyWith(
@@ -583,7 +583,7 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
                                   ),
                                 ],
                               ),
-                              child: const Text('🕋', style: TextStyle(fontSize: 18)),
+                              child: const Icon(Icons.mosque_rounded, size: 20, color: Colors.white),
                             ),
                             Container(
                               width: 3,

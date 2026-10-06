@@ -594,7 +594,8 @@ class MushafController extends GetxController {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: Row(
             children: const [
-              Text('🎉 '),
+              Icon(Icons.celebration_rounded, color: Color(0xFFD4AF37), size: 22),
+              SizedBox(width: 6),
               Text('تقبل الله طاعتكم!', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
             ],
           ),
@@ -619,7 +620,7 @@ class MushafController extends GetxController {
                     SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'تم تحديث سجل قراءتك وإلغاء تذكير هذا الوقت لهذا اليوم 🌿',
+                        'تم تحديث سجل قراءتك وإلغاء تذكير هذا الوقت لهذا اليوم',
                         style: TextStyle(fontSize: 13, color: Color(0xFF1B4D3E), fontWeight: FontWeight.w600),
                       ),
                     ),

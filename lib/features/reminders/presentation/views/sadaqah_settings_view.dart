@@ -75,7 +75,7 @@ class _SadaqahSettingsViewState extends State<SadaqahSettingsView> {
     if (mounted) {
       AppSnackbar.show(
         'تم الحفظ',
-        'تم تحديث إعدادات تذكير الصدقة وإعادة جدولتها بنجاح 🌿',
+        'تم تحديث إعدادات تذكير الصدقة وإعادة جدولتها بنجاح',
         context: context,
       );
     }
@@ -146,7 +146,7 @@ class _SadaqahSettingsViewState extends State<SadaqahSettingsView> {
                           children: [
                             Expanded(
                               child: ChoiceChip(
-                                label: const Center(child: Text('تقويم هجري 🌙')),
+                                label: const Center(child: Text('تقويم هجري')),
                                 selected: _calendar == 'hijri',
                                 selectedColor: primary.withOpacity(0.2),
                                 onSelected: (sel) {
@@ -157,7 +157,7 @@ class _SadaqahSettingsViewState extends State<SadaqahSettingsView> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: ChoiceChip(
-                                label: const Center(child: Text('تقويم ميلادي 📅')),
+                                label: const Center(child: Text('تقويم ميلادي')),
                                 selected: _calendar == 'gregorian',
                                 selectedColor: primary.withOpacity(0.2),
                                 onSelected: (sel) {
@@ -305,7 +305,7 @@ class _SadaqahSettingsViewState extends State<SadaqahSettingsView> {
                     if (context.mounted) {
                       AppSnackbar.show(
                         'تم إرسال الإشعار',
-                        'تفقّد لوحة الإشعارات واضغط على زر "تصدّقت ✓" لتجربة التسجيل المباشر',
+                        'تفقّد لوحة الإشعارات واضغط على زر "تصدّقت" لتجربة التسجيل المباشر',
                         context: context,
                       );
                     }

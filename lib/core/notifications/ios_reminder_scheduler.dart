@@ -368,7 +368,7 @@ class IosReminderNotificationScheduler {
       await notificationsPlugin.zonedSchedule(
         id,
         'ورد القرآن الكريم',
-        'حان موعد وردك اليومي، تلاوة صفحة من كتاب الله تنير يومك وتزيد بركتك 📖',
+        'حان موعد وردك اليومي، تلاوة صفحة من كتاب الله تنير يومك وتزيد بركتك',
         tzTime,
         NotificationDetails(iOS: darwinDetails),
         uiLocalNotificationDateInterpretation:
@@ -433,7 +433,7 @@ class IosReminderNotificationScheduler {
       await notificationsPlugin.zonedSchedule(
         id,
         'أذكار وورد المواصلات',
-        'استثمر وقت تنقلك في ذكر الله والاستماع للقرآن الكريم ($targetPages صفحات) 🚗',
+        'استثمر وقت تنقلك في ذكر الله والاستماع للقرآن الكريم ($targetPages صفحات)',
         tzTime,
         NotificationDetails(iOS: darwinDetails),
         uiLocalNotificationDateInterpretation:
@@ -494,7 +494,7 @@ class IosReminderNotificationScheduler {
     await notificationsPlugin.zonedSchedule(
       id,
       'تذكير الصدقة الشهرية',
-      'مانقص مال من صدقة — تذكير بإخراج صدقتك الشهرية المباركة 🤍',
+      'ما نقص مال من صدقة — تذكير بإخراج صدقتك الشهرية المباركة',
       tzTime,
       NotificationDetails(iOS: darwinDetails),
       uiLocalNotificationDateInterpretation:

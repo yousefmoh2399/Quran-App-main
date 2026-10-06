@@ -632,7 +632,7 @@ class _MushafViewState extends State<MushafView> {
                     icon: Icon(isDone ? Icons.check_circle_rounded : Icons.done_all_rounded, size: 16),
                     onPressed: isDone ? null : controller.completeCommuteWird,
                     label: Text(
-                      isDone ? 'تم الإنجاز بنجاح ✓' : 'أتممت الورد ✓',
+                      isDone ? 'تم الإنجاز بنجاح' : 'أتممت الورد',
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                     ),
                   );

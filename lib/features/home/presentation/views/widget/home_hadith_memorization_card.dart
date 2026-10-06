@@ -262,7 +262,7 @@ class _HomeHadithMemorizationCardState extends State<HomeHadithMemorizationCard>
               ),
               child: Row(
                 children: [
-                  const Text('🌿', style: TextStyle(fontSize: 20)),
+                  Icon(Icons.spa_rounded, color: colors.primary, size: 20),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
