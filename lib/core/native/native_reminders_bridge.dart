@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../notifications/ios_reminder_scheduler.dart';
 
@@ -10,9 +12,12 @@ import '../notifications/ios_reminder_scheduler.dart';
 class NativeRemindersBridge {
   static const MethodChannel _channel = MethodChannel('com.taqarrab.quran/native_reminders');
 
+  /// Indicates whether iOS reminders engine should be used.
+  static bool get isIOS => Platform.isIOS || !Platform.isAndroid;
+
   /// Fetches all reminders stored in SQLite (Android) or SharedPreferences (iOS).
   static Future<List<Map<String, dynamic>>> getAllReminders() async {
-    if (Platform.isIOS) {
+    if (isIOS) {
       debugPrint('📱 [iOS NativeRemindersBridge] getAllReminders called.');
       return IosReminderNotificationScheduler.instance.getAllReminders();
     }
@@ -206,15 +211,15 @@ class NativeRemindersBridge {
     }
   }
 
+  static const String prefsSoundsKey = 'reminder_sound_settings';
+
   /// Previews/plays an audio sound natively without third-party dependencies.
   static Future<bool> previewSound(String soundKey) async {
-    if (Platform.isIOS) {
-      debugPrint('📱 [iOS NativeRemindersBridge] previewSound($soundKey)');
-      return true;
-    }
     try {
       final success = await _channel.invokeMethod<bool>('previewSound', {'soundKey': soundKey});
       return success ?? false;
+    } on MissingPluginException {
+      return true;
     } catch (e, st) {
       debugPrint('❌ [NativeRemindersBridge] previewSound error: $e\n$st');
       return false;
@@ -223,10 +228,11 @@ class NativeRemindersBridge {
 
   /// Stops any currently playing preview sound.
   static Future<bool> stopSound() async {
-    if (Platform.isIOS) return true;
     try {
       final success = await _channel.invokeMethod<bool>('stopSound');
       return success ?? false;
+    } on MissingPluginException {
+      return true;
     } catch (e, st) {
       debugPrint('❌ [NativeRemindersBridge] stopSound error: $e\n$st');
       return false;
@@ -242,7 +248,28 @@ class NativeRemindersBridge {
     required String sadaqahSound,
     required String azkarSound,
   }) async {
-    if (Platform.isIOS) return true;
+    if (isIOS) {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final map = {
+          'mode': mode,
+          'unifiedSound': unifiedSound,
+          'wirdSound': wirdSound,
+          'commuteSound': commuteSound,
+          'sadaqahSound': sadaqahSound,
+          'azkarSound': azkarSound,
+        };
+        await prefs.setString(prefsSoundsKey, jsonEncode(map));
+        debugPrint('📱 [iOS NativeRemindersBridge] Saved sound settings: $map');
+        try {
+          await IosReminderNotificationScheduler.instance.rescheduleAll();
+        } catch (_) {}
+        return true;
+      } catch (e, st) {
+        debugPrint('❌ [iOS NativeRemindersBridge] saveSoundSettings error: $e\n$st');
+        return false;
+      }
+    }
     try {
       final success = await _channel.invokeMethod<bool>('saveSoundSettings', {
         'mode': mode,
@@ -261,7 +288,18 @@ class NativeRemindersBridge {
 
   /// Retrieves current notification sound settings from native preferences.
   static Future<Map<String, String>> getSoundSettings() async {
-    if (Platform.isIOS) return {};
+    if (isIOS) {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final str = prefs.getString(prefsSoundsKey);
+        if (str == null || str.isEmpty) return {};
+        final decoded = jsonDecode(str) as Map<String, dynamic>;
+        return decoded.map((k, v) => MapEntry(k.toString(), v.toString()));
+      } catch (e, st) {
+        debugPrint('❌ [iOS NativeRemindersBridge] getSoundSettings error: $e\n$st');
+        return {};
+      }
+    }
     try {
       final result = await _channel.invokeMethod<Map<dynamic, dynamic>>('getSoundSettings');
       if (result == null) return {};

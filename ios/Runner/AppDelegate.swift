@@ -1,9 +1,12 @@
 import UIKit
 import Flutter
 import AudioToolbox
+import AVFoundation
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
+  private var audioPlayer: AVAudioPlayer?
+
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
@@ -39,8 +42,61 @@ import AudioToolbox
           result(FlutterMethodNotImplemented)
         }
       }
+
+      let remindersChannel = FlutterMethodChannel(name: "com.taqarrab.quran/native_reminders", binaryMessenger: controller)
+      remindersChannel.setMethodCallHandler { [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) in
+        guard let self = self else {
+          result(false)
+          return
+        }
+        if call.method == "previewSound" {
+          let soundKey = (call.arguments as? [String: Any])?["soundKey"] as? String ?? "fazakkir"
+          self.playPreviewSound(soundKey: soundKey)
+          result(true)
+        } else if call.method == "stopSound" {
+          self.stopPreviewSound()
+          result(true)
+        } else {
+          result(FlutterMethodNotImplemented)
+        }
+      }
     }
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+
+  private func playPreviewSound(soundKey: String) {
+    stopPreviewSound()
+    guard soundKey != "silent" && soundKey != "system_default" else { return }
+
+    let filename: String
+    switch soundKey {
+    case "fazakkir": filename = "fazakkir"
+    case "azkar_1": filename = "azkar_1"
+    case "azkar_2": filename = "azkar_2"
+    case "adhan": filename = "adhan_ios"
+    case "cannon": filename = "cannon"
+    default: filename = soundKey
+    }
+
+    guard let url = Bundle.main.url(forResource: filename, withExtension: "wav") else {
+      print("⚠️ [AppDelegate] Sound file not found: \(filename).wav")
+      return
+    }
+
+    do {
+      try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers])
+      try AVAudioSession.sharedInstance().setActive(true)
+      audioPlayer = try AVAudioPlayer(contentsOf: url)
+      audioPlayer?.prepareToPlay()
+      audioPlayer?.play()
+    } catch {
+      print("⚠️ [AppDelegate] Error playing preview sound: \(error)")
+    }
+  }
+
+  private func stopPreviewSound() {
+    audioPlayer?.stop()
+    audioPlayer = nil
   }
 }

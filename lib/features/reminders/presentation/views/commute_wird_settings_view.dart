@@ -319,22 +319,27 @@ class _CommuteWirdSettingsViewState extends State<CommuteWirdSettingsView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
+                        Wrap(
+                          alignment: WrapAlignment.spaceBetween,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 8,
+                          runSpacing: 8,
                           children: [
-                            const Expanded(
-                              child: Text(
-                                'مواعيد وفترات الطريق اليومية',
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                              ),
+                            const Text(
+                              'مواعيد وفترات الطريق اليومية',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                             ),
-                            const SizedBox(width: 8),
-                            TextButton.icon(
-                              style: TextButton.styleFrom(
-                                visualDensity: VisualDensity.compact,
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            FilledButton.tonalIcon(
+                              style: FilledButton.styleFrom(
+                                visualDensity: VisualDensity.standard,
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                               ),
                               icon: const Icon(Icons.add_rounded, size: 18),
-                              label: const Text('إضافة موعد'),
+                              label: const Text(
+                                'إضافة موعد',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                              ),
                               onPressed: _addSlot,
                             ),
                           ],

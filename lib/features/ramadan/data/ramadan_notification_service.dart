@@ -200,7 +200,7 @@ class RamadanNotificationService {
 
     DarwinNotificationDetails iosDetails;
     if (soundFile != null && soundFile.isNotEmpty) {
-      final iosSound = soundFile == 'adhan' ? 'adhan.wav' : '$soundFile.wav';
+      final iosSound = soundFile == 'adhan' ? 'adhan_ios.wav' : '$soundFile.wav';
       iosDetails = DarwinNotificationDetails(
         presentAlert: true,
         presentBadge: true,
@@ -273,7 +273,7 @@ class RamadanNotificationService {
       importance: Importance.max,
       priority: Priority.high,
       playSound: true,
-      sound: const RawResourceAndroidNotificationSound('adhan'),
+      sound: const RawResourceAndroidNotificationSound('cannon'),
       enableVibration: true,
       icon: 'icon',
       largeIcon: const DrawableResourceAndroidBitmap('icon'),
@@ -283,7 +283,7 @@ class RamadanNotificationService {
       presentAlert: true,
       presentBadge: true,
       presentSound: true,
-      sound: 'adhan.wav',
+      sound: 'cannon.wav',
     );
 
     await _plugin.show(

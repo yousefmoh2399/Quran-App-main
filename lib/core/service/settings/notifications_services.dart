@@ -245,8 +245,8 @@ class NotifyHelper {
           ),
         );
     final DarwinNotificationDetails iosNotificationDetails =
-        DarwinNotificationDetails(
-          sound: soundAzkar1,
+        const DarwinNotificationDetails(
+          sound: 'azkar_1.wav',
           presentAlert: true,
           presentBadge: true,
           presentSound: true,
@@ -369,12 +369,12 @@ class NotifyHelper {
           audioAttributesUsage: AudioAttributesUsage.alarm,
           ticker: 'prayer_time',
         );
-    final DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
-      sound: soundAdhan,
+    final DarwinNotificationDetails iosDetails = const DarwinNotificationDetails(
+      sound: 'adhan_ios.wav',
       presentAlert: true,
       presentBadge: true,
       presentSound: true,
-      interruptionLevel: InterruptionLevel.critical,
+      interruptionLevel: InterruptionLevel.timeSensitive,
     );
 
     await flutterLocalNotificationsPlugin.zonedSchedule(
