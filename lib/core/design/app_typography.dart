@@ -11,9 +11,12 @@ class AppTypography {
   /// Fallback font cascade ensuring correct rendering for:
   /// - Full Islamic symbols and ligatures (ﷺ, ﷻ, ﷽, ۞, ۩, ۝) via Amiri.
   /// - Arabic UI text and numerals via Cairo.
+  /// - Emojis on iOS (Apple Color Emoji) and Android (Noto Color Emoji).
   static const List<String> fallbackFonts = [
     'Amiri',
     'Cairo',
+    'Apple Color Emoji',
+    'Noto Color Emoji',
   ];
 
   /// Pre-configured base TextStyle for UI elements with fallback support.

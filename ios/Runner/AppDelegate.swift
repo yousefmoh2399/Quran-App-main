@@ -60,6 +60,29 @@ import AVFoundation
           result(FlutterMethodNotImplemented)
         }
       }
+
+      let urlChannel = FlutterMethodChannel(name: "com.taqarrab.quran/url_launcher", binaryMessenger: controller)
+      urlChannel.setMethodCallHandler { (call: FlutterMethodCall, result: @escaping FlutterResult) in
+        guard let args = call.arguments as? [String: Any],
+              let urlString = args["url"] as? String,
+              let url = URL(string: urlString) else {
+          result(false)
+          return
+        }
+        if call.method == "launchUrl" {
+          if UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url, options: [:]) { success in
+              result(success)
+            }
+          } else {
+            result(false)
+          }
+        } else if call.method == "canLaunchUrl" {
+          result(UIApplication.shared.canOpenURL(url))
+        } else {
+          result(FlutterMethodNotImplemented)
+        }
+      }
     }
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
@@ -98,5 +121,25 @@ import AVFoundation
   private func stopPreviewSound() {
     audioPlayer?.stop()
     audioPlayer = nil
+  }
+
+  override func application(
+    _ app: UIApplication,
+    open url: URL,
+    options: [UIApplication.OpenURLOptionsKey: Any] = [:]
+  ) -> Bool {
+    guard let host = url.host else { return super.application(app, open: url, options: options) }
+    var navData: [String: Any] = ["target_screen": host]
+    if let components = URLComponents(url: url, resolvingAgainstBaseURL: false) {
+      if let pageItem = components.queryItems?.first(where: { $0.name == "page" })?.value,
+         let pageNum = Int(pageItem) {
+        navData["open_page"] = pageNum
+      }
+    }
+    if let controller = window?.rootViewController as? FlutterBinaryMessenger {
+      let navChannel = FlutterMethodChannel(name: "com.taqarrab.quran/app_navigation", binaryMessenger: controller)
+      navChannel.invokeMethod("onNavigationIntent", arguments: navData)
+    }
+    return true
   }
 }

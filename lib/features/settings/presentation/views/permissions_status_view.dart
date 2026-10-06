@@ -195,7 +195,7 @@ class _PermissionsStatusViewState extends State<PermissionsStatusView> {
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
-                        'على نظام iOS، لا يتطلب التطبيق صلاحيات إضافية معقدة مثل أندرويد (كالمنبهات الدقيقة، استثناءات توفير البطارية، أو تنبيه ملء الشاشة)؛ فنظام iOS يدير دقة المواعيد واستهلاك الطاقة في الخلفية تلقائياً وبأعلى دقة، طالما تم منح إذني الموقع والإشعارات أعلاه.',
+                        'على نظام iOS، لا يتطلب التطبيق صلاحيات تشغيل إضافية في الخلفية؛ فنظام iOS يدير دقة المواعيد واستهلاك الطاقة تلقائياً وبأعلى كفاءة، طالما تم منح إذني الموقع والإشعارات أعلاه.',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: colors.textMuted,
                           height: 1.5,

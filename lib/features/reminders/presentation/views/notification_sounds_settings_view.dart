@@ -156,7 +156,7 @@ class _NotificationSoundsSettingsViewState
                 ),
                 _buildModeTile(
                   title: 'نغمة الهاتف الافتراضية',
-                  subtitle: 'استخدام صوت الإشعار القياسي لنظام أندرويد للجميع',
+                  subtitle: 'استخدام صوت الإشعار القياسي للنظام للجميع',
                   modeKey: 'default',
                   icon: Icons.smartphone_rounded,
                 ),
