@@ -50,6 +50,7 @@ flutter:
     - assets/images/json/
     - assets/db/
     - assets/fonts/qpc_v2/
+    - assets/content/
   fonts:
       - family: IconBroken
         fonts:

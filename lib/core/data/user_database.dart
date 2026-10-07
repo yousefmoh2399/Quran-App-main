@@ -13,7 +13,7 @@ class UserDatabase {
   static final UserDatabase instance = UserDatabase._internal();
 
   static const String dbName = 'user_data.db';
-  static const int currentDbVersion = 2;
+  static const int currentDbVersion = 3;
 
   Database? _db;
 
@@ -201,6 +201,33 @@ class UserDatabase {
         PRIMARY KEY (surah, ayah, tafsir_id)
       )
     ''');
+
+    // 12. Guide progress table (Umrah, Rawdah, Hajj)
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS guide_progress (
+        guide_id TEXT NOT NULL,
+        step_id TEXT NOT NULL,
+        is_completed INTEGER NOT NULL DEFAULT 0,
+        completed_at TEXT,
+        current_lap INTEGER NOT NULL DEFAULT 0,
+        updated_at TEXT NOT NULL,
+        PRIMARY KEY (guide_id, step_id)
+      )
+    ''');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_guide_progress_guide ON guide_progress(guide_id)');
+
+    // 13. Trip diary table (offline personal notes during pilgrimage)
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS trip_diary (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL,
+        category TEXT NOT NULL DEFAULT 'عام',
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      )
+    ''');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_trip_diary_created ON trip_diary(created_at)');
   }
 
   static Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -256,6 +283,33 @@ class UserDatabase {
           PRIMARY KEY (surah, ayah, tafsir_id)
         )
       ''');
+    }
+
+    if (oldVersion < 3) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS guide_progress (
+          guide_id TEXT NOT NULL,
+          step_id TEXT NOT NULL,
+          is_completed INTEGER NOT NULL DEFAULT 0,
+          completed_at TEXT,
+          current_lap INTEGER NOT NULL DEFAULT 0,
+          updated_at TEXT NOT NULL,
+          PRIMARY KEY (guide_id, step_id)
+        )
+      ''');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_guide_progress_guide ON guide_progress(guide_id)');
+
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS trip_diary (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT NOT NULL,
+          content TEXT NOT NULL,
+          category TEXT NOT NULL DEFAULT 'عام',
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        )
+      ''');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_trip_diary_created ON trip_diary(created_at)');
     }
   }
 
