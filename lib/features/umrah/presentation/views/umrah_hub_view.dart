@@ -281,24 +281,31 @@ class _UmrahHubViewState extends State<UmrahHubView> {
           ),
           const SizedBox(height: AppSpacing.md),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'التقدم في المناسك',
-                style: TextStyle(
-                  fontFamily: AppTypography.uiFont,
-                  fontSize: 13 * fontScale,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
+              Expanded(
+                child: Text(
+                  'التقدم في المناسك',
+                  style: TextStyle(
+                    fontFamily: AppTypography.uiFont,
+                    fontSize: 13 * fontScale,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
-              Text(
-                '$completedCount من $totalSteps خطوات',
-                style: TextStyle(
-                  fontFamily: AppTypography.uiFont,
-                  fontSize: 12 * fontScale,
-                  color: colors.accent,
-                  fontWeight: FontWeight.bold,
+              const SizedBox(width: 8),
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    '$completedCount من $totalSteps خطوات',
+                    style: TextStyle(
+                      fontFamily: AppTypography.uiFont,
+                      fontSize: 12 * fontScale,
+                      color: colors.accent,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ],

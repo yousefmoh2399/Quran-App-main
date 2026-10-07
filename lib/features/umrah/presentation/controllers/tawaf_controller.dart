@@ -10,9 +10,6 @@ import 'package:quran_app_android/features/umrah/data/services/tawaf_heading_acc
 class TawafController extends GetxController {
   final GuideEngine _guideEngine;
 
-  TawafController({GuideEngine? guideEngine})
-      : _guideEngine = guideEngine ?? GuideEngine();
-
   final RxInt currentLap = 0.obs;
   final RxBool isFinished = false.obs;
   final RxList<DuaModel> lapsDuas = <DuaModel>[].obs;
@@ -23,9 +20,8 @@ class TawafController extends GetxController {
   late final TawafHeadingAccumulator accumulator;
   StreamSubscription<CompassEvent>? _compassSubscription;
 
-  @override
-  void onInit() {
-    super.onInit();
+  TawafController({GuideEngine? guideEngine})
+      : _guideEngine = guideEngine ?? GuideEngine() {
     accumulator = TawafHeadingAccumulator(
       onRotationCandidate: () {
         if (currentLap.value < 7) {
@@ -34,6 +30,11 @@ class TawafController extends GetxController {
         }
       },
     );
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
     loadSavedState();
   }
 

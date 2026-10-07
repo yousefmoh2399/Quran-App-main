@@ -130,13 +130,18 @@ class _SaiCounterViewState extends State<SaiCounterView>
                       children: [
                         const Icon(Icons.celebration, color: Colors.green),
                         const SizedBox(width: 8),
-                        Text(
-                          'الحمد لله! تم إتمام 7 أشواط سعي عند المروة',
-                          style: TextStyle(
-                            fontFamily: AppTypography.uiFont,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15 * fontScale,
-                            color: Colors.green.shade800,
+                        Flexible(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              'الحمد لله! تم إتمام 7 أشواط سعي عند المروة',
+                              style: TextStyle(
+                                fontFamily: AppTypography.uiFont,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15 * fontScale,
+                                color: Colors.green.shade800,
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -203,27 +208,39 @@ class _SaiCounterViewState extends State<SaiCounterView>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'الشوط الحالي',
-                style: TextStyle(
-                  fontFamily: AppTypography.uiFont,
-                  fontSize: 14 * fontScale,
-                  color: colors.textMuted,
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    'الشوط الحالي',
+                    style: TextStyle(
+                      fontFamily: AppTypography.uiFont,
+                      fontSize: 14 * fontScale,
+                      color: colors.textMuted,
+                    ),
+                  ),
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: primaryColor.withAlpha(25),
-                  borderRadius: BorderRadius.circular(AppRadius.sm),
-                ),
-                child: Text(
-                  isDone ? 'اكتمل السعي' : 'الشوط ${_controller.activeLapNumber} من 7',
-                  style: TextStyle(
-                    fontFamily: AppTypography.uiFont,
-                    fontSize: 13 * fontScale,
-                    fontWeight: FontWeight.bold,
-                    color: primaryColor,
+              const SizedBox(width: 8),
+              Flexible(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: primaryColor.withAlpha(25),
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
+                  ),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      isDone ? 'اكتمل السعي' : 'الشوط ${_controller.activeLapNumber} من 7',
+                      style: TextStyle(
+                        fontFamily: AppTypography.uiFont,
+                        fontSize: 13 * fontScale,
+                        fontWeight: FontWeight.bold,
+                        color: primaryColor,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -249,25 +266,28 @@ class _SaiCounterViewState extends State<SaiCounterView>
               Expanded(
                 child: Column(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.arrow_forward_rounded,
-                          size: isElderly ? 32 : 26,
-                          color: colors.accent,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'متجه إلى $to',
-                          style: TextStyle(
-                            fontFamily: AppTypography.uiFont,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14 * fontScale,
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.arrow_forward_rounded,
+                            size: isElderly ? 26 : 22,
                             color: colors.accent,
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 4),
+                          Text(
+                            'متجه إلى $to',
+                            style: TextStyle(
+                              fontFamily: AppTypography.uiFont,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13 * fontScale,
+                              color: colors.accent,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 6),
                     LinearProgressIndicator(
@@ -295,38 +315,42 @@ class _SaiCounterViewState extends State<SaiCounterView>
           const SizedBox(height: AppSpacing.md),
 
           // 7 Segment Pills Indicator
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: List.generate(7, (index) {
-              final isLapDone = index < lap;
-              final isLapActive = index == lap && !isDone;
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: List.generate(7, (index) {
+                final isLapDone = index < lap;
+                final isLapActive = index == lap && !isDone;
 
-              return Container(
-                width: isElderly ? 34 : 28,
-                height: isElderly ? 34 : 28,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isLapDone
-                      ? colors.accent
-                      : isLapActive
-                          ? primaryColor
-                          : colors.divider.withAlpha(90),
-                  border: isLapActive
-                      ? Border.all(color: Colors.white, width: 2)
-                      : null,
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  '${index + 1}',
-                  style: TextStyle(
-                    fontFamily: AppTypography.uiFont,
-                    fontSize: isElderly ? 14 : 12,
-                    fontWeight: FontWeight.bold,
-                    color: (isLapDone || isLapActive) ? Colors.white : textColor,
+                return Container(
+                  width: isElderly ? 34 : 28,
+                  height: isElderly ? 34 : 28,
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isLapDone
+                        ? colors.accent
+                        : isLapActive
+                            ? primaryColor
+                            : colors.divider.withAlpha(90),
+                    border: isLapActive
+                        ? Border.all(color: Colors.white, width: 2)
+                        : null,
                   ),
-                ),
-              );
-            }),
+                  alignment: Alignment.center,
+                  child: Text(
+                    '${index + 1}',
+                    style: TextStyle(
+                      fontFamily: AppTypography.uiFont,
+                      fontSize: isElderly ? 14 : 12,
+                      fontWeight: FontWeight.bold,
+                      color: (isLapDone || isLapActive) ? Colors.white : textColor,
+                    ),
+                  ),
+                );
+              }),
+            ),
           ),
         ],
       ),
@@ -341,28 +365,36 @@ class _SaiCounterViewState extends State<SaiCounterView>
     required double fontScale,
     required bool isElderly,
   }) {
-    return Column(
-      children: [
-        CircleAvatar(
-          radius: isElderly ? 26 : 22,
-          backgroundColor: isCurrent ? primaryColor : Colors.grey.shade400,
-          child: Icon(
-            isSafa ? Icons.terrain_rounded : Icons.landscape_rounded,
-            color: Colors.white,
-            size: isElderly ? 26 : 22,
+    return SizedBox(
+      width: isElderly ? 70 : 60,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircleAvatar(
+            radius: isElderly ? 24 : 20,
+            backgroundColor: isCurrent ? primaryColor : Colors.grey.shade400,
+            child: Icon(
+              isSafa ? Icons.terrain_rounded : Icons.landscape_rounded,
+              color: Colors.white,
+              size: isElderly ? 22 : 18,
+            ),
           ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          title,
-          style: TextStyle(
-            fontFamily: AppTypography.uiFont,
-            fontWeight: FontWeight.bold,
-            fontSize: 13 * fontScale,
-            color: isCurrent ? primaryColor : Colors.grey.shade700,
+          const SizedBox(height: 4),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              title,
+              maxLines: 1,
+              style: TextStyle(
+                fontFamily: AppTypography.uiFont,
+                fontWeight: FontWeight.bold,
+                fontSize: 13 * fontScale,
+                color: isCurrent ? primaryColor : Colors.grey.shade700,
+              ),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
