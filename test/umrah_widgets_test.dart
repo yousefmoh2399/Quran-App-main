@@ -66,7 +66,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('عدّاد طواف الكعبة المشرفة'), findsOneWidget);
-      expect(find.text('الشوط'), findsOneWidget);
+      expect(find.text('طواف العمرة'), findsWidgets);
       expect(find.text('0'), findsOneWidget);
       expect(find.text(' / 7'), findsOneWidget);
 
@@ -162,7 +162,25 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
-      expect(find.text('رفيق المعتمر'), findsOneWidget);
+      expect(find.text('رفيق المعتمر والحاج'), findsOneWidget);
+    });
+
+    testWidgets('UmrahHubView renders Hajj and Umrah guide tiles', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(360, 1000));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      await tester.pumpWidget(
+        buildTestApp(
+          child: const UmrahHubView(),
+          width: 360,
+          height: 1000,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('رفيق المعتمر والحاج'), findsOneWidget);
+      expect(find.text('دليل مناسك الحج خطوة بخطوة'), findsOneWidget);
+      expect(find.text('دليل مناسك العمرة خطوة بخطوة'), findsOneWidget);
     });
   });
 }

@@ -14,6 +14,19 @@ class SaiController extends GetxController {
   final RxBool isFinished = false.obs;
   final RxList<DuaModel> lapsDuas = <DuaModel>[].obs;
   final RxBool isGreenZoneAlertActive = false.obs;
+  final RxString saiType = 'سعي العمرة'.obs;
+
+  static const List<String> availableSaiTypes = [
+    'سعي العمرة',
+    'سعي الحج',
+  ];
+
+  void setSaiType(String type) {
+    if (availableSaiTypes.contains(type)) {
+      saiType.value = type;
+      AppHaptics.selection();
+    }
+  }
 
   @override
   void onInit() {

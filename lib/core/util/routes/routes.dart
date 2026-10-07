@@ -371,6 +371,13 @@ class AppRoutes {
       transitionDuration: kTransitionDuration,
     ),
     GetPage(
+      name: hajjGuide,
+      page: () => const UmrahGuideView(),
+      arguments: const {'guideId': 'hajj'},
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
       name: tawafCounter,
       page: () => const TawafCounterView(),
       transition: Transition.cupertino,
@@ -468,6 +475,7 @@ class AppRoutes {
   static String sectionHadith = '/sectionHadith';
   static String umrahHub = '/umrahHub';
   static String umrahGuide = '/umrahGuide';
+  static String hajjGuide = '/hajjGuide';
   static String tawafCounter = '/tawafCounter';
   static String saiCounter = '/saiCounter';
   static String umrahEstimates = '/umrahEstimates';

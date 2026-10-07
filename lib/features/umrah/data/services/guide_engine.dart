@@ -23,6 +23,7 @@ class GuideEngine {
   GuideEngine({UserDatabase? userDb}) : _userDb = userDb ?? UserDatabase.instance;
 
   static const String defaultUmrahAssetPath = 'assets/content/umrah_guide.json';
+  static const String defaultHajjAssetPath = 'assets/content/hajj_guide.json';
 
   /// Loads the guide definition from assets (or raw JSON) in an isolate,
   /// then merges any persisted progress from the local SQLite database.

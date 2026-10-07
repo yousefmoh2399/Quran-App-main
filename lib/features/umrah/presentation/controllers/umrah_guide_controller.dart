@@ -6,9 +6,26 @@ import 'package:quran_app_android/features/umrah/data/services/guide_engine.dart
 
 class UmrahGuideController extends GetxController {
   final GuideEngine _guideEngine;
+  final String guideId;
+  final String assetPath;
 
-  UmrahGuideController({GuideEngine? guideEngine})
-      : _guideEngine = guideEngine ?? GuideEngine();
+  UmrahGuideController({
+    GuideEngine? guideEngine,
+    String? guideId,
+    String? assetPath,
+  })  : _guideEngine = guideEngine ?? GuideEngine(),
+        guideId = guideId ??
+            (Get.arguments is Map && Get.arguments['guideId'] != null
+                ? Get.arguments['guideId'] as String
+                : 'umrah'),
+        assetPath = assetPath ??
+            ((guideId ??
+                        (Get.arguments is Map && Get.arguments['guideId'] != null
+                            ? Get.arguments['guideId'] as String
+                            : 'umrah')) ==
+                    'hajj'
+                ? GuideEngine.defaultHajjAssetPath
+                : GuideEngine.defaultUmrahAssetPath);
 
   final RxBool isLoading = true.obs;
   final Rxn<GuideModel> guide = Rxn<GuideModel>();
@@ -24,7 +41,7 @@ class UmrahGuideController extends GetxController {
   Future<void> loadGuide() async {
     isLoading.value = true;
     try {
-      final loadedGuide = await _guideEngine.loadGuide();
+      final loadedGuide = await _guideEngine.loadGuide(assetPath: assetPath);
       guide.value = loadedGuide;
 
       final completed = <String>{};

@@ -60,11 +60,35 @@ class TawafController extends GetxController {
     }
   }
 
+  final RxString tawafType = 'طواف العمرة'.obs;
+
+  static const List<String> availableTawafTypes = [
+    'طواف العمرة',
+    'طواف القدوم',
+    'طواف الإفاضة',
+    'طواف الوداع',
+    'طواف التطوع',
+  ];
+
+  void setTawafType(String type) {
+    if (availableTawafTypes.contains(type)) {
+      tawafType.value = type;
+      AppHaptics.selection();
+    }
+  }
+
+  /// Current active lap number being performed (1 to 7)
+  int get activeLapNumber => (currentLap.value + 1).clamp(1, 7);
+
   DuaModel? get currentLapDua {
     if (lapsDuas.isEmpty) return null;
-    final lapIndex = currentLap.value <= 0 ? 0 : (currentLap.value - 1).clamp(0, lapsDuas.length - 1);
-    return lapsDuas[lapIndex];
+    final activeIndex = isFinished.value
+        ? (lapsDuas.length - 1)
+        : (activeLapNumber - 1).clamp(0, lapsDuas.length - 1);
+    return lapsDuas[activeIndex];
   }
+
+  void stopSensor() => _stopSensor();
 
   Future<void> completeLap() async {
     if (currentLap.value >= 7) return;

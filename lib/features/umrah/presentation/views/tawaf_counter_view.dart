@@ -45,6 +45,8 @@ class _TawafCounterViewState extends State<TawafCounterView>
   @override
   void dispose() {
     _animController.dispose();
+    _controller.stopSensor();
+    Get.delete<TawafController>();
     super.dispose();
   }
 
@@ -99,6 +101,11 @@ class _TawafCounterViewState extends State<TawafCounterView>
                     primaryColor,
                     fontScale,
                   ),
+
+                // Tawaf Type selector pills
+                _buildTawafTypeSelector(colors, primaryColor, fontScale, isElderly),
+
+                const SizedBox(height: AppSpacing.sm),
 
                 // Interactive Circle & Kaaba representation
                 Center(
@@ -190,6 +197,40 @@ class _TawafCounterViewState extends State<TawafCounterView>
     });
   }
 
+  Widget _buildTawafTypeSelector(
+    AppColorsExtension colors,
+    Color primaryColor,
+    double fontScale,
+    bool isElderly,
+  ) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: TawafController.availableTawafTypes.map((type) {
+          final isSelected = _controller.tawafType.value == type;
+          return Padding(
+            padding: const EdgeInsets.only(left: AppSpacing.xs),
+            child: ChoiceChip(
+              label: Text(
+                type,
+                style: TextStyle(
+                  fontFamily: AppTypography.uiFont,
+                  fontSize: (isElderly ? 14 : 12) * fontScale,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: isSelected ? Colors.white : colors.text,
+                ),
+              ),
+              selected: isSelected,
+              selectedColor: primaryColor,
+              backgroundColor: colors.surface,
+              onSelected: (_) => _controller.setTawafType(type),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
   Widget _buildCircularCounter(
     AppColorsExtension colors,
     Color primaryColor,
@@ -265,13 +306,14 @@ class _TawafCounterViewState extends State<TawafCounterView>
                 ],
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             Text(
-              'الشوط',
+              _controller.tawafType.value,
               style: TextStyle(
                 fontFamily: AppTypography.uiFont,
-                fontSize: 13 * fontScale,
-                color: colors.textMuted,
+                fontSize: 12 * fontScale,
+                fontWeight: FontWeight.bold,
+                color: colors.accent,
               ),
             ),
             Row(
@@ -398,7 +440,7 @@ class _TawafCounterViewState extends State<TawafCounterView>
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  dua != null ? 'دعاء الشوط ${_controller.currentLap.value == 0 ? 1 : _controller.currentLap.value}' : 'دعاء الطواف',
+                  dua != null ? 'دعاء الشوط ${_controller.activeLapNumber}' : 'دعاء الطواف',
                   style: TextStyle(
                     fontFamily: AppTypography.uiFont,
                     fontSize: 15 * fontScale,

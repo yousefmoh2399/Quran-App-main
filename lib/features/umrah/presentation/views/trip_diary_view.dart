@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:quran_app_android/core/design/app_colors.dart';
@@ -34,6 +35,7 @@ class _TripDiaryViewState extends State<TripDiaryView> {
   @override
   void dispose() {
     _searchFieldController.dispose();
+    Get.delete<TripDiaryController>();
     super.dispose();
   }
 
@@ -292,13 +294,27 @@ class _TripDiaryViewState extends State<TripDiaryView> {
               PopupMenuButton<String>(
                 icon: Icon(Icons.more_vert, size: 18, color: colors.textMuted),
                 onSelected: (val) {
-                  if (val == 'edit') {
+                  if (val == 'copy') {
+                    Clipboard.setData(
+                      ClipboardData(text: '${entry.title}\n\n${entry.content}'),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('تم نسخ الخاطرة إلى الحافظة'),
+                        duration: Duration(seconds: 1),
+                      ),
+                    );
+                  } else if (val == 'edit') {
                     _showAddOrEditDialog(context, entry);
                   } else if (val == 'delete' && entry.id != null) {
                     _confirmDelete(context, entry.id!);
                   }
                 },
                 itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 'copy',
+                    child: Text('نسخ النص'),
+                  ),
                   const PopupMenuItem(
                     value: 'edit',
                     child: Text('تعديل الخاطرة'),
@@ -432,7 +448,18 @@ class _TripDiaryViewState extends State<TripDiaryView> {
                       onPressed: () {
                         final title = titleController.text.trim();
                         final content = contentController.text.trim();
-                        if (title.isEmpty || content.isEmpty) return;
+                        if (title.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('يرجى كتابة عنوان للخاطرة')),
+                          );
+                          return;
+                        }
+                        if (content.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('يرجى كتابة نص الخاطرة أو الملاحظة')),
+                          );
+                          return;
+                        }
 
                         if (existing == null) {
                           _controller.addEntry(

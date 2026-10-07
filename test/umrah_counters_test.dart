@@ -82,6 +82,32 @@ void main() {
       expect(newController.currentLap.value, equals(3));
       expect(newController.isFinished.value, isFalse);
     });
+
+    test('activeLapNumber reports 1..7 correctly as laps advance', () async {
+      expect(controller.currentLap.value, equals(0));
+      expect(controller.activeLapNumber, equals(1));
+
+      await controller.completeLap();
+      expect(controller.currentLap.value, equals(1));
+      expect(controller.activeLapNumber, equals(2));
+
+      for (int i = 2; i <= 7; i++) {
+        await controller.completeLap();
+      }
+      expect(controller.currentLap.value, equals(7));
+      expect(controller.activeLapNumber, equals(7));
+    });
+
+    test('tawafType defaults to طواف العمرة and supports all 5 available types', () {
+      expect(controller.tawafType.value, equals('طواف العمرة'));
+      expect(TawafController.availableTawafTypes.length, equals(5));
+
+      controller.setTawafType('طواف الإفاضة');
+      expect(controller.tawafType.value, equals('طواف الإفاضة'));
+
+      controller.setTawafType('طواف غير صالح');
+      expect(controller.tawafType.value, equals('طواف الإفاضة'));
+    });
   });
 
   group('SaiController Unit Tests', () {
@@ -91,6 +117,17 @@ void main() {
       await guideEngine.resetGuideProgress('umrah');
       controller = SaiController(guideEngine: guideEngine);
       await controller.loadSavedState();
+    });
+
+    test('saiType defaults to سعي العمرة and supports switching to سعي الحج', () {
+      expect(controller.saiType.value, equals('سعي العمرة'));
+      expect(SaiController.availableSaiTypes.length, equals(2));
+
+      controller.setSaiType('سعي الحج');
+      expect(controller.saiType.value, equals('سعي الحج'));
+
+      controller.setSaiType('نوع وهمي');
+      expect(controller.saiType.value, equals('سعي الحج'));
     });
 
     test('Initial state: start at Safa towards Marwah', () {

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_app_android/core/data/user_database.dart';
 import 'package:quran_app_android/features/umrah/data/models/guide_models.dart';
@@ -127,6 +128,22 @@ void main() {
       final guide = await guideEngine.loadGuide(rawJsonString: mockGuideJson);
       expect(guide.title, contains('دليل مناسك العمرة'));
       expect(guide.steps.first.isCompleted, isFalse);
+    });
+
+    test('hajj_guide.json asset file parses cleanly with 6 rites steps', () {
+      final file = File('assets/content/hajj_guide.json');
+      expect(file.existsSync(), isTrue);
+      final jsonString = file.readAsStringSync();
+      final guide = parseGuideJsonIsolate(jsonString);
+      expect(guide.id, equals('hajj'));
+      expect(guide.title, contains('الحج'));
+      expect(guide.steps.length, equals(6));
+      expect(guide.congestion.patterns, isNotEmpty);
+      expect(guide.sourcesReview, isNotEmpty);
+      for (final step in guide.steps) {
+        expect(step.source.reviewedAt, isNotEmpty);
+        expect(step.instruction, contains('نص تجريبي'));
+      }
     });
   });
 

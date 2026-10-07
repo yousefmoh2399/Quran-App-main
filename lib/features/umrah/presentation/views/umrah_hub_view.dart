@@ -47,7 +47,7 @@ class _UmrahHubViewState extends State<UmrahHubView> {
             backgroundColor: colors.surface,
             elevation: 0,
             title: Text(
-              'رفيق المعتمر',
+              'رفيق المعتمر والحاج',
               style: TextStyle(
                 fontFamily: AppTypography.uiFont,
                 color: textColor,
@@ -76,7 +76,7 @@ class _UmrahHubViewState extends State<UmrahHubView> {
                 const SizedBox(height: AppSpacing.md),
 
                 Text(
-                  'أدوات ومناسك العمرة',
+                  'أدلة ومناسك البيت الحرام والمشاعر',
                   style: TextStyle(
                     fontFamily: AppTypography.uiFont,
                     fontSize: 16 * fontScale,
@@ -92,7 +92,7 @@ class _UmrahHubViewState extends State<UmrahHubView> {
                   subtitle: 'الإحرام، الطواف، الركعتان، السعي، والحلق أو التقصير',
                   icon: Icons.auto_stories_rounded,
                   iconColor: primaryColor,
-                  onTap: () => Get.toNamed(AppRoutes.umrahGuide),
+                  onTap: () => Get.toNamed(AppRoutes.umrahGuide, arguments: const {'guideId': 'umrah'}),
                   colors: colors,
                   textColor: textColor,
                   fontScale: fontScale,
@@ -101,10 +101,25 @@ class _UmrahHubViewState extends State<UmrahHubView> {
 
                 const SizedBox(height: AppSpacing.sm),
 
-                // 2. Tawaf Counter
+                // 2. Hajj Guide
+                _buildHubTile(
+                  title: 'دليل مناسك الحج خطوة بخطوة',
+                  subtitle: 'يوم التروية، عرفة، مزدلفة، يوم النحر، التشريق، وطواف الوداع',
+                  icon: Icons.mosque_rounded,
+                  iconColor: const Color(0xFF1B5E20),
+                  onTap: () => Get.toNamed(AppRoutes.hajjGuide, arguments: const {'guideId': 'hajj'}),
+                  colors: colors,
+                  textColor: textColor,
+                  fontScale: fontScale,
+                  isElderly: isElderly,
+                ),
+
+                const SizedBox(height: AppSpacing.sm),
+
+                // 3. Tawaf Counter
                 _buildHubTile(
                   title: 'عدّاد الطواف التفاعلي (7 أشواط)',
-                  subtitle: 'دائرة تفاعلية حول الكعبة، الأدعية بخط كبير، وحفظ تلقائي',
+                  subtitle: 'طواف العمرة والقدوم والإفاضة والوداع والتطوع مع حفظ تلقائي',
                   icon: Icons.rotate_right_rounded,
                   iconColor: colors.accent,
                   onTap: () => Get.toNamed(AppRoutes.tawafCounter),
@@ -116,10 +131,10 @@ class _UmrahHubViewState extends State<UmrahHubView> {
 
                 const SizedBox(height: AppSpacing.sm),
 
-                // 3. Sa'i Counter
+                // 4. Sa'i Counter
                 _buildHubTile(
                   title: 'عدّاد السعي (الصفا والمروة)',
-                  subtitle: 'تتبع الاتجاه بين الصفا والمروة وتنبيه الميلين الأخضرين',
+                  subtitle: 'سعي العمرة وسعي الحج وتنبيه الميلين الأخضرين مع حفظ تلقائي',
                   icon: Icons.directions_walk_rounded,
                   iconColor: Colors.green.shade700,
                   onTap: () => Get.toNamed(AppRoutes.saiCounter),
@@ -131,10 +146,10 @@ class _UmrahHubViewState extends State<UmrahHubView> {
 
                 const SizedBox(height: AppSpacing.sm),
 
-                // 4. Congestion Estimates
+                // 5. Congestion Estimates
                 _buildHubTile(
-                  title: 'تقديرات أوقات الزحام بالحرم',
-                  subtitle: 'أنماط استرشادية تقريبية لأفضل أوقات الطواف والسعي',
+                  title: 'تقديرات أوقات الزحام بالحرم والمشاعر',
+                  subtitle: 'أنماط استرشادية تقريبية لأفضل أوقات الطواف والسعي والمناسك',
                   icon: Icons.access_time_rounded,
                   iconColor: Colors.blue.shade700,
                   onTap: () => Get.toNamed(AppRoutes.umrahEstimates),
@@ -258,7 +273,7 @@ class _UmrahHubViewState extends State<UmrahHubView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'تقبل الله عمرتكم وسعيكم',
+                      'تقبل الله طاعتكم ومناسككم',
                       style: TextStyle(
                         fontFamily: AppTypography.decorativeFont,
                         fontSize: (isElderly ? 20 : 17) * fontScale,

@@ -6,6 +6,7 @@ import 'package:quran_app_android/core/design/app_radius.dart';
 import 'package:quran_app_android/core/design/app_spacing.dart';
 import 'package:quran_app_android/core/design/app_typography.dart';
 import 'package:quran_app_android/core/design/components/app_scaffold.dart';
+import 'package:quran_app_android/core/util/routes/routes.dart';
 import 'package:quran_app_android/features/umrah/data/models/guide_models.dart';
 import 'package:quran_app_android/features/umrah/presentation/controllers/umrah_guide_controller.dart';
 import 'package:quran_app_android/features/umrah/presentation/controllers/umrah_preferences_controller.dart';
@@ -46,6 +47,7 @@ class _UmrahGuideViewState extends State<UmrahGuideView>
   @override
   void dispose() {
     _animController.dispose();
+    Get.delete<UmrahGuideController>();
     super.dispose();
   }
 
@@ -60,6 +62,7 @@ class _UmrahGuideViewState extends State<UmrahGuideView>
       final fontScale = _prefsController.fontMultiplier;
       final primaryColor = _prefsController.getPrimaryColor(colors.primary, isDark);
       final textColor = _prefsController.getTextColor(colors.text, isDark);
+      final guideTitle = _controller.guide.value?.title ?? 'دليل المناسك';
 
       return Directionality(
         textDirection: TextDirection.rtl,
@@ -68,7 +71,7 @@ class _UmrahGuideViewState extends State<UmrahGuideView>
             backgroundColor: colors.surface,
             elevation: 0,
             title: Text(
-              'دليل مناسك العمرة',
+              guideTitle,
               style: TextStyle(
                 fontFamily: AppTypography.uiFont,
                 color: textColor,
@@ -367,7 +370,7 @@ class _UmrahGuideViewState extends State<UmrahGuideView>
               icon: Icons.rotate_right_rounded,
               title: 'فتح عدّاد الطواف التفاعلي (7 أشواط)',
               subtitle: 'دائرة تفاعلية حول الكعبة مع الأدعية والتتبع',
-              onTap: () => Get.toNamed('/tawaf_counter'),
+              onTap: () => Get.toNamed(AppRoutes.tawafCounter),
               colors: colors,
               primaryColor: primaryColor,
               fontScale: fontScale,
@@ -379,7 +382,7 @@ class _UmrahGuideViewState extends State<UmrahGuideView>
               icon: Icons.directions_walk_rounded,
               title: 'فتح عدّاد السعي التفاعلي (الصفا والمروة)',
               subtitle: 'تتبع 7 أشواط مع تنبيه الميلين الأخضرين',
-              onTap: () => Get.toNamed('/sai_counter'),
+              onTap: () => Get.toNamed(AppRoutes.saiCounter),
               colors: colors,
               primaryColor: primaryColor,
               fontScale: fontScale,

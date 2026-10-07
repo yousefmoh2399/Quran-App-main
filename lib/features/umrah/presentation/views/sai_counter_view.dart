@@ -44,6 +44,7 @@ class _SaiCounterViewState extends State<SaiCounterView>
   @override
   void dispose() {
     _animController.dispose();
+    Get.delete<SaiController>();
     super.dispose();
   }
 
@@ -91,6 +92,11 @@ class _SaiCounterViewState extends State<SaiCounterView>
             child: ListView(
               padding: const EdgeInsets.all(AppSpacing.md),
               children: [
+                // Sai Type selector pills
+                _buildSaiTypeSelector(colors, primaryColor, fontScale, isElderly),
+
+                const SizedBox(height: AppSpacing.sm),
+
                 // Direction Track Card
                 RepaintBoundary(
                   child: disableAnim
@@ -181,6 +187,40 @@ class _SaiCounterViewState extends State<SaiCounterView>
         ),
       );
     });
+  }
+
+  Widget _buildSaiTypeSelector(
+    AppColorsExtension colors,
+    Color primaryColor,
+    double fontScale,
+    bool isElderly,
+  ) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: SaiController.availableSaiTypes.map((type) {
+          final isSelected = _controller.saiType.value == type;
+          return Padding(
+            padding: const EdgeInsets.only(left: AppSpacing.xs),
+            child: ChoiceChip(
+              label: Text(
+                type,
+                style: TextStyle(
+                  fontFamily: AppTypography.uiFont,
+                  fontSize: (isElderly ? 14 : 12) * fontScale,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: isSelected ? Colors.white : colors.text,
+                ),
+              ),
+              selected: isSelected,
+              selectedColor: primaryColor,
+              backgroundColor: colors.surface,
+              onSelected: (_) => _controller.setSaiType(type),
+            ),
+          );
+        }).toList(),
+      ),
+    );
   }
 
   Widget _buildDirectionTrackCard(
