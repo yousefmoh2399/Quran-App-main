@@ -6,6 +6,7 @@ import 'package:quran_app_android/core/design/app_spacing.dart';
 import 'package:quran_app_android/core/design/app_typography.dart';
 import 'package:quran_app_android/core/service/theme_controller.dart';
 import 'package:quran_app_android/features/settings/presentation/views/widget/settings_group_card.dart';
+import 'package:quran_app_android/features/umrah/presentation/controllers/umrah_preferences_controller.dart';
 
 class SectionThemeMode extends StatelessWidget {
   const SectionThemeMode({super.key});
@@ -14,6 +15,9 @@ class SectionThemeMode extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.appColors;
     final themeController = Get.find<ThemeController>();
+    final prefsController = Get.isRegistered<UmrahPreferencesController>()
+        ? Get.find<UmrahPreferencesController>()
+        : Get.put(UmrahPreferencesController());
 
     return SettingsGroupCard(
       title: 'المظهر والسمة',
@@ -68,6 +72,37 @@ class SectionThemeMode extends StatelessWidget {
                       ),
                     ],
                   ),
+                );
+              }),
+              const Divider(height: 24),
+              Obx(() {
+                final isElderly = prefsController.isElderlyMode.value;
+                return SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  secondary: Icon(
+                    Icons.accessibility_new_rounded,
+                    color: isElderly ? colors.primary : colors.textMuted,
+                  ),
+                  title: Text(
+                    'وضع كبار السن وسهولة الاستخدام',
+                    style: TextStyle(
+                      fontFamily: AppTypography.uiFont,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: colors.text,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'تكبير الخطوط والأزرار، تباين لوني عالي، واهتزاز قوي لتسهيل التفاعل',
+                    style: TextStyle(
+                      fontFamily: AppTypography.uiFont,
+                      fontSize: 12,
+                      color: colors.textMuted,
+                    ),
+                  ),
+                  value: isElderly,
+                  activeColor: colors.primary,
+                  onChanged: (_) => prefsController.toggleElderlyMode(),
                 );
               }),
             ],
