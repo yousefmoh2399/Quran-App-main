@@ -52,6 +52,13 @@ import 'package:quran_app_android/features/stats/presentation/views/achievements
 import 'package:quran_app_android/features/splash/presentation/views/splash_screen_view.dart';
 import 'package:quran_app_android/features/tafsser/presentation/views/tafseer_details_view.dart';
 import 'package:quran_app_android/features/tafsser/presentation/views/tafseer_view.dart';
+import 'package:quran_app_android/features/umrah/presentation/views/congestion_estimates_view.dart';
+import 'package:quran_app_android/features/umrah/presentation/views/sai_counter_view.dart';
+import 'package:quran_app_android/features/umrah/presentation/views/tawaf_counter_view.dart';
+import 'package:quran_app_android/features/umrah/presentation/views/trip_diary_view.dart';
+import 'package:quran_app_android/features/umrah/presentation/views/umrah_guide_view.dart';
+import 'package:quran_app_android/features/umrah/presentation/views/umrah_hub_view.dart';
+import 'package:quran_app_android/features/umrah/presentation/views/umrah_sources_review_view.dart';
 
 class AppRoutes {
   static List<GetPage> routes = [
@@ -351,6 +358,48 @@ class AppRoutes {
       transition: Transition.cupertino,
       transitionDuration: kTransitionDuration,
     ),
+    GetPage(
+      name: umrahHub,
+      page: () => const UmrahHubView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: umrahGuide,
+      page: () => const UmrahGuideView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: tawafCounter,
+      page: () => const TawafCounterView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: saiCounter,
+      page: () => const SaiCounterView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: umrahEstimates,
+      page: () => const CongestionEstimatesView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: umrahDiary,
+      page: () => const TripDiaryView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: umrahSources,
+      page: () => const UmrahSourcesReviewView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
     if (kDebugMode) ...[
       GetPage(
         name: adhanDebug,
@@ -417,4 +466,11 @@ class AppRoutes {
   static String mushafDebug = '/mushafDebug';
   static String onboarding = '/onboarding';
   static String sectionHadith = '/sectionHadith';
+  static String umrahHub = '/umrahHub';
+  static String umrahGuide = '/umrahGuide';
+  static String tawafCounter = '/tawafCounter';
+  static String saiCounter = '/saiCounter';
+  static String umrahEstimates = '/umrahEstimates';
+  static String umrahDiary = '/umrahDiary';
+  static String umrahSources = '/umrahSources';
 }

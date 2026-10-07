@@ -28,6 +28,11 @@ class HomeQuickShortcuts extends StatelessWidget {
       route: AppRoutes.ramadanHub,
     ),
     _ShortcutItem(
+      title: 'رفيق المعتمر',
+      icon: Icons.mosque_rounded,
+      route: AppRoutes.umrahHub,
+    ),
+    _ShortcutItem(
       title: 'القبلة',
       icon: Icons.explore_rounded,
       route: AppRoutes.qiblah,

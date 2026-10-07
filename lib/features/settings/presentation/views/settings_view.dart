@@ -67,6 +67,14 @@ class SettingsView extends StatelessWidget {
                   onTap: () => Get.toNamed(AppRoutes.ramadanHub),
                 ),
                 SettingsTile(
+                  icon: Icons.mosque_rounded,
+                  iconColor: const Color(0xFF0F5C4A),
+                  title: 'رفيق المعتمر (مناسك العمرة)',
+                  subtitle: 'دليل الخطوات، عداد الطواف والسعي، الأدعية، ويوميات الرحلة',
+                  trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
+                  onTap: () => Get.toNamed(AppRoutes.umrahHub),
+                ),
+                SettingsTile(
                   icon: Icons.radio_button_checked_rounded,
                   title: 'أذكار ما بعد الصلاة المفروضة',
                   subtitle: 'التسبيح والتحميد والتكبير بعد الفريضة',
