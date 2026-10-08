@@ -222,9 +222,13 @@ class _PilgrimChecklistViewState extends State<PilgrimChecklistView> {
       final fontScale = _prefsController.fontMultiplier;
       final primaryColor = _prefsController.getPrimaryColor(colors.primary, isDark);
       final textColor = _prefsController.getTextColor(colors.text, isDark);
+      final selectedCategory = _selectedCategory.value;
+      final isLoading = _isLoading.value;
+      final items = _items.toList();
+      final filteredList = _filteredItems;
 
-      final total = _items.length;
-      final checked = _items.where((i) => i.isChecked).length;
+      final total = items.length;
+      final checked = items.where((i) => i.isChecked).length;
       final percent = total > 0 ? (checked / total) : 0.0;
 
       return Directionality(
@@ -286,15 +290,19 @@ class _PilgrimChecklistViewState extends State<PilgrimChecklistView> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'نسبة جاهزية الحقيبة والسنن',
-                            style: TextStyle(
-                              fontFamily: AppTypography.uiFont,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14 * fontScale,
-                              color: textColor,
+                          Expanded(
+                            child: Text(
+                              'نسبة جاهزية الحقيبة والسنن',
+                              style: TextStyle(
+                                fontFamily: AppTypography.uiFont,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14 * fontScale,
+                                color: textColor,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          const SizedBox(width: 8),
                           Text(
                             '$checked من $total (${(percent * 100).toInt()}%)',
                             style: TextStyle(
@@ -332,7 +340,7 @@ class _PilgrimChecklistViewState extends State<PilgrimChecklistView> {
                     separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.xs),
                     itemBuilder: (context, index) {
                       final cat = categories[index];
-                      final isSelected = _selectedCategory.value == cat;
+                      final isSelected = selectedCategory == cat;
 
                       return UmrahFilterChip(
                         label: cat,
@@ -349,36 +357,30 @@ class _PilgrimChecklistViewState extends State<PilgrimChecklistView> {
 
                 // Items List
                 Expanded(
-                  child: Builder(builder: (context) {
-                    if (_isLoading.value) {
-                      return Center(child: CircularProgressIndicator(color: primaryColor));
-                    }
-
-                    final list = _filteredItems;
-                    if (list.isEmpty) {
-                      return Center(
-                        child: Text(
-                          'لا توجد عناصر في هذا التصنيف',
-                          style: TextStyle(
-                            fontFamily: AppTypography.uiFont,
-                            color: colors.textMuted,
-                            fontSize: 15 * fontScale,
-                          ),
-                        ),
-                      );
-                    }
-
-                    return ListView.separated(
-                      padding: const EdgeInsets.only(
-                        left: AppSpacing.md,
-                        right: AppSpacing.md,
-                        top: AppSpacing.sm,
-                        bottom: 80, // spacing for FAB
-                      ),
-                      itemCount: list.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 6),
-                      itemBuilder: (context, index) {
-                        final item = list[index];
+                  child: isLoading
+                      ? Center(child: CircularProgressIndicator(color: primaryColor))
+                      : filteredList.isEmpty
+                          ? Center(
+                              child: Text(
+                                'لا توجد عناصر في هذا التصنيف',
+                                style: TextStyle(
+                                  fontFamily: AppTypography.uiFont,
+                                  color: colors.textMuted,
+                                  fontSize: 15 * fontScale,
+                                ),
+                              ),
+                            )
+                          : ListView.separated(
+                              padding: const EdgeInsets.only(
+                                left: AppSpacing.md,
+                                right: AppSpacing.md,
+                                top: AppSpacing.sm,
+                                bottom: 80, // spacing for FAB
+                              ),
+                              itemCount: filteredList.length,
+                              separatorBuilder: (_, __) => const SizedBox(height: 6),
+                              itemBuilder: (context, index) {
+                                final item = filteredList[index];
                         return _buildItemTile(
                           item,
                           colors,
@@ -388,8 +390,7 @@ class _PilgrimChecklistViewState extends State<PilgrimChecklistView> {
                           isElderly,
                         );
                       },
-                    );
-                  }),
+                    ),
                 ),
               ],
             ),

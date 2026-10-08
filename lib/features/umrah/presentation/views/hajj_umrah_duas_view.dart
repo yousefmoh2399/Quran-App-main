@@ -248,6 +248,9 @@ class _HajjUmrahDuasViewState extends State<HajjUmrahDuasView> {
       final fontScale = _prefsController.fontMultiplier;
       final primaryColor = _prefsController.getPrimaryColor(colors.primary, isDark);
       final textColor = _prefsController.getTextColor(colors.text, isDark);
+      final selectedCat = _selectedCategory.value;
+      final query = _searchQuery.value;
+      final list = _filteredDuas;
 
       return Directionality(
         textDirection: TextDirection.rtl,
@@ -285,7 +288,7 @@ class _HajjUmrahDuasViewState extends State<HajjUmrahDuasView> {
                     decoration: InputDecoration(
                       hintText: 'ابحث في أدعية وأذكار الحج والعمرة...',
                       prefixIcon: Icon(Icons.search_rounded, color: primaryColor),
-                      suffixIcon: Obx(() => _searchQuery.value.isNotEmpty
+                      suffixIcon: query.isNotEmpty
                           ? IconButton(
                               icon: const Icon(Icons.clear_rounded, size: 20),
                               onPressed: () {
@@ -293,7 +296,7 @@ class _HajjUmrahDuasViewState extends State<HajjUmrahDuasView> {
                                 _searchQuery.value = '';
                               },
                             )
-                          : const SizedBox.shrink()),
+                          : const SizedBox.shrink(),
                       filled: true,
                       fillColor: colors.surface,
                       border: OutlineInputBorder(
@@ -322,7 +325,7 @@ class _HajjUmrahDuasViewState extends State<HajjUmrahDuasView> {
                     separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.xs),
                     itemBuilder: (context, index) {
                       final cat = categories[index];
-                      final isSelected = _selectedCategory.value == cat;
+                      final isSelected = selectedCat == cat;
 
                       return UmrahFilterChip(
                         label: cat,
@@ -339,45 +342,39 @@ class _HajjUmrahDuasViewState extends State<HajjUmrahDuasView> {
 
                 // Duas List
                 Expanded(
-                  child: Builder(builder: (context) {
-                    final list = _filteredDuas;
-
-                    if (list.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.search_off_rounded, size: 54, color: colors.textMuted),
-                            const SizedBox(height: 12),
-                            Text(
-                              'لا توجد أدعية مطابقة للبحث',
-                              style: TextStyle(
-                                fontFamily: AppTypography.uiFont,
-                                fontSize: 16 * fontScale,
-                                color: colors.textMuted,
+                  child: list.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.search_off_rounded, size: 54, color: colors.textMuted),
+                              const SizedBox(height: 12),
+                              Text(
+                                'لا توجد أدعية مطابقة للبحث',
+                                style: TextStyle(
+                                  fontFamily: AppTypography.uiFont,
+                                  fontSize: 16 * fontScale,
+                                  color: colors.textMuted,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.all(AppSpacing.md),
+                          itemCount: list.length,
+                          itemBuilder: (context, index) {
+                            final dua = list[index];
+                            return _buildDuaCard(
+                              dua,
+                              colors,
+                              primaryColor,
+                              textColor,
+                              fontScale,
+                              isElderly,
+                            );
+                          },
                         ),
-                      );
-                    }
-
-                    return ListView.builder(
-                      padding: const EdgeInsets.all(AppSpacing.md),
-                      itemCount: list.length,
-                      itemBuilder: (context, index) {
-                        final dua = list[index];
-                        return _buildDuaCard(
-                          dua,
-                          colors,
-                          primaryColor,
-                          textColor,
-                          fontScale,
-                          isElderly,
-                        );
-                      },
-                    );
-                  }),
                 ),
               ],
             ),

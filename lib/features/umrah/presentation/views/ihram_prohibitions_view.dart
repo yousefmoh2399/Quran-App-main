@@ -155,6 +155,8 @@ class _IhramProhibitionsViewState extends State<IhramProhibitionsView> {
       final fontScale = _prefsController.fontMultiplier;
       final primaryColor = _prefsController.getPrimaryColor(colors.primary, isDark);
       final textColor = _prefsController.getTextColor(colors.text, isDark);
+      final selectedCategory = _selectedCategory.value;
+      final filteredList = _filteredItems;
 
       return Directionality(
         textDirection: TextDirection.rtl,
@@ -218,7 +220,7 @@ class _IhramProhibitionsViewState extends State<IhramProhibitionsView> {
                     separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.xs),
                     itemBuilder: (context, index) {
                       final cat = categories[index];
-                      final isSelected = _selectedCategory.value == cat;
+                      final isSelected = selectedCategory == cat;
 
                       return UmrahFilterChip(
                         label: cat,
@@ -237,9 +239,9 @@ class _IhramProhibitionsViewState extends State<IhramProhibitionsView> {
                 Expanded(
                   child: ListView.builder(
                     padding: const EdgeInsets.all(AppSpacing.md),
-                    itemCount: _filteredItems.length,
+                    itemCount: filteredList.length,
                     itemBuilder: (context, index) {
-                      final item = _filteredItems[index];
+                      final item = filteredList[index];
                       return _buildProhibitionCard(
                         item,
                         colors,

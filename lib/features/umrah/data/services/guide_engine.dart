@@ -156,6 +156,39 @@ class GuideEngine {
     );
   }
 
+  static const List<Map<String, String>> defaultDiarySeed = [
+    {
+      'title': 'الوقوف أمام الكعبة المشرفة لأول مرة',
+      'category': 'مشاعر وروحانيات',
+      'content':
+          'لحظة خشوع ومهابة لا توصف عند رؤية الكعبة الشريفة وسواد أستارها. فاضت الأعين بالدموع وسكنت الجوارح استشعاراً لعظمة بيت الله الحرام وفضله.',
+    },
+    {
+      'title': 'الدعاء المستجاب عند الملتزم وتحت الميزاب',
+      'category': 'دعاء مستجاب',
+      'content':
+          'سألت الله تعالى الثبات والمغفرة والعفو وصلاح الأهل والذرية والبركة في الرزق، ودعوت للوالدين ولأحبتي جميعاً بكل خير في الدنيا والآخرة.',
+    },
+    {
+      'title': 'السعي بين الصفا والمروة واستشعار يقين هاجر',
+      'category': 'ذكريات الحرم',
+      'content':
+          'استحضار صبر ويقين أمنا هاجر عليها السلام وسعيها الحثيث متوكلةً على ربها في وادٍ غير ذي زرع، درسٌ عملي متجدد في عظم التوكل واليقين بالله وحسن الظن به.',
+    },
+    {
+      'title': 'الوصول إلى مكة المكرمة والبدء بالتلبية',
+      'category': 'عام',
+      'content':
+          'بداية رحلة النسك وانطلاق صوت التلبية النبوية الخالصة: لبيك اللهم لبيك، لبيك لا شريك لك لبيك. شعور غامر بالسكينة والراحة والانقطاع عن شواغل الدنيا.',
+    },
+    {
+      'title': 'شرب ماء زمزم والتضلع منه بنية الشفاء',
+      'category': 'مشاعر وروحانيات',
+      'content':
+          'التضلع من ماء زمزم المبارك بنية الشفاء وتيسير الأمور وصلاح القلب، امتثالاً لوصية النبي صلى الله عليه وسلم: ماء زمزم لما شُرب له.',
+    },
+  ];
+
   /// Fetches trip diary notes, optionally filtered by keyword.
   Future<List<TripDiaryEntry>> getDiaryEntries({String? query}) async {
     final db = await _userDb.database;
@@ -177,6 +210,36 @@ class GuideEngine {
     }
 
     return results.map(TripDiaryEntry.fromMap).toList();
+  }
+
+  static bool _isSeedingDiary = false;
+
+  /// Seeds inspirational starter notes if the diary table is completely empty.
+  Future<void> seedDefaultDiaryEntriesIfEmpty() async {
+    if (_isSeedingDiary) return;
+    _isSeedingDiary = true;
+    try {
+      final db = await _userDb.database;
+      await db.transaction((txn) async {
+        final results = await txn.query('trip_diary', limit: 1);
+        if (results.isEmpty) {
+          final now = DateTime.now();
+          for (int i = 0; i < defaultDiarySeed.length; i++) {
+            final seed = defaultDiarySeed[i];
+            final entryTime = now.subtract(Duration(hours: i * 6));
+            await txn.insert('trip_diary', {
+              'title': seed['title']!,
+              'content': seed['content']!,
+              'category': seed['category']!,
+              'created_at': entryTime.toIso8601String(),
+              'updated_at': entryTime.toIso8601String(),
+            });
+          }
+        }
+      });
+    } finally {
+      _isSeedingDiary = false;
+    }
   }
 
   /// Updates an existing diary entry.

@@ -50,6 +50,9 @@ class _TripDiaryViewState extends State<TripDiaryView> {
       final fontScale = _prefsController.fontMultiplier;
       final primaryColor = _prefsController.getPrimaryColor(colors.primary, isDark);
       final textColor = _prefsController.getTextColor(colors.text, isDark);
+      final selectedCategory = _controller.selectedCategory.value;
+      final isLoading = _controller.isLoading.value;
+      final entriesList = _controller.entries.toList();
 
       return Directionality(
         textDirection: TextDirection.rtl,
@@ -148,7 +151,7 @@ class _TripDiaryViewState extends State<TripDiaryView> {
                     separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.xs),
                     itemBuilder: (context, index) {
                       final category = TripDiaryController.categories[index];
-                      final isSelected = _controller.selectedCategory.value == category;
+                      final isSelected = selectedCategory == category;
 
                       return UmrahFilterChip(
                         label: category,
@@ -165,69 +168,63 @@ class _TripDiaryViewState extends State<TripDiaryView> {
 
                 // Notes List or Empty State
                 Expanded(
-                  child: Builder(builder: (context) {
-                    if (_controller.isLoading.value) {
-                      return Center(child: CircularProgressIndicator(color: primaryColor));
-                    }
-
-                    if (_controller.entries.isEmpty) {
-                      return Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(AppSpacing.xl),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.auto_stories_outlined,
-                                size: isElderly ? 70 : 54,
-                                color: colors.textMuted.withAlpha(120),
-                              ),
-                              const SizedBox(height: AppSpacing.md),
-                              Text(
-                                _searchFieldController.text.isNotEmpty
-                                    ? 'لا توجد نتائج مطابقة لبحثك'
-                                    : 'سجّل مشاعرك وأدعيتك في رحاب البيت الحرام',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontFamily: AppTypography.uiFont,
-                                  fontSize: 16 * fontScale,
-                                  fontWeight: FontWeight.bold,
-                                  color: textColor,
+                  child: isLoading
+                      ? Center(child: CircularProgressIndicator(color: primaryColor))
+                      : entriesList.isEmpty
+                          ? Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(AppSpacing.xl),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.auto_stories_outlined,
+                                      size: isElderly ? 70 : 54,
+                                      color: colors.textMuted.withAlpha(120),
+                                    ),
+                                    const SizedBox(height: AppSpacing.md),
+                                    Text(
+                                      _searchFieldController.text.isNotEmpty
+                                          ? 'لا توجد نتائج مطابقة لبحثك'
+                                          : 'سجّل مشاعرك وأدعيتك في رحاب البيت الحرام',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontFamily: AppTypography.uiFont,
+                                        fontSize: 16 * fontScale,
+                                        fontWeight: FontWeight.bold,
+                                        color: textColor,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      'ملاحظاتك تحفظ محلياً على جهازك بالكامل ومشمولة في النسخ الاحتياطي.',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontFamily: AppTypography.uiFont,
+                                        fontSize: 13 * fontScale,
+                                        color: colors.textMuted,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              const SizedBox(height: 6),
-                              Text(
-                                'ملاحظاتك تحفظ محلياً على جهازك بالكامل ومشمولة في النسخ الاحتياطي.',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontFamily: AppTypography.uiFont,
-                                  fontSize: 13 * fontScale,
-                                  color: colors.textMuted,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    }
-
-                    return ListView.separated(
-                      padding: const EdgeInsets.all(AppSpacing.md),
-                      itemCount: _controller.entries.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
-                      itemBuilder: (context, index) {
-                        final entry = _controller.entries[index];
-                        return _buildEntryCard(
-                          entry,
-                          colors,
-                          primaryColor,
-                          textColor,
-                          fontScale,
-                          isElderly,
-                        );
-                      },
-                    );
-                  }),
+                            )
+                          : ListView.separated(
+                              padding: const EdgeInsets.all(AppSpacing.md),
+                              itemCount: entriesList.length,
+                              separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+                              itemBuilder: (context, index) {
+                                final entry = entriesList[index];
+                                return _buildEntryCard(
+                                  entry,
+                                  colors,
+                                  primaryColor,
+                                  textColor,
+                                  fontScale,
+                                  isElderly,
+                                );
+                              },
+                            ),
                 ),
               ],
             ),
@@ -275,17 +272,27 @@ class _TripDiaryViewState extends State<TripDiaryView> {
                   ),
                 ),
               ),
-              const Spacer(),
-              Text(
-                dateStr,
-                style: TextStyle(
-                  fontFamily: AppTypography.uiFont,
-                  fontSize: 11 * fontScale,
-                  color: colors.textMuted,
+              const SizedBox(width: AppSpacing.xs),
+              Expanded(
+                child: Text(
+                  dateStr,
+                  textAlign: TextAlign.end,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontFamily: AppTypography.uiFont,
+                    fontSize: 11 * fontScale,
+                    color: colors.textMuted,
+                  ),
                 ),
               ),
-              PopupMenuButton<String>(
-                icon: Icon(Icons.more_vert, size: 18, color: colors.textMuted),
+              SizedBox(
+                width: 28,
+                height: 28,
+                child: PopupMenuButton<String>(
+                  padding: EdgeInsets.zero,
+                  iconSize: 18,
+                  icon: Icon(Icons.more_vert, size: 18, color: colors.textMuted),
                 onSelected: (val) {
                   if (val == 'copy') {
                     Clipboard.setData(
@@ -318,8 +325,9 @@ class _TripDiaryViewState extends State<TripDiaryView> {
                   ),
                 ],
               ),
-            ],
-          ),
+            ),
+          ],
+        ),
           const SizedBox(height: 6),
           Text(
             entry.title,

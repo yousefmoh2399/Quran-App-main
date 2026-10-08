@@ -210,6 +210,12 @@ void main() {
       await guideEngine.deleteDiaryEntry(id);
       final emptyList = await guideEngine.getDiaryEntries();
       expect(emptyList, isEmpty);
+
+      // Verify seedDefaultDiaryEntriesIfEmpty seeds 5 starter notes
+      await guideEngine.seedDefaultDiaryEntriesIfEmpty();
+      final seeded = await guideEngine.getDiaryEntries();
+      expect(seeded.length, equals(5));
+      expect(seeded.any((e) => e.category == 'مشاعر وروحانيات'), isTrue);
     });
 
     test('pilgrim checklist seed, get, toggle, add, and reset operations', () async {

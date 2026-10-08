@@ -173,6 +173,7 @@ class _UmrahGuideViewState extends State<UmrahGuideView>
       child: Obx(() {
         final guide = _controller.guide.value;
         if (guide == null) return const SizedBox.shrink();
+        final selectedIndex = _controller.currentStepIndex.value;
 
         return ListView.separated(
           scrollDirection: Axis.horizontal,
@@ -180,7 +181,7 @@ class _UmrahGuideViewState extends State<UmrahGuideView>
           separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.xs),
           itemBuilder: (context, index) {
             final step = guide.steps[index];
-            final isSelected = _controller.currentStepIndex.value == index;
+            final isSelected = selectedIndex == index;
             final isDone = _controller.isStepCompleted(step.id);
 
             return InkWell(

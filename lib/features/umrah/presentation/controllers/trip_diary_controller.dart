@@ -32,6 +32,7 @@ class TripDiaryController extends GetxController {
   Future<void> loadEntries() async {
     isLoading.value = true;
     try {
+      await _guideEngine.seedDefaultDiaryEntriesIfEmpty();
       final query = searchQuery.value.trim().isEmpty ? null : searchQuery.value.trim();
       final all = await _guideEngine.getDiaryEntries(query: query);
 

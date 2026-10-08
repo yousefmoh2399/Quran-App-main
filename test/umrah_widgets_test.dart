@@ -3,10 +3,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:quran_app_android/core/data/user_database.dart';
 import 'package:quran_app_android/core/design/app_colors.dart';
+import 'package:quran_app_android/features/umrah/presentation/controllers/trip_diary_controller.dart';
 import 'package:quran_app_android/features/umrah/presentation/controllers/umrah_preferences_controller.dart';
+import 'package:quran_app_android/features/umrah/presentation/views/hajj_umrah_duas_view.dart';
+import 'package:quran_app_android/features/umrah/presentation/views/ihram_prohibitions_view.dart';
+import 'package:quran_app_android/features/umrah/presentation/views/pilgrim_checklist_view.dart';
 import 'package:quran_app_android/features/umrah/presentation/views/sai_counter_view.dart';
 import 'package:quran_app_android/features/umrah/presentation/views/tawaf_counter_view.dart';
+import 'package:quran_app_android/features/umrah/presentation/views/trip_diary_view.dart';
 import 'package:quran_app_android/features/umrah/presentation/views/umrah_hub_view.dart';
+import 'package:quran_app_android/features/umrah/presentation/widgets/umrah_filter_chip.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 Widget buildTestApp({
@@ -52,9 +59,13 @@ void main() {
     UserDatabase.customDatabaseForTesting = null;
   });
 
-  setUp(() {
+  setUp(() async {
+    SharedPreferences.setMockInitialValues({});
     Get.reset();
     Get.put(UmrahPreferencesController());
+    await testDb.delete('trip_diary');
+    await testDb.delete('pilgrim_checklist');
+    await testDb.delete('guide_progress');
   });
 
   group('TawafCounterView Widget Tests', () {
@@ -181,6 +192,95 @@ void main() {
       expect(find.text('رفيق المعتمر والحاج'), findsOneWidget);
       expect(find.text('دليل مناسك الحج خطوة بخطوة'), findsOneWidget);
       expect(find.text('دليل مناسك العمرة خطوة بخطوة'), findsOneWidget);
+    });
+  });
+
+  group('Filter Chips Selection and Interactivity Tests', () {
+    testWidgets('HajjUmrahDuasView filter chips toggle and highlight on tap', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(500, 800));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      await tester.pumpWidget(buildTestApp(child: const HajjUmrahDuasView(), width: 500, height: 800));
+      await tester.pumpAndSettle();
+
+      final talbiyahChip = find.widgetWithText(UmrahFilterChip, 'التلبية والإحرام');
+      expect(talbiyahChip, findsOneWidget);
+
+      await tester.tap(talbiyahChip);
+      await tester.pumpAndSettle();
+
+      final selectedChip = tester.widget<UmrahFilterChip>(talbiyahChip);
+      expect(selectedChip.isSelected, isTrue);
+      expect(find.text('التلبية النبوية المأثورة'), findsOneWidget);
+    });
+
+    testWidgets('TripDiaryView seeds default notes and filter chips update on tap', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(500, 800));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      await tester.pumpWidget(buildTestApp(child: const TripDiaryView(), width: 500, height: 800));
+      final controller = Get.find<TripDiaryController>();
+      await tester.runAsync(() async {
+        await controller.loadEntries();
+      });
+      await tester.pump();
+
+      expect(find.text('الوقوف أمام الكعبة المشرفة لأول مرة'), findsOneWidget);
+
+      final duaChip = find.widgetWithText(UmrahFilterChip, 'دعاء مستجاب');
+      expect(duaChip, findsOneWidget);
+
+      await tester.tap(duaChip);
+      await tester.runAsync(() async {
+        await controller.loadEntries();
+      });
+      await tester.pump();
+
+      final selectedDuaChip = tester.widget<UmrahFilterChip>(duaChip);
+      expect(selectedDuaChip.isSelected, isTrue);
+      expect(find.text('الدعاء المستجاب عند الملتزم وتحت الميزاب'), findsOneWidget);
+    });
+
+    testWidgets('PilgrimChecklistView filter chips update and filter items on tap', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(500, 800));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      await tester.pumpWidget(buildTestApp(child: const PilgrimChecklistView(), width: 500, height: 800));
+      await tester.runAsync(() async {
+        await Future.delayed(const Duration(milliseconds: 300));
+      });
+      await tester.pump();
+
+      final ihramClothesChip = find.widgetWithText(UmrahFilterChip, 'ملابس الإحرام');
+      expect(ihramClothesChip, findsOneWidget);
+
+      await tester.tap(ihramClothesChip);
+      await tester.runAsync(() async {
+        await Future.delayed(const Duration(milliseconds: 200));
+      });
+      await tester.pump();
+
+      final selectedChip = tester.widget<UmrahFilterChip>(ihramClothesChip);
+      expect(selectedChip.isSelected, isTrue);
+      expect(find.text('إزار ورداء أبيضين قطنيين نظيفين'), findsOneWidget);
+    });
+
+    testWidgets('IhramProhibitionsView filter chips update on tap', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(500, 800));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      await tester.pumpWidget(buildTestApp(child: const IhramProhibitionsView(), width: 500, height: 800));
+      await tester.pumpAndSettle();
+
+      final clothingChip = find.widgetWithText(UmrahFilterChip, 'خاصة بالرجال');
+      expect(clothingChip, findsOneWidget);
+
+      await tester.tap(clothingChip);
+      await tester.pumpAndSettle();
+
+      final selectedClothingChip = tester.widget<UmrahFilterChip>(clothingChip);
+      expect(selectedClothingChip.isSelected, isTrue);
+      expect(find.textContaining('لبس المخيط'), findsOneWidget);
     });
   });
 }
