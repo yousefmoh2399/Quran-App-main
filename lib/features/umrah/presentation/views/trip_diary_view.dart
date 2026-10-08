@@ -138,34 +138,34 @@ class _TripDiaryViewState extends State<TripDiaryView> {
                   ),
                 ),
 
-                // Category Filter Chips wrapped in Obx for instant reactive selection feedback
-                Obx(() => SizedBox(
-                      height: isElderly ? 56 : 46,
-                      child: ListView.separated(
-                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 4),
-                        scrollDirection: Axis.horizontal,
-                        itemCount: TripDiaryController.categories.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.xs),
-                        itemBuilder: (context, index) {
-                          final category = TripDiaryController.categories[index];
-                          final isSelected = _controller.selectedCategory.value == category;
+                // Category Filter Chips
+                SizedBox(
+                  height: isElderly ? 56 : 46,
+                  child: ListView.separated(
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 4),
+                    scrollDirection: Axis.horizontal,
+                    itemCount: TripDiaryController.categories.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.xs),
+                    itemBuilder: (context, index) {
+                      final category = TripDiaryController.categories[index];
+                      final isSelected = _controller.selectedCategory.value == category;
 
-                          return UmrahFilterChip(
-                            label: category,
-                            isSelected: isSelected,
-                            fontScale: fontScale,
-                            isElderly: isElderly,
-                            onTap: () => _controller.setCategory(category),
-                          );
-                        },
-                      ),
-                    )),
+                      return UmrahFilterChip(
+                        label: category,
+                        isSelected: isSelected,
+                        fontScale: fontScale,
+                        isElderly: isElderly,
+                        onTap: () => _controller.setCategory(category),
+                      );
+                    },
+                  ),
+                ),
 
                 const Divider(height: 1),
 
                 // Notes List or Empty State
                 Expanded(
-                  child: Obx(() {
+                  child: Builder(builder: (context) {
                     if (_controller.isLoading.value) {
                       return Center(child: CircularProgressIndicator(color: primaryColor));
                     }

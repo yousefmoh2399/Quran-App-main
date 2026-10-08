@@ -209,27 +209,27 @@ class _IhramProhibitionsViewState extends State<IhramProhibitionsView> {
                 ),
 
                 // Category Chips
-                Obx(() => SizedBox(
-                      height: isElderly ? 58 : 48,
-                      child: ListView.separated(
-                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 4),
-                        scrollDirection: Axis.horizontal,
-                        itemCount: categories.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.xs),
-                        itemBuilder: (context, index) {
-                          final cat = categories[index];
-                          final isSelected = _selectedCategory.value == cat;
+                SizedBox(
+                  height: isElderly ? 58 : 48,
+                  child: ListView.separated(
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 4),
+                    scrollDirection: Axis.horizontal,
+                    itemCount: categories.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.xs),
+                    itemBuilder: (context, index) {
+                      final cat = categories[index];
+                      final isSelected = _selectedCategory.value == cat;
 
-                          return UmrahFilterChip(
-                            label: cat,
-                            isSelected: isSelected,
-                            fontScale: fontScale,
-                            isElderly: isElderly,
-                            onTap: () => _selectedCategory.value = cat,
-                          );
-                        },
-                      ),
-                    )),
+                      return UmrahFilterChip(
+                        label: cat,
+                        isSelected: isSelected,
+                        fontScale: fontScale,
+                        isElderly: isElderly,
+                        onTap: () => _selectedCategory.value = cat,
+                      );
+                    },
+                  ),
+                ),
 
                 const Divider(height: 1),
 
