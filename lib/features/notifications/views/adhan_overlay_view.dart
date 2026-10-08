@@ -191,7 +191,7 @@ class AdhanOverlayView extends StatelessWidget {
         status: status,
       ));
       Get.snackbar(
-        'تقبل الله طاعتكم 🤲',
+        'تقبل الله طاعتكم',
         'تم تسجيل $prayerName (${status.labelAr}) في سجل صلواتك بنجاح.',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFF0F5C4A),

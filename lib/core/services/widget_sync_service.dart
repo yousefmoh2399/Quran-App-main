@@ -4,7 +4,7 @@ import 'package:home_widget/home_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class WidgetSyncService {
-  static const String appGroupId = 'group.com.homeScreenApp';
+  static const String appGroupId = 'group.com.yousefmohamed.quranApp';
   static const String androidWirdWidget = 'com.example.quran_app_android.widgets.WirdKhatmaWidgetProvider';
   static const String iOSWirdWidget = 'WirdKhatmaWidget';
   static const String androidPrayerWidget = 'com.example.quran_app_android.widgets.PrayerTimesWidgetProvider';

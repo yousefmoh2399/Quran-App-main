@@ -1,6 +1,7 @@
 import 'package:adhan/adhan.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:quran_app_android/core/native/native_reminders_bridge.dart';
 import 'package:quran_app_android/core/notifications/ios_prayer_scheduler.dart';
 import 'package:quran_app_android/core/notifications/ios_reminder_scheduler.dart';
 import 'package:quran_app_android/core/notifications/notification_budget.dart';
@@ -39,6 +40,7 @@ class FakeLocalNotificationsPlugin extends Fake implements FlutterLocalNotificat
       'body': body,
       'date': scheduledDate,
       'payload': payload,
+      'details': notificationDetails,
     });
   }
 
@@ -55,6 +57,7 @@ class FakeLocalNotificationsPlugin extends Fake implements FlutterLocalNotificat
       'title': title,
       'body': body,
       'payload': payload,
+      'details': notificationDetails,
     });
   }
 }
@@ -353,6 +356,143 @@ void main() {
       for (final id in NotificationBudget.getAllAzkarIds()) {
         expect(fakePlugin.cancelledIds.contains(id), isTrue);
       }
+    });
+  });
+
+  group('iOS Audio Parity & Dynamic Sound Settings', () {
+    test('Default sound settings map to correct bundled audio files', () async {
+      final fakePlugin = FakeLocalNotificationsPlugin();
+      final scheduler = IosReminderNotificationScheduler(
+        notificationsPlugin: fakePlugin,
+        nowProvider: () => DateTime(2026, 10, 15, 8, 0),
+      );
+
+      // Reschedule with defaults (wird: fazakkir, sadaqah: azkar_2, azkar: azkar_1)
+      await scheduler.rescheduleAll();
+
+      final scheduled = fakePlugin.scheduledNotifications;
+      expect(scheduled.isNotEmpty, isTrue);
+
+      // Check wird notification sound
+      final wirdNotif = scheduled.firstWhere(
+        (n) => n['id'] >= 2000 && n['id'] <= 2006,
+      );
+      final wirdDetails = wirdNotif['details'] as NotificationDetails;
+      final wirdIos = wirdDetails.iOS!;
+      expect(wirdIos.sound, 'fazakkir.wav');
+      expect(wirdIos.presentSound, isTrue);
+
+      // Check sadaqah notification sound
+      final sadaqahNotif = scheduled.firstWhere(
+        (n) => n['id'] == 2200,
+      );
+      final sadaqahDetails = sadaqahNotif['details'] as NotificationDetails;
+      final sadaqahIos = sadaqahDetails.iOS!;
+      expect(sadaqahIos.sound, 'azkar_2.wav');
+      expect(sadaqahIos.presentSound, isTrue);
+    });
+
+    test('Custom sound settings via NativeRemindersBridge persist and apply', () async {
+      final fakePlugin = FakeLocalNotificationsPlugin();
+      final scheduler = IosReminderNotificationScheduler(
+        notificationsPlugin: fakePlugin,
+        nowProvider: () => DateTime(2026, 10, 15, 8, 0),
+      );
+
+      // Save custom sound preferences
+      await NativeRemindersBridge.saveSoundSettings(
+        mode: 'custom',
+        unifiedSound: 'azkar_1',
+        wirdSound: 'adhan',
+        commuteSound: 'cannon',
+        sadaqahSound: 'fazakkir',
+        azkarSound: 'azkar_2',
+      );
+
+      // Check retrieved settings
+      final settings = await NativeRemindersBridge.getSoundSettings();
+      expect(settings['wirdSound'], 'adhan');
+      expect(settings['sadaqahSound'], 'fazakkir');
+      expect(settings['azkarSound'], 'azkar_2');
+
+      // Reschedule and verify mapped sound files
+      await scheduler.rescheduleAll();
+      final scheduled = fakePlugin.scheduledNotifications;
+
+      final wirdNotif = scheduled.firstWhere((n) => n['id'] == 2000);
+      final wirdIos = (wirdNotif['details'] as NotificationDetails).iOS!;
+      expect(wirdIos.sound, 'adhan_ios.wav');
+
+      final sadaqahNotif = scheduled.firstWhere((n) => n['id'] == 2200);
+      final sadaqahIos = (sadaqahNotif['details'] as NotificationDetails).iOS!;
+      expect(sadaqahIos.sound, 'fazakkir.wav');
+    });
+
+    test('Silent mode disables sound presentation', () async {
+      final fakePlugin = FakeLocalNotificationsPlugin();
+      final scheduler = IosReminderNotificationScheduler(
+        notificationsPlugin: fakePlugin,
+        nowProvider: () => DateTime(2026, 10, 15, 8, 0),
+      );
+
+      await NativeRemindersBridge.saveSoundSettings(
+        mode: 'custom',
+        unifiedSound: 'fazakkir',
+        wirdSound: 'silent',
+        commuteSound: 'silent',
+        sadaqahSound: 'silent',
+        azkarSound: 'silent',
+      );
+
+      await scheduler.rescheduleAll();
+      final scheduled = fakePlugin.scheduledNotifications;
+      final wirdNotif = scheduled.firstWhere((n) => n['id'] == 2000);
+      final wirdIos = (wirdNotif['details'] as NotificationDetails).iOS!;
+      expect(wirdIos.presentSound, isFalse);
+      expect(wirdIos.sound, isNull);
+    });
+  });
+
+  group('IosPrayerNotificationScheduler - Mode & Sound Configuration', () {
+    test('Prayer modes (adhan, notification_only, silent) are correctly mapped to iOS details', () async {
+      final fakePlugin = FakeLocalNotificationsPlugin();
+      final scheduler = IosPrayerNotificationScheduler(
+        notificationsPlugin: fakePlugin,
+        nowProvider: () => DateTime(2026, 10, 15, 3, 0), // Early morning before all prayers
+      );
+
+      final settings = AdhanSettingsModel(
+        latitude: 30.0444,
+        longitude: 31.2357,
+        fajrMode: 'adhan',
+        dhuhrMode: 'notification_only',
+        asrMode: 'silent',
+        maghribMode: 'adhan',
+        ishaMode: 'adhan',
+      );
+
+      final count = await scheduler.scheduleFromSettings(settings);
+      expect(count > 0, isTrue);
+
+      final scheduled = fakePlugin.scheduledNotifications;
+
+      // Fajr (mode: adhan) -> sound: adhan_ios.wav, presentSound: true
+      final fajr = scheduled.firstWhere((n) => (n['id'] as int) % 5 == 0);
+      final fajrIos = (fajr['details'] as NotificationDetails).iOS!;
+      expect(fajrIos.presentSound, isTrue);
+      expect(fajrIos.sound, 'adhan_ios.wav');
+
+      // Dhuhr (mode: notification_only) -> sound: null, presentSound: true
+      final dhuhr = scheduled.firstWhere((n) => (n['id'] as int) % 5 == 1);
+      final dhuhrIos = (dhuhr['details'] as NotificationDetails).iOS!;
+      expect(dhuhrIos.presentSound, isTrue);
+      expect(dhuhrIos.sound, isNull);
+
+      // Asr (mode: silent) -> sound: null, presentSound: false
+      final asr = scheduled.firstWhere((n) => (n['id'] as int) % 5 == 2);
+      final asrIos = (asr['details'] as NotificationDetails).iOS!;
+      expect(asrIos.presentSound, isFalse);
+      expect(asrIos.sound, isNull);
     });
   });
 }

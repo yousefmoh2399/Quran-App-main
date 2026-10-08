@@ -178,7 +178,7 @@ class _NameOfAllahDetailSheetState extends State<NameOfAllahDetailSheet> {
                     builder: (btnContext) => TextButton.icon(
                       onPressed: () async {
                         await Share.share(
-                          '✨ ${item.name} ✨\n\n${item.text}',
+                          '«${item.name}»\n\n${item.text}',
                           sharePositionOrigin: getSharePositionOrigin(btnContext),
                         );
                       },

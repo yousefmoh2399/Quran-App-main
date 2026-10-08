@@ -110,7 +110,10 @@ class PermissionService with WidgetsBindingObserver {
     AppPermissionType type, {
     bool force = false,
   }) async {
+    final beforeStatus = getStatus(type);
+    debugPrint('🔔 [PermissionService] Before requesting ${type.name}: status = $beforeStatus');
     final status = await adapter.request(type);
+    debugPrint('🔔 [PermissionService] After requesting ${type.name}: status = $status');
     final updated = Map<AppPermissionType, AppPermissionStatus>.from(statuses.value);
     updated[type] = status;
     statuses.value = updated;

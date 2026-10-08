@@ -161,7 +161,7 @@ class _RemindersDebugViewState extends State<RemindersDebugView> {
                                       color: primary,
                                       borderRadius: BorderRadius.circular(6),
                                     ),
-                                    child: const Text('المنبه الفعّال حالياً ⏰', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                                    child: const Text('المنبه الفعّال حالياً', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                                   ),
                                   const SizedBox(width: 8),
                                 ],
@@ -208,8 +208,8 @@ class _RemindersDebugViewState extends State<RemindersDebugView> {
                                 Expanded(
                                   child: Text(
                                     isCancelled
-                                        ? 'شرط الإلغاء: مُحقق (سيتخطى الإشعار ويجدول التالي) 🚫'
-                                        : 'شرط الإلغاء: غير محقق (سيظهر الإشعار بنجاح) 🔔',
+                                        ? 'شرط الإلغاء: مُحقق (سيتخطى الإشعار ويجدول التالي)'
+                                        : 'شرط الإلغاء: غير محقق (سيظهر الإشعار بنجاح)',
                                     style: TextStyle(
                                       fontSize: 11.5,
                                       fontWeight: FontWeight.bold,

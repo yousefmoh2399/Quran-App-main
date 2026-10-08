@@ -115,7 +115,9 @@ class _PermissionsStatusViewState extends State<PermissionsStatusView> {
                           const SizedBox(height: 4),
                           Text(
                             totalGranted == totalApplicable
-                                ? 'التطبيق جاهز لتشغيل الأذان والمواقيت بدقة عالية.'
+                                ? (!kIsWeb && Platform.isIOS
+                                    ? 'تم تفعيل صلاحيات iOS المطلوبة. مواعيد الأذان والقبلة جاهزة للعمل بأعلى دقة.'
+                                    : 'التطبيق جاهز لتشغيل الأذان والمواقيت بدقة عالية.')
                                 : 'فعّل الصلاحيات غير المكتملة لضمان دقة الأذان في موعده.',
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: colors.textMuted,
@@ -152,6 +154,57 @@ class _PermissionsStatusViewState extends State<PermissionsStatusView> {
                     await _refresh();
                   },
                 ),
+
+              if (!kIsWeb && Platform.isIOS) ...[
+                const SizedBox(height: AppSpacing.md),
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: colors.surface,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: colors.primary.withOpacity(0.2)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: colors.primary.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(
+                              Icons.apple_rounded,
+                              size: 22,
+                              color: colors.primary,
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                          Expanded(
+                            child: Text(
+                              'إدارة مواعيد الأذان في نظام iOS',
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: colors.text,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        'على نظام iOS، لا يتطلب التطبيق صلاحيات تشغيل إضافية في الخلفية؛ فنظام iOS يدير دقة المواعيد واستهلاك الطاقة تلقائياً وبأعلى كفاءة، طالما تم منح إذني الموقع والإشعارات أعلاه.',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colors.textMuted,
+                          height: 1.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
 
               if (!kIsWeb && Platform.isAndroid) ...[
                 const SizedBox(height: AppSpacing.md),

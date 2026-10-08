@@ -189,8 +189,8 @@ class NotifyHelper {
       category: AndroidNotificationCategory.status,
       visibility: NotificationVisibility.public,
       styleInformation: BigTextStyleInformation(
-        '$allPrayersLine\n📍 المدينة: $cityName',
-        contentTitle: '🕌 الصلاة القادمة: $nextPrayerName $nextPrayerTime ($countdownStr)',
+        '$allPrayersLine\nالمدينة: $cityName',
+        contentTitle: 'الصلاة القادمة: $nextPrayerName $nextPrayerTime ($countdownStr)',
         summaryText: 'مواقيت الصلاة',
       ),
       color: const Color(0xFF0F5C4A),
@@ -198,7 +198,7 @@ class NotifyHelper {
 
     await flutterLocalNotificationsPlugin.show(
       prayerBannerNotificationId,
-      '🕌 $nextPrayerName $nextPrayerTime • $countdownStr',
+      '$nextPrayerName $nextPrayerTime • $countdownStr',
       allPrayersLine,
       NotificationDetails(android: androidDetails),
       payload: 'taqarrab://prayer_times',
@@ -218,12 +218,12 @@ class NotifyHelper {
     final int randomIndex = Random().nextInt(adhkar.length);
     final hour = DateTime.now().hour;
     final String dynamicTitle = (hour >= 5 && hour < 12)
-        ? '☀️ أذكار الصباح'
+        ? 'أذكار الصباح'
         : (hour >= 15 && hour < 21)
-            ? '🌙 أذكار المساء'
+            ? 'أذكار المساء'
             : (hour >= 21 || hour < 5)
-                ? '🌙 أذكار الليل والسكينة'
-                : '📿 ذكر وتذكير';
+                ? 'أذكار الليل والسكينة'
+                : 'ذكر وتذكير';
 
     final text = adhkar[randomIndex];
 
@@ -250,8 +250,8 @@ class NotifyHelper {
           ),
         );
     final DarwinNotificationDetails iosNotificationDetails =
-        DarwinNotificationDetails(
-          sound: soundAzkar1,
+        const DarwinNotificationDetails(
+          sound: 'azkar_1.wav',
           presentAlert: true,
           presentBadge: true,
           presentSound: true,
@@ -374,12 +374,12 @@ class NotifyHelper {
           audioAttributesUsage: AudioAttributesUsage.alarm,
           ticker: 'prayer_time',
         );
-    final DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
-      sound: soundAdhan,
+    final DarwinNotificationDetails iosDetails = const DarwinNotificationDetails(
+      sound: 'adhan_ios.wav',
       presentAlert: true,
       presentBadge: true,
       presentSound: true,
-      interruptionLevel: InterruptionLevel.critical,
+      interruptionLevel: InterruptionLevel.timeSensitive,
     );
 
     await flutterLocalNotificationsPlugin.zonedSchedule(

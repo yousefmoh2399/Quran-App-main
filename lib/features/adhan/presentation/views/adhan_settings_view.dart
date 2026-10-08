@@ -297,23 +297,40 @@ class AdhanSettingsView extends StatelessWidget {
                   AppSpacing.verticalSm,
                   SizedBox(
                     width: double.infinity,
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: colors.primary),
-                        shape: const RoundedRectangleBorder(borderRadius: AppRadius.borderMd),
-                        padding: const EdgeInsets.symmetric(vertical: 10.0),
-                      ),
-                      icon: Icon(Icons.play_circle_filled_rounded, color: colors.primary),
-                      label: Text(
-                        'تشغيل تجريبي للأذان الآن',
-                        style: TextStyle(
-                          fontFamily: AppTypography.uiFont,
-                          fontWeight: FontWeight.bold,
-                          color: colors.primary,
+                    child: Obx(() {
+                      final isPlaying = controller.isPlayingTestAdhan.value;
+                      return OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(
+                            color: isPlaying ? Colors.redAccent : colors.primary,
+                          ),
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: AppRadius.borderMd,
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 10.0),
+                          backgroundColor: isPlaying
+                              ? Colors.redAccent.withOpacity(0.08)
+                              : null,
                         ),
-                      ),
-                      onPressed: () => controller.testAdhanSound('الفجر'),
-                    ),
+                        icon: Icon(
+                          isPlaying
+                              ? Icons.stop_circle_rounded
+                              : Icons.play_circle_filled_rounded,
+                          color: isPlaying ? Colors.redAccent : colors.primary,
+                        ),
+                        label: Text(
+                          isPlaying
+                              ? 'إيقاف صوت الأذان التجريبي'
+                              : 'تشغيل تجريبي للأذان الآن',
+                          style: TextStyle(
+                            fontFamily: AppTypography.uiFont,
+                            fontWeight: FontWeight.bold,
+                            color: isPlaying ? Colors.redAccent : colors.primary,
+                          ),
+                        ),
+                        onPressed: () => controller.testAdhanSound('الفجر'),
+                      );
+                    }),
                   ),
                 ],
               ),
@@ -331,28 +348,31 @@ class AdhanSettingsView extends StatelessWidget {
                 borderRadius: AppRadius.borderLg,
                 border: Border.all(color: colors.divider),
               ),
-              child: SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(
-                  'دعاء ما بعد الأذان (الشيخ الشعراوي)',
-                  style: TextStyle(
-                    fontFamily: AppTypography.uiFont,
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.bold,
-                    color: colors.text,
+              child: Material(
+                color: Colors.transparent,
+                child: SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(
+                    'دعاء ما بعد الأذان (الشيخ الشعراوي)',
+                    style: TextStyle(
+                      fontFamily: AppTypography.uiFont,
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.bold,
+                      color: colors.text,
+                    ),
                   ),
-                ),
-                subtitle: Text(
-                  'تشغيل دعاء «اللهم رب هذه الدعوة التامة...» بصوت فضيلة الشيخ محمد متولي الشعراوي تلقائياً بعد انتهاء الأذان مباشرة',
-                  style: TextStyle(
-                    fontFamily: AppTypography.uiFont,
-                    fontSize: 11.5,
-                    color: colors.textMuted,
+                  subtitle: Text(
+                    'تشغيل دعاء «اللهم رب هذه الدعوة التامة...» بصوت فضيلة الشيخ محمد متولي الشعراوي تلقائياً بعد انتهاء الأذان مباشرة',
+                    style: TextStyle(
+                      fontFamily: AppTypography.uiFont,
+                      fontSize: 11.5,
+                      color: colors.textMuted,
+                    ),
                   ),
+                  value: settings.playPostAdhanDua,
+                  activeColor: colors.primary,
+                  onChanged: (val) => controller.updatePlayPostAdhanDua(val),
                 ),
-                value: settings.playPostAdhanDua,
-                activeColor: colors.primary,
-                onChanged: (val) => controller.updatePlayPostAdhanDua(val),
               ),
             ),
 

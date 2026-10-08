@@ -210,6 +210,7 @@ class IosPrayerNotificationScheduler {
           key: 'fajr',
           time: prayerTimes.fajr,
           enabled: settings.fajrEnabled,
+          mode: settings.fajrMode,
         ),
         _PrayerSlot(
           prayerIndex: 1,
@@ -217,6 +218,7 @@ class IosPrayerNotificationScheduler {
           key: 'dhuhr',
           time: prayerTimes.dhuhr,
           enabled: settings.dhuhrEnabled,
+          mode: settings.dhuhrMode,
         ),
         _PrayerSlot(
           prayerIndex: 2,
@@ -224,6 +226,7 @@ class IosPrayerNotificationScheduler {
           key: 'asr',
           time: prayerTimes.asr,
           enabled: settings.asrEnabled,
+          mode: settings.asrMode,
         ),
         _PrayerSlot(
           prayerIndex: 3,
@@ -231,6 +234,7 @@ class IosPrayerNotificationScheduler {
           key: 'maghrib',
           time: prayerTimes.maghrib,
           enabled: settings.maghribEnabled,
+          mode: settings.maghribMode,
         ),
         _PrayerSlot(
           prayerIndex: 4,
@@ -238,6 +242,7 @@ class IosPrayerNotificationScheduler {
           key: 'isha',
           time: prayerTimes.isha,
           enabled: settings.ishaEnabled,
+          mode: settings.ishaMode,
         ),
       ];
 
@@ -252,16 +257,22 @@ class IosPrayerNotificationScheduler {
         try {
           final tzTime = tz.TZDateTime.from(slot.time, tz.local);
 
-          const darwinDetails = DarwinNotificationDetails(
+          final isSilent = slot.mode == 'silent';
+          final isNotificationOnly = slot.mode == 'notification_only';
+          final soundToPlay = isSilent
+              ? null
+              : (isNotificationOnly ? null : soundFileName);
+
+          final darwinDetails = DarwinNotificationDetails(
             presentAlert: true,
             presentBadge: true,
-            presentSound: true,
-            sound: soundFileName,
+            presentSound: !isSilent,
+            sound: soundToPlay,
             interruptionLevel: InterruptionLevel.timeSensitive,
             categoryIdentifier: categoryIdentifier,
           );
 
-          const notificationDetails = NotificationDetails(iOS: darwinDetails);
+          final notificationDetails = NotificationDetails(iOS: darwinDetails);
 
           await notificationsPlugin.zonedSchedule(
             notificationId,
@@ -342,6 +353,7 @@ class _PrayerSlot {
   final String key;
   final DateTime time;
   final bool enabled;
+  final String mode;
 
   const _PrayerSlot({
     required this.prayerIndex,
@@ -349,5 +361,6 @@ class _PrayerSlot {
     required this.key,
     required this.time,
     required this.enabled,
+    required this.mode,
   });
 }

@@ -104,7 +104,7 @@ class _WirdReminderSettingsViewState extends State<WirdReminderSettingsView> {
     if (mounted) {
       AppSnackbar.show(
         'تم الحفظ',
-        'تم تحديث موعد تذكير الورد القرآني وجدولته بنجاح 📖',
+        'تم تحديث موعد تذكير الورد القرآني وجدولته بنجاح',
         context: context,
       );
     }
@@ -144,7 +144,8 @@ class _WirdReminderSettingsViewState extends State<WirdReminderSettingsView> {
                         children: [
                           Row(
                             children: [
-                              const Text('🔥 ', style: TextStyle(fontSize: 20)),
+                              const Icon(Icons.local_fire_department_rounded, color: Colors.orange, size: 24),
+                              const SizedBox(width: 4),
                               Text(
                                 '${_plan?.streak ?? 0}',
                                 style: TextStyle(

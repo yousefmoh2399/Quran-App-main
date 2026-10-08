@@ -55,11 +55,22 @@ class HomeHeader extends StatelessWidget {
   String _greetingText() {
     final hour = DateTime.now().hour;
     if (hour >= 3 && hour < 12) {
-      return 'صباح الخير والبركة ☀️';
+      return 'صباح الخير والبركة';
     } else if (hour >= 12 && hour < 17) {
-      return 'طابت أوقاتكم بذكر الله 🌤️';
+      return 'طابت أوقاتكم بذكر الله';
     } else {
-      return 'مساء الخير والسكينة 🌙';
+      return 'مساء الخير والسكينة';
+    }
+  }
+
+  IconData _greetingIcon() {
+    final hour = DateTime.now().hour;
+    if (hour >= 3 && hour < 12) {
+      return Icons.wb_sunny_rounded;
+    } else if (hour >= 12 && hour < 17) {
+      return Icons.wb_cloudy_rounded;
+    } else {
+      return Icons.nightlight_round;
     }
   }
 
@@ -80,12 +91,23 @@ class HomeHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  _greetingText(),
-                  style: textTheme.titleMedium?.copyWith(
-                    color: colors.primary,
-                    fontWeight: FontWeight.bold,
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      _greetingText(),
+                      style: textTheme.titleMedium?.copyWith(
+                        color: colors.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Icon(
+                      _greetingIcon(),
+                      size: 18,
+                      color: colors.primary,
+                    ),
+                  ],
                 ),
                 AppSpacing.verticalXs,
                 if (hijriStr.isNotEmpty)

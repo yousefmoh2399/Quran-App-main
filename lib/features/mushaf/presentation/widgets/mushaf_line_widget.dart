@@ -76,6 +76,7 @@ class MushafLineWidget extends StatelessWidget {
             Text(
               '۞  ',
               style: TextStyle(
+                fontFamily: AppTypography.decorativeFont,
                 color: theme.surahHeaderBorder,
                 fontSize: 14.0,
               ),
@@ -93,6 +94,7 @@ class MushafLineWidget extends StatelessWidget {
             Text(
               '  ۞',
               style: TextStyle(
+                fontFamily: AppTypography.decorativeFont,
                 color: theme.surahHeaderBorder,
                 fontSize: 14.0,
               ),
@@ -137,7 +139,9 @@ class MushafLineWidget extends StatelessWidget {
           rawText,
           textDirection: TextDirection.rtl,
           style: TextStyle(
+            inherit: false,
             fontFamily: MushafFontManager.pageFontFamily(pageNumber),
+            fontFamilyFallback: const [],
             fontSize: 22.0,
             color: theme.textColor,
             height: 1.1,
@@ -255,7 +259,9 @@ class MushafLineWidget extends StatelessWidget {
             child: Text(
               word.glyphCode,
               style: TextStyle(
+                inherit: false,
                 fontFamily: MushafFontManager.pageFontFamily(word.pageNumber),
+                fontFamilyFallback: const [],
                 fontSize: 22.0,
                 color: theme.textColor,
                 height: 1.1,

@@ -56,11 +56,11 @@ class _MushafFontDebugViewState extends State<MushafFontDebugView> {
         _fontLoadSuccess[pageNum] = isLoaded;
         _testLines[pageNum] = line;
         _fontDiagnostics[pageNum] =
-            '✅ Family: ${MushafFontManager.pageFontFamily(pageNum)} | Time: ${stopwatch.elapsedMilliseconds}ms | Words: ${line.words.length}';
+            '[OK] Family: ${MushafFontManager.pageFontFamily(pageNum)} | Time: ${stopwatch.elapsedMilliseconds}ms | Words: ${line.words.length}';
         debugPrint('MushafFontDebug: Page $pageNum loaded successfully (${stopwatch.elapsedMilliseconds}ms)');
       } catch (e) {
         _fontLoadSuccess[pageNum] = false;
-        _fontDiagnostics[pageNum] = '❌ Failed: $e';
+        _fontDiagnostics[pageNum] = '[ERR] Failed: $e';
         debugPrint('MushafFontDebug: Error on page $pageNum: $e');
       }
     }

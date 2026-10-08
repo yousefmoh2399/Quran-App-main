@@ -45,7 +45,7 @@ class _AdhanDebugViewState extends State<AdhanDebugView> {
   Future<void> _triggerTestAdhan() async {
     Get.snackbar(
       'جدولة أذان تجريبي',
-      'سيتم إطلاق شاشة وصوت الأذان فوق القفل بعد 10 ثوانٍ بالتمام! ⏱️',
+      'سيتم إطلاق شاشة وصوت الأذان فوق القفل بعد 10 ثوانٍ بالتمام!',
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: const Color(0xFF0F5C4A),
       colorText: Colors.white,
@@ -59,7 +59,7 @@ class _AdhanDebugViewState extends State<AdhanDebugView> {
     await _loadDebugData();
     Get.snackbar(
       'إعادة الجدولة الفلكية',
-      'تم إعادة حساب وجدولة $count صلاة بنجاح للـ 7 أيام القادمة 🕋',
+      'تم إعادة حساب وجدولة $count صلاة بنجاح للـ 7 أيام القادمة',
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: const Color(0xFF0F5C4A),
       colorText: Colors.white,

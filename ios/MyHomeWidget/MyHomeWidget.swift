@@ -387,7 +387,7 @@ struct PrayerTimelineProvider: TimelineProvider {
     }
 
     private func loadSharedPrayer() -> PrayerEntry {
-        let defaults = UserDefaults(suiteName: "group.com.homeScreenApp")
+        let defaults = UserDefaults(suiteName: "group.com.yousefmohamed.quranApp")
         let name = defaults?.string(forKey: "next_prayer_name") ?? "الصلاة"
         let time = defaults?.string(forKey: "next_prayer_time") ?? "--:--"
         let city = defaults?.string(forKey: "prayer_city") ?? "القاهرة"
@@ -484,7 +484,7 @@ struct WirdKhatmaTimelineProvider: TimelineProvider {
     }
 
     private func loadSharedWird() -> WirdKhatmaEntry {
-        let defaults = UserDefaults(suiteName: "group.com.homeScreenApp")
+        let defaults = UserDefaults(suiteName: "group.com.yousefmohamed.quranApp")
         let streak = defaults?.integer(forKey: "wird_streak") ?? 0
         let target = max(1, defaults?.integer(forKey: "wird_target") ?? 4)
         let completed = defaults?.integer(forKey: "wird_completed") ?? 0
@@ -638,7 +638,7 @@ struct RamadanWidgetTimelineProvider: TimelineProvider {
     }
 
     private func loadSharedRamadan() -> RamadanWidgetEntry {
-        let defaults = UserDefaults(suiteName: "group.com.homeScreenApp")
+        let defaults = UserDefaults(suiteName: "group.com.yousefmohamed.quranApp")
         let day = max(1, defaults?.integer(forKey: "ramadan_day") ?? 1)
         let dayTitle = defaults?.string(forKey: "ramadan_day_title") ?? "اليوم \(day) من رمضان"
         let eventTitle = defaults?.string(forKey: "ramadan_event_title") ?? "متبقي على موعد الإفطار"

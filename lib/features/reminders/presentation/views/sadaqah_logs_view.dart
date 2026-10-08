@@ -94,7 +94,7 @@ class _SadaqahLogsViewState extends State<SadaqahLogsView> {
                 _loadLogs();
                 AppSnackbar.show(
                   'تقبل الله طاعتكم',
-                  'تم حفظ الصدقة في سجلك المحلي بنجاح 🤲',
+                  'تم حفظ الصدقة في سجلك المحلي بنجاح',
                   context: context,
                 );
               }
@@ -239,7 +239,14 @@ class _SadaqahLogsViewState extends State<SadaqahLogsView> {
                                     color: primary,
                                   ),
                                 )
-                              : const Text('✓ مسجلة', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+                              : Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: const [
+                                    Icon(Icons.check_circle_outline_rounded, size: 16, color: Colors.green),
+                                    SizedBox(width: 4),
+                                    Text('مسجلة', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+                                  ],
+                                ),
                         ),
                       );
                     }),

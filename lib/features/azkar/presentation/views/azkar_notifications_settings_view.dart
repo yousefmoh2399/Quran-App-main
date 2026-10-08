@@ -97,7 +97,7 @@ class _AzkarNotificationsSettingsViewState
 
     final ok = await NativeAzkarBridge.saveSettings(map);
     if (ok) {
-      defaultToast(text: 'تم حفظ إعدادات تنبيهات الأذكار بنجاح 📿');
+      defaultToast(text: 'تم حفظ إعدادات تنبيهات الأذكار بنجاح');
     } else {
       defaultToast(text: 'حدث خطأ أثناء حفظ الإعدادات');
     }

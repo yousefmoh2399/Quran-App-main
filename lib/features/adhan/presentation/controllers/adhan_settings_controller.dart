@@ -56,7 +56,7 @@ class AdhanSettingsController extends GetxController {
         }
         AppSnackbar.show(
           'تم حفظ الإعدادات',
-          'تم تحديث مواقيت الصلاة وجدولة الـ 7 أيام القادمة بنجاح 🕌',
+          'تم تحديث مواقيت الصلاة وجدولة الـ 7 أيام القادمة بنجاح',
           backgroundColor: const Color(0xFF0F5C4A),
         );
       }
@@ -169,16 +169,42 @@ class AdhanSettingsController extends GetxController {
     saveSettings();
   }
 
+  final isPlayingTestAdhan = false.obs;
+
   Future<void> testAdhanSound(String prayerName) async {
+    if (isPlayingTestAdhan.value) {
+      await stopTestAdhan();
+      return;
+    }
+
+    isPlayingTestAdhan.value = true;
     await NativeAdhanBridge.scheduleTestAdhan(
       delaySeconds: 1,
       prayerName: prayerName,
     );
     AppSnackbar.show(
       'تشغيل تجريبي للأذان',
-      'تم إطلاق الأذان التجريبي لصلاة $prayerName 🕌',
+      'جاري تشغيل صوت الأذان وإطلاق الإشعار لصلاة $prayerName',
       backgroundColor: const Color(0xFF0F5C4A),
       duration: const Duration(seconds: 3),
+    );
+
+    // Automatically reset playback state after 29 seconds (duration of adhan_ios.wav)
+    Future.delayed(const Duration(seconds: 29), () {
+      if (isPlayingTestAdhan.value) {
+        isPlayingTestAdhan.value = false;
+      }
+    });
+  }
+
+  Future<void> stopTestAdhan() async {
+    isPlayingTestAdhan.value = false;
+    await NativeAdhanBridge.stopAdhan();
+    AppSnackbar.show(
+      'إيقاف الأذان',
+      'تم إيقاف صوت الأذان التجريبي',
+      backgroundColor: const Color(0xFF0F5C4A),
+      duration: const Duration(seconds: 2),
     );
   }
 }

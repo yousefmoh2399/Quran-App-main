@@ -156,7 +156,7 @@ class _NotificationSoundsSettingsViewState
                 ),
                 _buildModeTile(
                   title: 'نغمة الهاتف الافتراضية',
-                  subtitle: 'استخدام صوت الإشعار القياسي لنظام أندرويد للجميع',
+                  subtitle: 'استخدام صوت الإشعار القياسي للنظام للجميع',
                   modeKey: 'default',
                   icon: Icons.smartphone_rounded,
                 ),
@@ -318,34 +318,37 @@ class _NotificationSoundsSettingsViewState
           width: isSelected ? 1.8 : 1,
         ),
       ),
-      child: RadioListTile<String>(
-        value: modeKey,
-        groupValue: _settings.mode,
-        activeColor: primary,
-        title: Text(
-          title,
-          style: TextStyle(
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-            fontSize: 14.5,
+      child: Material(
+        color: Colors.transparent,
+        child: RadioListTile<String>(
+          value: modeKey,
+          groupValue: _settings.mode,
+          activeColor: primary,
+          title: Text(
+            title,
+            style: TextStyle(
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+              fontSize: 14.5,
+            ),
           ),
-        ),
-        subtitle: Text(
-          subtitle,
-          style: TextStyle(
-            fontSize: 12,
-            color: theme.textTheme.bodySmall?.color,
+          subtitle: Text(
+            subtitle,
+            style: TextStyle(
+              fontSize: 12,
+              color: theme.textTheme.bodySmall?.color,
+            ),
           ),
+          secondary: Icon(
+            icon,
+            color: isSelected ? primary : theme.iconTheme.color?.withOpacity(0.6),
+          ),
+          onChanged: (val) {
+            if (val != null) {
+              setState(() => _settings.mode = val);
+              _save();
+            }
+          },
         ),
-        secondary: Icon(
-          icon,
-          color: isSelected ? primary : theme.iconTheme.color?.withOpacity(0.6),
-        ),
-        onChanged: (val) {
-          if (val != null) {
-            setState(() => _settings.mode = val);
-            _save();
-          }
-        },
       ),
     );
   }

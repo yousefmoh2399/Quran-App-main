@@ -199,7 +199,8 @@ class _CommuteWirdSettingsViewState extends State<CommuteWirdSettingsView> {
                         children: [
                           Row(
                             children: [
-                              const Text('🔥 ', style: TextStyle(fontSize: 20)),
+                              const Icon(Icons.local_fire_department_rounded, color: Colors.orange, size: 24),
+                              const SizedBox(width: 4),
                               Text(
                                 '${_state?.streak ?? 0}',
                                 style: TextStyle(
@@ -319,13 +320,27 @@ class _CommuteWirdSettingsViewState extends State<CommuteWirdSettingsView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        Wrap(
+                          alignment: WrapAlignment.spaceBetween,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 8,
+                          runSpacing: 8,
                           children: [
-                            const Text('مواعيد وفترات الطريق اليومية', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                            TextButton.icon(
+                            const Text(
+                              'مواعيد وفترات الطريق اليومية',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                            ),
+                            FilledButton.tonalIcon(
+                              style: FilledButton.styleFrom(
+                                visualDensity: VisualDensity.standard,
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              ),
                               icon: const Icon(Icons.add_rounded, size: 18),
-                              label: const Text('إضافة موعد'),
+                              label: const Text(
+                                'إضافة موعد',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                              ),
                               onPressed: _addSlot,
                             ),
                           ],
@@ -371,8 +386,11 @@ class _CommuteWirdSettingsViewState extends State<CommuteWirdSettingsView> {
                                   ],
                                 ),
                                 const Divider(height: 16),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                Wrap(
+                                  alignment: WrapAlignment.spaceBetween,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  spacing: 8,
+                                  runSpacing: 8,
                                   children: [
                                     OutlinedButton.icon(
                                       icon: const Icon(Icons.access_time_rounded, size: 16),
@@ -380,6 +398,7 @@ class _CommuteWirdSettingsViewState extends State<CommuteWirdSettingsView> {
                                       onPressed: () => _editSlotTime(slot),
                                     ),
                                     Row(
+                                      mainAxisSize: MainAxisSize.min,
                                       children: [
                                         const Text('الهدف: ', style: TextStyle(fontSize: 13)),
                                         DropdownButton<int>(

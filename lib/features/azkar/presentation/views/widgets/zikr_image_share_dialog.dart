@@ -308,7 +308,7 @@ class _ZikrImageShareDialogState extends State<ZikrImageShareDialog> {
                             child: Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 8),
                               child: Text(
-                                '✨ ${widget.categoryTitle} ✨',
+                                widget.categoryTitle,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(

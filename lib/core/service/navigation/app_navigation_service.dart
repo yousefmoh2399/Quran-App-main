@@ -98,9 +98,29 @@ class AppNavigationService {
         await Get.toNamed(AppRoutes.adhan);
         return;
 
+      case 'adhan_settings':
+        await Get.toNamed(AppRoutes.adhanSettings);
+        return;
+
       case 'mushaf':
         final page = openPage ?? _getLastReadPage();
         await Get.toNamed(AppRoutes.mushaf, arguments: {'pageNumber': page});
+        return;
+
+      case 'qiblah':
+        await Get.toNamed(AppRoutes.qiblah);
+        return;
+
+      case 'commute_wird_settings':
+        await Get.toNamed(AppRoutes.commuteWirdSettings);
+        return;
+
+      case 'permissions':
+        await Get.toNamed(AppRoutes.permissionsStatus);
+        return;
+
+      case 'sounds':
+        await Get.toNamed(AppRoutes.notificationSoundsSettings);
         return;
     }
 

@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:quran_app_android/core/data/repositories/user_repository.dart';
 import 'package:quran_app_android/core/native/native_adhan_bridge.dart';
+import 'package:quran_app_android/core/design/app_typography.dart';
 import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
 import 'package:quran_app_android/core/service/settings/notifications_services.dart';
 import 'package:quran_app_android/core/util/assets.dart';
@@ -253,7 +254,7 @@ class LockScreenBannerService {
         final remaining = (plan.endPage - lastRead).clamp(0, 604);
         if (remaining == 0) {
           wirdLine = 'أتممت ورد اليوم المبارك (ص ${plan.startPage} - ${plan.endPage}) تقبل الله!';
-          wirdShort = 'ورد اليوم: تم بحمد الله 🌿';
+          wirdShort = 'ورد اليوم: تم بحمد الله';
         } else {
           wirdLine = 'ص ${plan.startPage} إلى ${plan.endPage} • متبقي $remaining صفحات';
           wirdShort = 'الورد: ص $lastRead (متبقي $remaining)';
@@ -283,17 +284,17 @@ class LockScreenBannerService {
     // Construct Title
     String bannerTitle = 'تطبيق تقرّب';
     if (model.showNextPrayer && nextPrayerCountdown.isNotEmpty) {
-      bannerTitle = '🕌 الصلاة القادمة: $nextPrayerName • $nextPrayerTimeStr ($nextPrayerCountdown)';
+      bannerTitle = 'الصلاة القادمة: $nextPrayerName • $nextPrayerTimeStr ($nextPrayerCountdown)';
     } else if (model.showHijriDate && hijriLine.isNotEmpty) {
-      bannerTitle = '📅 $hijriLine';
+      bannerTitle = hijriLine;
     } else if (model.showWirdProgress && wirdShort.isNotEmpty) {
-      bannerTitle = '📖 $wirdShort';
+      bannerTitle = wirdShort;
     }
 
     // Collapsed 1-line text for compact view
     String collapsedText = '';
     if (nextPrayerCountdown.isNotEmpty) {
-      collapsedText = '⏳ $nextPrayerCountdown  │  $wirdShort';
+      collapsedText = '$nextPrayerCountdown  │  $wirdShort';
     } else {
       collapsedText = '$cityName  •  $hijriLine';
     }
@@ -302,26 +303,26 @@ class LockScreenBannerService {
     final plainBuffer = StringBuffer();
 
     if (model.showAllPrayers && allPrayersPlainLine1.isNotEmpty) {
-      plainBuffer.writeln('🕌 مواقيت الصلاة اليوم:');
+      plainBuffer.writeln('مواقيت الصلاة اليوم:');
       plainBuffer.writeln('   $allPrayersPlainLine1');
       plainBuffer.writeln('   $allPrayersPlainLine2');
       plainBuffer.writeln('');
     }
 
     if (model.showWirdProgress && wirdLine.isNotEmpty) {
-      plainBuffer.writeln('📖 الورد: $wirdLine');
+      plainBuffer.writeln('الورد: $wirdLine');
     }
 
     if (model.showDailyZikr && zikrLine.isNotEmpty) {
-      plainBuffer.writeln('📿 ذكر الوقت: «$zikrLine»');
+      plainBuffer.writeln('ذكر الوقت: «$zikrLine»');
     }
 
     if (model.showHijriDate && hijriLine.isNotEmpty) {
-      plainBuffer.writeln('📅 $hijriLine');
+      plainBuffer.writeln(hijriLine);
     }
 
     if (plainBuffer.isEmpty) {
-      plainBuffer.writeln('ألا بذكر الله تطمئن القلوب 🌿');
+      plainBuffer.writeln('ألا بذكر الله تطمئن القلوب');
     }
 
     final allPrayersUnified = '$allPrayersPlainLine1 • $allPrayersPlainLine2';
@@ -382,19 +383,19 @@ class LockScreenBannerService {
       actions.addAll([
         const AndroidNotificationAction(
           'action_mushaf',
-          '📖 الورد',
+          'الورد',
           showsUserInterface: true,
           cancelNotification: false,
         ),
         const AndroidNotificationAction(
           'action_azkar',
-          '📿 الأذكار',
+          'الأذكار',
           showsUserInterface: true,
           cancelNotification: false,
         ),
         const AndroidNotificationAction(
           'action_prayer',
-          '🕌 المواقيت',
+          'المواقيت',
           showsUserInterface: true,
           cancelNotification: false,
         ),
@@ -502,6 +503,18 @@ class LockScreenBannerService {
 
       double curY = 20.0;
 
+      TextStyle bannerStyle({
+        required double fontSize,
+        FontWeight fontWeight = FontWeight.normal,
+        Color color = Colors.white,
+      }) => TextStyle(
+        fontFamily: AppTypography.uiFont,
+        fontFamilyFallback: AppTypography.fallbackFonts,
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        color: color,
+      );
+
       // Draw Taqarrab Logo on the left side of header
       try {
         final logo = await _getLogoImage();
@@ -530,17 +543,17 @@ class LockScreenBannerService {
       // 3. Header: App title, City, Date
       final headerSpan = TextSpan(
         children: [
-          const TextSpan(
-            text: '🕌 تطبيق تقرّب  •  ',
-            style: TextStyle(
+          TextSpan(
+            text: 'تطبيق تقرّب  •  ',
+            style: bannerStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Color(0xFFD4AF37),
+              color: const Color(0xFFD4AF37),
             ),
           ),
           TextSpan(
             text: '${data.cityName}  •  ${data.hijriLine}',
-            style: const TextStyle(
+            style: bannerStyle(
               fontSize: 18,
               fontWeight: FontWeight.w500,
               color: Colors.white70,
@@ -559,9 +572,9 @@ class LockScreenBannerService {
       if (model.showNextPrayer && data.nextPrayerName.isNotEmpty) {
         final nextPrayerSpan = TextSpan(
           children: [
-            const TextSpan(
+            TextSpan(
               text: 'الصلاة القادمة: ',
-              style: TextStyle(
+              style: bannerStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
@@ -569,18 +582,18 @@ class LockScreenBannerService {
             ),
             TextSpan(
               text: '${data.nextPrayerName} ${data.nextPrayerTimeStr} ',
-              style: const TextStyle(
+              style: bannerStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFFD4AF37),
+                color: const Color(0xFFD4AF37),
               ),
             ),
             TextSpan(
               text: '(${data.nextPrayerCountdown})',
-              style: const TextStyle(
+              style: bannerStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF81C784),
+                color: const Color(0xFF81C784),
               ),
             ),
           ],
@@ -659,7 +672,7 @@ class LockScreenBannerService {
             children: [
               TextSpan(
                 text: '${p['name']}\n',
-                style: TextStyle(
+                style: bannerStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: isNext ? const Color(0xFFD4AF37) : Colors.white70,
@@ -667,7 +680,7 @@ class LockScreenBannerService {
               ),
               TextSpan(
                 text: timeStr,
-                style: TextStyle(
+                style: bannerStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: isNext ? Colors.white : Colors.white60,
@@ -692,17 +705,17 @@ class LockScreenBannerService {
       if (model.showWirdProgress && data.wirdLine.isNotEmpty) {
         final wirdSpan = TextSpan(
           children: [
-            const TextSpan(
-              text: '📖 الورد: ',
-              style: TextStyle(
+            TextSpan(
+              text: 'الورد: ',
+              style: bannerStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFFD4AF37),
+                color: const Color(0xFFD4AF37),
               ),
             ),
             TextSpan(
               text: data.wirdLine,
-              style: const TextStyle(
+              style: bannerStyle(
                 fontSize: 16,
                 color: Colors.white,
               ),
@@ -721,17 +734,17 @@ class LockScreenBannerService {
       if (model.showDailyZikr && data.zikrLine.isNotEmpty) {
         final zikrSpan = TextSpan(
           children: [
-            const TextSpan(
-              text: '📿 ذكر الوقت: ',
-              style: TextStyle(
+            TextSpan(
+              text: 'ذكر الوقت: ',
+              style: bannerStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFFD4AF37),
+                color: const Color(0xFFD4AF37),
               ),
             ),
             TextSpan(
               text: '«${data.zikrLine}»',
-              style: const TextStyle(
+              style: bannerStyle(
                 fontSize: 16,
                 color: Colors.white,
               ),

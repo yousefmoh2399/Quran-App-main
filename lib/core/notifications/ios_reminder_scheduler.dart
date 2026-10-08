@@ -48,11 +48,80 @@ class IosReminderNotificationScheduler {
   ];
 
   // --- Storage Helpers ---
+  static Map<String, Map<String, dynamic>> _getDefaultReminders() {
+    return {
+      'wird_daily': {
+        'id': 'wird_daily',
+        'type': 'wird_daily',
+        'schedule_json': jsonEncode({'hour': 20, 'minute': 0}),
+        'payload_json': jsonEncode({
+          'title': 'وردك القرآني اليومي',
+          'body': 'حان وقت وردك القرآني المبارك، رتّل وتدبّر آيات الله.',
+        }),
+        'enabled': 1,
+        'last_triggered': 0,
+      },
+      'commute_morning': {
+        'id': 'commute_morning',
+        'type': 'commute',
+        'schedule_json': jsonEncode({
+          'hour': 7,
+          'minute': 30,
+          'days': [1, 2, 3, 4, 5],
+          'target_pages': 3,
+          'count_towards_main': true,
+        }),
+        'payload_json': jsonEncode({
+          'title': 'ورد المواصلات',
+          'body': 'استثمر طريقك في تلاوة القرآن وتزكية وقتك.',
+        }),
+        'enabled': 0,
+        'last_triggered': 0,
+      },
+      'sadaqah_monthly': {
+        'id': 'sadaqah_monthly',
+        'type': 'sadaqah_monthly',
+        'schedule_json': jsonEncode({
+          'day': 25,
+          'day_type': 'day_of_month',
+          'calendar': 'hijri',
+          'hour': 10,
+          'minute': 0,
+          'second_reminder': true,
+        }),
+        'payload_json': jsonEncode({
+          'title': 'تذكير الصدقة الشهرية',
+          'amount': 0,
+        }),
+        'enabled': 1,
+        'last_triggered': 0,
+      },
+      'azkar_periodic': {
+        'id': 'azkar_periodic',
+        'type': 'azkar_periodic',
+        'schedule_json': jsonEncode({
+          'interval_minutes': 60,
+          'from_hour': 8,
+          'from_minute': 0,
+          'to_hour': 22,
+          'to_minute': 0,
+        }),
+        'payload_json': jsonEncode({'title': 'أذكار وتسابيح'}),
+        'enabled': 1,
+        'last_triggered': 0,
+      },
+    };
+  }
+
   Future<Map<String, Map<String, dynamic>>> _loadAllRemindersMap() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final str = prefs.getString(prefsRemindersKey);
-      if (str == null || str.isEmpty) return {};
+      if (str == null || str.isEmpty) {
+        final defaults = _getDefaultReminders();
+        await prefs.setString(prefsRemindersKey, jsonEncode(defaults));
+        return defaults;
+      }
       final decoded = jsonDecode(str) as Map<String, dynamic>;
       return decoded.map(
         (key, value) => MapEntry(key, Map<String, dynamic>.from(value as Map)),
@@ -60,6 +129,77 @@ class IosReminderNotificationScheduler {
     } catch (e) {
       debugPrint('⚠️ [IosReminderScheduler] Error loading reminders: $e');
       return {};
+    }
+  }
+
+  /// Resolves the user-configured audio filename for iOS notifications.
+  /// Returns 'SILENT' if silent, null if system_default, or the .wav filename.
+  Future<String?> _getSoundForType(String type) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final str = prefs.getString('reminder_sound_settings');
+      if (str == null || str.isEmpty) {
+        switch (type) {
+          case 'wird_daily':
+          case 'commute':
+            return 'fazakkir.wav';
+          case 'sadaqah_monthly':
+            return 'azkar_2.wav';
+          case 'azkar_periodic':
+            return 'azkar_1.wav';
+          default:
+            return 'azkar_1.wav';
+        }
+      }
+      final map = jsonDecode(str) as Map<String, dynamic>;
+      final mode = map['mode']?.toString() ?? 'custom';
+      if (mode == 'default') return null;
+      if (mode == 'unified') {
+        final unifiedSound = map['unifiedSound']?.toString() ?? 'fazakkir';
+        return _mapSoundKeyToFilename(unifiedSound);
+      }
+
+      String soundKey;
+      switch (type) {
+        case 'wird_daily':
+          soundKey = map['wirdSound']?.toString() ?? 'fazakkir';
+          break;
+        case 'commute':
+          soundKey = map['commuteSound']?.toString() ?? 'fazakkir';
+          break;
+        case 'sadaqah_monthly':
+          soundKey = map['sadaqahSound']?.toString() ?? 'azkar_2';
+          break;
+        case 'azkar_periodic':
+          soundKey = map['azkarSound']?.toString() ?? 'azkar_1';
+          break;
+        default:
+          soundKey = 'azkar_1';
+      }
+      return _mapSoundKeyToFilename(soundKey);
+    } catch (_) {
+      return 'azkar_1.wav';
+    }
+  }
+
+  static String? _mapSoundKeyToFilename(String soundKey) {
+    switch (soundKey) {
+      case 'silent':
+        return 'SILENT';
+      case 'system_default':
+        return null;
+      case 'fazakkir':
+        return 'fazakkir.wav';
+      case 'azkar_1':
+        return 'azkar_1.wav';
+      case 'azkar_2':
+        return 'azkar_2.wav';
+      case 'adhan':
+        return 'adhan_ios.wav';
+      case 'cannon':
+        return 'cannon.wav';
+      default:
+        return 'azkar_1.wav';
     }
   }
 
@@ -200,6 +340,8 @@ class IosReminderNotificationScheduler {
     }
     final hour = (sched['hour'] as num?)?.toInt() ?? 9;
     final minute = (sched['minute'] as num?)?.toInt() ?? 0;
+    final soundFile = await _getSoundForType('wird_daily');
+    final isSilent = soundFile == 'SILENT';
 
     for (int dayOffset = 0; dayOffset < NotificationBudget.wirdSlotCount; dayOffset++) {
       final scheduledDate = DateTime(
@@ -215,20 +357,20 @@ class IosReminderNotificationScheduler {
       final id = NotificationBudget.getWirdId(dayOffset);
       final tzTime = tz.TZDateTime.from(scheduledDate, tz.local);
 
-      const darwinDetails = DarwinNotificationDetails(
+      final darwinDetails = DarwinNotificationDetails(
         presentAlert: true,
         presentBadge: true,
-        presentSound: true,
-        sound: 'azkar_1.wav',
+        presentSound: !isSilent,
+        sound: isSilent ? null : soundFile,
         interruptionLevel: InterruptionLevel.timeSensitive,
       );
 
       await notificationsPlugin.zonedSchedule(
         id,
         'ورد القرآن الكريم',
-        'حان موعد وردك اليومي، تلاوة صفحة من كتاب الله تنير يومك وتزيد بركتك 📖',
+        'حان موعد وردك اليومي، تلاوة صفحة من كتاب الله تنير يومك وتزيد بركتك',
         tzTime,
-        const NotificationDetails(iOS: darwinDetails),
+        NotificationDetails(iOS: darwinDetails),
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -257,6 +399,9 @@ class IosReminderNotificationScheduler {
         ? rawDays.map((e) => (e as num).toInt()).toSet()
         : {1, 2, 3, 4, 5};
 
+    final soundFile = await _getSoundForType('commute');
+    final isSilent = soundFile == 'SILENT';
+
     for (int dayOffset = 0; dayOffset < NotificationBudget.transitSlotCount; dayOffset++) {
       final scheduledDate = DateTime(
         now.year,
@@ -277,20 +422,20 @@ class IosReminderNotificationScheduler {
       final id = NotificationBudget.getTransitId(dayOffset);
       final tzTime = tz.TZDateTime.from(scheduledDate, tz.local);
 
-      const darwinDetails = DarwinNotificationDetails(
+      final darwinDetails = DarwinNotificationDetails(
         presentAlert: true,
         presentBadge: true,
-        presentSound: true,
-        sound: 'azkar_1.wav',
+        presentSound: !isSilent,
+        sound: isSilent ? null : soundFile,
         interruptionLevel: InterruptionLevel.timeSensitive,
       );
 
       await notificationsPlugin.zonedSchedule(
         id,
         'أذكار وورد المواصلات',
-        'استثمر وقت تنقلك في ذكر الله والاستماع للقرآن الكريم ($targetPages صفحات) 🚗',
+        'استثمر وقت تنقلك في ذكر الله والاستماع للقرآن الكريم ($targetPages صفحات)',
         tzTime,
-        const NotificationDetails(iOS: darwinDetails),
+        NotificationDetails(iOS: darwinDetails),
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -332,23 +477,26 @@ class IosReminderNotificationScheduler {
       now: now,
     );
 
+    final soundFile = await _getSoundForType('sadaqah_monthly');
+    final isSilent = soundFile == 'SILENT';
+
     final id = NotificationBudget.getSadaqahId();
     final tzTime = tz.TZDateTime.from(targetDate, tz.local);
 
-    const darwinDetails = DarwinNotificationDetails(
+    final darwinDetails = DarwinNotificationDetails(
       presentAlert: true,
       presentBadge: true,
-      presentSound: true,
-      sound: 'azkar_1.wav',
+      presentSound: !isSilent,
+      sound: isSilent ? null : soundFile,
       interruptionLevel: InterruptionLevel.timeSensitive,
     );
 
     await notificationsPlugin.zonedSchedule(
       id,
       'تذكير الصدقة الشهرية',
-      'مانقص مال من صدقة — تذكير بإخراج صدقتك الشهرية المباركة 🤍',
+      'ما نقص مال من صدقة — تذكير بإخراج صدقتك الشهرية المباركة',
       tzTime,
-      const NotificationDetails(iOS: darwinDetails),
+      NotificationDetails(iOS: darwinDetails),
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -371,6 +519,9 @@ class IosReminderNotificationScheduler {
     final toH = (sched['to_hour'] as num?)?.toInt() ?? 22;
     final toM = (sched['to_minute'] as num?)?.toInt() ?? 0;
 
+    final soundFile = await _getSoundForType('azkar_periodic');
+    final isSilent = soundFile == 'SILENT';
+
     var current = DateTime(now.year, now.month, now.day, fromH, fromM);
     final end = DateTime(now.year, now.month, now.day, toH, toM);
 
@@ -381,11 +532,11 @@ class IosReminderNotificationScheduler {
         final tzTime = tz.TZDateTime.from(current, tz.local);
         final zikrText = _rotatingAzkar[slotIndex % _rotatingAzkar.length];
 
-        const darwinDetails = DarwinNotificationDetails(
+        final darwinDetails = DarwinNotificationDetails(
           presentAlert: true,
           presentBadge: true,
-          presentSound: true,
-          sound: 'azkar_1.wav',
+          presentSound: !isSilent,
+          sound: isSilent ? null : soundFile,
           interruptionLevel: InterruptionLevel.timeSensitive,
         );
 
@@ -394,7 +545,7 @@ class IosReminderNotificationScheduler {
           'أذكار وتسابيح',
           zikrText,
           tzTime,
-          const NotificationDetails(iOS: darwinDetails),
+          NotificationDetails(iOS: darwinDetails),
           uiLocalNotificationDateInterpretation:
               UILocalNotificationDateInterpretation.absoluteTime,
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -469,11 +620,13 @@ class IosReminderNotificationScheduler {
 
   Future<bool> testTriggerReminder(String id) async {
     try {
-      const darwinDetails = DarwinNotificationDetails(
+      final soundFile = await _getSoundForType(id);
+      final isSilent = soundFile == 'SILENT';
+      final darwinDetails = DarwinNotificationDetails(
         presentAlert: true,
         presentBadge: true,
-        presentSound: true,
-        sound: 'azkar_1.wav',
+        presentSound: !isSilent,
+        sound: isSilent ? null : soundFile,
         interruptionLevel: InterruptionLevel.timeSensitive,
       );
 
@@ -482,7 +635,7 @@ class IosReminderNotificationScheduler {
         testId,
         'تجربة تذكير: $id',
         'هذا إشعار تجريبي فوري للتأكد من وصول التنبيه وصوته على iOS',
-        const NotificationDetails(iOS: darwinDetails),
+        NotificationDetails(iOS: darwinDetails),
       );
       return true;
     } catch (e) {

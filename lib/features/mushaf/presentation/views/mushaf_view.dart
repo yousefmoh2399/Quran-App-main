@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -31,9 +33,11 @@ class _MushafViewState extends State<MushafView> {
   Orientation? _lastOrientation;
 
   void _setGestureExclusion(bool enabled) {
-    try {
-      _navChannel.invokeMethod('setSystemGestureExclusion', {'enabled': enabled});
-    } catch (_) {}
+    if (!kIsWeb && Platform.isAndroid) {
+      try {
+        _navChannel.invokeMethod('setSystemGestureExclusion', {'enabled': enabled}).catchError((_) {});
+      } catch (_) {}
+    }
   }
 
   @override
@@ -628,7 +632,7 @@ class _MushafViewState extends State<MushafView> {
                     icon: Icon(isDone ? Icons.check_circle_rounded : Icons.done_all_rounded, size: 16),
                     onPressed: isDone ? null : controller.completeCommuteWird,
                     label: Text(
-                      isDone ? 'تم الإنجاز بنجاح ✓' : 'أتممت الورد ✓',
+                      isDone ? 'تم الإنجاز بنجاح' : 'أتممت الورد',
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                     ),
                   );

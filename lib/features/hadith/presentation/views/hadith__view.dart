@@ -58,7 +58,7 @@ class SectionHadithView extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'الأحاديث المحفوظة 🔖',
+                        'الأحاديث المحفوظة',
                         style: textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: colors.text,
@@ -322,7 +322,7 @@ class SectionHadithView extends StatelessWidget {
                                             borderRadius: AppRadius.borderSm,
                                           ),
                                           child: Text(
-                                            'آخر قراءة 📍',
+                                            'آخر قراءة',
                                             style: textTheme.labelSmall?.copyWith(
                                               color: Colors.white,
                                               fontWeight: FontWeight.bold,
@@ -522,7 +522,7 @@ class SectionHadithView extends StatelessWidget {
                                                     AppRadius.borderSm,
                                               ),
                                               child: Text(
-                                                'آخر قراءة 📍',
+                                                'آخر قراءة',
                                                 style: textTheme.labelSmall
                                                     ?.copyWith(
                                                   color: Colors.white,

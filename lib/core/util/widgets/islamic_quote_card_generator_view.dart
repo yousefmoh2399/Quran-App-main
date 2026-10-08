@@ -109,7 +109,7 @@ class _IslamicQuoteCardGeneratorViewState
         final xfile = XFile(file.path, mimeType: 'image/png');
         await Share.shareXFiles(
           [xfile],
-          text: '«${widget.quoteText}»\n${widget.categoryTitle} • ${widget.source}\nتطبيق تقرّب 🌿',
+          text: '«${widget.quoteText}»\n${widget.categoryTitle} • ${widget.source}\nتطبيق تقرّب',
           sharePositionOrigin: shareOrigin,
         );
       }
@@ -332,7 +332,7 @@ class _IslamicQuoteCardGeneratorViewState
                                     ),
                                   ),
                                   const SizedBox(width: 4),
-                                  const Text('🌿', style: TextStyle(fontSize: 11)),
+                                  Icon(Icons.spa_rounded, size: 12, color: _selectedPreset.accentColor),
                                 ],
                               ),
                             ],

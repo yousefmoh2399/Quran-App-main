@@ -8,24 +8,50 @@ class AppTypography {
   static const String quranFont = 'uthman';
   static const String surahNameFont = 'SurahName';
 
+  /// Fallback font cascade ensuring correct rendering for:
+  /// - Full Islamic symbols and ligatures (ﷺ, ﷻ, ﷽, ۞, ۩, ۝) via Amiri.
+  /// - Arabic UI text and numerals via Cairo.
+  /// - Emojis on iOS (Apple Color Emoji) and Android (Noto Color Emoji).
+  static const List<String> fallbackFonts = [
+    'Amiri',
+    'Cairo',
+    'Apple Color Emoji',
+    'Noto Color Emoji',
+  ];
+
+  /// Pre-configured base TextStyle for UI elements with fallback support.
+  static const TextStyle uiStyle = TextStyle(
+    fontFamily: uiFont,
+    fontFamilyFallback: fallbackFonts,
+  );
+
+  /// Pre-configured base TextStyle for decorative headers with fallback support.
+  static const TextStyle decorativeStyle = TextStyle(
+    fontFamily: decorativeFont,
+    fontFamilyFallback: fallbackFonts,
+  );
+
   /// Generates a TextTheme respecting system textScaler while maintaining hierarchy.
   static TextTheme createTextTheme(Color textColor, Color textMutedColor) {
     return TextTheme(
       // Display: large decorative numbers or headers
       displayLarge: const TextStyle(
         fontFamily: decorativeFont,
+        fontFamilyFallback: fallbackFonts,
         fontSize: 34,
         fontWeight: FontWeight.bold,
         height: 1.25,
       ).copyWith(color: textColor),
       displayMedium: const TextStyle(
         fontFamily: decorativeFont,
+        fontFamilyFallback: fallbackFonts,
         fontSize: 28,
         fontWeight: FontWeight.bold,
         height: 1.3,
       ).copyWith(color: textColor),
       displaySmall: const TextStyle(
         fontFamily: decorativeFont,
+        fontFamilyFallback: fallbackFonts,
         fontSize: 24,
         fontWeight: FontWeight.w600,
         height: 1.35,
@@ -34,18 +60,21 @@ class AppTypography {
       // Headline: page titles and major sections
       headlineLarge: const TextStyle(
         fontFamily: decorativeFont,
+        fontFamilyFallback: fallbackFonts,
         fontSize: 24,
         fontWeight: FontWeight.bold,
         height: 1.35,
       ).copyWith(color: textColor),
       headlineMedium: const TextStyle(
         fontFamily: decorativeFont,
+        fontFamilyFallback: fallbackFonts,
         fontSize: 20,
         fontWeight: FontWeight.bold,
         height: 1.4,
       ).copyWith(color: textColor),
       headlineSmall: const TextStyle(
         fontFamily: uiFont,
+        fontFamilyFallback: fallbackFonts,
         fontSize: 18,
         fontWeight: FontWeight.w700,
         height: 1.4,
@@ -54,18 +83,21 @@ class AppTypography {
       // Title: card titles, app bar titles
       titleLarge: const TextStyle(
         fontFamily: uiFont,
+        fontFamilyFallback: fallbackFonts,
         fontSize: 18,
         fontWeight: FontWeight.bold,
         height: 1.4,
       ).copyWith(color: textColor),
       titleMedium: const TextStyle(
         fontFamily: uiFont,
+        fontFamilyFallback: fallbackFonts,
         fontSize: 16,
         fontWeight: FontWeight.w600,
         height: 1.45,
       ).copyWith(color: textColor),
       titleSmall: const TextStyle(
         fontFamily: uiFont,
+        fontFamilyFallback: fallbackFonts,
         fontSize: 14,
         fontWeight: FontWeight.w600,
         height: 1.45,
@@ -74,18 +106,21 @@ class AppTypography {
       // Body: content reading, paragraphs, details
       bodyLarge: const TextStyle(
         fontFamily: uiFont,
+        fontFamilyFallback: fallbackFonts,
         fontSize: 16,
         fontWeight: FontWeight.normal,
         height: 1.5,
       ).copyWith(color: textColor),
       bodyMedium: const TextStyle(
         fontFamily: uiFont,
+        fontFamilyFallback: fallbackFonts,
         fontSize: 14,
         fontWeight: FontWeight.normal,
         height: 1.5,
       ).copyWith(color: textColor),
       bodySmall: const TextStyle(
         fontFamily: uiFont,
+        fontFamilyFallback: fallbackFonts,
         fontSize: 12,
         fontWeight: FontWeight.normal,
         height: 1.5,
@@ -94,18 +129,21 @@ class AppTypography {
       // Label: buttons, tags, captions
       labelLarge: const TextStyle(
         fontFamily: uiFont,
+        fontFamilyFallback: fallbackFonts,
         fontSize: 14,
         fontWeight: FontWeight.w600,
         height: 1.3,
       ).copyWith(color: textColor),
       labelMedium: const TextStyle(
         fontFamily: uiFont,
+        fontFamilyFallback: fallbackFonts,
         fontSize: 12,
         fontWeight: FontWeight.w500,
         height: 1.3,
       ).copyWith(color: textMutedColor),
       labelSmall: const TextStyle(
         fontFamily: uiFont,
+        fontFamilyFallback: fallbackFonts,
         fontSize: 10,
         fontWeight: FontWeight.w500,
         height: 1.3,

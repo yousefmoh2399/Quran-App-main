@@ -81,7 +81,7 @@ class _RamadanKhatmaViewState extends State<RamadanKhatmaView> {
         backgroundColor: const Color(0xFF09261E),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text(
-          '🎉 هنيئاً لك ختم كتاب الله!',
+          'هنيئاً لك ختم كتاب الله!',
           textAlign: TextAlign.center,
           style: TextStyle(color: Color(0xFFD4AF37), fontWeight: FontWeight.bold, fontSize: 20),
         ),
@@ -95,7 +95,7 @@ class _RamadanKhatmaViewState extends State<RamadanKhatmaView> {
             ),
             SizedBox(height: 12),
             Text(
-              'تقبل الله طاعتكم وجعل القرآن العظيم ربيع قلوبكم ونور صدوركم 🤲',
+              'تقبل الله طاعتكم وجعل القرآن العظيم ربيع قلوبكم ونور صدوركم',
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
             ),

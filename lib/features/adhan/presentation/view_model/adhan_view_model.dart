@@ -143,7 +143,7 @@ class AdhanViewModel extends GetxController {
           debugPrint('User moved > 50km ($distance m). Updating location and rolling window!');
           AppSnackbar.show(
             'تحديث الموقع',
-            'تم رصد انتقال جغرافي جديد وتحديث مواقيت الصلاة تلقائياً 🕌',
+            'تم رصد انتقال جغرافي جديد وتحديث مواقيت الصلاة تلقائياً',
             backgroundColor: const Color(0xFF0F5C4A),
             duration: const Duration(seconds: 3),
           );
