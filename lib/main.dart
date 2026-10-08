@@ -86,21 +86,20 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     }
     _listenToInitialNotification();
     Future.microtask(() async {
-      final notify = NotifyHelper();
-      await notify.initializeNotification();
-      final granted = await notify.ensureSchedulingPermissions(
-        requestIfNeeded: false,
-      );
-      if (!granted) {
-        debugPrint(
-          'ℹ️ Scheduling permissions not granted yet; will be requested contextually.',
-        );
-      }
       try {
-        //  notify.scheduleAzkar(timeOfDay: null);
-        debugPrint('✅ Azkar scheduled successfully.');
+        final notify = NotifyHelper();
+        await notify.initializeNotification();
+        final granted = await notify.ensureSchedulingPermissions(
+          requestIfNeeded: false,
+        );
+        if (!granted) {
+          debugPrint(
+            'ℹ️ Scheduling permissions not granted yet; will be requested contextually.',
+          );
+        }
+        debugPrint('✅ Notifications and Azkar initialized successfully.');
       } catch (e, st) {
-        debugPrint('⚠️ scheduleAzkar skipped: $e\n$st');
+        debugPrint('⚠️ Background notification initialization warning: $e\n$st');
       }
     });
   }

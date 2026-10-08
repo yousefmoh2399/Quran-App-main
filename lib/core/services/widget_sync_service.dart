@@ -50,8 +50,7 @@ class WidgetSyncService {
 
       // Trigger widget update
       await HomeWidget.updateWidget(
-        name: androidWirdWidget,
-        androidName: androidWirdWidget,
+        qualifiedAndroidName: androidWirdWidget,
         iOSName: iOSWirdWidget,
       );
     } catch (e) {
@@ -73,8 +72,7 @@ class WidgetSyncService {
       await HomeWidget.saveWidgetData<String>('prayer_city', cityName);
 
       await HomeWidget.updateWidget(
-        name: androidPrayerWidget,
-        androidName: androidPrayerWidget,
+        qualifiedAndroidName: androidPrayerWidget,
         iOSName: iOSPrayerWidget,
       );
     } catch (e) {
@@ -118,8 +116,7 @@ class WidgetSyncService {
 
       // Trigger widget update
       await HomeWidget.updateWidget(
-        name: androidRamadanWidget,
-        androidName: androidRamadanWidget,
+        qualifiedAndroidName: androidRamadanWidget,
         iOSName: iOSRamadanWidget,
       );
     } catch (e) {

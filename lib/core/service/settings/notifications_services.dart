@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:adhan/adhan.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 
@@ -131,7 +132,11 @@ class NotifyHelper {
       await flutterLocalNotificationsPlugin.cancel(900);
       await flutterLocalNotificationsPlugin.cancel(901);
     } catch (_) {}
-    await ensureSchedulingPermissions(requestIfNeeded: true);
+    try {
+      await ensureSchedulingPermissions(requestIfNeeded: false);
+    } catch (e) {
+      debugPrint('⚠️ ensureSchedulingPermissions check: $e');
+    }
     requestIOSPermissions();
     _initialized = true;
   }
@@ -404,58 +409,78 @@ class NotifyHelper {
     }
 
     Future<bool> ensureNotificationPermission() async {
-      final bool? enabled = await androidPlugin.areNotificationsEnabled();
-      if (enabled == null || enabled) {
-        return true;
-      }
-      if (!requestIfNeeded) {
-        debugPrint(
-          'Notification permission not granted; skipping scheduled notifications.',
-        );
+      try {
+        final bool? enabled = await androidPlugin.areNotificationsEnabled();
+        if (enabled == null || enabled) {
+          return true;
+        }
+        if (!requestIfNeeded) {
+          debugPrint(
+            'Notification permission not granted; skipping scheduled notifications.',
+          );
+          return false;
+        }
+        final bool granted =
+            await androidPlugin.requestNotificationsPermission() ?? false;
+        if (!granted) {
+          debugPrint(
+            'Notification permission request denied by the user.',
+          );
+          return false;
+        }
+        final bool? afterRequest = await androidPlugin.areNotificationsEnabled();
+        return afterRequest == null || afterRequest;
+      } on PlatformException catch (e) {
+        debugPrint('⚠️ ensureNotificationPermission PlatformException (${e.code}): ${e.message}');
+        return false;
+      } catch (e) {
+        debugPrint('⚠️ ensureNotificationPermission unexpected error: $e');
         return false;
       }
-      final bool granted =
-          await androidPlugin.requestNotificationsPermission() ?? false;
-      if (!granted) {
-        debugPrint(
-          'Notification permission request denied by the user.',
-        );
-        return false;
-      }
-      final bool? afterRequest = await androidPlugin.areNotificationsEnabled();
-      return afterRequest == null || afterRequest;
     }
 
     Future<bool> ensureExactAlarmPermission() async {
-      final bool? canSchedule =
-          await androidPlugin.canScheduleExactNotifications();
-      if (canSchedule == null || canSchedule) {
-        return true;
-      }
-      if (!requestIfNeeded) {
-        debugPrint(
-          'Exact alarm permission not granted; skipping scheduled notifications.',
-        );
+      try {
+        final bool? canSchedule =
+            await androidPlugin.canScheduleExactNotifications();
+        if (canSchedule == null || canSchedule) {
+          return true;
+        }
+        if (!requestIfNeeded) {
+          debugPrint(
+            'Exact alarm permission not granted; skipping scheduled notifications.',
+          );
+          return false;
+        }
+        final bool granted =
+            await androidPlugin.requestExactAlarmsPermission() ?? false;
+        if (!granted) {
+          debugPrint(
+            'Exact alarm permission request denied by the user.',
+          );
+          return false;
+        }
+        final bool? afterRequest =
+            await androidPlugin.canScheduleExactNotifications();
+        return afterRequest == null || afterRequest;
+      } on PlatformException catch (e) {
+        debugPrint('⚠️ ensureExactAlarmPermission PlatformException (${e.code}): ${e.message}');
+        return false;
+      } catch (e) {
+        debugPrint('⚠️ ensureExactAlarmPermission unexpected error: $e');
         return false;
       }
-      final bool granted =
-          await androidPlugin.requestExactAlarmsPermission() ?? false;
-      if (!granted) {
-        debugPrint(
-          'Exact alarm permission request denied by the user.',
-        );
-        return false;
-      }
-      final bool? afterRequest =
-          await androidPlugin.canScheduleExactNotifications();
-      return afterRequest == null || afterRequest;
     }
 
     final bool notificationsOk = await ensureNotificationPermission();
     final bool exactOk = await ensureExactAlarmPermission();
 
     if (requestIfNeeded) {
-      await androidPlugin.requestFullScreenIntentPermission();
+      try {
+        await androidPlugin.requestFullScreenIntentPermission();
+      } catch (e) {
+        debugPrint('⚠️ requestFullScreenIntentPermission warning: $e');
+      }
     }
 
     return notificationsOk && exactOk;

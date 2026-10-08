@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:adhan/adhan.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -72,17 +73,26 @@ class AdhanViewModel extends GetxController {
     update();
   }
 
-  /// Checks device location and if user moved > 50km, recalculates prayer times.
   Future<void> checkAndRefreshLocation() async {
-    final status = await Permission.location.status;
-    if (!status.isGranted) {
-      final req = await Permission.location.request();
-      if (!req.isGranted) {
-        if (latitude == null || longitude == null) {
-          isLocationRequired.value = true;
+    try {
+      final status = await Permission.location.status;
+      if (!status.isGranted) {
+        final req = await Permission.location.request();
+        if (!req.isGranted) {
+          if (latitude == null || longitude == null) {
+            isLocationRequired.value = true;
+          }
+          return;
         }
-        return;
       }
+    } on PlatformException catch (e) {
+      debugPrint('⚠️ Location permission request in progress or busy: $e');
+      if (latitude == null || longitude == null) {
+        isLocationRequired.value = true;
+      }
+      return;
+    } catch (e) {
+      debugPrint('⚠️ Location permission check error: $e');
     }
 
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();

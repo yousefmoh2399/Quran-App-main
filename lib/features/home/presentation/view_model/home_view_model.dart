@@ -32,7 +32,6 @@ class HomeViewModel extends GetxController {
   String currentZekr = 'سبحان الله';
   String appGroupId = 'group.com.homeScreenApp';
   String iOSWidgetName = 'MyHomeWidget';
-  String androidWidgetName = 'MyHomeWidget';
   String dataKey = 'currentZekr';
 
   Future<void> _init() async {
@@ -133,16 +132,26 @@ class HomeViewModel extends GetxController {
 
   Future<void> _updateWidget() async {
     try {
-      final randomIndex = DateTime.now().second % staticVars.smallDo3a2.length;
-      currentZekr = staticVars.smallDo3a2[randomIndex];
+      if (staticVars.smallDo3a2.isNotEmpty) {
+        final randomIndex = DateTime.now().second % staticVars.smallDo3a2.length;
+        currentZekr = staticVars.smallDo3a2[randomIndex];
+      }
       await HomeWidget.saveWidgetData(dataKey, currentZekr);
       await HomeWidget.saveWidgetData('deepLink', 'quranapp://azkar');
-      await Future.delayed(const Duration(seconds: 1));
-      await HomeWidget.updateWidget(
-        iOSName: iOSWidgetName,
-        androidName: androidWidgetName,
-      );
-      debugPrint('✅ Widget updated successfully');
+      await Future.delayed(const Duration(milliseconds: 300));
+      for (final widgetQualified in [
+        'com.example.quran_app_android.widgets.AzkarSmallWidgetProvider',
+        'com.example.quran_app_android.widgets.AzkarMediumWidgetProvider',
+        'com.example.quran_app_android.widgets.AzkarLargeWidgetProvider',
+      ]) {
+        try {
+          await HomeWidget.updateWidget(
+            qualifiedAndroidName: widgetQualified,
+            iOSName: iOSWidgetName,
+          );
+        } catch (_) {}
+      }
+      debugPrint('✅ Azkar HomeWidget updated successfully');
     } catch (e, st) {
       debugPrint('⚠️ Widget update failed: $e\n$st');
     }
