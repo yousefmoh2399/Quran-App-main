@@ -43,6 +43,9 @@ class MushafPageCurlPainter extends CustomPainter {
     if (theme.mode == MushafThemeMode.readingNight) {
       return const Color(0xFF332B22);
     }
+    if (theme.mode == MushafThemeMode.sepia) {
+      return const Color(0xFFE2D6BF);
+    }
     return theme.pageBg;
   }
 

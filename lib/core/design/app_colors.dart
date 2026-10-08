@@ -61,6 +61,18 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
     error: Color(0xFFF2B8B5),
   );
 
+  /// Warm paper / Sepia theme palette (warm antique manuscript look, soothes eye strain)
+  static const sepia = AppColorsExtension(
+    bg: Color(0xFFF4ECD8),
+    surface: Color(0xFFFAF4E6),
+    primary: Color(0xFF0F5C4A),
+    accent: Color(0xFFB8892B),
+    text: Color(0xFF2C221E),
+    textMuted: Color(0xFF756254),
+    divider: Color(0xFFE2D6BF),
+    error: Color(0xFFB3261E),
+  );
+
   @override
   AppColorsExtension copyWith({
     Color? bg,

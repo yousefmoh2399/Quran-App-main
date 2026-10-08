@@ -363,6 +363,14 @@ class _RamadanHubViewState extends State<RamadanHubView> {
                       badgeIcon: Icons.balance_rounded,
                       onTap: () => Get.toNamed(AppRoutes.ramadanZakat),
                     ),
+                    _buildMenuCard(
+                      title: 'ختمة العائلة الجماعية',
+                      subtitle: 'توزيع الأجزاء الـ 30 ومتابعة الختمة مع الأسرة والأصدقاء',
+                      icon: Icons.groups_rounded,
+                      iconColor: const Color(0xFFB8860B),
+                      badgeIcon: Icons.share_rounded,
+                      onTap: () => Get.toNamed(AppRoutes.khatmaCircles),
+                    ),
                   ],
                 );
               },

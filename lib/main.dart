@@ -159,8 +159,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         initialRoute: AppRoutes.splash,
         initialBinding: Binding(),
         getPages: AppRoutes.routes,
-        theme: AppTheme.light,
-        darkTheme: AppTheme.dark,
+        theme: themeController.isSepia ? AppTheme.sepia : AppTheme.light,
+        darkTheme: themeController.isSepia ? AppTheme.sepia : AppTheme.dark,
         themeMode: themeController.themeMode,
       ),
     );

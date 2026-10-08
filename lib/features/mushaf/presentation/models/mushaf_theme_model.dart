@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 enum MushafThemeMode {
   light,
   dark,
-  readingNight;
+  readingNight,
+  sepia;
 
   static MushafThemeMode fromString(String? val) {
     switch (val) {
@@ -12,6 +13,8 @@ enum MushafThemeMode {
         return MushafThemeMode.dark;
       case 'readingNight':
         return MushafThemeMode.readingNight;
+      case 'sepia':
+        return MushafThemeMode.sepia;
       case 'light':
       default:
         return MushafThemeMode.light;
@@ -85,7 +88,7 @@ class MushafThemeConfig {
     spineShadow: Color(0x66000000),
   );
 
-  /// Warm Reading Night Theme (Sepia / Low blue light)
+  /// Warm Reading Night Theme (Low blue light dark mode)
   static const readingNight = MushafThemeConfig(
     mode: MushafThemeMode.readingNight,
     pageBg: Color(0xFF14110D),
@@ -101,6 +104,22 @@ class MushafThemeConfig {
     spineShadow: Color(0x77000000),
   );
 
+  /// Authentic Warm Paper / Sepia Theme (Ancient manuscript warmth, easy on eyes)
+  static const sepia = MushafThemeConfig(
+    mode: MushafThemeMode.sepia,
+    pageBg: Color(0xFFF4ECD8),
+    frameBorderOuter: Color(0xFFA67C2A),
+    frameBorderInner: Color(0xFF205243),
+    cornerAccent: Color(0xFFA67C2A),
+    textColor: Color(0xFF2A2118),
+    headerFooterColor: Color(0xFF6B5847),
+    ayahHighlight: Color(0x38C59A45),
+    surahHeaderBg: Color(0xFFEADBBE),
+    surahHeaderBorder: Color(0xFFA67C2A),
+    surahHeaderTextColor: Color(0xFF205243),
+    spineShadow: Color(0x38000000),
+  );
+
   static MushafThemeConfig of(MushafThemeMode mode) {
     switch (mode) {
       case MushafThemeMode.light:
@@ -109,6 +128,8 @@ class MushafThemeConfig {
         return dark;
       case MushafThemeMode.readingNight:
         return readingNight;
+      case MushafThemeMode.sepia:
+        return sepia;
     }
   }
 }

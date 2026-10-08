@@ -191,6 +191,21 @@ class _UmrahHubViewState extends State<UmrahHubView> {
 
                 const SizedBox(height: AppSpacing.sm),
 
+                // 8. Landmarks Guide
+                _buildHubTile(
+                  title: 'معالم الحرمين الشريفين وآداب الزيارة',
+                  subtitle: 'دليل تفاعلي للكعبة والمقام والحجر والروضة الشريفة والبقيع والسنن والآداب',
+                  icon: Icons.mosque_rounded,
+                  iconColor: const Color(0xFFC5A059),
+                  onTap: () => Get.toNamed(AppRoutes.landmarksGuide),
+                  colors: colors,
+                  textColor: textColor,
+                  fontScale: fontScale,
+                  isElderly: isElderly,
+                ),
+
+                const SizedBox(height: AppSpacing.sm),
+
                 // 5. Congestion Estimates
                 _buildHubTile(
                   title: 'تقديرات أوقات الزحام بالحرم والمشاعر',

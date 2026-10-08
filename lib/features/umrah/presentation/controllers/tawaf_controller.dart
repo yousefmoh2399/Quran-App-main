@@ -17,6 +17,12 @@ class TawafController extends GetxController {
   final RxBool showSensorPrompt = false.obs;
   final RxDouble compassHeading = 0.0.obs;
 
+  // Smart Lap Timer & Pace Estimation
+  final RxInt currentLapDurationSeconds = 0.obs;
+  final RxList<int> lapDurations = <int>[].obs;
+  final RxBool isTimerRunning = false.obs;
+  Timer? _lapTimer;
+
   late final TawafHeadingAccumulator accumulator;
   StreamSubscription<CompassEvent>? _compassSubscription;
 
@@ -40,6 +46,7 @@ class TawafController extends GetxController {
 
   @override
   void onClose() {
+    pauseTimer();
     _stopSensor();
     super.onClose();
   }
@@ -90,8 +97,69 @@ class TawafController extends GetxController {
 
   void stopSensor() => _stopSensor();
 
+  void startOrResumeTimer() {
+    if (isTimerRunning.value || isFinished.value) return;
+    isTimerRunning.value = true;
+    _lapTimer?.cancel();
+    _lapTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      currentLapDurationSeconds.value++;
+    });
+  }
+
+  void pauseTimer() {
+    isTimerRunning.value = false;
+    _lapTimer?.cancel();
+    _lapTimer = null;
+  }
+
+  void toggleTimer() {
+    if (isTimerRunning.value) {
+      pauseTimer();
+      AppHaptics.selection();
+    } else {
+      startOrResumeTimer();
+      AppHaptics.selection();
+    }
+  }
+
+  int get totalElapsedSeconds {
+    final prev = lapDurations.fold<int>(0, (sum, sec) => sum + sec);
+    return prev + currentLapDurationSeconds.value;
+  }
+
+  int get averageLapSeconds {
+    if (lapDurations.isEmpty) return currentLapDurationSeconds.value;
+    final total = lapDurations.fold<int>(0, (sum, sec) => sum + sec);
+    return (total / lapDurations.length).round();
+  }
+
+  int get estimatedRemainingSeconds {
+    if (isFinished.value || currentLap.value >= 7) return 0;
+    final remainingLaps = 7 - currentLap.value;
+    final avg = averageLapSeconds;
+    if (avg <= 0) return 0;
+    return remainingLaps * avg;
+  }
+
+  String formatTime(int totalSeconds) {
+    if (totalSeconds <= 0) return '00:00';
+    final hours = totalSeconds ~/ 3600;
+    final minutes = (totalSeconds % 3600) ~/ 60;
+    final seconds = totalSeconds % 60;
+    if (hours > 0) {
+      return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    }
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+  }
+
   Future<void> completeLap() async {
     if (currentLap.value >= 7) return;
+
+    // Record lap duration
+    if (currentLapDurationSeconds.value > 0) {
+      lapDurations.add(currentLapDurationSeconds.value);
+      currentLapDurationSeconds.value = 0;
+    }
 
     currentLap.value++;
     accumulator.reset();
@@ -99,8 +167,13 @@ class TawafController extends GetxController {
 
     if (currentLap.value >= 7) {
       isFinished.value = true;
+      pauseTimer();
       AppHaptics.cycleCompleted();
     } else {
+      // Auto-start timer if user hasn't explicitly started it
+      if (!isTimerRunning.value) {
+        startOrResumeTimer();
+      }
       AppHaptics.itemCompleted();
     }
 
@@ -115,6 +188,11 @@ class TawafController extends GetxController {
 
   Future<void> undoLap() async {
     if (currentLap.value <= 0) return;
+
+    if (lapDurations.isNotEmpty) {
+      lapDurations.removeLast();
+    }
+    currentLapDurationSeconds.value = 0;
 
     currentLap.value--;
     isFinished.value = false;
@@ -131,6 +209,10 @@ class TawafController extends GetxController {
   }
 
   Future<void> resetTawaf() async {
+    pauseTimer();
+    currentLapDurationSeconds.value = 0;
+    lapDurations.clear();
+
     currentLap.value = 0;
     isFinished.value = false;
     accumulator.reset();

@@ -57,11 +57,14 @@ import 'package:quran_app_android/features/umrah/presentation/views/hajj_umrah_d
 import 'package:quran_app_android/features/umrah/presentation/views/ihram_prohibitions_view.dart';
 import 'package:quran_app_android/features/umrah/presentation/views/pilgrim_checklist_view.dart';
 import 'package:quran_app_android/features/umrah/presentation/views/sai_counter_view.dart';
+import 'package:quran_app_android/features/umrah/presentation/views/landmarks_guide_view.dart';
 import 'package:quran_app_android/features/umrah/presentation/views/tawaf_counter_view.dart';
 import 'package:quran_app_android/features/umrah/presentation/views/trip_diary_view.dart';
 import 'package:quran_app_android/features/umrah/presentation/views/umrah_guide_view.dart';
 import 'package:quran_app_android/features/umrah/presentation/views/umrah_hub_view.dart';
 import 'package:quran_app_android/features/umrah/presentation/views/umrah_sources_review_view.dart';
+import 'package:quran_app_android/features/khatma_circles/presentation/views/khatma_circles_list_view.dart';
+import 'package:quran_app_android/features/khatma_circles/presentation/views/khatma_circle_detail_view.dart';
 
 class AppRoutes {
   static List<GetPage> routes = [
@@ -428,6 +431,24 @@ class AppRoutes {
       transition: Transition.cupertino,
       transitionDuration: kTransitionDuration,
     ),
+    GetPage(
+      name: landmarksGuide,
+      page: () => const LandmarksGuideView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: khatmaCircles,
+      page: () => const KhatmaCirclesListView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: khatmaCircleDetail,
+      page: () => const KhatmaCircleDetailView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
     if (kDebugMode) ...[
       GetPage(
         name: adhanDebug,
@@ -505,4 +526,7 @@ class AppRoutes {
   static String hajjUmrahDuas = '/hajjUmrahDuas';
   static String ihramProhibitions = '/ihramProhibitions';
   static String pilgrimChecklist = '/pilgrimChecklist';
+  static String landmarksGuide = '/landmarksGuide';
+  static String khatmaCircles = '/khatmaCircles';
+  static String khatmaCircleDetail = '/khatmaCircleDetail';
 }

@@ -490,7 +490,17 @@ class _MushafViewState extends State<MushafView> {
             children: [
               Icon(Icons.nightlight_round, color: Color(0xFFD9B25A), size: 20),
               AppSpacing.horizontalSm,
-              Text('قراءة ليلية (دافئ)'),
+              Text('قراءة ليلية (مظلم دافئ)'),
+            ],
+          ),
+        ),
+        const PopupMenuItem(
+          value: MushafThemeMode.sepia,
+          child: Row(
+            children: [
+              Icon(Icons.menu_book_rounded, color: Color(0xFFA67C2A), size: 20),
+              AppSpacing.horizontalSm,
+              Text('ورق دافئ (سيبيا مريح)'),
             ],
           ),
         ),

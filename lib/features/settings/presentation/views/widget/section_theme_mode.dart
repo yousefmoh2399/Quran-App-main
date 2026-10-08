@@ -38,7 +38,7 @@ class SectionThemeMode extends StatelessWidget {
               ),
               AppSpacing.verticalSm,
               Obx(() {
-                final currentMode = themeController.themeMode;
+                final currentMode = themeController.appThemeMode;
                 return Container(
                   decoration: BoxDecoration(
                     color: colors.bg,
@@ -49,26 +49,34 @@ class SectionThemeMode extends StatelessWidget {
                     children: [
                       _buildThemeOption(
                         context: context,
-                        label: 'تلقائي النظام',
+                        label: 'تلقائي',
                         icon: Icons.brightness_auto_rounded,
-                        isSelected: currentMode == ThemeMode.system,
-                        onTap: () => themeController.setThemeMode(ThemeMode.system),
+                        isSelected: currentMode == AppThemeModeType.system,
+                        onTap: () => themeController.setAppThemeMode(AppThemeModeType.system),
                       ),
                       Container(width: 1, height: 40, color: colors.divider),
                       _buildThemeOption(
                         context: context,
                         label: 'فاتح',
                         icon: Icons.light_mode_rounded,
-                        isSelected: currentMode == ThemeMode.light,
-                        onTap: () => themeController.setThemeMode(ThemeMode.light),
+                        isSelected: currentMode == AppThemeModeType.light,
+                        onTap: () => themeController.setAppThemeMode(AppThemeModeType.light),
                       ),
                       Container(width: 1, height: 40, color: colors.divider),
                       _buildThemeOption(
                         context: context,
                         label: 'داكن',
                         icon: Icons.dark_mode_rounded,
-                        isSelected: currentMode == ThemeMode.dark,
-                        onTap: () => themeController.setThemeMode(ThemeMode.dark),
+                        isSelected: currentMode == AppThemeModeType.dark,
+                        onTap: () => themeController.setAppThemeMode(AppThemeModeType.dark),
+                      ),
+                      Container(width: 1, height: 40, color: colors.divider),
+                      _buildThemeOption(
+                        context: context,
+                        label: 'ورق دافئ',
+                        icon: Icons.menu_book_rounded,
+                        isSelected: currentMode == AppThemeModeType.sepia,
+                        onTap: () => themeController.setAppThemeMode(AppThemeModeType.sepia),
                       ),
                     ],
                   ),

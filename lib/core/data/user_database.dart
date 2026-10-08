@@ -13,7 +13,7 @@ class UserDatabase {
   static final UserDatabase instance = UserDatabase._internal();
 
   static const String dbName = 'user_data.db';
-  static const int currentDbVersion = 4;
+  static const int currentDbVersion = 5;
 
   Database? _db;
 
@@ -241,7 +241,42 @@ class UserDatabase {
         created_at TEXT NOT NULL
       )
     ''');
-    await db.execute('CREATE INDEX IF NOT EXISTS idx_checklist_cat ON pilgrim_checklist(category)');
+    // 15. Khatma circles table (Family and group Khatmas)
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS khatma_circles (
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT DEFAULT '',
+        target_date TEXT,
+        created_at TEXT NOT NULL,
+        is_completed INTEGER NOT NULL DEFAULT 0,
+        completed_at TEXT
+      )
+    ''');
+
+    // 16. Khatma circle Juz assignments
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS khatma_circle_juz (
+        circle_id TEXT NOT NULL,
+        juz_number INTEGER NOT NULL,
+        assigned_to TEXT DEFAULT '',
+        status TEXT NOT NULL DEFAULT 'available',
+        completed_at TEXT,
+        PRIMARY KEY (circle_id, juz_number)
+      )
+    ''');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_circle_juz_circle ON khatma_circle_juz(circle_id)');
+
+    // 17. Lap timers (Tawaf and Sa'i smart pacing)
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS lap_timers (
+        session_id TEXT NOT NULL,
+        lap_number INTEGER NOT NULL,
+        duration_seconds INTEGER NOT NULL,
+        recorded_at TEXT NOT NULL,
+        PRIMARY KEY (session_id, lap_number)
+      )
+    ''');
   }
 
   static Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -339,6 +374,41 @@ class UserDatabase {
         )
       ''');
       await db.execute('CREATE INDEX IF NOT EXISTS idx_checklist_cat ON pilgrim_checklist(category)');
+    }
+
+    if (oldVersion < 5) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS khatma_circles (
+          id TEXT PRIMARY KEY,
+          title TEXT NOT NULL,
+          description TEXT DEFAULT '',
+          target_date TEXT,
+          created_at TEXT NOT NULL,
+          is_completed INTEGER NOT NULL DEFAULT 0,
+          completed_at TEXT
+        )
+      ''');
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS khatma_circle_juz (
+          circle_id TEXT NOT NULL,
+          juz_number INTEGER NOT NULL,
+          assigned_to TEXT DEFAULT '',
+          status TEXT NOT NULL DEFAULT 'available',
+          completed_at TEXT,
+          PRIMARY KEY (circle_id, juz_number)
+        )
+      ''');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_circle_juz_circle ON khatma_circle_juz(circle_id)');
+
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS lap_timers (
+          session_id TEXT NOT NULL,
+          lap_number INTEGER NOT NULL,
+          duration_seconds INTEGER NOT NULL,
+          recorded_at TEXT NOT NULL,
+          PRIMARY KEY (session_id, lap_number)
+        )
+      ''');
     }
   }
 

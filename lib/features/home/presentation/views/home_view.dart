@@ -10,6 +10,7 @@ import 'package:quran_app_android/features/home/presentation/views/widget/contin
 import 'package:quran_app_android/features/home/presentation/views/widget/home_hadith_memorization_card.dart';
 import 'package:quran_app_android/features/home/presentation/views/widget/home_header.dart';
 import 'package:quran_app_android/features/home/presentation/views/widget/home_nav_bar.dart';
+import 'package:quran_app_android/features/home/presentation/views/widget/daily_tadabbur_card.dart';
 import 'package:quran_app_android/features/home/presentation/views/widget/home_quick_shortcuts.dart';
 import 'package:quran_app_android/features/home/presentation/views/widget/next_prayer_card.dart';
 
@@ -73,6 +74,8 @@ class _HomeViewState extends State<HomeView> {
               ContinueReadingWirdCard(),
               AppSpacing.verticalLg,
               HomeQuickShortcuts(),
+              AppSpacing.verticalLg,
+              DailyTadabburCard(),
               AppSpacing.verticalLg,
               HomeHadithMemorizationCard(),
               AppSpacing.verticalLg,

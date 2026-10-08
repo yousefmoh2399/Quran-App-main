@@ -130,4 +130,67 @@ class AppTheme {
       ),
     );
   }
+
+  /// Sepia / Warm Paper ThemeData
+  static ThemeData get sepia {
+    const colors = AppColorsExtension.sepia;
+    final textTheme = AppTypography.createTextTheme(colors.text, colors.textMuted);
+
+    final colorScheme = ColorScheme.light(
+      primary: colors.primary,
+      onPrimary: Colors.white,
+      secondary: colors.accent,
+      onSecondary: Colors.white,
+      surface: colors.surface,
+      onSurface: colors.text,
+      error: colors.error,
+      onError: Colors.white,
+      outline: colors.divider,
+    );
+
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.light,
+      fontFamily: AppTypography.uiFont,
+      fontFamilyFallback: AppTypography.fallbackFonts,
+      colorScheme: colorScheme,
+      scaffoldBackgroundColor: colors.bg,
+      textTheme: textTheme,
+      extensions: const [colors],
+      appBarTheme: AppBarTheme(
+        backgroundColor: colors.bg,
+        foregroundColor: colors.text,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: true,
+        titleTextStyle: textTheme.titleLarge?.copyWith(
+          color: colors.text,
+          fontWeight: FontWeight.bold,
+        ),
+        iconTheme: IconThemeData(color: colors.text),
+      ),
+      cardTheme: CardThemeData(
+        color: colors.surface,
+        elevation: 0,
+        shape: const RoundedRectangleBorder(
+          borderRadius: AppRadius.borderMd,
+          side: BorderSide(color: Color(0xFFE2D6BF), width: 1),
+        ),
+        margin: EdgeInsets.zero,
+      ),
+      dividerTheme: const DividerThemeData(
+        color: Color(0xFFE2D6BF),
+        thickness: 1,
+        space: 1,
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: Color(0xFFFAF4E6),
+        modalBackgroundColor: Color(0xFFFAF4E6),
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: AppRadius.radiusXl),
+        ),
+      ),
+    );
+  }
 }

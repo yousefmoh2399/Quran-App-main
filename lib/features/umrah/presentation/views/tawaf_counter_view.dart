@@ -162,6 +162,15 @@ class _TawafCounterViewState extends State<TawafCounterView>
                     ),
                   ),
 
+                // Smart Pacing & Lap Timer Card
+                _buildSmartPacingCard(
+                  colors,
+                  primaryColor,
+                  textColor,
+                  fontScale,
+                  isElderly,
+                ),
+
                 // Primary Action Buttons
                 _buildActionButtons(
                   colors,
@@ -664,6 +673,166 @@ class _TawafCounterViewState extends State<TawafCounterView>
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSmartPacingCard(
+    AppColorsExtension colors,
+    Color primaryColor,
+    Color textColor,
+    double fontScale,
+    bool isElderly,
+  ) {
+    final totalSec = _controller.totalElapsedSeconds;
+    final avgSec = _controller.averageLapSeconds;
+    final remainingSec = _controller.estimatedRemainingSeconds;
+    final isRunning = _controller.isTimerRunning.value;
+    final isFinished = _controller.isFinished.value;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        border: Border.all(color: colors.divider),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Icon(Icons.timer_outlined, size: 16, color: primaryColor),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  'مؤقت الطواف والسرعة:',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontFamily: AppTypography.uiFont,
+                    fontSize: 12 * fontScale,
+                    fontWeight: FontWeight.bold,
+                    color: primaryColor,
+                  ),
+                ),
+              ),
+              if (!isFinished)
+                InkWell(
+                  onTap: () => _controller.toggleTimer(),
+                  borderRadius: BorderRadius.circular(AppRadius.xs),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isRunning ? Icons.pause_circle_outline : Icons.play_circle_outline,
+                          size: 15,
+                          color: isRunning ? Colors.orange.shade800 : primaryColor,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          isRunning ? 'إيقاف مؤقت' : 'استئناف',
+                          style: TextStyle(
+                            fontFamily: AppTypography.uiFont,
+                            fontSize: 11 * fontScale,
+                            fontWeight: FontWeight.bold,
+                            color: isRunning ? Colors.orange.shade800 : primaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: _buildPacingStat(
+                  label: 'الوقت الإجمالي',
+                  value: _controller.formatTime(totalSec),
+                  icon: Icons.access_time_rounded,
+                  colors: colors,
+                  textColor: textColor,
+                  fontScale: fontScale,
+                ),
+              ),
+              Container(width: 1, height: 26, color: colors.divider),
+              Expanded(
+                child: _buildPacingStat(
+                  label: 'متوسط الشوط',
+                  value: _controller.formatTime(avgSec),
+                  icon: Icons.speed_rounded,
+                  colors: colors,
+                  textColor: textColor,
+                  fontScale: fontScale,
+                ),
+              ),
+              Container(width: 1, height: 26, color: colors.divider),
+              Expanded(
+                child: _buildPacingStat(
+                  label: isFinished ? 'الحالة' : 'المتبقي التقديري',
+                  value: isFinished ? 'مكتمل' : _controller.formatTime(remainingSec),
+                  icon: isFinished ? Icons.check_circle_outline : Icons.hourglass_bottom_rounded,
+                  colors: colors,
+                  textColor: isFinished ? Colors.green.shade700 : textColor,
+                  fontScale: fontScale,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPacingStat({
+    required String label,
+    required String value,
+    required IconData icon,
+    required AppColorsExtension colors,
+    required Color textColor,
+    required double fontScale,
+  }) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: AppTypography.uiFont,
+            fontSize: 10 * fontScale,
+            color: colors.textMuted,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 12, color: colors.textMuted),
+            const SizedBox(width: 3),
+            Flexible(
+              child: Text(
+                value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontFamily: AppTypography.uiFont,
+                  fontSize: 12 * fontScale,
+                  fontWeight: FontWeight.bold,
+                  color: textColor,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
