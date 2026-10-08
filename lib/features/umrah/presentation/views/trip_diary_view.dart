@@ -10,6 +10,7 @@ import 'package:quran_app_android/core/design/components/app_scaffold.dart';
 import 'package:quran_app_android/features/umrah/data/models/guide_models.dart';
 import 'package:quran_app_android/features/umrah/presentation/controllers/trip_diary_controller.dart';
 import 'package:quran_app_android/features/umrah/presentation/controllers/umrah_preferences_controller.dart';
+import 'package:quran_app_android/features/umrah/presentation/widgets/umrah_filter_chip.dart';
 
 class TripDiaryView extends StatefulWidget {
   const TripDiaryView({super.key});
@@ -137,36 +138,28 @@ class _TripDiaryViewState extends State<TripDiaryView> {
                   ),
                 ),
 
-                // Category Chips
-                SizedBox(
-                  height: 48,
-                  child: ListView.separated(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 6),
-                    scrollDirection: Axis.horizontal,
-                    itemCount: TripDiaryController.categories.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.xs),
-                    itemBuilder: (context, index) {
-                      final category = TripDiaryController.categories[index];
-                      final isSelected = _controller.selectedCategory.value == category;
+                // Category Filter Chips wrapped in Obx for instant reactive selection feedback
+                Obx(() => SizedBox(
+                      height: isElderly ? 56 : 46,
+                      child: ListView.separated(
+                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 4),
+                        scrollDirection: Axis.horizontal,
+                        itemCount: TripDiaryController.categories.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.xs),
+                        itemBuilder: (context, index) {
+                          final category = TripDiaryController.categories[index];
+                          final isSelected = _controller.selectedCategory.value == category;
 
-                      return ChoiceChip(
-                        label: Text(
-                          category,
-                          style: TextStyle(
-                            fontFamily: AppTypography.uiFont,
-                            fontSize: 12 * fontScale,
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                            color: isSelected ? Colors.white : textColor,
-                          ),
-                        ),
-                        selected: isSelected,
-                        selectedColor: primaryColor,
-                        backgroundColor: colors.surface,
-                        onSelected: (_) => _controller.setCategory(category),
-                      );
-                    },
-                  ),
-                ),
+                          return UmrahFilterChip(
+                            label: category,
+                            isSelected: isSelected,
+                            fontScale: fontScale,
+                            isElderly: isElderly,
+                            onTap: () => _controller.setCategory(category),
+                          );
+                        },
+                      ),
+                    )),
 
                 const Divider(height: 1),
 

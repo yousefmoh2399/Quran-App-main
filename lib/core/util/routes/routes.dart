@@ -53,6 +53,9 @@ import 'package:quran_app_android/features/splash/presentation/views/splash_scre
 import 'package:quran_app_android/features/tafsser/presentation/views/tafseer_details_view.dart';
 import 'package:quran_app_android/features/tafsser/presentation/views/tafseer_view.dart';
 import 'package:quran_app_android/features/umrah/presentation/views/congestion_estimates_view.dart';
+import 'package:quran_app_android/features/umrah/presentation/views/hajj_umrah_duas_view.dart';
+import 'package:quran_app_android/features/umrah/presentation/views/ihram_prohibitions_view.dart';
+import 'package:quran_app_android/features/umrah/presentation/views/pilgrim_checklist_view.dart';
 import 'package:quran_app_android/features/umrah/presentation/views/sai_counter_view.dart';
 import 'package:quran_app_android/features/umrah/presentation/views/tawaf_counter_view.dart';
 import 'package:quran_app_android/features/umrah/presentation/views/trip_diary_view.dart';
@@ -407,6 +410,24 @@ class AppRoutes {
       transition: Transition.cupertino,
       transitionDuration: kTransitionDuration,
     ),
+    GetPage(
+      name: hajjUmrahDuas,
+      page: () => const HajjUmrahDuasView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: ihramProhibitions,
+      page: () => const IhramProhibitionsView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: pilgrimChecklist,
+      page: () => const PilgrimChecklistView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
     if (kDebugMode) ...[
       GetPage(
         name: adhanDebug,
@@ -481,4 +502,7 @@ class AppRoutes {
   static String umrahEstimates = '/umrahEstimates';
   static String umrahDiary = '/umrahDiary';
   static String umrahSources = '/umrahSources';
+  static String hajjUmrahDuas = '/hajjUmrahDuas';
+  static String ihramProhibitions = '/ihramProhibitions';
+  static String pilgrimChecklist = '/pilgrimChecklist';
 }

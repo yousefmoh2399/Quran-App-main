@@ -142,7 +142,9 @@ void main() {
       expect(guide.sourcesReview, isNotEmpty);
       for (final step in guide.steps) {
         expect(step.source.reviewedAt, isNotEmpty);
-        expect(step.instruction, contains('نص تجريبي'));
+        expect(step.instruction, isNotEmpty);
+        expect(step.instruction, isNot(contains('نص تجريبي')));
+        expect(step.source.status, equals('معتمد وموثق'));
       }
     });
   });
@@ -209,5 +211,41 @@ void main() {
       final emptyList = await guideEngine.getDiaryEntries();
       expect(emptyList, isEmpty);
     });
+
+    test('pilgrim checklist seed, get, toggle, add, and reset operations', () async {
+      // 1. Initial get triggers default seeding
+      final initialItems = await guideEngine.getChecklistItems();
+      expect(initialItems.length, greaterThanOrEqualTo(10));
+      expect(initialItems.every((item) => !item.isChecked), isTrue);
+
+      // 2. Toggle item state
+      final firstItem = initialItems.first;
+      await guideEngine.toggleChecklistItem(firstItem.id, true);
+      final afterToggle = await guideEngine.getChecklistItems();
+      expect(afterToggle.firstWhere((i) => i.id == firstItem.id).isChecked, isTrue);
+
+      // 3. Add custom item
+      final customItem = PilgrimChecklistItem(
+        id: 'custom_ihram_soap',
+        title: 'صابون بدون رائحة',
+        category: 'مستلزمات شخصية',
+        note: 'مهم قبل الإحرام',
+        isCustom: true,
+      );
+      await guideEngine.addChecklistItem(customItem);
+      final afterAdd = await guideEngine.getChecklistItems();
+      expect(afterAdd.any((i) => i.id == 'custom_ihram_soap'), isTrue);
+
+      // 4. Reset checklist unchecks all items
+      await guideEngine.resetChecklist();
+      final afterReset = await guideEngine.getChecklistItems();
+      expect(afterReset.every((i) => !i.isChecked), isTrue);
+
+      // 5. Delete custom item removes it
+      await guideEngine.deleteChecklistItem('custom_ihram_soap');
+      final afterDelete = await guideEngine.getChecklistItems();
+      expect(afterDelete.any((i) => i.id == 'custom_ihram_soap'), isFalse);
+    });
   });
 }
+

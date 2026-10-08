@@ -53,26 +53,33 @@ class QuranFilterChipsBar extends StatelessWidget {
           return Padding(
             padding: const EdgeInsets.only(left: 8.0),
             child: ChoiceChip(
+              showCheckmark: false,
               avatar: Icon(
-                filter.icon,
+                isSelected ? Icons.check_rounded : filter.icon,
                 size: 15,
                 color: isSelected ? Colors.white : colors.textMuted,
               ),
               label: Text(
                 label,
                 style: textTheme.labelSmall?.copyWith(
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                   color: isSelected ? Colors.white : colors.text,
                 ),
               ),
               selected: isSelected,
-              selectedColor: colors.primary,
-              backgroundColor: colors.surface,
+              color: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.selected)) {
+                  return colors.primary;
+                }
+                return colors.surface;
+              }),
+              elevation: isSelected ? 3 : 0,
+              shadowColor: colors.primary.withAlpha(100),
               shape: RoundedRectangleBorder(
                 borderRadius: AppRadius.borderFull,
                 side: BorderSide(
                   color: isSelected ? colors.primary : colors.divider,
-                  width: 1,
+                  width: isSelected ? 2 : 1,
                 ),
               ),
               onSelected: (selected) {

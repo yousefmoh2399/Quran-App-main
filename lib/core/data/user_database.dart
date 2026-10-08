@@ -13,7 +13,7 @@ class UserDatabase {
   static final UserDatabase instance = UserDatabase._internal();
 
   static const String dbName = 'user_data.db';
-  static const int currentDbVersion = 3;
+  static const int currentDbVersion = 4;
 
   Database? _db;
 
@@ -228,6 +228,20 @@ class UserDatabase {
       )
     ''');
     await db.execute('CREATE INDEX IF NOT EXISTS idx_trip_diary_created ON trip_diary(created_at)');
+
+    // 14. Pilgrim checklist table (packing & preparation)
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS pilgrim_checklist (
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        category TEXT NOT NULL,
+        note TEXT DEFAULT '',
+        is_checked INTEGER NOT NULL DEFAULT 0,
+        is_custom INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL
+      )
+    ''');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_checklist_cat ON pilgrim_checklist(category)');
   }
 
   static Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -310,6 +324,21 @@ class UserDatabase {
         )
       ''');
       await db.execute('CREATE INDEX IF NOT EXISTS idx_trip_diary_created ON trip_diary(created_at)');
+    }
+
+    if (oldVersion < 4) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS pilgrim_checklist (
+          id TEXT PRIMARY KEY,
+          title TEXT NOT NULL,
+          category TEXT NOT NULL,
+          note TEXT DEFAULT '',
+          is_checked INTEGER NOT NULL DEFAULT 0,
+          is_custom INTEGER NOT NULL DEFAULT 0,
+          created_at TEXT NOT NULL
+        )
+      ''');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_checklist_cat ON pilgrim_checklist(category)');
     }
   }
 

@@ -915,7 +915,7 @@ class UserRepository {
   Future<String> exportUserDataJson() async {
     final db = await _db;
     final data = <String, dynamic>{
-      'version': 3,
+      'version': 4,
       'app': 'taqarrab',
       'exported_at': DateTime.now().toIso8601String(),
       'bookmarks': await db.query('bookmarks'),
@@ -930,6 +930,7 @@ class UserRepository {
       'user_achievements': await db.query('user_achievements'),
       'guide_progress': await db.query('guide_progress'),
       'trip_diary': await db.query('trip_diary'),
+      'pilgrim_checklist': await db.query('pilgrim_checklist'),
     };
     return const JsonEncoder.withIndent('  ').convert(data);
   }
@@ -966,6 +967,7 @@ class UserRepository {
         safeRestore('user_achievements', 'user_achievements');
         safeRestore('guide_progress', 'guide_progress');
         safeRestore('trip_diary', 'trip_diary');
+        safeRestore('pilgrim_checklist', 'pilgrim_checklist');
       });
       return true;
     } catch (_) {

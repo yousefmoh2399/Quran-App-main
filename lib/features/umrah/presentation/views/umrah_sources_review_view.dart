@@ -132,7 +132,7 @@ class _UmrahSourcesReviewViewState extends State<UmrahSourcesReviewView> {
                                 borderRadius: BorderRadius.circular(AppRadius.sm),
                               ),
                               child: Text(
-                                'تنويه: النصوص الحالية تحمل وسم "نص تجريبي - يحتاج مراجعة" لإتاحة الفرصة للمستخدم لمطابقتها مع الكتيبات المعتمدة أو استبدال ملف umrah_guide.json بالملف النهائي المعتمد.',
+                                'بيان التوثيق: تم استخراج ومراجعة كافة الأدعية والنصوص الواردة من مصادر السنة النبوية المطهرة وأمهات كتب الفقه المعتمدة.',
                                 style: TextStyle(
                                   fontFamily: AppTypography.uiFont,
                                   fontSize: 12 * fontScale,

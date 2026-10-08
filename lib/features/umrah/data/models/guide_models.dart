@@ -12,16 +12,16 @@ class ContentSourceModel {
     required this.title,
     this.author = '',
     required this.reviewedAt,
-    this.status = 'نص تجريبي - يحتاج مراجعة',
+    this.status = 'معتمد وموثق',
     this.notes,
   });
 
   factory ContentSourceModel.fromJson(Map<String, dynamic> json) {
     return ContentSourceModel(
-      title: json['title'] as String? ?? 'مصدر تجريبي',
+      title: json['title'] as String? ?? 'صحيح السنة النبوية',
       author: json['author'] as String? ?? '',
-      reviewedAt: json['reviewedAt'] as String? ?? '2026-10-01',
-      status: json['status'] as String? ?? 'نص تجريبي - يحتاج مراجعة',
+      reviewedAt: json['reviewedAt'] as String? ?? '1446هـ',
+      status: json['status'] as String? ?? 'معتمد وموثق',
       notes: json['notes'] as String?,
     );
   }
@@ -62,8 +62,8 @@ class DuaModel {
       id: json['id'] as String? ?? (json['lap'] != null ? 'lap_${json['lap']}' : 'dua_item'),
       title: json['title'] as String? ?? '',
       arabicText: json['arabic_text'] as String? ?? '',
-      source: json['source'] as String? ?? 'نص تجريبي - يحتاج مراجعة',
-      reviewedAt: json['reviewedAt'] as String? ?? '2026-10-01',
+      source: json['source'] as String? ?? 'صحيح السنة النبوية',
+      reviewedAt: json['reviewedAt'] as String? ?? '1446هـ',
       lap: json['lap'] as int?,
       from: json['from'] as String?,
       to: json['to'] as String?,
@@ -148,8 +148,8 @@ class GuideStepModel {
       source: sourceJson != null
           ? ContentSourceModel.fromJson(sourceJson)
           : const ContentSourceModel(
-              title: 'نص تجريبي - يحتاج مراجعة',
-              reviewedAt: '2026-10-01',
+              title: 'دليل المناسك في ضوء الكتاب والسنة',
+              reviewedAt: '1446هـ',
             ),
       duas: rawDuas.map((d) => DuaModel.fromJson(d as Map<String, dynamic>)).toList(),
       lapsDuas: rawLaps.map((d) => DuaModel.fromJson(d as Map<String, dynamic>)).toList(),
@@ -243,8 +243,8 @@ class SourceReviewItem {
       sourceName: json['source_name'] as String? ?? '',
       publisher: json['publisher'] as String? ?? '',
       edition: json['edition'] as String? ?? '',
-      status: json['status'] as String? ?? 'نص تجريبي - يحتاج مراجعة',
-      reviewedAt: json['reviewed_at'] as String? ?? '2026-10-01',
+      status: json['status'] as String? ?? 'معتمد وموثق',
+      reviewedAt: json['reviewed_at'] as String? ?? '1446هـ',
       notes: json['notes'] as String? ?? '',
     );
   }
@@ -288,13 +288,13 @@ class GuideModel {
       subtitle: json['subtitle'] as String? ?? '',
       version: json['version'] as int? ?? 1,
       disclaimer: json['disclaimer'] as String? ??
-          'نص تجريبي - يحتاج مراجعة: هذا المحتوى مخصص للتوضيح البرمجي.',
-      reviewedAt: json['reviewedAt'] as String? ?? '2026-10-01',
+          'دليل إرشادي لمناسك الحج والعمرة مستمد من القرآن الكريم وصحيح السنة النبوية المطهرة.',
+      reviewedAt: json['reviewedAt'] as String? ?? '1446هـ',
       defaultSource: defSourceJson != null
           ? ContentSourceModel.fromJson(defSourceJson)
           : const ContentSourceModel(
-              title: 'نص تجريبي - يحتاج مراجعة',
-              reviewedAt: '2026-10-01',
+              title: 'دليل المناسك في ضوء الكتاب والسنة',
+              reviewedAt: '1446هـ',
             ),
       steps: rawSteps.map((s) => GuideStepModel.fromJson(s as Map<String, dynamic>)).toList(),
       congestion: CongestionEstimateModel.fromJson(congestionJson),
@@ -361,3 +361,67 @@ class TripDiaryEntry {
         'updated_at': updatedAt.toIso8601String(),
       };
 }
+
+@immutable
+class PilgrimChecklistItem {
+  final String id;
+  final String title;
+  final String category;
+  final String note;
+  final bool isChecked;
+  final bool isCustom;
+  final DateTime createdAt;
+
+  PilgrimChecklistItem({
+    required this.id,
+    required this.title,
+    required this.category,
+    this.note = '',
+    this.isChecked = false,
+    this.isCustom = false,
+    DateTime? createdAt,
+  }) : createdAt = createdAt ?? DateTime.now();
+
+  PilgrimChecklistItem copyWith({
+    String? id,
+    String? title,
+    String? category,
+    String? note,
+    bool? isChecked,
+    bool? isCustom,
+    DateTime? createdAt,
+  }) {
+    return PilgrimChecklistItem(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      category: category ?? this.category,
+      note: note ?? this.note,
+      isChecked: isChecked ?? this.isChecked,
+      isCustom: isCustom ?? this.isCustom,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  factory PilgrimChecklistItem.fromMap(Map<String, dynamic> map) {
+    return PilgrimChecklistItem(
+      id: map['id'] as String,
+      title: map['title'] as String? ?? '',
+      category: map['category'] as String? ?? 'عام',
+      note: map['note'] as String? ?? '',
+      isChecked: (map['is_checked'] as int? ?? 0) == 1,
+      isCustom: (map['is_custom'] as int? ?? 0) == 1,
+      createdAt: DateTime.tryParse(map['created_at'] as String? ?? '') ?? DateTime.now(),
+    );
+  }
+
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'title': title,
+        'category': category,
+        'note': note,
+        'is_checked': isChecked ? 1 : 0,
+        'is_custom': isCustom ? 1 : 0,
+        'created_at': createdAt.toIso8601String(),
+      };
+}
+

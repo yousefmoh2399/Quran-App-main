@@ -146,6 +146,51 @@ class _UmrahHubViewState extends State<UmrahHubView> {
 
                 const SizedBox(height: AppSpacing.sm),
 
+                // 5. Duas & Adhkar
+                _buildHubTile(
+                  title: 'أدعية وأذكار الحج والعمرة المأثورة',
+                  subtitle: 'أدعية الطواف والسعي ويوم عرفة والتلبية مع عداد التكرار وحفظ النص',
+                  icon: Icons.menu_book_rounded,
+                  iconColor: const Color(0xFFC5A059),
+                  onTap: () => Get.toNamed(AppRoutes.hajjUmrahDuas),
+                  colors: colors,
+                  textColor: textColor,
+                  fontScale: fontScale,
+                  isElderly: isElderly,
+                ),
+
+                const SizedBox(height: AppSpacing.sm),
+
+                // 6. Ihram Prohibitions
+                _buildHubTile(
+                  title: 'محظورات الإحرام وأحكام الفدية',
+                  subtitle: 'بيان شرعي مفصل لما يحرم على المحرم وأحكام الكفارات والأعذار',
+                  icon: Icons.rule_rounded,
+                  iconColor: Colors.teal.shade700,
+                  onTap: () => Get.toNamed(AppRoutes.ihramProhibitions),
+                  colors: colors,
+                  textColor: textColor,
+                  fontScale: fontScale,
+                  isElderly: isElderly,
+                ),
+
+                const SizedBox(height: AppSpacing.sm),
+
+                // 7. Packing Checklist
+                _buildHubTile(
+                  title: 'حقيبة وتجهيزات الحاج والمعتمر',
+                  subtitle: 'قائمة تفاعلية لحقيبة السفر وملابس الإحرام والمستندات والسنن',
+                  icon: Icons.checklist_rtl_rounded,
+                  iconColor: Colors.indigo.shade600,
+                  onTap: () => Get.toNamed(AppRoutes.pilgrimChecklist),
+                  colors: colors,
+                  textColor: textColor,
+                  fontScale: fontScale,
+                  isElderly: isElderly,
+                ),
+
+                const SizedBox(height: AppSpacing.sm),
+
                 // 5. Congestion Estimates
                 _buildHubTile(
                   title: 'تقديرات أوقات الزحام بالحرم والمشاعر',

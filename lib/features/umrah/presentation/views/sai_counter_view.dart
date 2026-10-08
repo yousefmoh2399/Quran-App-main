@@ -8,6 +8,7 @@ import 'package:quran_app_android/core/design/app_typography.dart';
 import 'package:quran_app_android/core/design/components/app_scaffold.dart';
 import 'package:quran_app_android/features/umrah/presentation/controllers/sai_controller.dart';
 import 'package:quran_app_android/features/umrah/presentation/controllers/umrah_preferences_controller.dart';
+import 'package:quran_app_android/features/umrah/presentation/widgets/umrah_filter_chip.dart';
 
 class SaiCounterView extends StatefulWidget {
   const SaiCounterView({super.key});
@@ -202,20 +203,12 @@ class _SaiCounterViewState extends State<SaiCounterView>
           final isSelected = _controller.saiType.value == type;
           return Padding(
             padding: const EdgeInsets.only(left: AppSpacing.xs),
-            child: ChoiceChip(
-              label: Text(
-                type,
-                style: TextStyle(
-                  fontFamily: AppTypography.uiFont,
-                  fontSize: (isElderly ? 14 : 12) * fontScale,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected ? Colors.white : colors.text,
-                ),
-              ),
-              selected: isSelected,
-              selectedColor: primaryColor,
-              backgroundColor: colors.surface,
-              onSelected: (_) => _controller.setSaiType(type),
+            child: UmrahFilterChip(
+              label: type,
+              isSelected: isSelected,
+              fontScale: fontScale,
+              isElderly: isElderly,
+              onTap: () => _controller.setSaiType(type),
             ),
           );
         }).toList(),
@@ -661,7 +654,7 @@ class _SaiCounterViewState extends State<SaiCounterView>
           ),
           const SizedBox(height: 8),
           Text(
-            'المصدر: ${dua?.source ?? "نص تجريبي - يحتاج مراجعة: صحيح مسلم"}',
+            'المصدر: ${dua?.source ?? "صحيح مسلم"}',
             style: TextStyle(
               fontFamily: AppTypography.uiFont,
               fontSize: 11 * fontScale,

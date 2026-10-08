@@ -200,4 +200,92 @@ class GuideEngine {
       whereArgs: [id],
     );
   }
+
+  static const List<Map<String, String>> defaultChecklistSeed = [
+    {'title': 'إزار ورداء أبيضين قطنيين نظيفين', 'category': 'ملابس الإحرام'},
+    {'title': 'حزام إحرام جلدي أو قماشي مع جيب', 'category': 'ملابس الإحرام'},
+    {'title': 'نعل مريح خفيف بدون تغطية للكعبين', 'category': 'ملابس الإحرام'},
+    {'title': 'دبابيس وملاقط لتثبيت رداء الإحرام', 'category': 'ملابس الإحرام'},
+    {'title': 'إحرام إضافي احتياطي', 'category': 'ملابس الإحرام'},
+    {'title': 'جواز السفر وتأشيرة العمرة أو الحج', 'category': 'المستندات'},
+    {'title': 'تصريح نسك وباركود الدخول للروضة والحرم', 'category': 'المستندات'},
+    {'title': 'كرت التطعيمات والشهادة الصحية', 'category': 'المستندات'},
+    {'title': 'عناوين وأرقام الفندق ومرشد الحملة', 'category': 'المستندات'},
+    {'title': 'الأدوية الشخصية والمزمنة بكمية كافية', 'category': 'الحقيبة الطبية'},
+    {'title': 'مسكن للألم وخافض للحرارة', 'category': 'الحقيبة الطبية'},
+    {'title': 'مرهم مضاد للتسلخات والالتهابات', 'category': 'الحقيبة الطبية'},
+    {'title': 'لاصقات طبية للجروح وبثور المشي', 'category': 'الحقيبة الطبية'},
+    {'title': 'معقم يدين وصابون غير معطر للإحرام', 'category': 'الحقيبة الطبية'},
+    {'title': 'مظلة شمسية خفيفة واقية من الحرارة', 'category': 'الأغراض الشخصية'},
+    {'title': 'مقص أظافر وشعر للتحلل بعد السعي', 'category': 'الأغراض الشخصية'},
+    {'title': 'شاحن متنقل (باور بانك) للهاتف', 'category': 'الأغراض الشخصية'},
+    {'title': 'كيس قماشي لحفظ الحذاء في الحرم', 'category': 'الأغراض الشخصية'},
+    {'title': 'نظارة شمسية لحماية العينين من الوهج', 'category': 'الأغراض الشخصية'},
+    {'title': 'تقليم الأظافر وإزالة الشعر الزائد', 'category': 'سنن قبل الإحرام'},
+    {'title': 'الاغتسال الكامل بنية النظافة للإحرام', 'category': 'سنن قبل الإحرام'},
+    {'title': 'التطيب في البدن واللحية قبل عقد النية', 'category': 'سنن قبل الإحرام'},
+  ];
+
+  /// Fetches checklist items, seeding defaults if database table is empty.
+  Future<List<PilgrimChecklistItem>> getChecklistItems() async {
+    final db = await _userDb.database;
+    final results = await db.query('pilgrim_checklist', orderBy: 'created_at ASC');
+
+    if (results.isEmpty) {
+      final now = DateTime.now();
+      for (int i = 0; i < defaultChecklistSeed.length; i++) {
+        final seed = defaultChecklistSeed[i];
+        final id = 'seed_$i';
+        await db.insert('pilgrim_checklist', {
+          'id': id,
+          'title': seed['title']!,
+          'category': seed['category']!,
+          'is_checked': 0,
+          'is_custom': 0,
+          'created_at': now.add(Duration(milliseconds: i)).toIso8601String(),
+        });
+      }
+      final reloaded = await db.query('pilgrim_checklist', orderBy: 'created_at ASC');
+      return reloaded.map(PilgrimChecklistItem.fromMap).toList();
+    }
+
+    return results.map(PilgrimChecklistItem.fromMap).toList();
+  }
+
+  /// Toggles checked state of a checklist item.
+  Future<void> toggleChecklistItem(String id, bool isChecked) async {
+    final db = await _userDb.database;
+    await db.update(
+      'pilgrim_checklist',
+      {'is_checked': isChecked ? 1 : 0},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  /// Adds a custom checklist item.
+  Future<void> addChecklistItem(PilgrimChecklistItem item) async {
+    final db = await _userDb.database;
+    await db.insert(
+      'pilgrim_checklist',
+      item.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  /// Deletes a checklist item.
+  Future<void> deleteChecklistItem(String id) async {
+    final db = await _userDb.database;
+    await db.delete(
+      'pilgrim_checklist',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  /// Resets all items to unchecked.
+  Future<void> resetChecklist() async {
+    final db = await _userDb.database;
+    await db.update('pilgrim_checklist', {'is_checked': 0});
+  }
 }

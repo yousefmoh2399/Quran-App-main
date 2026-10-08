@@ -9,6 +9,7 @@ import 'package:quran_app_android/core/design/app_typography.dart';
 import 'package:quran_app_android/core/design/components/app_scaffold.dart';
 import 'package:quran_app_android/features/umrah/presentation/controllers/tawaf_controller.dart';
 import 'package:quran_app_android/features/umrah/presentation/controllers/umrah_preferences_controller.dart';
+import 'package:quran_app_android/features/umrah/presentation/widgets/umrah_filter_chip.dart';
 
 class TawafCounterView extends StatefulWidget {
   const TawafCounterView({super.key});
@@ -210,20 +211,12 @@ class _TawafCounterViewState extends State<TawafCounterView>
           final isSelected = _controller.tawafType.value == type;
           return Padding(
             padding: const EdgeInsets.only(left: AppSpacing.xs),
-            child: ChoiceChip(
-              label: Text(
-                type,
-                style: TextStyle(
-                  fontFamily: AppTypography.uiFont,
-                  fontSize: (isElderly ? 14 : 12) * fontScale,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected ? Colors.white : colors.text,
-                ),
-              ),
-              selected: isSelected,
-              selectedColor: primaryColor,
-              backgroundColor: colors.surface,
-              onSelected: (_) => _controller.setTawafType(type),
+            child: UmrahFilterChip(
+              label: type,
+              isSelected: isSelected,
+              fontScale: fontScale,
+              isElderly: isElderly,
+              onTap: () => _controller.setTawafType(type),
             ),
           );
         }).toList(),
@@ -481,7 +474,7 @@ class _TawafCounterViewState extends State<TawafCounterView>
           ),
           const SizedBox(height: 8),
           Text(
-            'المصدر: ${dua?.source ?? "نص تجريبي - يحتاج مراجعة: سنن أبي داود"}',
+            'المصدر: ${dua?.source ?? "سنن أبي داود"}',
             style: TextStyle(
               fontFamily: AppTypography.uiFont,
               fontSize: 11 * fontScale,

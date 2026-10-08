@@ -150,7 +150,7 @@ void main() {
       final jsonStr = await repo.exportUserDataJson();
       expect(jsonStr, isNotEmpty);
       final decoded = jsonDecode(jsonStr) as Map<String, dynamic>;
-      expect(decoded['version'], equals(2));
+      expect(decoded['version'], equals(4));
       expect(decoded['bookmarks'], isNotEmpty);
       expect(decoded['prayer_logs'], isNotEmpty);
       expect(decoded['fasting_logs'], isNotEmpty);
