@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:sqflite/sqflite.dart';
 import 'package:quran_app_android/core/data/user_database.dart';
 import '../models/khatma_circle_model.dart';
 
@@ -313,5 +314,211 @@ class KhatmaCirclesService {
     });
 
     return (await getCircleById(newId)) ?? circle;
+  }
+
+  // ==========================================
+  // OFFLINE QR CODE SYNC SYSTEM
+  // ==========================================
+
+  static const String qrCirclePrefix = 'taqarrab:circle:';
+  static const String qrProgressPrefix = 'taqarrab:progress:';
+
+  /// Generates a compact offline QR string for the entire Khatma Circle.
+  String generateCircleQrPayload(KhatmaCircle circle) {
+    final map = {
+      'v': 1,
+      'id': circle.id,
+      't': circle.title,
+      'd': circle.description,
+      'td': circle.targetDate,
+      'ca': circle.createdAt.toIso8601String(),
+      'ic': circle.isCompleted ? 1 : 0,
+      'j': circle.juzList.map((j) {
+        String stCode = 'a';
+        if (j.isCompleted) {
+          stCode = 'c';
+        } else if (j.isInProgress) {
+          stCode = 'p';
+        }
+        return [j.juzNumber, j.assignedTo, stCode];
+      }).toList(),
+    };
+    return '$qrCirclePrefix${jsonEncode(map)}';
+  }
+
+  /// Parses a compact offline QR string into a KhatmaCircle model.
+  KhatmaCircle? parseCircleQrPayload(String raw) {
+    try {
+      String jsonStr = raw.trim();
+      if (jsonStr.startsWith(qrCirclePrefix)) {
+        jsonStr = jsonStr.substring(qrCirclePrefix.length);
+      }
+      final map = jsonDecode(jsonStr) as Map<String, dynamic>;
+      final id = map['id'] as String;
+      final title = (map['t'] as String? ?? 'ختمة العائلة').trim();
+      final desc = (map['d'] as String? ?? '').trim();
+      final td = map['td'] as String?;
+      final ca = DateTime.tryParse(map['ca'] as String? ?? '') ?? DateTime.now();
+      final ic = (map['ic'] as int? ?? 0) == 1;
+
+      final rawJ = map['j'] as List<dynamic>? ?? [];
+      final List<KhatmaCircleJuz> juzList = [];
+
+      for (int i = 1; i <= 30; i++) {
+        String assigned = '';
+        String status = 'available';
+
+        if (i - 1 < rawJ.length) {
+          final item = rawJ[i - 1] as List<dynamic>;
+          if (item.length >= 3) {
+            assigned = item[1]?.toString() ?? '';
+            final stCode = item[2]?.toString() ?? 'a';
+            if (stCode == 'c') {
+              status = 'completed';
+            } else if (stCode == 'p') {
+              status = 'in_progress';
+            } else {
+              status = 'available';
+            }
+          }
+        }
+
+        juzList.add(KhatmaCircleJuz(
+          circleId: id,
+          juzNumber: i,
+          assignedTo: assigned,
+          status: status,
+        ));
+      }
+
+      return KhatmaCircle(
+        id: id,
+        title: title,
+        description: desc,
+        targetDate: td,
+        createdAt: ca,
+        isCompleted: ic,
+        juzList: juzList,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Imports or updates a full Khatma Circle from a scanned QR code into the local database.
+  Future<KhatmaCircle> importOrUpdateCircle(KhatmaCircle circle) async {
+    final db = await _userDb.database;
+    final existing = await getCircleById(circle.id);
+
+    await db.transaction((txn) async {
+      if (existing == null) {
+        await txn.insert('khatma_circles', circle.toMap());
+        for (final j in circle.juzList) {
+          await txn.insert('khatma_circle_juz', j.toMap());
+        }
+      } else {
+        await txn.update(
+          'khatma_circles',
+          {
+            'title': circle.title,
+            'description': circle.description,
+            'target_date': circle.targetDate,
+            'is_completed': circle.isCompleted ? 1 : 0,
+            'completed_at': circle.completedAt?.toIso8601String(),
+          },
+          where: 'id = ?',
+          whereArgs: [circle.id],
+        );
+        for (final j in circle.juzList) {
+          await txn.insert(
+            'khatma_circle_juz',
+            j.toMap(),
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        }
+      }
+    });
+
+    await _checkAndSyncCircleCompletion(circle.id);
+    return (await getCircleById(circle.id)) ?? circle;
+  }
+
+  /// Generates a lightweight QR string for a member's daily reading progress.
+  String generateMemberProgressQrPayload({
+    required String circleId,
+    required String memberName,
+    required List<int> juzNumbers,
+    required String status,
+  }) {
+    final map = {
+      'v': 1,
+      'cid': circleId,
+      'm': memberName.trim(),
+      'j': juzNumbers,
+      's': status == 'completed' ? 'c' : 'p',
+      'ts': DateTime.now().toIso8601String(),
+    };
+    return '$qrProgressPrefix${jsonEncode(map)}';
+  }
+
+  /// Parses a member's daily reading progress QR string.
+  Map<String, dynamic>? parseMemberProgressQrPayload(String raw) {
+    try {
+      String jsonStr = raw.trim();
+      if (jsonStr.startsWith(qrProgressPrefix)) {
+        jsonStr = jsonStr.substring(qrProgressPrefix.length);
+      }
+      final map = jsonDecode(jsonStr) as Map<String, dynamic>;
+      if (!map.containsKey('cid') || !map.containsKey('m') || !map.containsKey('j')) {
+        return null;
+      }
+      final circleId = map['cid'] as String;
+      final memberName = map['m'] as String;
+      final rawJ = map['j'] as List<dynamic>;
+      final juzNumbers = rawJ.map((e) => (e as num).toInt()).toList();
+      final stCode = map['s'] as String? ?? 'c';
+      final status = stCode == 'c' ? 'completed' : 'in_progress';
+
+      return {
+        'circleId': circleId,
+        'memberName': memberName,
+        'juzNumbers': juzNumbers,
+        'status': status,
+        'timestamp': map['ts'] as String?,
+      };
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Applies scanned member reading progress to the local database circle.
+  Future<bool> applyMemberProgress({
+    required String circleId,
+    required String memberName,
+    required List<int> juzNumbers,
+    required String status,
+  }) async {
+    final db = await _userDb.database;
+    final circle = await getCircleById(circleId);
+    if (circle == null) return false;
+
+    final now = DateTime.now().toIso8601String();
+    final completedAt = status == 'completed' ? now : null;
+
+    for (final jNum in juzNumbers) {
+      await db.update(
+        'khatma_circle_juz',
+        {
+          'assigned_to': memberName.trim(),
+          'status': status,
+          'completed_at': completedAt,
+        },
+        where: 'circle_id = ? AND juz_number = ?',
+        whereArgs: [circleId, jNum],
+      );
+    }
+
+    await _checkAndSyncCircleCompletion(circleId);
+    return true;
   }
 }

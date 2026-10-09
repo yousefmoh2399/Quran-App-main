@@ -8,6 +8,8 @@ import '../../../../core/design/components/app_scaffold.dart';
 import '../controllers/reading_analytics_controller.dart';
 import '../../data/models/reading_analytics_models.dart';
 
+import '../widgets/reading_achievement_card_widget.dart';
+
 class ReadingAnalyticsView extends StatefulWidget {
   final ReadingAnalyticsController? controller;
   const ReadingAnalyticsView({super.key, this.controller});
@@ -18,6 +20,7 @@ class ReadingAnalyticsView extends StatefulWidget {
 
 class _ReadingAnalyticsViewState extends State<ReadingAnalyticsView> {
   late final ReadingAnalyticsController _controller;
+  final GlobalKey _cardKey = GlobalKey();
 
   @override
   void initState() {
@@ -37,11 +40,14 @@ class _ReadingAnalyticsViewState extends State<ReadingAnalyticsView> {
       child: AppScaffold(
         title: 'إحصائيات التلاوة والنشاط',
         actions: [
-          IconButton(
-            tooltip: 'مشاركة ملخص الإنجاز',
-            icon: Icon(Icons.share_rounded, color: colors.primary),
-            onPressed: () => _controller.shareReport(),
-          ),
+          Obx(() {
+            final summary = _controller.summary.value;
+            return IconButton(
+              tooltip: 'مشاركة بطاقة الإنجاز كصورة',
+              icon: Icon(Icons.share_rounded, color: colors.primary),
+              onPressed: summary == null ? null : () => _showShareBottomSheet(context, summary),
+            );
+          }),
         ],
         body: Obx(() {
           if (_controller.isLoading.value) {
@@ -65,6 +71,35 @@ class _ReadingAnalyticsViewState extends State<ReadingAnalyticsView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                if (summary.totalPagesRead == 0) ...[
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 14),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: colors.primary.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      border: Border.all(color: colors.primary.withOpacity(0.3)),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.info_outline_rounded, color: colors.primary, size: 24),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'ابدأ بقراءة وردك من المصحف الشريف الآن، وسيتم توثيق كل صفحة تقرؤها بدقة في سجل إنجازك القرآني!',
+                            style: TextStyle(
+                              fontFamily: AppTypography.uiFont,
+                              fontSize: 12.5,
+                              color: colors.text,
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
                 // 1. Top Metrics Grid (Streak, Total Pages, Khatma %, Hours)
                 _buildMetricsGrid(summary, colors),
                 const SizedBox(height: 16),
@@ -81,26 +116,26 @@ class _ReadingAnalyticsViewState extends State<ReadingAnalyticsView> {
                 _buildWeeklyGoalSection(summary, colors),
                 const SizedBox(height: 20),
 
-                // 5. Share Button
+                // 5. Share Button (Image Card)
                 SizedBox(
-                  height: 50,
+                  height: 52,
                   child: ElevatedButton.icon(
-                    onPressed: () => _controller.shareReport(),
+                    onPressed: () => _showShareBottomSheet(context, summary),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: colors.primary,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(AppRadius.md),
                       ),
-                      elevation: 1.5,
+                      elevation: 2,
                     ),
-                    icon: const Icon(Icons.share_rounded, size: 20),
+                    icon: const Icon(Icons.photo_library_rounded, size: 22),
                     label: Text(
                       'مشاركة بطاقة إنجازي القرآني',
                       style: TextStyle(
                         fontFamily: AppTypography.uiFont,
                         fontWeight: FontWeight.bold,
-                        fontSize: 15,
+                        fontSize: 15.5,
                       ),
                     ),
                   ),
@@ -693,6 +728,174 @@ class _ReadingAnalyticsViewState extends State<ReadingAnalyticsView> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showShareBottomSheet(BuildContext context, ReadingAnalyticsSummary summary) {
+    final colors = context.appColors;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (bottomSheetContext) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: Container(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(bottomSheetContext).size.height * 0.90,
+            ),
+            decoration: BoxDecoration(
+              color: colors.surface,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Top drag handle
+                Container(
+                  width: 44,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: colors.divider,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'مشاركة بطاقة إنجازك القرآني',
+                      style: TextStyle(
+                        fontFamily: AppTypography.uiFont,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: colors.text,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded),
+                      onPressed: () => Navigator.pop(bottomSheetContext),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+
+                // Card Preview with RepaintBoundary
+                Flexible(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Center(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: RepaintBoundary(
+                            key: _cardKey,
+                            child: ReadingAchievementCardWidget(summary: summary),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+
+                // Action Buttons
+                Obx(() {
+                  final isExporting = _controller.isExporting.value;
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: ElevatedButton.icon(
+                          onPressed: isExporting
+                              ? null
+                              : () => _controller.shareAsImage(bottomSheetContext, _cardKey),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: colors.primary,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(AppRadius.md),
+                            ),
+                          ),
+                          icon: isExporting
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                )
+                              : const Icon(Icons.share_rounded, size: 20),
+                          label: Text(
+                            isExporting ? 'جاري تجهيز الصورة...' : 'مشاركة كصورة (حالات وواتساب)',
+                            style: TextStyle(
+                              fontFamily: AppTypography.uiFont,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: isExporting
+                                  ? null
+                                  : () => _controller.saveCardToDevice(bottomSheetContext, _cardKey),
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(color: colors.primary),
+                                foregroundColor: colors.primary,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(AppRadius.md),
+                                ),
+                              ),
+                              icon: const Icon(Icons.download_rounded, size: 18),
+                              label: const Text(
+                                'حفظ بالمعرض',
+                                style: TextStyle(
+                                  fontFamily: AppTypography.uiFont,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: TextButton.icon(
+                              onPressed: () {
+                                Navigator.pop(bottomSheetContext);
+                                _controller.shareReportText();
+                              },
+                              style: TextButton.styleFrom(
+                                foregroundColor: colors.textMuted,
+                              ),
+                              icon: const Icon(Icons.notes_rounded, size: 18),
+                              label: const Text(
+                                'مشاركة كنص',
+                                style: TextStyle(
+                                  fontFamily: AppTypography.uiFont,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                }),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

@@ -357,11 +357,11 @@ class _RamadanHubViewState extends State<RamadanHubView> {
                     ),
                     _buildMenuCard(
                       title: 'حاسبة الزكاة الذكية',
-                      subtitle: 'حساب زكاة الفطر وزكاة المال بدون إنترنت',
+                      subtitle: 'حساب زكاة المرتب وسعر الذهب والمال ومقترح الصدقة',
                       icon: Icons.calculate_rounded,
                       iconColor: Colors.green.shade700,
                       badgeIcon: Icons.balance_rounded,
-                      onTap: () => Get.toNamed(AppRoutes.ramadanZakat),
+                      onTap: () => Get.toNamed(AppRoutes.zakatCalculator),
                     ),
                     _buildMenuCard(
                       title: 'ختمة العائلة الجماعية',

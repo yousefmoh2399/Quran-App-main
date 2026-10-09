@@ -9,6 +9,8 @@ import 'package:quran_app_android/core/design/components/app_scaffold.dart';
 import '../../data/models/khatma_circle_model.dart';
 import '../../data/services/khatma_circles_service.dart';
 import '../controllers/khatma_circles_controller.dart';
+import 'khatma_qr_display_dialog.dart';
+import 'khatma_qr_scanner_view.dart';
 
 class KhatmaCircleDetailView extends StatefulWidget {
   final String? circleId;
@@ -83,6 +85,27 @@ class _KhatmaCircleDetailViewState extends State<KhatmaCircleDetailView> {
               onPressed: () => Navigator.of(context).maybePop(),
             ),
             actions: [
+              IconButton(
+                icon: const Icon(Icons.qr_code_2_rounded),
+                color: const Color(0xFFD4AF37),
+                tooltip: 'عرض رمز QR للختمة',
+                onPressed: () {
+                  final p = _controller.getCircleQrPayload(circle);
+                  KhatmaQrDisplayDialog.show(
+                    context,
+                    title: circle.title,
+                    subtitle: 'امسح هذا الرمز من هاتف أي شخص آخر للانضمام ومزامنة الأجزاء أوفلاين',
+                    payload: p,
+                    type: KhatmaQrType.circleFull,
+                  );
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.qr_code_scanner_rounded),
+                color: colors.primary,
+                tooltip: 'مسح إنجاز عضو (QR)',
+                onPressed: () => Get.to(() => KhatmaQrScannerView(targetCircleId: circle.id)),
+              ),
               IconButton(
                 icon: const Icon(Icons.share_rounded),
                 color: colors.primary,
@@ -195,6 +218,65 @@ class _KhatmaCircleDetailViewState extends State<KhatmaCircleDetailView> {
                           ),
                           minHeight: 8,
                         ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: const Color(0xFFB8860B),
+                                side: const BorderSide(color: Color(0xFFD4AF37)),
+                                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(AppRadius.md),
+                                ),
+                              ),
+                              onPressed: () {
+                                final p = _controller.getCircleQrPayload(circle);
+                                KhatmaQrDisplayDialog.show(
+                                  context,
+                                  title: circle.title,
+                                  subtitle: 'امسح هذا الرمز من هاتف أي شخص آخر للانضمام ومزامنة الأجزاء أوفلاين',
+                                  payload: p,
+                                  type: KhatmaQrType.circleFull,
+                                );
+                              },
+                              icon: const Icon(Icons.qr_code_2_rounded, size: 18),
+                              label: const Text(
+                                'رمز الختمة (QR)',
+                                style: TextStyle(
+                                  fontFamily: AppTypography.uiFont,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: colors.primary,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(AppRadius.md),
+                                ),
+                              ),
+                              onPressed: () => Get.to(() => KhatmaQrScannerView(targetCircleId: circle.id)),
+                              icon: const Icon(Icons.qr_code_scanner_rounded, size: 18),
+                              label: const Text(
+                                'مسح تقدم عضو',
+                                style: TextStyle(
+                                  fontFamily: AppTypography.uiFont,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       if (circle.isCompleted) ...[
                         const SizedBox(height: 10),
@@ -338,28 +420,56 @@ class _KhatmaCircleDetailViewState extends State<KhatmaCircleDetailView> {
               fontWeight: juz.assignedTo.isNotEmpty ? FontWeight.bold : FontWeight.normal,
             ),
           ),
-          trailing: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: statusBg,
-              borderRadius: BorderRadius.circular(AppRadius.xs),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(statusIcon, size: 14, color: statusFg),
-                const SizedBox(width: 4),
-                Text(
-                  statusLabel,
-                  style: TextStyle(
-                    fontFamily: AppTypography.uiFont,
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: statusFg,
-                  ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (juz.assignedTo.isNotEmpty)
+                IconButton(
+                  icon: const Icon(Icons.qr_code_rounded, size: 21),
+                  color: const Color(0xFFD4AF37),
+                  tooltip: 'رمز إنجاز القارئ (QR)',
+                  onPressed: () {
+                    final payload = _controller.getMemberProgressQrPayload(
+                      circleId: juz.circleId,
+                      memberName: juz.assignedTo,
+                      juzNumbers: [juz.juzNumber],
+                      status: juz.status,
+                    );
+                    KhatmaQrDisplayDialog.show(
+                      context,
+                      title: 'إنجاز القارئ: ${juz.assignedTo}',
+                      subtitle: 'الجزء ${juz.juzNumber}: ${KhatmaCirclesService.getJuzTitle(juz.juzNumber)}',
+                      payload: payload,
+                      type: KhatmaQrType.memberProgress,
+                      memberName: juz.assignedTo,
+                      juzNumbers: [juz.juzNumber],
+                    );
+                  },
                 ),
-              ],
-            ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: statusBg,
+                  borderRadius: BorderRadius.circular(AppRadius.xs),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(statusIcon, size: 14, color: statusFg),
+                    const SizedBox(width: 4),
+                    Text(
+                      statusLabel,
+                      style: TextStyle(
+                        fontFamily: AppTypography.uiFont,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: statusFg,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -453,6 +563,46 @@ class _KhatmaCircleDetailViewState extends State<KhatmaCircleDetailView> {
                   ),
                 ),
               ),
+              if (juz.assignedTo.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFFB8860B),
+                    side: const BorderSide(color: Color(0xFFD4AF37)),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                    final p = _controller.getMemberProgressQrPayload(
+                      circleId: juz.circleId,
+                      memberName: juz.assignedTo,
+                      juzNumbers: [juz.juzNumber],
+                      status: currentStatus.value,
+                    );
+                    KhatmaQrDisplayDialog.show(
+                      context,
+                      title: 'إنجاز القارئ: ${juz.assignedTo}',
+                      subtitle: 'الجزء ${juz.juzNumber}: ${KhatmaCirclesService.getJuzTitle(juz.juzNumber)}',
+                      payload: p,
+                      type: KhatmaQrType.memberProgress,
+                      memberName: juz.assignedTo,
+                      juzNumbers: [juz.juzNumber],
+                    );
+                  },
+                  icon: const Icon(Icons.qr_code_2_rounded, size: 18),
+                  label: const Text(
+                    'عرض رمز إنجاز القارئ (QR)',
+                    style: TextStyle(
+                      fontFamily: AppTypography.uiFont,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12.5,
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),

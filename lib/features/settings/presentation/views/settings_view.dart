@@ -67,6 +67,14 @@ class SettingsView extends StatelessWidget {
                   onTap: () => Get.toNamed(AppRoutes.ramadanHub),
                 ),
                 SettingsTile(
+                  icon: Icons.calculate_rounded,
+                  iconColor: const Color(0xFF1B5E20),
+                  title: 'حاسبة الزكاة والراتب والصدقات',
+                  subtitle: 'حساب زكاة المرتب وسعر الذهب، زكاة المال، ومقترح الصدقة التلقائي',
+                  trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
+                  onTap: () => Get.toNamed(AppRoutes.zakatCalculator),
+                ),
+                SettingsTile(
                   icon: Icons.mosque_rounded,
                   iconColor: const Color(0xFF0F5C4A),
                   title: 'رفيق المعتمر (مناسك العمرة)',

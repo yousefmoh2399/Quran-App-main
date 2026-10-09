@@ -65,11 +65,13 @@ import 'package:quran_app_android/features/umrah/presentation/views/umrah_hub_vi
 import 'package:quran_app_android/features/umrah/presentation/views/umrah_sources_review_view.dart';
 import 'package:quran_app_android/features/khatma_circles/presentation/views/khatma_circles_list_view.dart';
 import 'package:quran_app_android/features/khatma_circles/presentation/views/khatma_circle_detail_view.dart';
+import 'package:quran_app_android/features/khatma_circles/presentation/views/khatma_qr_scanner_view.dart';
 import 'package:quran_app_android/features/card_studio/presentation/views/card_studio_view.dart';
 import 'package:quran_app_android/features/hifz_tester/presentation/views/hifz_tester_view.dart';
 import 'package:quran_app_android/features/traveler_companion/presentation/views/traveler_companion_view.dart';
 import 'package:quran_app_android/features/reading_analytics/presentation/views/reading_analytics_view.dart';
 import 'package:quran_app_android/features/qiblah/presentation/views/ar_qibla_camera_view.dart';
+import 'package:quran_app_android/features/zakat_calculator/presentation/views/zakat_calculator_view.dart';
 
 class AppRoutes {
   static List<GetPage> routes = [
@@ -455,6 +457,12 @@ class AppRoutes {
       transitionDuration: kTransitionDuration,
     ),
     GetPage(
+      name: khatmaQrScanner,
+      page: () => const KhatmaQrScannerView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
       name: cardStudio,
       page: () => const CardStudioView(),
       transition: Transition.cupertino,
@@ -481,6 +489,12 @@ class AppRoutes {
     GetPage(
       name: arQibla,
       page: () => const ArQiblaCameraView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: zakatCalculator,
+      page: () => const ZakatCalculatorView(),
       transition: Transition.cupertino,
       transitionDuration: kTransitionDuration,
     ),
@@ -564,9 +578,11 @@ class AppRoutes {
   static String landmarksGuide = '/landmarksGuide';
   static String khatmaCircles = '/khatmaCircles';
   static String khatmaCircleDetail = '/khatmaCircleDetail';
+  static String khatmaQrScanner = '/khatmaQrScanner';
   static String cardStudio = '/cardStudio';
   static String hifzTester = '/hifzTester';
   static String travelerCompanion = '/travelerCompanion';
   static String readingAnalytics = '/readingAnalytics';
   static String arQibla = '/arQibla';
+  static String zakatCalculator = '/zakatCalculator';
 }

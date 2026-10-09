@@ -9,6 +9,8 @@ import 'package:quran_app_android/core/services/app_haptics_service.dart';
 import '../../data/models/khatma_circle_model.dart';
 import '../controllers/khatma_circles_controller.dart';
 import 'khatma_circle_detail_view.dart';
+import 'khatma_qr_display_dialog.dart';
+import 'khatma_qr_scanner_view.dart';
 
 class KhatmaCirclesListView extends StatefulWidget {
   const KhatmaCirclesListView({super.key});
@@ -52,6 +54,14 @@ class _KhatmaCirclesListViewState extends State<KhatmaCirclesListView> {
             icon: Icon(Icons.arrow_back_ios_new, color: colors.text),
             onPressed: () => Navigator.of(context).maybePop(),
           ),
+          actions: [
+            IconButton(
+              tooltip: 'مسح رمز QR للانضمام',
+              icon: const Icon(Icons.qr_code_scanner_rounded),
+              color: colors.primary,
+              onPressed: () => Get.to(() => const KhatmaQrScannerView()),
+            ),
+          ],
         ),
         floatingActionButton: FloatingActionButton.extended(
           backgroundColor: colors.primary,
@@ -119,6 +129,26 @@ class _KhatmaCirclesListViewState extends State<KhatmaCirclesListView> {
                       icon: const Icon(Icons.add),
                       label: const Text(
                         'ابدأ ختمة الآن',
+                        style: TextStyle(
+                          fontFamily: AppTypography.uiFont,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: colors.primary,
+                        side: BorderSide(color: colors.primary),
+                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                        ),
+                      ),
+                      onPressed: () => Get.to(() => const KhatmaQrScannerView()),
+                      icon: const Icon(Icons.qr_code_scanner_rounded, size: 20),
+                      label: const Text(
+                        'مسح رمز QR للانضمام لختمة عائلية',
                         style: TextStyle(
                           fontFamily: AppTypography.uiFont,
                           fontWeight: FontWeight.bold,
@@ -208,11 +238,31 @@ class _KhatmaCirclesListViewState extends State<KhatmaCirclesListView> {
                         ),
                       )
                     else
-                      IconButton(
-                        icon: const Icon(Icons.share_outlined, size: 20),
-                        color: colors.primary,
-                        tooltip: 'مشاركة عبر واتساب',
-                        onPressed: () => _controller.shareViaWhatsApp(circle),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.qr_code_2_rounded, size: 21),
+                            color: const Color(0xFFD4AF37),
+                            tooltip: 'رمز الاستجابة للختمة (QR)',
+                            onPressed: () {
+                              final payload = _controller.getCircleQrPayload(circle);
+                              KhatmaQrDisplayDialog.show(
+                                context,
+                                title: circle.title,
+                                subtitle: 'امسح هذا الرمز من هاتف أي شخص آخر للانضمام للختمة أوفلاين',
+                                payload: payload,
+                                type: KhatmaQrType.circleFull,
+                              );
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.share_outlined, size: 20),
+                            color: colors.primary,
+                            tooltip: 'مشاركة عبر واتساب',
+                            onPressed: () => _controller.shareViaWhatsApp(circle),
+                          ),
+                        ],
                       ),
                   ],
                 ),

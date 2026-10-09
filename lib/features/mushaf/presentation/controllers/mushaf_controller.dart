@@ -15,6 +15,7 @@ import 'package:quran_app_android/features/reminders/data/commute_wird_repositor
 import '../../../../core/services/app_haptics_service.dart';
 import '../models/mushaf_theme_model.dart';
 import '../widgets/mushaf_paper_flip_view.dart';
+import '../../../reading_analytics/data/services/reading_analytics_service.dart';
 
 /// Central controller for the 604-page Madinah Mushaf experience.
 class MushafController extends GetxController {
@@ -62,6 +63,7 @@ class MushafController extends GetxController {
 
   // Reading dwell timer (5 seconds dwell triggers reading log)
   Timer? _dwellTimer;
+  final Set<int> _readPagesInSession = <int>{};
 
   // In-memory Pages Cache
   final Map<int, MushafPage> pagesCache = {};
@@ -111,6 +113,7 @@ class MushafController extends GetxController {
     _dwellTimer?.cancel();
     _lastReadDebounce?.cancel();
     _saveLastRead(currentPage.value);
+    _readPagesInSession.clear();
     MushafRasterCache.instance.clear();
     pageController.dispose();
     super.dispose();
@@ -261,7 +264,17 @@ class MushafController extends GetxController {
     _dwellTimer?.cancel();
     _dwellTimer = Timer(const Duration(seconds: 5), () async {
       if (currentPage.value == page) {
-        await _userRepo.logPageRead(page);
+        if (!_readPagesInSession.contains(page)) {
+          _readPagesInSession.add(page);
+          await _userRepo.logPageRead(page);
+          try {
+            await ReadingAnalyticsService.instance.recordReadingEvent(
+              pagesRead: 1,
+              minutes: 1,
+              timestamp: DateTime.now(),
+            );
+          } catch (_) {}
+        }
       }
     });
   }

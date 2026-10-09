@@ -108,4 +108,59 @@ class KhatmaCirclesController extends GetxController {
   String getShareText(KhatmaCircle circle) {
     return _service.generateWhatsAppShareText(circle);
   }
+
+  // ==========================================
+  // OFFLINE QR SYSTEM INTEGRATION
+  // ==========================================
+
+  String getCircleQrPayload(KhatmaCircle circle) {
+    return _service.generateCircleQrPayload(circle);
+  }
+
+  String getMemberProgressQrPayload({
+    required String circleId,
+    required String memberName,
+    required List<int> juzNumbers,
+    required String status,
+  }) {
+    return _service.generateMemberProgressQrPayload(
+      circleId: circleId,
+      memberName: memberName,
+      juzNumbers: juzNumbers,
+      status: status,
+    );
+  }
+
+  Future<KhatmaCircle> importOrUpdateCircle(KhatmaCircle circle) async {
+    final saved = await _service.importOrUpdateCircle(circle);
+    AppHaptics.itemCompleted();
+    await loadCircles();
+    if (currentCircle.value?.id == circle.id) {
+      await loadCircleDetail(circle.id);
+    }
+    return saved;
+  }
+
+  Future<bool> applyMemberProgressFromQr(Map<String, dynamic> data) async {
+    final circleId = data['circleId'] as String;
+    final memberName = data['memberName'] as String;
+    final juzNumbers = data['juzNumbers'] as List<int>;
+    final status = data['status'] as String;
+
+    final success = await _service.applyMemberProgress(
+      circleId: circleId,
+      memberName: memberName,
+      juzNumbers: juzNumbers,
+      status: status,
+    );
+
+    if (success) {
+      AppHaptics.itemCompleted();
+      await loadCircles();
+      if (currentCircle.value?.id == circleId) {
+        await loadCircleDetail(circleId);
+      }
+    }
+    return success;
+  }
 }
