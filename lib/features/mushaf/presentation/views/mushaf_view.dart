@@ -16,6 +16,7 @@ import '../widgets/mushaf_dual_page_view.dart';
 import '../widgets/mushaf_jump_dialog.dart';
 import '../widgets/mushaf_paper_flip_view.dart';
 import '../widgets/page_bookmark_bottom_sheet.dart';
+import '../../../gharib_quran/presentation/widgets/page_vocabulary_bottom_sheet.dart';
 import '../../../quran/presentation/views/quran_search_view.dart';
 
 /// The authentic 604-page, 15-line Madinah Mushaf reader screen.
@@ -328,6 +329,7 @@ class _MushafViewState extends State<MushafView> {
 
               // Quran Full-Text Search Button
               IconButton(
+                visualDensity: VisualDensity.compact,
                 icon: const Icon(Icons.search_rounded),
                 color: colors.text,
                 tooltip: 'البحث في القرآن',
@@ -337,8 +339,22 @@ class _MushafViewState extends State<MushafView> {
                 ),
               ),
 
+              // Page Vocabulary Button
+              IconButton(
+                visualDensity: VisualDensity.compact,
+                icon: const Icon(Icons.spellcheck_rounded),
+                color: colors.text,
+                tooltip: 'مفردات الصفحة',
+                onPressed: () => PageVocabularyBottomSheet.show(
+                  context,
+                  pageNumber: currentPage,
+                  surahName: surahName,
+                ),
+              ),
+
               // Jump Dialog Button
               IconButton(
+                visualDensity: VisualDensity.compact,
                 icon: const Icon(Icons.explore_outlined),
                 color: colors.text,
                 tooltip: 'انتقال سريع',
@@ -347,6 +363,7 @@ class _MushafViewState extends State<MushafView> {
 
               // Bookmark Page Button
               IconButton(
+                visualDensity: VisualDensity.compact,
                 icon: Icon(
                   isBookmarked ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
                   color: isBookmarked

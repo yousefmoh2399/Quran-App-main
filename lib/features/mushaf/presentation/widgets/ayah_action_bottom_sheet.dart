@@ -16,6 +16,9 @@ import '../../../card_studio/presentation/views/card_studio_view.dart';
 import '../../../../core/services/app_haptics_service.dart';
 import '../../../tafsser/data/tafsir_repository.dart';
 import '../../../../core/util/routes/routes.dart';
+import '../../../gharib_quran/data/models/quran_vocabulary_word.dart';
+import '../../../gharib_quran/data/repositories/gharib_quran_repository.dart';
+import '../../../gharib_quran/presentation/widgets/page_vocabulary_bottom_sheet.dart';
 
 /// Interactive, exquisitely organized action sheet displayed when an Ayah
 /// is tapped or long-pressed in the Mushaf.
@@ -65,7 +68,7 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(() {
       if (mounted) setState(() {});
     });
@@ -248,6 +251,10 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet>
     final colors = context.appColors;
     final textTheme = Theme.of(context).textTheme;
     final arabicText = widget.ayahEntity?.textAr ?? '';
+    final ayahWords = GharibQuranRepository.instance.getWordsForAyah(
+      widget.surahNumber,
+      widget.ayahNumber,
+    );
 
     final hasActiveBookmarkOrMemorize = _isBookmarked || _selectedStatus != null;
 
@@ -352,7 +359,7 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet>
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
             child: Container(
               width: double.infinity,
-              constraints: const BoxConstraints(maxHeight: 120.0),
+              constraints: const BoxConstraints(maxHeight: 135.0),
               padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
               decoration: BoxDecoration(
                 color: colors.bg,
@@ -361,23 +368,78 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet>
               ),
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                child: Text(
-                  '﴿ $arabicText ﴾',
-                  textAlign: TextAlign.center,
-                  textDirection: TextDirection.rtl,
-                  style: TextStyle(
-                    fontFamily: AppTypography.decorativeFont,
-                    fontSize: 18.5,
-                    fontWeight: FontWeight.bold,
-                    color: colors.text,
-                    height: 1.8,
-                  ),
+                child: Column(
+                  children: [
+                    Text(
+                      '﴿ $arabicText ﴾',
+                      textAlign: TextAlign.center,
+                      textDirection: TextDirection.rtl,
+                      style: TextStyle(
+                        fontFamily: AppTypography.decorativeFont,
+                        fontSize: 18.5,
+                        fontWeight: FontWeight.bold,
+                        color: colors.text,
+                        height: 1.8,
+                      ),
+                    ),
+                    if (ayahWords.isNotEmpty) ...[
+                      const SizedBox(height: 8.0),
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 6.0,
+                        runSpacing: 4.0,
+                        children: [
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.spellcheck_rounded, size: 14.0, color: colors.accent),
+                              const SizedBox(width: 4.0),
+                              Text(
+                                'مفردات الآية:',
+                                style: TextStyle(
+                                  fontFamily: AppTypography.uiFont,
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: colors.accent,
+                                ),
+                              ),
+                            ],
+                          ),
+                          ...ayahWords.map((word) => InkWell(
+                            onTap: () {
+                              AppHaptics.selection();
+                              _tabController.animateTo(1);
+                            },
+                            borderRadius: BorderRadius.circular(6.0),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
+                              decoration: BoxDecoration(
+                                color: colors.primary.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(6.0),
+                                border: Border.all(color: colors.primary.withOpacity(0.35)),
+                              ),
+                              child: Text(
+                                word.word,
+                                style: TextStyle(
+                                  fontFamily: 'uthman',
+                                  fontSize: 13.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: colors.primary,
+                                ),
+                              ),
+                            ),
+                          )),
+                        ],
+                      ),
+                    ],
+                  ],
                 ),
               ),
             ),
           ),
 
-          // 4. Modern Segmented Tab Switcher (التفسير vs الحفظ والعلامات)
+          // 4. Modern Segmented Tab Switcher (التفسير vs المفردات vs الحفظ والعلامات)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
             child: Container(
@@ -408,21 +470,21 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet>
                 labelStyle: const TextStyle(
                   fontFamily: AppTypography.uiFont,
                   fontWeight: FontWeight.bold,
-                  fontSize: 13.5,
+                  fontSize: 13.0,
                 ),
                 unselectedLabelStyle: const TextStyle(
                   fontFamily: AppTypography.uiFont,
                   fontWeight: FontWeight.w600,
-                  fontSize: 13.0,
+                  fontSize: 12.5,
                 ),
                 tabs: [
                   const Tab(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.auto_stories_rounded, size: 16.0),
-                        SizedBox(width: 6),
-                        Text('التفسير والبيان'),
+                        Icon(Icons.auto_stories_rounded, size: 15.0),
+                        SizedBox(width: 4),
+                        Text('التفسير'),
                       ],
                     ),
                   ),
@@ -430,14 +492,42 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet>
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.bookmark_added_rounded, size: 16.0),
-                        const SizedBox(width: 6),
-                        const Text('الحفظ والعلامات'),
-                        if (hasActiveBookmarkOrMemorize) ...[
-                          const SizedBox(width: 6),
+                        const Icon(Icons.spellcheck_rounded, size: 15.0),
+                        const SizedBox(width: 4),
+                        const Text('المفردات'),
+                        if (ayahWords.isNotEmpty) ...[
+                          const SizedBox(width: 4),
                           Container(
-                            width: 7.0,
-                            height: 7.0,
+                            padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 1.0),
+                            decoration: BoxDecoration(
+                              color: colors.accent,
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            child: Text(
+                              '${ayahWords.length}',
+                              style: const TextStyle(
+                                fontSize: 10.0,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  Tab(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.bookmark_added_rounded, size: 15.0),
+                        const SizedBox(width: 4),
+                        const Text('الحفظ'),
+                        if (hasActiveBookmarkOrMemorize) ...[
+                          const SizedBox(width: 4),
+                          Container(
+                            width: 6.5,
+                            height: 6.5,
                             decoration: BoxDecoration(
                               color: _isBookmarked ? _selectedColor.color : colors.accent,
                               shape: BoxShape.circle,
@@ -459,6 +549,7 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet>
               physics: const BouncingScrollPhysics(),
               children: [
                 _buildTafsirTab(colors, textTheme),
+                _buildVocabularyTab(colors, textTheme, ayahWords),
                 _buildBookmarkAndMemorizeTab(colors, textTheme),
               ],
             ),
@@ -596,7 +687,313 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet>
   }
 
   // -------------------------------------------------------------
-  // TAB 2: الحفظ والعلامات
+  // TAB 2: غريب المفردات
+  // -------------------------------------------------------------
+  Widget _buildVocabularyTab(
+    AppColorsExtension colors,
+    TextTheme textTheme,
+    List<QuranVocabularyWord> ayahWords,
+  ) {
+    final pageWords = GharibQuranRepository.instance.getWordsForPage(widget.pageNumber);
+    final nonAyahPageWords = pageWords.where((pw) => !ayahWords.any((aw) => aw.id == pw.id)).toList();
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      physics: const BouncingScrollPhysics(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Section 1: Words of this specific Ayah (if any)
+          if (ayahWords.isNotEmpty) ...[
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+              decoration: BoxDecoration(
+                color: colors.primary.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(10.0),
+                border: Border.all(color: colors.primary.withOpacity(0.2)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.stars_rounded, color: colors.primary, size: 18.0),
+                  const SizedBox(width: 8.0),
+                  Text(
+                    'مفردات هذه الآية الكريمة (${toArabicDigits(ayahWords.length)})',
+                    style: TextStyle(
+                      fontFamily: AppTypography.uiFont,
+                      fontSize: 13.0,
+                      fontWeight: FontWeight.bold,
+                      color: colors.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10.0),
+            ...ayahWords.map((word) => _buildVocabularyWordItem(colors, textTheme, word, isDirectAyah: true)),
+            const SizedBox(height: 12.0),
+          ] else ...[
+            Container(
+              padding: const EdgeInsets.all(12.0),
+              decoration: BoxDecoration(
+                color: colors.bg,
+                borderRadius: AppRadius.borderMd,
+                border: Border.all(color: colors.divider.withOpacity(0.6)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline_rounded, color: colors.accent, size: 20.0),
+                  const SizedBox(width: 10.0),
+                  Expanded(
+                    child: Text(
+                      'ألفاظ هذه الآية جلية وميسرة. إليك مفردات الصفحة ${toArabicDigits(widget.pageNumber)} للتدبر والبيان:',
+                      style: TextStyle(
+                        fontFamily: AppTypography.uiFont,
+                        fontSize: 12.5,
+                        color: colors.textMuted,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12.0),
+          ],
+
+          // Section 2: Page Words
+          if (nonAyahPageWords.isNotEmpty) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'مفردات الصفحة (صـ ${toArabicDigits(widget.pageNumber)})',
+                  style: TextStyle(
+                    fontFamily: AppTypography.uiFont,
+                    fontSize: 13.0,
+                    fontWeight: FontWeight.bold,
+                    color: colors.text,
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: () {
+                    PageVocabularyBottomSheet.show(
+                      context,
+                      pageNumber: widget.pageNumber,
+                      surahName: widget.surahName,
+                    );
+                  },
+                  icon: const Icon(Icons.open_in_new_rounded, size: 14.0),
+                  label: const Text('عرض معجم الصفحة', style: TextStyle(fontSize: 11.5)),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6.0),
+            ...nonAyahPageWords.take(4).map(
+                  (word) => _buildVocabularyWordItem(colors, textTheme, word, isDirectAyah: false),
+                ),
+          ],
+          const SizedBox(height: 16.0),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVocabularyWordItem(
+    AppColorsExtension colors,
+    TextTheme textTheme,
+    QuranVocabularyWord word, {
+    required bool isDirectAyah,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10.0),
+      padding: const EdgeInsets.all(13.0),
+      decoration: BoxDecoration(
+        color: colors.bg,
+        borderRadius: AppRadius.borderMd,
+        border: Border.all(
+          color: isDirectAyah
+              ? colors.primary.withOpacity(0.35)
+              : colors.divider.withOpacity(0.7),
+          width: isDirectAyah ? 1.5 : 1.0,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Text(
+                '﴿ ${word.word} ﴾',
+                style: TextStyle(
+                  fontFamily: 'uthman',
+                  fontSize: 19.0,
+                  fontWeight: FontWeight.bold,
+                  color: colors.primary,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7.0, vertical: 2.5),
+                decoration: BoxDecoration(
+                  color: colors.accent.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(6.0),
+                ),
+                child: Text(
+                  'جذر: ${word.root}',
+                  style: TextStyle(
+                    fontFamily: AppTypography.uiFont,
+                    fontSize: 11.0,
+                    fontWeight: FontWeight.bold,
+                    color: colors.accent,
+                  ),
+                ),
+              ),
+              if (!isDirectAyah) ...[
+                const SizedBox(width: 5.0),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 7.0, vertical: 2.5),
+                  decoration: BoxDecoration(
+                    color: colors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(6.0),
+                  ),
+                  child: Text(
+                    'آية ${toArabicDigits(word.ayahNumber)}',
+                    style: TextStyle(
+                      fontFamily: AppTypography.uiFont,
+                      fontSize: 11.0,
+                      fontWeight: FontWeight.bold,
+                      color: colors.primary,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 8.0),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.arrow_right_rounded, color: colors.accent, size: 19.0),
+              const SizedBox(width: 4.0),
+              Expanded(
+                child: SelectableText(
+                  word.meaning,
+                  textDirection: TextDirection.rtl,
+                  style: TextStyle(
+                    fontFamily: AppTypography.uiFont,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w600,
+                    color: colors.text,
+                    height: 1.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (word.linguisticBenefit != null) ...[
+            const SizedBox(height: 8.0),
+            Container(
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: colors.surface,
+                borderRadius: BorderRadius.circular(8.0),
+                border: Border.all(color: colors.accent.withOpacity(0.2)),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.lightbulb_outline_rounded, size: 15.0, color: colors.accent),
+                  const SizedBox(width: 6.0),
+                  Expanded(
+                    child: Text(
+                      word.linguisticBenefit!,
+                      style: TextStyle(
+                        fontFamily: AppTypography.uiFont,
+                        fontSize: 11.5,
+                        color: colors.textMuted,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          const SizedBox(height: 8.0),
+          // Action Buttons: Copy Meaning & Share to Card Studio
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              InkWell(
+                onTap: () {
+                  AppHaptics.selection();
+                  Clipboard.setData(ClipboardData(
+                    text: '﴿${word.word}﴾: ${word.meaning} [سورة ${word.surahName}: ${word.ayahNumber}]',
+                  ));
+                  _showFeedback('تم نسخ معنى كلمة ${word.word}');
+                },
+                borderRadius: BorderRadius.circular(6.0),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.copy_rounded, size: 14.0, color: colors.textMuted),
+                      const SizedBox(width: 4.0),
+                      Text(
+                        'نسخ المعنى',
+                        style: TextStyle(
+                          fontFamily: AppTypography.uiFont,
+                          fontSize: 11.0,
+                          color: colors.textMuted,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8.0),
+              InkWell(
+                onTap: () {
+                  AppHaptics.selection();
+                  Get.to(() => CardStudioView(
+                    initialText: word.ayahSnippet,
+                    initialSurahName: 'سورة ${word.surahName}',
+                    initialAyahNumber: word.ayahNumber,
+                    initialTafsir: '${word.word}: ${word.meaning}',
+                    initialSource: 'معجم غريب القرآن',
+                  ));
+                },
+                borderRadius: BorderRadius.circular(6.0),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.palette_outlined, size: 14.0, color: colors.accent),
+                      const SizedBox(width: 4.0),
+                      Text(
+                        'تصميم بطاقة',
+                        style: TextStyle(
+                          fontFamily: AppTypography.uiFont,
+                          fontSize: 11.0,
+                          fontWeight: FontWeight.bold,
+                          color: colors.accent,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // -------------------------------------------------------------
+  // TAB 3: الحفظ والعلامات
   // -------------------------------------------------------------
   Widget _buildBookmarkAndMemorizeTab(AppColorsExtension colors, TextTheme textTheme) {
     return SingleChildScrollView(

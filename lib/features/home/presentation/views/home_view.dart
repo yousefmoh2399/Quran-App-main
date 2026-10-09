@@ -13,6 +13,7 @@ import 'package:quran_app_android/features/home/presentation/views/widget/home_n
 import 'package:quran_app_android/features/home/presentation/views/widget/daily_tadabbur_card.dart';
 import 'package:quran_app_android/features/home/presentation/views/widget/home_quick_shortcuts.dart';
 import 'package:quran_app_android/features/home/presentation/views/widget/next_prayer_card.dart';
+import 'package:quran_app_android/features/gharib_quran/presentation/widgets/daily_quran_word_card.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -76,6 +77,8 @@ class _HomeViewState extends State<HomeView> {
               HomeQuickShortcuts(),
               AppSpacing.verticalLg,
               DailyTadabburCard(),
+              AppSpacing.verticalLg,
+              DailyQuranWordCard(),
               AppSpacing.verticalLg,
               HomeHadithMemorizationCard(),
               AppSpacing.verticalLg,
