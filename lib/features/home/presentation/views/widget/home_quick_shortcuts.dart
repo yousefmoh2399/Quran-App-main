@@ -38,6 +38,11 @@ class HomeQuickShortcuts extends StatelessWidget {
       route: AppRoutes.khatmaCircles,
     ),
     _ShortcutItem(
+      title: 'استوديو البطاقات',
+      icon: Icons.palette_rounded,
+      route: AppRoutes.cardStudio,
+    ),
+    _ShortcutItem(
       title: 'القبلة',
       icon: Icons.explore_rounded,
       route: AppRoutes.qiblah,

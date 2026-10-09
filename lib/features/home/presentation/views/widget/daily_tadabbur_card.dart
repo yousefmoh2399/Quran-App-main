@@ -208,6 +208,32 @@ class DailyTadabburCard extends StatelessWidget {
               ),
               const SizedBox(width: 6),
               IconButton.filledTonal(
+                tooltip: 'تصميم بطاقة دعوية',
+                onPressed: () {
+                  AppHaptics.selection();
+                  Get.toNamed(
+                    AppRoutes.cardStudio,
+                    arguments: {
+                      'text': item.ayahText,
+                      'surahName': item.surahName,
+                      'ayahNumber': item.ayahNumber,
+                      'source': '${item.surahName} • آية ${item.ayahNumber} | ${item.scholar}',
+                      'tafsir': item.reflection,
+                      'mode': 'tadabbur',
+                    },
+                  );
+                },
+                icon: const Icon(Icons.palette_rounded, size: 16),
+                style: IconButton.styleFrom(
+                  backgroundColor: colors.accent.withOpacity(0.14),
+                  foregroundColor: colors.accent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              IconButton.filledTonal(
                 tooltip: 'مشاركة التدبر',
                 onPressed: () {
                   AppHaptics.selection();

@@ -12,7 +12,7 @@ import '../../../../core/design/app_typography.dart';
 import '../controllers/mushaf_controller.dart';
 import '../models/mushaf_theme_model.dart';
 import '../utils/mushaf_utils.dart';
-import '../views/ayah_card_generator_view.dart';
+import '../../../card_studio/presentation/views/card_studio_view.dart';
 import '../../../../core/services/app_haptics_service.dart';
 import '../../../tafsser/data/tafsir_repository.dart';
 
@@ -218,11 +218,11 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet>
     AppHaptics.selection();
     final ayahText = widget.ayahEntity?.textAr ?? 'آية ${widget.ayahNumber}';
     final tafsirText = _loadedTafsirText ?? widget.ayahEntity?.tafsirMuyassar;
-    Get.to(() => AyahCardGeneratorView(
-      ayahText: ayahText,
-      surahName: 'سورة ${widget.surahName}',
-      ayahNumber: widget.ayahNumber,
-      tafsirText: tafsirText,
+    Get.to(() => CardStudioView(
+      initialText: ayahText,
+      initialSurahName: 'سورة ${widget.surahName}',
+      initialAyahNumber: widget.ayahNumber,
+      initialTafsir: tafsirText,
     ));
   }
 
