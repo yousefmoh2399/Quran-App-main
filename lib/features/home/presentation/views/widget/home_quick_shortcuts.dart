@@ -33,6 +33,11 @@ class HomeQuickShortcuts extends StatelessWidget {
       route: AppRoutes.umrahHub,
     ),
     _ShortcutItem(
+      title: 'رخص السفر',
+      icon: Icons.flight_takeoff_rounded,
+      route: AppRoutes.travelerCompanion,
+    ),
+    _ShortcutItem(
       title: 'ختمة العائلة',
       icon: Icons.groups_rounded,
       route: AppRoutes.khatmaCircles,

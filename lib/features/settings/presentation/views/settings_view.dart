@@ -75,6 +75,14 @@ class SettingsView extends StatelessWidget {
                   onTap: () => Get.toNamed(AppRoutes.umrahHub),
                 ),
                 SettingsTile(
+                  icon: Icons.flight_takeoff_rounded,
+                  iconColor: const Color(0xFF2E7D32),
+                  title: 'مساعد المسافر ورخص السفر',
+                  subtitle: 'مؤقت المسح على الخفين، دليل الجمع والقصر، وأدعية السفر',
+                  trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
+                  onTap: () => Get.toNamed(AppRoutes.travelerCompanion),
+                ),
+                SettingsTile(
                   icon: Icons.radio_button_checked_rounded,
                   title: 'أذكار ما بعد الصلاة المفروضة',
                   subtitle: 'التسبيح والتحميد والتكبير بعد الفريضة',

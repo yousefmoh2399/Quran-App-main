@@ -221,7 +221,22 @@ class _UmrahHubViewState extends State<UmrahHubView> {
 
                 const SizedBox(height: AppSpacing.sm),
 
-                // 5. Trip Diary
+                // 5. Traveler Companion & Fiqh Concessions
+                _buildHubTile(
+                  title: 'مساعد المسافر ورخص السفر',
+                  subtitle: 'مؤقت المسح على الخفين، الجمع والقصر، وأدعية السفر',
+                  icon: Icons.flight_takeoff_rounded,
+                  iconColor: const Color(0xFF2E7D32),
+                  onTap: () => Get.toNamed(AppRoutes.travelerCompanion),
+                  colors: colors,
+                  textColor: textColor,
+                  fontScale: fontScale,
+                  isElderly: isElderly,
+                ),
+
+                const SizedBox(height: AppSpacing.sm),
+
+                // 6. Trip Diary
                 _buildHubTile(
                   title: 'يوميات وخواطر الرحلة',
                   subtitle: 'سجّل مشاعرك وأدعيتك محلياً مع البحث والتصنيف',
