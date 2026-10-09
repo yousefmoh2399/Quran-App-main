@@ -233,7 +233,7 @@ class CardStudioController extends GetxController {
 
         await Share.shareXFiles(
           [xFile],
-          text: '${mainText.value}\n[${subtitleText.value}]\nعبر تطبيق تقرّب (أوفلاين بالكامل)',
+          text: '${mainText.value}\n[${subtitleText.value}]\nعبر تطبيق تقرّب',
           sharePositionOrigin: origin,
         );
       }

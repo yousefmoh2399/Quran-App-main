@@ -149,7 +149,7 @@ void main() {
       expect(find.byType(CustomPaint), findsWidgets);
       expect(find.text('سورة البقرة • آية 255'), findsOneWidget);
       expect(find.text('بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ'), findsOneWidget);
-      expect(find.text('تطبيق تقرّب • أوفلاين'), findsOneWidget);
+      expect(find.text('تطبيق تقرّب'), findsOneWidget);
     });
 
     testWidgets('IslamicFramePainter paints without errors for all 4 styles', (tester) async {

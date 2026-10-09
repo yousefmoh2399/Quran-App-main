@@ -366,7 +366,7 @@ class HifzSetupView extends StatelessWidget {
         ),
         child: DropdownButtonHideUnderline(
           child: DropdownButton<SurahEntity>(
-            value: selected ?? surahs.first,
+            value: surahs.firstWhereOrNull((s) => s.id == selected?.id) ?? surahs.first,
             isExpanded: true,
             icon: Icon(Icons.keyboard_arrow_down_rounded, color: colors.primary),
             items: surahs.map((surah) {

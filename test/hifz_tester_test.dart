@@ -185,6 +185,49 @@ void main() {
         expect(q.options.toSet().length, 4);
       }
     });
+
+    test('cleanWord preserves Alef Wasla (ٱ) and Tashkeel completely without truncation', () {
+      expect(generator.cleanWord('ٱلرَّحْمَـٰنِ'), 'ٱلرَّحْمَـٰنِ');
+      expect(generator.cleanWord('ٱللَّهِ'), 'ٱللَّهِ');
+      expect(generator.cleanWord('ٱلْحَمْدُ'), 'ٱلْحَمْدُ');
+      expect(generator.cleanWord('عَلِيمٌ ۗ'), 'عَلِيمٌ');
+      expect(generator.cleanWord('﴿قُلْ﴾'), 'قُلْ');
+    });
+
+    test('generateQuestions for single surah strictly returns 100% questions from that surah only', () async {
+      final questions = await generator.generateQuestions(
+        mode: HifzTestMode.fillBlank,
+        scope: HifzScopeType.singleSurah,
+        targetSurah: sampleSurahs.first, // Al-Fatihah
+        count: 10,
+        preloadedSurahs: sampleSurahs,
+        preloadedAyahs: sampleAyahs,
+      );
+
+      expect(questions.isNotEmpty, isTrue);
+      for (final q in questions) {
+        expect(q.surahId, 1, reason: 'Question ${q.id} must strictly be from Surah Al-Fatihah (id: 1)');
+        expect(q.surahName, 'الفاتحة');
+        expect(q.options.length, 4);
+      }
+    });
+
+    test('generateQuestions for nextAyah in single surah strictly returns 100% questions from that surah', () async {
+      final questions = await generator.generateQuestions(
+        mode: HifzTestMode.nextAyah,
+        scope: HifzScopeType.singleSurah,
+        targetSurah: sampleSurahs.first, // Al-Fatihah
+        count: 10,
+        preloadedSurahs: sampleSurahs,
+        preloadedAyahs: sampleAyahs,
+      );
+
+      expect(questions.isNotEmpty, isTrue);
+      for (final q in questions) {
+        expect(q.surahId, 1, reason: 'All questions must be from Surah 1');
+        expect(q.surahName, 'الفاتحة');
+      }
+    });
   });
 
   group('HifzTesterController State Management Tests', () {

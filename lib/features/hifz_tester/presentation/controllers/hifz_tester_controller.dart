@@ -75,13 +75,24 @@ class HifzTesterController extends GetxController {
     super.onClose();
   }
 
+  int? _pendingSurahId;
+
   Future<void> _loadSurahs() async {
     try {
       final list = await _quranRepository.getSurahs();
       surahs.assignAll(list);
-      if (surahs.isNotEmpty && selectedSurah.value == null) {
-        // Default to Al-Baqarah (id: 2) or Al-Fatihah (id: 1)
-        selectedSurah.value = surahs.length > 1 ? surahs[1] : surahs.first;
+      if (surahs.isNotEmpty) {
+        if (_pendingSurahId != null) {
+          final found = surahs.firstWhereOrNull((s) => s.id == _pendingSurahId);
+          if (found != null) {
+            selectedSurah.value = found;
+            selectedScope.value = HifzScopeType.singleSurah;
+          }
+        }
+        if (selectedSurah.value == null) {
+          // Default to Al-Fatihah (id: 1)
+          selectedSurah.value = surahs.first;
+        }
       }
     } catch (e) {
       debugPrint('Error loading surahs in HifzTesterController: $e');
@@ -95,11 +106,14 @@ class HifzTesterController extends GetxController {
   }) {
     if (mode != null) selectedMode.value = mode;
     if (scope != null) selectedScope.value = scope;
-    if (surahId != null && surahs.isNotEmpty) {
-      final found = surahs.firstWhereOrNull((s) => s.id == surahId);
-      if (found != null) {
-        selectedSurah.value = found;
-        selectedScope.value = HifzScopeType.singleSurah;
+    if (surahId != null) {
+      _pendingSurahId = surahId;
+      selectedScope.value = HifzScopeType.singleSurah;
+      if (surahs.isNotEmpty) {
+        final found = surahs.firstWhereOrNull((s) => s.id == surahId);
+        if (found != null) {
+          selectedSurah.value = found;
+        }
       }
     }
   }
@@ -118,6 +132,8 @@ class HifzTesterController extends GetxController {
     selectedScope.value = scope;
     if (scope == HifzScopeType.mutashabihatOnly) {
       selectedMode.value = HifzTestMode.mutashabihat;
+    } else if (scope == HifzScopeType.singleSurah && selectedMode.value == HifzTestMode.surahIdentify) {
+      selectedMode.value = HifzTestMode.fillBlank;
     }
     AppHaptics.selection();
   }
@@ -133,12 +149,18 @@ class HifzTesterController extends GetxController {
   }
 
   void setSurah(SurahEntity? surah) {
+    if (surah == null) return;
     selectedSurah.value = surah;
+    selectedScope.value = HifzScopeType.singleSurah;
+    if (selectedMode.value == HifzTestMode.surahIdentify) {
+      selectedMode.value = HifzTestMode.fillBlank;
+    }
     AppHaptics.selection();
   }
 
   void setJuz(int juz) {
     selectedJuz.value = juz;
+    selectedScope.value = HifzScopeType.juz;
     AppHaptics.selection();
   }
 

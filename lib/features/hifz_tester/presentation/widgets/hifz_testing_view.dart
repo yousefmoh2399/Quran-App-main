@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_radius.dart';
+import '../../../../core/design/app_typography.dart';
 import '../../../../core/design/components/app_card.dart';
 import '../controllers/hifz_tester_controller.dart';
 import '../../data/models/hifz_test_models.dart';
@@ -263,7 +264,8 @@ class HifzTestingView extends StatelessWidget {
               textAlign: TextAlign.center,
               textDirection: TextDirection.rtl,
               style: TextStyle(
-                fontFamily: 'uthman',
+                fontFamily: AppTypography.quranFont,
+                fontFamilyFallback: AppTypography.fallbackFonts,
                 fontSize: 20,
                 height: 1.9,
                 fontWeight: FontWeight.w600,
@@ -362,10 +364,12 @@ class HifzTestingView extends StatelessWidget {
                         optionText,
                         textDirection: TextDirection.rtl,
                         style: TextStyle(
-                          fontSize: 16,
+                          fontFamily: AppTypography.quranFont,
+                          fontFamilyFallback: AppTypography.fallbackFonts,
+                          fontSize: optionText.split(' ').length > 2 ? 16 : 19,
                           fontWeight: FontWeight.w600,
                           color: textColor,
-                          height: 1.4,
+                          height: 1.7,
                         ),
                       ),
                     ),

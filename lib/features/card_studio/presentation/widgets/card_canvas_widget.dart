@@ -261,7 +261,7 @@ class CardCanvasWidget extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               Text(
-                'تطبيق تقرّب • أوفلاين',
+                'تطبيق تقرّب',
                 style: TextStyle(
                   fontFamily: AppTypography.uiFont,
                   fontSize: 10,

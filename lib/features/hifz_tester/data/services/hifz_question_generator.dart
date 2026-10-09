@@ -53,14 +53,25 @@ class HifzQuestionGenerator {
     'إن', 'أن', 'إنما', 'بل', 'كل', 'إذا', 'إذ', 'قد', 'بلى', 'حتى',
   };
 
-  /// Clean word by removing non-alphabetic characters / verse markers
+  /// Clean word by removing non-alphabetic characters, verse markers, brackets, waqf signs.
+  /// Preserves all Arabic letters including Alef Wasla (ٱ \u0671), dagger alef (ٰ \u0670),
+  /// all diacritics / Tashkeel (\u064B-\u065F), Hamzas (\u0653-\u0655), and recitation marks.
   String cleanWord(String word) {
-    return word.replaceAll(RegExp(r'[^\u0621-\u064A\u064B-\u065F\u0670]'), '').trim();
+    if (word.isEmpty) return '';
+    var cleaned = word.replaceAll(
+      RegExp(r'[\d\u0660-\u0669()\[\]{}«»\u0022\u0027؛:،.؟!—\-_/\\*~<>\u06DD\uFD3E\uFD3F]'),
+      '',
+    );
+    // Remove isolated waqf signs attached at the end (\u06D6-\u06DC)
+    cleaned = cleaned.replaceAll(RegExp(r'[\u06D6-\u06DC]+$'), '');
+    return cleaned.trim();
   }
 
   /// Strip Tashkeel for comparison purposes
   String stripTashkeel(String text) {
-    return text.replaceAll(RegExp(r'[\u064B-\u065F\u0670\u06D6-\u06ED]'), '');
+    return text
+        .replaceAll(RegExp(r'[\u064B-\u065F\u0670\u06D6-\u06ED]'), '')
+        .replaceAll('ٱ', 'ا');
   }
 
   /// Generates a complete set of [count] questions based on the requested mode and scope
@@ -74,38 +85,23 @@ class HifzQuestionGenerator {
     List<SurahEntity>? preloadedSurahs,
     List<AyahEntity>? preloadedAyahs,
   }) async {
-    final questions = <HifzQuestion>[];
-
-    // If Mutashabihat test mode is chosen, pull directly from the Mutashabihat repository
-    if (mode == HifzTestMode.mutashabihat || scope == HifzScopeType.mutashabihatOnly) {
+    // If Mutashabihat test mode is chosen across whole Quran
+    if (mode == HifzTestMode.mutashabihat && (scope == HifzScopeType.entireQuran || scope == HifzScopeType.mutashabihatOnly)) {
       return generateMutashabihatQuestions(count: count);
     }
 
-    // Load Surahs and Ayahs according to scope
+    // Load Surahs
     List<SurahEntity> surahs = preloadedSurahs ?? [];
     if (surahs.isEmpty) {
       try {
         surahs = await _quranRepository.getSurahs();
       } catch (_) {
-        // Fallback for tests or missing DB
         surahs = _getFallbackSurahs();
       }
     }
 
     if (surahs.isEmpty) {
       return generateMutashabihatQuestions(count: count);
-    }
-
-    // Determine candidate Surahs
-    List<SurahEntity> candidateSurahs;
-    if (scope == HifzScopeType.singleSurah && targetSurah != null) {
-      candidateSurahs = [targetSurah];
-    } else if (scope == HifzScopeType.juz && targetJuz != null) {
-      // Find surahs in that Juz
-      candidateSurahs = _filterSurahsByJuz(surahs, targetJuz);
-      if (candidateSurahs.isEmpty) candidateSurahs = surahs;
-    } else {
-      candidateSurahs = surahs;
     }
 
     // Cache of ayahs by surah ID
@@ -116,6 +112,28 @@ class HifzQuestionGenerator {
       }
     }
 
+    // SINGLE SURAH SCOPE: 100% guarantee all questions belong to targetSurah only!
+    if (scope == HifzScopeType.singleSurah && targetSurah != null) {
+      return _generateSingleSurahQuestions(
+        surah: targetSurah,
+        mode: mode,
+        count: count,
+        difficulty: difficulty,
+        preloadedAyahs: ayahsBySurah[targetSurah.id],
+        allSurahs: surahs,
+      );
+    }
+
+    // Scope: Juz or Entire Quran
+    List<SurahEntity> candidateSurahs;
+    if (scope == HifzScopeType.juz && targetJuz != null) {
+      candidateSurahs = _filterSurahsByJuz(surahs, targetJuz);
+      if (candidateSurahs.isEmpty) candidateSurahs = surahs;
+    } else {
+      candidateSurahs = surahs;
+    }
+
+    final questions = <HifzQuestion>[];
     int attempts = 0;
     final int maxAttempts = count * 4;
 
@@ -129,7 +147,6 @@ class HifzQuestionGenerator {
           surahAyahs = await _quranRepository.getAyahs(surah.id);
           ayahsBySurah[surah.id] = surahAyahs;
         } catch (_) {
-          // fallback
           surahAyahs = _getFallbackAyahsForSurah(surah.id);
           ayahsBySurah[surah.id] = surahAyahs;
         }
@@ -166,12 +183,12 @@ class HifzQuestionGenerator {
           );
           break;
         case HifzTestMode.mutashabihat:
-          // Handled separately above
+          final list = generateMutashabihatQuestions(count: 1);
+          if (list.isNotEmpty) q = list.first;
           break;
       }
 
       if (q != null) {
-        // Prevent duplicate questions in same session
         final alreadyExists = questions.any((existing) => existing.ayahText == q!.ayahText);
         if (!alreadyExists) {
           questions.add(q);
@@ -179,10 +196,257 @@ class HifzQuestionGenerator {
       }
     }
 
-    // If still short of questions, fill remaining with Mutashabihat
-    if (questions.length < count) {
+    // Only fill remaining with Mutashabihat when scope is entire Quran
+    if (questions.length < count && scope == HifzScopeType.entireQuran) {
       final additional = generateMutashabihatQuestions(count: count - questions.length);
       questions.addAll(additional);
+    }
+
+    return questions;
+  }
+
+  /// Specialized generator for Single Surah testing:
+  /// Strictly guarantees that 100% of generated questions are from [surah] only!
+  Future<List<HifzQuestion>> _generateSingleSurahQuestions({
+    required SurahEntity surah,
+    required HifzTestMode mode,
+    required int count,
+    required HifzDifficulty difficulty,
+    List<AyahEntity>? preloadedAyahs,
+    required List<SurahEntity> allSurahs,
+  }) async {
+    List<AyahEntity> surahAyahs = preloadedAyahs ?? [];
+    if (surahAyahs.isEmpty) {
+      try {
+        surahAyahs = await _quranRepository.getAyahs(surah.id);
+      } catch (_) {
+        surahAyahs = _getFallbackAyahsForSurah(surah.id);
+      }
+    }
+
+    if (surahAyahs.isEmpty) return [];
+
+    final questions = <HifzQuestion>[];
+
+    // Mode: Next Ayah Challenge
+    if (mode == HifzTestMode.nextAyah) {
+      if (surahAyahs.length >= 2) {
+        final transitions = List<int>.generate(surahAyahs.length - 1, (i) => i)..shuffle(_random);
+        for (final currentIdx in transitions) {
+          if (questions.length >= count) break;
+          final currentAyah = surahAyahs[currentIdx];
+          final nextAyah = surahAyahs[currentIdx + 1];
+          final correctAnswerText = _formatAyahChoice(nextAyah.textAr);
+
+          final distractorTexts = <String>{};
+          final otherIndices = List<int>.generate(surahAyahs.length, (i) => i)
+            ..remove(currentIdx)
+            ..remove(currentIdx + 1)
+            ..shuffle(_random);
+
+          for (final idx in otherIndices) {
+            if (distractorTexts.length >= 3) break;
+            final choice = _formatAyahChoice(surahAyahs[idx].textAr);
+            if (choice != correctAnswerText) {
+              distractorTexts.add(choice);
+            }
+          }
+
+          // If surah is very short (< 4 verses), gather distractors from other surahs only as options
+          if (distractorTexts.length < 3) {
+            for (final otherS in allSurahs) {
+              if (distractorTexts.length >= 3) break;
+              if (otherS.id == surah.id) continue;
+              final otherAyahs = _getFallbackAyahsForSurah(otherS.id);
+              for (final a in otherAyahs) {
+                final choice = _formatAyahChoice(a.textAr);
+                if (choice != correctAnswerText) {
+                  distractorTexts.add(choice);
+                  if (distractorTexts.length >= 3) break;
+                }
+              }
+            }
+          }
+
+          if (distractorTexts.length < 3) continue;
+
+          final options = <String>[correctAnswerText, ...distractorTexts.take(3)]..shuffle(_random);
+          final correctIdx = options.indexOf(correctAnswerText);
+
+          questions.add(
+            HifzQuestion(
+              id: 'na_${surah.id}_${currentAyah.ayahNumber}',
+              mode: HifzTestMode.nextAyah,
+              prompt: 'ما هي الآية التالية لقوله تعالى في سورة ${surah.nameAr}؟',
+              ayahText: currentAyah.textAr,
+              displayText: '﴿ ${currentAyah.textAr} ﴾',
+              options: options,
+              correctAnswerIndex: correctIdx,
+              surahName: surah.nameAr,
+              surahId: surah.id,
+              ayahNumber: currentAyah.ayahNumber,
+              tafsir: nextAyah.tafsirMuyassar,
+              ruleExplanation: 'الآية التالية هي: ﴿${nextAyah.textAr}﴾ [سورة ${surah.nameAr}: الآية ${nextAyah.ayahNumber}]',
+            ),
+          );
+        }
+      }
+
+      // If still fewer questions than requested, supplement with Fill-in-the-Blank from the SAME Surah!
+      if (questions.length < count) {
+        final remaining = count - questions.length;
+        final supplement = _generateFillBlankQuestionsForSurah(
+          surah: surah,
+          surahAyahs: surahAyahs,
+          count: remaining,
+          difficulty: difficulty,
+          existingQuestionKeys: questions.map((q) => '${q.ayahNumber}').toSet(),
+        );
+        questions.addAll(supplement);
+      }
+
+      return questions;
+    }
+
+    // Mode: Mutashabihat in this Surah
+    if (mode == HifzTestMode.mutashabihat) {
+      final surahMutashabihat = MutashabihatEntry.authenticMutashabihat
+          .where((e) => e.surah1Id == surah.id || e.surah2Id == surah.id)
+          .toList()
+        ..shuffle(_random);
+
+      for (int i = 0; i < surahMutashabihat.length && questions.length < count; i++) {
+        questions.add(_buildMutashabihatQuestion(surahMutashabihat[i], 'mut_${surah.id}_$i'));
+      }
+
+      // Supplement with fillBlank from this SAME Surah if needed
+      if (questions.length < count) {
+        final supplement = _generateFillBlankQuestionsForSurah(
+          surah: surah,
+          surahAyahs: surahAyahs,
+          count: count - questions.length,
+          difficulty: difficulty,
+          existingQuestionKeys: questions.map((q) => '${q.ayahNumber}').toSet(),
+        );
+        questions.addAll(supplement);
+      }
+
+      return questions;
+    }
+
+    // Mode: Surah Identify (when requested in tests for a single surah)
+    if (mode == HifzTestMode.surahIdentify) {
+      for (final ayah in (List<AyahEntity>.from(surahAyahs)..shuffle(_random))) {
+        if (questions.length >= count) break;
+        final q = _generateSurahIdentifyQuestion(
+          surahAyahs: [ayah],
+          surah: surah,
+          allSurahs: allSurahs,
+          questionId: 'si_${surah.id}_${ayah.ayahNumber}',
+        );
+        if (q != null) questions.add(q);
+      }
+      return questions;
+    }
+
+    // Default: Fill-in-the-Blank
+    return _generateFillBlankQuestionsForSurah(
+      surah: surah,
+      surahAyahs: surahAyahs,
+      count: count,
+      difficulty: difficulty,
+      existingQuestionKeys: {},
+    );
+  }
+
+  /// Generates Fill-in-the-Blank questions exclusively from [surahAyahs]
+  List<HifzQuestion> _generateFillBlankQuestionsForSurah({
+    required SurahEntity surah,
+    required List<AyahEntity> surahAyahs,
+    required int count,
+    required HifzDifficulty difficulty,
+    Set<String>? existingQuestionKeys,
+  }) {
+    final questions = <HifzQuestion>[];
+    final usedKeys = Set<String>.from(existingQuestionKeys ?? {});
+
+    // Collect all candidate tokens across the surah
+    final candidates = <_CandidateWordToken>[];
+    for (final ayah in surahAyahs) {
+      final rawWords = ayah.textAr.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+      if (rawWords.length < 2) continue;
+
+      for (int i = 0; i < rawWords.length; i++) {
+        final clean = cleanWord(rawWords[i]);
+        final stripped = stripTashkeel(clean);
+        if (clean.isNotEmpty && stripped.length >= 3 && !_commonStopWords.contains(stripped)) {
+          candidates.add(_CandidateWordToken(ayah: ayah, wordIndex: i, rawWords: rawWords, targetWord: clean));
+        }
+      }
+    }
+
+    candidates.shuffle(_random);
+
+    for (final token in candidates) {
+      if (questions.length >= count) break;
+      final key = '${token.ayah.ayahNumber}_${token.targetWord}';
+      if (usedKeys.contains(key)) continue;
+
+      // Hide the target word with clean brackets
+      final displayWords = List<String>.from(token.rawWords);
+      displayWords[token.wordIndex] = '﴿ ........ ﴾';
+      final displayText = displayWords.join(' ');
+
+      // Collect distractors from the SAME surah
+      final distractors = <String>{};
+      for (final otherAyah in surahAyahs) {
+        if (distractors.length >= 3) break;
+        final words = otherAyah.textAr.split(RegExp(r'\s+'));
+        for (final w in words) {
+          final cw = cleanWord(w);
+          if (cw.isNotEmpty &&
+              cw != token.targetWord &&
+              stripTashkeel(cw) != stripTashkeel(token.targetWord) &&
+              cw.length >= 3 &&
+              !_commonStopWords.contains(stripTashkeel(cw))) {
+            distractors.add(cw);
+            if (distractors.length >= 3) break;
+          }
+        }
+      }
+
+      // Fallback distractors from Quranic pool
+      if (distractors.length < 3) {
+        final pool = List<String>.from(_quranicKeywordsPool)..shuffle(_random);
+        for (final kw in pool) {
+          if (distractors.length >= 3) break;
+          if (kw != token.targetWord && stripTashkeel(kw) != stripTashkeel(token.targetWord)) {
+            distractors.add(kw);
+          }
+        }
+      }
+
+      final optionsList = <String>[token.targetWord, ...distractors.take(3)]..shuffle(_random);
+      final correctIdx = optionsList.indexOf(token.targetWord);
+
+      questions.add(
+        HifzQuestion(
+          id: 'fb_${surah.id}_${token.ayah.ayahNumber}_${token.wordIndex}',
+          mode: HifzTestMode.fillBlank,
+          prompt: 'أكمل الكلمة المحجوبة في قوله تعالى من سورة ${surah.nameAr}:',
+          ayahText: token.ayah.textAr,
+          displayText: displayText,
+          hiddenWord: token.targetWord,
+          options: optionsList,
+          correctAnswerIndex: correctIdx,
+          surahName: surah.nameAr,
+          surahId: surah.id,
+          ayahNumber: token.ayah.ayahNumber,
+          tafsir: token.ayah.tafsirMuyassar,
+          ruleExplanation: 'الآية الكريمة: ﴿${token.ayah.textAr}﴾ [سورة ${surah.nameAr}: الآية ${token.ayah.ayahNumber}]',
+        ),
+      );
+      usedKeys.add(key);
     }
 
     return questions;
@@ -195,18 +459,16 @@ class HifzQuestionGenerator {
     required HifzDifficulty difficulty,
     required String questionId,
   }) {
-    // Pick an ayah with at least 5 words
     final eligibleAyahs = surahAyahs.where((a) {
       final words = a.textAr.split(RegExp(r'\s+'));
-      return words.length >= 4;
+      return words.length >= 3;
     }).toList();
 
     if (eligibleAyahs.isEmpty) return null;
     final ayah = eligibleAyahs[_random.nextInt(eligibleAyahs.length)];
     final rawWords = ayah.textAr.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
-    if (rawWords.length < 3) return null;
+    if (rawWords.length < 2) return null;
 
-    // Filter candidate words to hide
     final candidateIndices = <int>[];
     for (int i = 0; i < rawWords.length; i++) {
       final clean = cleanWord(rawWords[i]);
@@ -219,7 +481,6 @@ class HifzQuestionGenerator {
     int targetIndex;
     if (candidateIndices.isNotEmpty) {
       if (difficulty == HifzDifficulty.hard) {
-        // Prefer the last word / rhyme word in hard mode
         final lastCandidate = candidateIndices.lastWhere(
           (idx) => idx >= rawWords.length - 2,
           orElse: () => candidateIndices.last,
@@ -235,15 +496,11 @@ class HifzQuestionGenerator {
     final targetWord = cleanWord(rawWords[targetIndex]);
     if (targetWord.isEmpty) return null;
 
-    // Create display text with hidden blank
     final displayWords = List<String>.from(rawWords);
     displayWords[targetIndex] = '﴿ ........ ﴾';
     final displayText = displayWords.join(' ');
 
-    // Gather distractors
     final distractors = <String>{};
-
-    // 1. Other words in the same Surah
     for (final otherAyah in surahAyahs) {
       if (distractors.length >= 3) break;
       final otherWords = otherAyah.textAr.split(RegExp(r'\s+'));
@@ -259,7 +516,6 @@ class HifzQuestionGenerator {
       }
     }
 
-    // 2. Fallback to Quranic keywords pool
     final shuffledPool = List<String>.from(_quranicKeywordsPool)..shuffle(_random);
     for (final kw in shuffledPool) {
       if (distractors.length >= 3) break;
@@ -284,7 +540,7 @@ class HifzQuestionGenerator {
       surahId: surah.id,
       ayahNumber: ayah.ayahNumber,
       tafsir: ayah.tafsirMuyassar,
-      ruleExplanation: 'الآية الكريمة: ﴿${ayah.textAr}﴾ [${surah.nameAr}: ${ayah.ayahNumber}]',
+      ruleExplanation: 'الآية الكريمة: ﴿${ayah.textAr}﴾ [سورة ${surah.nameAr}: الآية ${ayah.ayahNumber}]',
     );
   }
 
@@ -299,7 +555,6 @@ class HifzQuestionGenerator {
   }) {
     if (surahAyahs.length < 2) return null;
 
-    // Pick an ayah that has a next ayah (ayahNumber < total)
     final maxIndex = surahAyahs.length - 1;
     final currentIdx = _random.nextInt(maxIndex);
     final currentAyah = surahAyahs[currentIdx];
@@ -307,10 +562,7 @@ class HifzQuestionGenerator {
 
     final correctAnswerText = _formatAyahChoice(nextAyah.textAr);
 
-    // Collect 3 distractor ayahs
     final distractorTexts = <String>{};
-
-    // Try other ayahs from the same Surah first
     final candidateIndices = List<int>.generate(surahAyahs.length, (i) => i)
       ..remove(currentIdx)
       ..remove(currentIdx + 1)
@@ -324,7 +576,6 @@ class HifzQuestionGenerator {
       }
     }
 
-    // If still need distractors, draw from another Surah
     int fallbackAttempt = 0;
     while (distractorTexts.length < 3 && fallbackAttempt < 10) {
       fallbackAttempt++;
@@ -356,17 +607,19 @@ class HifzQuestionGenerator {
       surahId: surah.id,
       ayahNumber: currentAyah.ayahNumber,
       tafsir: nextAyah.tafsirMuyassar,
-      ruleExplanation: 'الآية التالية هي: ﴿${nextAyah.textAr}﴾ [الآية ${nextAyah.ayahNumber}]',
+      ruleExplanation: 'الآية التالية هي: ﴿${nextAyah.textAr}﴾ [سورة ${surah.nameAr}: الآية ${nextAyah.ayahNumber}]',
     );
   }
 
-  /// Formats an Ayah text to fit cleanly as a multiple-choice button
+  /// Formats an Ayah text for display in multiple-choice buttons.
+  /// Preserves the full verse text without cutting off words.
   String _formatAyahChoice(String text) {
-    final words = text.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
-    if (words.length <= 12) {
-      return text.trim();
+    final cleaned = text.trim();
+    final words = cleaned.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+    if (words.length <= 22) {
+      return cleaned;
     }
-    return '${words.take(10).join(' ')} ...';
+    return '${words.take(18).join(' ')} ...';
   }
 
   /// Generates questions for Surah Identification
@@ -523,3 +776,18 @@ class HifzQuestionGenerator {
     return const [];
   }
 }
+
+class _CandidateWordToken {
+  final AyahEntity ayah;
+  final int wordIndex;
+  final List<String> rawWords;
+  final String targetWord;
+
+  const _CandidateWordToken({
+    required this.ayah,
+    required this.wordIndex,
+    required this.rawWords,
+    required this.targetWord,
+  });
+}
+
