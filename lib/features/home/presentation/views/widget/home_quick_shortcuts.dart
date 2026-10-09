@@ -43,6 +43,11 @@ class HomeQuickShortcuts extends StatelessWidget {
       route: AppRoutes.cardStudio,
     ),
     _ShortcutItem(
+      title: 'اختبار الحفظ',
+      icon: Icons.psychology_alt_rounded,
+      route: AppRoutes.hifzTester,
+    ),
+    _ShortcutItem(
       title: 'القبلة',
       icon: Icons.explore_rounded,
       route: AppRoutes.qiblah,

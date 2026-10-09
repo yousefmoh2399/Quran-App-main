@@ -66,6 +66,7 @@ import 'package:quran_app_android/features/umrah/presentation/views/umrah_source
 import 'package:quran_app_android/features/khatma_circles/presentation/views/khatma_circles_list_view.dart';
 import 'package:quran_app_android/features/khatma_circles/presentation/views/khatma_circle_detail_view.dart';
 import 'package:quran_app_android/features/card_studio/presentation/views/card_studio_view.dart';
+import 'package:quran_app_android/features/hifz_tester/presentation/views/hifz_tester_view.dart';
 
 class AppRoutes {
   static List<GetPage> routes = [
@@ -456,6 +457,12 @@ class AppRoutes {
       transition: Transition.cupertino,
       transitionDuration: kTransitionDuration,
     ),
+    GetPage(
+      name: hifzTester,
+      page: () => const HifzTesterView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
     if (kDebugMode) ...[
       GetPage(
         name: adhanDebug,
@@ -537,4 +544,5 @@ class AppRoutes {
   static String khatmaCircles = '/khatmaCircles';
   static String khatmaCircleDetail = '/khatmaCircleDetail';
   static String cardStudio = '/cardStudio';
+  static String hifzTester = '/hifzTester';
 }

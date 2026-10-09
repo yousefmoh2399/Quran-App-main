@@ -15,6 +15,7 @@ import '../utils/mushaf_utils.dart';
 import '../../../card_studio/presentation/views/card_studio_view.dart';
 import '../../../../core/services/app_haptics_service.dart';
 import '../../../tafsser/data/tafsir_repository.dart';
+import '../../../../core/util/routes/routes.dart';
 
 /// Interactive, exquisitely organized action sheet displayed when an Ayah
 /// is tapped or long-pressed in the Mushaf.
@@ -321,6 +322,18 @@ class _AyahActionBottomSheetState extends State<AyahActionBottomSheet>
                       color: colors.primary,
                       tooltip: 'مشاركة كصورة',
                       onPressed: _openImageCard,
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.psychology_alt_outlined, size: 21.0),
+                      color: colors.primary,
+                      tooltip: 'اختبر حفظك في السورة',
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        Get.toNamed(
+                          AppRoutes.hifzTester,
+                          arguments: {'surahId': widget.ayahEntity?.surahId},
+                        );
+                      },
                     ),
                     IconButton(
                       icon: const Icon(Icons.close_rounded, size: 22.0),
