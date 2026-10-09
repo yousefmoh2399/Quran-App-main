@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get/get.dart';
 import 'package:quran_app_android/features/adhan/presentation/views/widget/adhan_view_data.dart';
+import 'package:quran_app_android/features/khatma_circles/data/models/khatma_circle_model.dart';
+import 'package:quran_app_android/features/khatma_circles/presentation/controllers/khatma_circles_controller.dart';
+import 'package:quran_app_android/features/khatma_circles/presentation/views/khatma_circle_detail_view.dart';
 
 void main() {
   group('ListTile Material Regression Tests', () {
@@ -123,6 +127,38 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.text('صوت الأذان'), findsOneWidget);
+    });
+
+    testWidgets('KhatmaCircleDetailView renders juz list without ListTile background assertion', (tester) async {
+      Get.reset();
+      final controller = Get.put(KhatmaCirclesController());
+      final sampleJuzList = List.generate(
+        30,
+        (i) => KhatmaCircleJuz(
+          circleId: 'test-circle',
+          juzNumber: i + 1,
+          assignedTo: i == 0 ? 'محمد' : '',
+          status: i == 0 ? 'in_progress' : 'available',
+        ),
+      );
+      final sampleCircle = KhatmaCircle(
+        id: 'test-circle',
+        title: 'ختمة التجربة',
+        createdAt: DateTime.now(),
+        juzList: sampleJuzList,
+      );
+      controller.currentCircle.value = sampleCircle;
+
+      await tester.pumpWidget(
+        const GetMaterialApp(
+          home: KhatmaCircleDetailView(circleId: 'test-circle'),
+        ),
+      );
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('ختمة التجربة'), findsOneWidget);
+      expect(find.byType(ListTile), findsWidgets);
     });
   });
 }

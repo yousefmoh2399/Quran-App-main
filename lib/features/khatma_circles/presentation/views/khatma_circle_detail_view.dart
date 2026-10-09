@@ -296,66 +296,70 @@ class _KhatmaCircleDetailViewState extends State<KhatmaCircleDetailView> {
           color: juz.isCompleted ? Colors.green.withAlpha(80) : colors.divider,
         ),
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-        onTap: () => _showAssignDialog(context, juz),
-        leading: Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: colors.primary.withAlpha(20),
-            borderRadius: BorderRadius.circular(AppRadius.sm),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            '${juz.juzNumber}',
-            style: TextStyle(
-              fontFamily: AppTypography.uiFont,
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-              color: colors.primary,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+          onTap: () => _showAssignDialog(context, juz),
+          leading: Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: colors.primary.withAlpha(20),
+              borderRadius: BorderRadius.circular(AppRadius.sm),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              '${juz.juzNumber}',
+              style: TextStyle(
+                fontFamily: AppTypography.uiFont,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: colors.primary,
+              ),
             ),
           ),
-        ),
-        title: Text(
-          KhatmaCirclesService.getJuzTitle(juz.juzNumber),
-          style: TextStyle(
-            fontFamily: AppTypography.uiFont,
-            fontSize: 13.5,
-            fontWeight: FontWeight.bold,
-            color: colors.text,
+          title: Text(
+            KhatmaCirclesService.getJuzTitle(juz.juzNumber),
+            style: TextStyle(
+              fontFamily: AppTypography.uiFont,
+              fontSize: 13.5,
+              fontWeight: FontWeight.bold,
+              color: colors.text,
+            ),
           ),
-        ),
-        subtitle: Text(
-          juz.assignedTo.isNotEmpty ? 'القائم بالقراءة: ${juz.assignedTo}' : 'غير محجوز لأحد بعد',
-          style: TextStyle(
-            fontFamily: AppTypography.uiFont,
-            fontSize: 12,
-            color: juz.assignedTo.isNotEmpty ? colors.primary : colors.textMuted,
-            fontWeight: juz.assignedTo.isNotEmpty ? FontWeight.bold : FontWeight.normal,
+          subtitle: Text(
+            juz.assignedTo.isNotEmpty ? 'القائم بالقراءة: ${juz.assignedTo}' : 'غير محجوز لأحد بعد',
+            style: TextStyle(
+              fontFamily: AppTypography.uiFont,
+              fontSize: 12,
+              color: juz.assignedTo.isNotEmpty ? colors.primary : colors.textMuted,
+              fontWeight: juz.assignedTo.isNotEmpty ? FontWeight.bold : FontWeight.normal,
+            ),
           ),
-        ),
-        trailing: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: statusBg,
-            borderRadius: BorderRadius.circular(AppRadius.xs),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(statusIcon, size: 14, color: statusFg),
-              const SizedBox(width: 4),
-              Text(
-                statusLabel,
-                style: TextStyle(
-                  fontFamily: AppTypography.uiFont,
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: statusFg,
+          trailing: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: statusBg,
+              borderRadius: BorderRadius.circular(AppRadius.xs),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(statusIcon, size: 14, color: statusFg),
+                const SizedBox(width: 4),
+                Text(
+                  statusLabel,
+                  style: TextStyle(
+                    fontFamily: AppTypography.uiFont,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: statusFg,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
