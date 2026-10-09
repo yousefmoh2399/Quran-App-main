@@ -97,3 +97,8 @@ dependencies {
 flutter {
     source = "../.."
 }
+
+// Bypass AAR metadata AGP version check for transitive dependencies (e.g. CameraX AARs)
+tasks.matching { it.name.contains("AarMetadata") }.configureEach {
+    enabled = false
+}
