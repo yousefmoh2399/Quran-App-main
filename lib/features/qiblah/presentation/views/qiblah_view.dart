@@ -4,6 +4,7 @@ import 'package:quran_app_android/core/design/components/app_scaffold.dart';
 import 'package:quran_app_android/features/qiblah/presentation/view_model/qiblah_view_model.dart';
 import 'package:quran_app_android/features/qiblah/presentation/views/widget/go_settings_view.dart';
 import 'package:quran_app_android/features/qiblah/presentation/views/widget/qiblah_stream_builder.dart';
+import 'package:quran_app_android/core/util/routes/routes.dart';
 
 class QiblahView extends StatefulWidget {
   const QiblahView({super.key});
@@ -41,6 +42,15 @@ class _QiblahViewState extends State<QiblahView>
     return AppScaffold(
       title: 'اتجاه القبلة',
       constrainContentWidth: true,
+      actions: [
+        IconButton(
+          tooltip: 'كاميرا الواقع المعزز (AR)',
+          icon: const Icon(Icons.camera_alt_outlined),
+          onPressed: () {
+            Get.toNamed(AppRoutes.arQibla);
+          },
+        ),
+      ],
       body: GetBuilder<QiblahViewModel>(
         init: qiblahViewModel,
         builder: (controller) {

@@ -28,6 +28,8 @@
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>نحتاج إذن تحديد الموقع لتحديد اتجاه القِبلة وحساب مواقيت الصلاة بدقة لموقعك الحالي. / We need your location to calculate accurate prayer times and determine the Qiblah direction.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>نحتاج إذن الكاميرا لعرض اتجاه القبلة بالواقع المعزز في العالم الحقيقي. / Camera permission is required for the AR Qiblah view.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>CFBundleLocalizations</key>

@@ -459,6 +459,37 @@ class UserRepository {
     }
   }
 
+  Future<void> logDayReading(int pagesRead, {required int lastPage, DateTime? date}) async {
+    final db = await _db;
+    final dateStr = _formatDate(date ?? DateTime.now());
+
+    final existing = await db.query(
+      'reading_log',
+      where: 'date = ?',
+      whereArgs: [dateStr],
+      limit: 1,
+    );
+
+    if (existing.isEmpty) {
+      await db.insert('reading_log', {
+        'date': dateStr,
+        'pages_read': pagesRead,
+        'last_page': lastPage,
+      });
+    } else {
+      final currentRead = existing.first['pages_read'] as int? ?? 0;
+      await db.update(
+        'reading_log',
+        {
+          'pages_read': currentRead + pagesRead,
+          'last_page': lastPage,
+        },
+        where: 'date = ?',
+        whereArgs: [dateStr],
+      );
+    }
+  }
+
   Future<ReadingLogEntry?> getTodayReadingLog() async {
     final db = await _db;
     final dateStr = _formatDate(DateTime.now());

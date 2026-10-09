@@ -9,7 +9,9 @@ import 'package:quran_app_android/core/design/app_spacing.dart';
 import 'package:quran_app_android/core/design/app_typography.dart';
 import 'package:quran_app_android/core/design/components/app_card.dart';
 import 'package:quran_app_android/core/design/components/empty_state.dart';
+import 'package:get/get.dart';
 import 'package:quran_app_android/core/services/app_haptics_service.dart';
+import 'package:quran_app_android/core/util/routes/routes.dart';
 
 class QiblahStreamBuilder extends StatefulWidget {
   final AnimationController animationController;
@@ -152,31 +154,71 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Mode switcher: Compass vs Map/Radar
-              Container(
-                decoration: BoxDecoration(
-                  color: colors.surface,
-                  borderRadius: AppRadius.borderFull,
-                  border: Border.all(color: colors.divider),
-                ),
-                padding: const EdgeInsets.all(4),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildModeButton(
-                      index: 0,
-                      label: 'البوصلة الدائرية',
-                      icon: Icons.explore_rounded,
-                      colors: colors,
+              // Mode switcher: Compass vs Map/Radar + AR Camera
+              Wrap(
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      color: colors.surface,
+                      borderRadius: AppRadius.borderFull,
+                      border: Border.all(color: colors.divider),
                     ),
-                    _buildModeButton(
-                      index: 1,
-                      label: 'الرادار والمسافة',
-                      icon: Icons.radar_rounded,
-                      colors: colors,
+                    padding: const EdgeInsets.all(4),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _buildModeButton(
+                          index: 0,
+                          label: 'البوصلة الدائرية',
+                          icon: Icons.explore_rounded,
+                          colors: colors,
+                        ),
+                        _buildModeButton(
+                          index: 1,
+                          label: 'الرادار والمسافة',
+                          icon: Icons.radar_rounded,
+                          colors: colors,
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  InkWell(
+                    onTap: () => Get.toNamed(AppRoutes.arQibla),
+                    borderRadius: AppRadius.borderFull,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            colors.primary.withOpacity(0.18),
+                            colors.primary.withOpacity(0.08),
+                          ],
+                        ),
+                        borderRadius: AppRadius.borderFull,
+                        border: Border.all(color: colors.primary.withOpacity(0.35)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.camera_alt_rounded, size: 16, color: colors.primary),
+                          AppSpacing.horizontalXs,
+                          Text(
+                            'كاميرا AR',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: colors.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
               AppSpacing.verticalMd,
               // Distance to Kaaba badge

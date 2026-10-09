@@ -53,6 +53,11 @@ class HomeQuickShortcuts extends StatelessWidget {
       route: AppRoutes.hifzTester,
     ),
     _ShortcutItem(
+      title: 'إحصائيات القراءة',
+      icon: Icons.insights_rounded,
+      route: AppRoutes.readingAnalytics,
+    ),
+    _ShortcutItem(
       title: 'القبلة',
       icon: Icons.explore_rounded,
       route: AppRoutes.qiblah,
