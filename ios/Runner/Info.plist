@@ -34,6 +34,8 @@
 	<string>نحتاج إذن الوصول إلى الصور لحفظ ومشاركة بطاقات الآيات القرآنية والأذكار المصممة وإحصائيات القراءة. / Photo library access is required to save and share designed Quran and Azkar cards.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>نحتاج إذن إضافة الصور لحفظ بطاقات الآيات والأذكار المصممة مباشرة في ألبوم الصور بجهازك. / Permission is required to save Quran cards directly to your Photos library.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>نحتاج إذن حساسات الحركة والبوصلة لتتبع دوران الطواف وتوجيه القِبلة بدقة. / Motion and compass sensor access is used to track Tawaf rotation and accurate Qiblah orientation.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>CFBundleLocalizations</key>

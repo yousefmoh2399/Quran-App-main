@@ -1,109 +1,152 @@
 # سياسة الخصوصية لتطبيق "تَقَرَّبْ" (Privacy Policy for Taqarrab)
 
-**تاريخ السريان (Effective Date):** 5 أكتوبر 2026  
+**تاريخ آخر تحديث (Last Updated):** 10 أكتوبر 2026  
 **اسم التطبيق (App Name):** تَقَرَّبْ (Taqarrab)  
-**معرّف التطبيق (Application ID):** `com.taqarrab.quran`  
-**البريد الإلكتروني للتواصل (Contact Email):** `support@taqarrab.app` (أو بريدك الخاص)
+**معرّف الحزمة (Bundle ID / Package Name):** `com.yousefmohamed.quranApp`  
+**البريد الإلكتروني للدعم (Contact Email):** `support@taqarrab.app`  
 
 ---
 
-## 🌿 مقدمة ورؤية الخصوصية (Introduction)
+## 🌿 1. مقدمة ورؤية الخصوصية (Introduction & Core Philosophy)
 
-تطبيق **"تَقَرَّبْ"** هو تطبيق إسلامي مجاني بالكامل خُصص لمساعدة المسلمين على قراءة القرآن الكريم، معرفة مواقيت الصلاة، اتجاه القبلة، وقراءة الأذكار.
+تطبيق **"تَقَرَّبْ"** هو تطبيق إسلامي مجاني بالكامل وخالٍ تماماً من أي إعلانات، صُمم ليكون رفيقاً شاملاً للمسلم في قراءة القرآن الكريم، الاستماع للأذان، معرفة اتجاه القبلة العادي والمعزز (AR)، متابعة الأذكار، مناسك الحج والعمرة، وحساب الزكاة والختمات القرآنية.
 
-نحن نؤمن بأن العبادة تتطلب أعلى درجات الخصوصية والطمأنينة؛ لذا صُمم التطبيق ليعمل بمبدأ **"الخصوصية أولاً وحفظ البيانات محلياً (Offline-First Privacy)"**.  
-**نحن لا نجمع، ولا نبيع، ولا نشارك أي بيانات شخصية تخصك مع أي طرف ثالث على الإطلاق.**
+نحن نؤمن إيماناً راسخاً بأن العبادة تتطلب أعلى درجات الأمان والطمأنينة والخصوصية؛ ولذلك تم بناء التطبيق هندسياً على مبدأ **"العمل دون اتصال بالإنترنت وحفظ البيانات محلياً (100% Offline-First & On-Device Processing)"**.
 
----
-
-## 🔒 1. البيانات والتخزين المحلي (Local Data Storage)
-* **ما يتم تخزينه:** جميع بيانات تفاعلك مع التطبيق (مثل: آخر صفحة قرأتها في المصحف، العلامات المرجعية، سجل الآيات المحفوظة، ملاحظات التدبر، إعدادات التنبيهات، ومتابعة الختمة).
-* **مكان التخزين:** تُخزن هذه البيانات **فقط وحصرياً داخل قاعدة بيانات محلية ومحمية على هاتفك الشخصي**.
-* **عدم الرفع:** لا يتم نقل هذه البيانات أو رفعها إلى أي خوادم خارجية (Servers) أو سحابية، وتظل تحت تحكمك الكامل. حذف التطبيق من هاتفك يؤدي إلى حذف هذه البيانات المحلية.
+> 🛡️ **تعهد قاطع:**  
+> **نحن لا نجمع، ولا نخزن على خوادم خارجية، ولا نتتبع، ولا نبيع، ولا نشارك أي بيانات شخصية أو معلومات استخدام أو موقع مع أي طرف ثالث على الإطلاق.**
 
 ---
 
-## 📍 2. أذونات التطبيق وكيفية استخدامها (Permissions Usage)
+## 🔒 2. البيانات والتخزين المحلي على جهازك (Local On-Device Data)
 
-يطلب التطبيق الحد الأدنى من الأذونات اللازمة لتقديم وظائفه الأساسية، ويتم التعامل معها كالتالي:
-
-### أ) إذن الموقع الجغرافي (Location Permission):
-* **النوع:** `ACCESS_FINE_LOCATION` و `ACCESS_COARSE_LOCATION`.
-* **الهدف:** حساب مواقيت الصلاة الخمسة بدقة فلكية وتحديد زاوية بوصلة القبلة نحو الكعبة المشرفة وفق موقعك الحالي.
-* **الخصوصية:** تتم معالجة بيانات الموقع **لحظياً داخل جهازك فقط (Ephemeral on-device processing)**؛ لا نقوم بتتبع موقعك الجغرافي، ولا يتم حفظ سجل تنقلاتك، ولا يتم إرسال موقعك لأي خادم.
-
-### ب) إذن المنبهات الدقيقة والإشعارات (Exact Alarms & Notifications):
-* **النوع:** `SCHEDULE_EXACT_ALARM` و `USE_EXACT_ALARM` و `POST_NOTIFICATIONS`.
-* **الهدف:** إطلاق صوت الأذان وعرض تنبيهات الصلاة بدقة بالثانية في مواعيدها المحددة، والتذكير بأذكار الصباح والمساء والورد القرآني.
-* **التحكم:** يمكنك تفعيل أو تعطيل أو تخصيص أصوات أي صلاة أو ذكر بالكامل من داخل إعدادات التطبيق.
-
-### ج) إذن خدمة الواجهة الأمامية (Foreground Service):
-* **النوع:** `FOREGROUND_SERVICE_MEDIA_PLAYBACK`.
-* **الهدف:** ضمان استمرار تشغيل صوت نداء الأذان كاملاً عند دخول وقت الصلاة حتى في حال كانت شاشة الهاتف مغلقة أو كان التطبيق في الخلفية.
-
-### د) إذن حفظ الصور والوسائط (Media / Storage Access):
-* **النوع:** `WRITE_EXTERNAL_STORAGE` (للإصدارات القديمة فقط).
-* **الهدف:** يُستخدم **فقط** عندما تختار بنفسك حفظ بطاقة تصميم لآية قرآنية أو ذكر في ألبوم الصور بهاتفك.
-* **الخصوصية:** التطبيق **لا يقرأ ولا يستعرض ولا يصل إلى أي صورة شخصية أو فيديو في معرض الصور الخاص بك**.
+* **ما يتم تخزينه:**  
+  جميع بيانات تفاعلك مع التطبيق تظل **حصرياً داخل هاتفك الشخصي**، وتشمل:
+  - آخر صفحة وموضع توقف في المصحف الشريف وعلاماتك المرجعية (Bookmarks).
+  - سجل التلاوة، الورد اليومي، وإحصائيات القراءة والتحليلات البيانية (Reading Analytics).
+  - سجل الأذكار، تسبيحات العداد الإلكتروني، وتفضيلات تنبيهات الصلوات.
+  - يوميات وملاحظات الحج والعمرة، وأشواط الطواف والسعي.
+  - بيانات الختمات القرآنية الفردية والعائلية.
+* **مكان التخزين:**  
+  تُخزن هذه البيانات في قاعدة بيانات محلية مشفرة ومحمية تابعة للتطبيق فقط (`SQLite / SharedPreferences`).
+* **عدم الرفع السحابي:**  
+  لا يتم إرسال أي جزء من هذه البيانات إلى أي خادم أو قاعدة بيانات سحابية (Cloud). وحذف التطبيق من جهازك يؤدي لحذف هذه البيانات المحلية تلقائياً.
 
 ---
 
-## 🚫 3. الإعلانات والتتبع (No Ads & Zero Tracking)
-* **خالٍ تماماً من الإعلانات (100% Ad-Free):** لا يحتوي التطبيق على أي إعلانات تجارية (No Google AdMob, No Unity Ads, etc.).
-* **خالٍ من أدوات التتبع والتحليلات (Zero Analytics / Tracking SDKs):** لا يحتوي التطبيق على أي كود برمجي لتتبع المستخدمين أو تحليل سلوكهم (لا يوجد Firebase Analytics، أو Facebook Pixel، أو أي مكتبة طرف ثالث تتبعية).
+## 📱 3. الأذونات واستخدامات الحساسات (Permissions & Sensors Usage)
+
+يطلب التطبيق فقط الحد الأدنى من الصلاحيات لتشغيل وظائفه الدينية، وتتم معالجتها **آنياً ومحلياً على الهاتف فقط (In-Memory Processing)**:
+
+### أ) إذن الموقع الجغرافي (`Location`):
+* **الاستخدام:**  
+  - حساب مواقيت الصلاة الخمسة بدقة فلكية وفق إحداثيات خطوط الطول والعرض لموقعك الحالي.
+  - حساب زاوية انحراف القِبلة الدقيقة نحو الكعبة المشرفة بمكة المكرمة.
+* **الضمان:**  
+  - المعالجة تتم داخل جهازك لحظياً، ولا يتم تسجيل سجل تحركاتك (No Location Tracking/History)، ولا يتم إرسال إحداثياتك لأي جهة.
+
+### ب) إذن الكاميرا (`Camera`):
+* **الاستخدام:**  
+  - ميزة **القبلة بالواقع المعزز (AR Qiblah Camera)**: لعرض مجسم الكعبة ثلاثي الأبعاد ومسار التوجيه فوق المنظر الحقيقي المحيط بك لتسهيل تحديد اتجاه الصلاة.
+  - ميزة **مسح رموز الختمات القرآنية (QR Code Scanner)**: لقراءة رموز الختمات المشتركة ومزامنة إنجاز القراءة بين أجهزة العائلة دون الحاجة للإنترنت.
+* **الضمان:**  
+  - البث المباشر للكاميرا يُعالج لحظياً في الذاكرة العشوائية لتحديد الزاوية وقراءة الرمز فقط؛ **لا يتم التقاط أو تسجيل أو حفظ أو رفع أي صور أو فيديوهات على الإطلاق**.
+
+### ج) حساسات الحركة والبوصلة والجيروسكوب (`Motion & Compass Sensors / Gyroscope`):
+* **الاستخدام:**  
+  - قراءة حساس المجال المغناطيسي (Magnetometer) والجيروسكوب لتوجيه إبرة البوصلة نحو القبلة بسلاسة ودقة.
+  - تتبع حركة الدوران في ميزة **مساعد الطواف (Tawaf Heading Accumulator)** لتقدير إتمام الدورة حول الكعبة (360 درجة).
+* **الضمان:**  
+  - بيانات الحساسات تُقرأ وتُعالج داخلياً عبر واجهات النظام الرسمية دون حفظ سجلات حركة أو مشاركة أي بيانات حركية.
+
+### د) ألبوم الصور والوسائط (`Photo Library & Storage`):
+* **الاستخدام:**  
+  - يُطلب الإذن فقط عندما تختار بنفسك حفظ بطاقة تصميمية لآية أو ذكر من **"استوديو البطاقات"** أو حفظ تقرير إنجازك من **"تحليلات القراءة"** في ألبوم الصور.
+* **الضمان:**  
+  - التطبيق يستخدم صلاحية الإضافة فقط (`Add-Only`) عند توفرها، **ولا يقرأ أو يستعرض أو يصل لأي صور أو فيديوهات شخصية في هاتفك**.
+
+### هـ) الإشعارات والمنبهات الدقيقة (`Notifications & Exact Alarms`):
+* **الاستخدام:**  
+  - إطلاق صوت الأذان في موعد كل صلاة بالدقيقة والثانية حتى مع قفل الشاشة أو وضع السكون.
+  - إرسال تذكيرات الأذكار الصباحية والمسائية والورد اليومي.
+* **التحكم:**  
+  - يتم جدولة جميع التنبيهات محلياً على نظام التشغيل مباشرة دون خوادم وسيطة (No Push Notification Servers)، ويمكنك إيقافها أو تخصيص أصواتها بالكامل.
 
 ---
 
-## 👶 4. خصوصية الأطفال (Children's Privacy)
-تطبيق "تقرب" آمن ومناسب لجميع الأعمار (تصنيف 3+ / Everyone). التطبيق لا يجمع عن علم أي معلومات تعريف شخصية من أي مستخدم بما في ذلك الأطفال، ويتوافق تماماً مع معايير قانون حماية خصوصية الأطفال على الإنترنت (COPPA) وسياسات متجر Google Play و Apple App Store.
+## 🚫 4. الإعلانات والتتبع الخارجي (No Ads & Zero Third-Party Tracking)
+
+* **خالٍ 100% من الإعلانات:**  
+  لا يتضمن التطبيق أي شبكات إعلانية تجارية (لا وجود لـ Google AdMob أو Unity Ads أو غيرها).
+* **خالٍ من أدوات التتبع (Zero Analytics SDKs):**  
+  لا يحتوي كود التطبيق على أي مكتبات تتبع سلوكي أو تحليلي (لا وجود لـ Firebase Analytics أو Facebook SDK أو AppsFlyer).
+* **توافق وثيقة خصوصية أبل (Apple Privacy Manifest):**  
+  التطبيق مزود بملف `PrivacyInfo.xcprivacy` معتمد يعلن رسمياً بأن `NSPrivacyTracking = false`، مع توثيق الأسباب المشروعة لاستخدام واجهات النظام المحلية القياسية.
 
 ---
 
-## 🔄 5. التعديلات على سياسة الخصوصية (Changes to this Policy)
-قد نقوم بتحديث سياسة الخصوصية من حين لآخر إذا أضفنا ميزات جديدة تتطلب ذلك. سيتم نشر أي تحديث على هذه الصفحة مع تحديث "تاريخ السريان".
+## 👶 5. خصوصية الأطفال والأسرة (Children & Family Safety)
+
+التطبيق مخصص ومناسب لكافة الفئات العمرية (تصنيف 4+ على App Store و 3+ على Google Play). التطبيق آمن تماماً، ولا يجمع أي معلومات تعريفية شخصية، ومتوافق مع المعايير الدولية لحماية خصوصية الأطفال على الإنترنت (COPPA).
 
 ---
 
-## 📬 6. التواصل والدعم الفني (Contact Us)
-إذا كان لديك أي سؤال أو استفسار بخصوص سياسة الخصوصية هذه أو استخدامك لتطبيق "تقرب"، يسعدنا تواصلك معنا:
-* **البريد الإلكتروني:** `support@taqarrab.app` (أو البريد المعتمد في حساب المطور)
-* **مستودع المشروع:** [GitHub Repository Issues](https://github.com/yousefmoh2399/Quran-App-main/issues)
+## 🔄 6. التحديثات والتعديلات (Updates to Policy)
+
+قد نقوم بتحديث سياسة الخصوصية هذه من حين لآخر لتعكس أي ميزات دينية جديدة نضيفها مستقبلاً. سيتم توثيق أي تحديث في هذا الملف مع تحديث تاريخ السريان داخل التطبيق وعلى المستودع البرمجي.
+
+---
+
+## 📬 7. التواصل والدعم (Contact & Inquiries)
+
+إذا كان لديك أي استفسار أو اقتراح بخصوص خصوصية بياناتك:
+* **البريد الإلكتروني:** `support@taqarrab.app`
+* **المستودع المفتوح:** [GitHub Issues](https://github.com/yousefmoh2399/Quran-App-main/issues)
 
 ---
 ---
 
-# English Version (For Google Play & App Store Compliance)
+# Privacy Policy for Taqarrab (English Version)
 
-## Privacy Policy for "Taqarrab"
+**Last Updated:** October 10, 2026  
+**Application Name:** Taqarrab (تَقَرَّبْ)  
+**Bundle Identifier:** `com.yousefmohamed.quranApp`  
+**Support Email:** `support@taqarrab.app`  
 
-**Effective Date:** October 5, 2026  
-**Application ID:** `com.taqarrab.quran`  
-**Contact:** `support@taqarrab.app`
+### 1. Overview & Commitment
+Taqarrab is an authentic, completely free, and 100% ad-free Islamic utility application built to serve Muslims worldwide with Quran recitation, accurate Adhan prayer times, Augmented Reality (AR) and standard Qiblah direction, daily Azkar, Hajj & Umrah companions, and Zakat calculation.
 
-### Overview
-Taqarrab ("we", "our", or "the app") is a completely free, ad-free Islamic application designed to provide users with an authentic Holy Quran reading experience, accurate prayer times, Qiblah compass, and daily Azkar (supplications).
+Taqarrab is built upon an uncompromising **offline-first, zero-data-collection architecture**. **We do not collect, transmit, store on servers, sell, or monetize any of your personal data.**
 
-We are deeply committed to protecting your privacy. Taqarrab is engineered on an **offline-first, zero-tracking philosophy**. **We do not collect, transmit, sell, or share any personal information whatsoever.**
+### 2. Local On-Device Data Storage
+* **Data Stored:** Reading history, Quran bookmarks, daily Wird targets, memorization badges, personal reflection notes, Azkar counter progress, and Hajj/Umrah logs.
+* **Storage Location:** All data is stored strictly in your device's isolated local application sandbox (`SQLite` / `UserDefaults`).
+* **No Cloud Transmission:** No personal data is ever uploaded to external cloud servers or third-party databases.
 
-### 1. Data Collection and Local Storage
-* All user data—including bookmarks, reading progress, memorization status, personal notes, and prayer notification preferences—is stored strictly and exclusively on your local device storage.
-* No data is transmitted to any cloud servers or external databases.
+### 3. Permissions and Sensor Usage
+Taqarrab requests only the permissions necessary to provide its core religious features, processed strictly on-device:
+* **Location (`NSLocationWhenInUseUsageDescription` / Android Location):** Used ephemerally in-memory to compute local astronomical prayer times and calculate the exact Qiblah compass angle towards the Kaaba. Location is never tracked, logged, or transmitted.
+* **Camera (`NSCameraUsageDescription` / Android Camera):**
+  - **AR Qiblah View:** Projects an augmented 3D Kaaba indicator on your camera feed to guide your prayer orientation in physical space.
+  - **Family Khatma QR Scanning:** Decodes QR codes to synchronize Quran completion circles between family devices completely offline.
+  - *Guarantee:* Live camera frames are processed exclusively in volatile memory; **no photos or videos are ever captured, saved, or uploaded**.
+* **Motion Sensors, Gyroscope & Magnetometer (`NSMotionUsageDescription`):**
+  - Used for real-time heading orientation in the Qiblah compass and AR overlay.
+  - Used in the experimental **Tawaf Heading Accumulator** to detect rotational movement during circumambulation around the Kaaba.
+* **Photo Library (`NSPhotoLibraryAddUsageDescription`, `NSPhotoLibraryUsageDescription`):**
+  - Used solely when you explicitly choose to export or save a high-resolution Quranic verse card or reading achievement image from the Card Studio to your device's Photos gallery. We never read or inspect your personal photo album.
+* **Notifications & Exact Alarms:**
+  - Scheduled purely on-device via native system schedulers to deliver timely Adhan audio calls to prayer and morning/evening Azkar reminders without remote push servers.
 
-### 2. Device Permissions
-Taqarrab requests only the bare minimum permissions necessary for its religious utility features:
-* **Location (`ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`):** Used solely on-device to calculate astronomical prayer times and determine the Qiblah direction. Location data is processed ephemerally in-memory and is never logged, stored, or transmitted.
-* **Exact Alarms & Notifications (`USE_EXACT_ALARM`, `SCHEDULE_EXACT_ALARM`, `POST_NOTIFICATIONS`):** Used strictly to schedule timely Adhan call-to-prayer alerts and Azkar reminders.
-* **Foreground Service (`FOREGROUND_SERVICE_MEDIA_PLAYBACK`):** Used to play the audio Adhan when prayer time arrives, even when the screen is locked.
-* **Photo Library / Storage:** Used only when you explicitly export/save an Ayah card image that you generated to your photo gallery. The app never reads or accesses your personal photos.
+### 4. Zero Advertising & Zero Tracking
+* **100% Ad-Free:** Zero third-party ad networks or commercial banners.
+* **Zero Tracking:** No behavioral trackers or telemetry SDKs (No Firebase Analytics, Facebook SDK, or commercial trackers).
+* **Apple Privacy Manifest Compliant:** Fully configured with `PrivacyInfo.xcprivacy` declaring `NSPrivacyTracking = false` and `NSPrivacyCollectedDataTypes = []`.
 
-### 3. Advertising and Analytics
-* **100% Ad-Free:** The app contains zero advertisements.
-* **No Third-Party Analytics:** We do not embed any third-party tracking or behavioral SDKs (e.g., Google Analytics, Firebase, Facebook SDK).
+### 5. Children's Privacy
+Rated 4+ / Everyone. Taqarrab does not solicit or collect information from children under 13, fully complying with COPPA and App Store safety guidelines.
 
-### 4. Children’s Privacy
-The app contains no inappropriate content and is rated for Everyone / 4+. We do not collect personal information from any user, including children under the age of 13.
-
-### 5. Contact Us
-If you have any questions or feedback regarding this Privacy Policy, please contact us at:  
+### 6. Contact Us
+For questions regarding this policy:  
 Email: `support@taqarrab.app`  
 GitHub: [https://github.com/yousefmoh2399/Quran-App-main](https://github.com/yousefmoh2399/Quran-App-main)
