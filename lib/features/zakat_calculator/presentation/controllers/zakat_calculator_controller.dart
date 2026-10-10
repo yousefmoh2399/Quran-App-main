@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import '../../../../core/util/app_snackbar.dart';
 import '../../../../core/util/routes/routes.dart';
 import '../../data/models/salary_zakat_model.dart';
 import '../../data/services/zakat_calculator_service.dart';
@@ -182,10 +183,9 @@ class ZakatCalculatorController extends GetxController {
           '«مَا نَقَصَتْ صَدَقَةٌ مِنْ مَالٍ»';
     }
     await Clipboard.setData(ClipboardData(text: summary));
-    Get.snackbar(
+    AppSnackbar.show(
       'تم النسخ بنجاح 📋',
       'تم نسخ ملخص الحساب الشرعي للحافظة',
-      snackPosition: SnackPosition.BOTTOM,
       duration: const Duration(seconds: 2),
     );
   }

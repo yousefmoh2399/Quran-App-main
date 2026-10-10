@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/services/app_haptics_service.dart';
+import '../../../../core/util/app_snackbar.dart';
 import '../../data/models/reading_analytics_models.dart';
 import '../../data/services/reading_analytics_service.dart';
 
@@ -57,10 +58,10 @@ class ReadingAnalyticsController extends GetxController {
     try {
       final boundary = cardKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
       if (boundary == null) {
-        Get.snackbar(
+        AppSnackbar.show(
           'تنبيه',
           'تعذر قراءة بطاقة الإنجاز، يرجى المحاولة مرة ثانية',
-          snackPosition: SnackPosition.BOTTOM,
+          context: context,
         );
         return;
       }
@@ -98,11 +99,13 @@ class ReadingAnalyticsController extends GetxController {
       }
     } catch (e) {
       debugPrint('Error generating achievement card image: $e');
-      Get.snackbar(
-        'تنبيه',
-        'حدث خطأ أثناء تصدير الصورة، يرجى المحاولة لاحقاً',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      if (context.mounted) {
+        AppSnackbar.show(
+          'تنبيه',
+          'حدث خطأ أثناء تصدير الصورة، يرجى المحاولة لاحقاً',
+          context: context,
+        );
+      }
     } finally {
       isExporting.value = false;
     }
@@ -128,15 +131,23 @@ class ReadingAnalyticsController extends GetxController {
         final file = File('${dir.path}/$fileName');
         await file.writeAsBytes(pngBytes);
 
-        Get.snackbar(
-          'تم حفظ البطاقة بنجاح ✅',
-          'تم حفظ بطاقة إنجازك القرآني بجودة فائقة في ملفات التطبيق',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        if (context.mounted) {
+          AppSnackbar.show(
+            'تم حفظ البطاقة بنجاح ✅',
+            'تم حفظ بطاقة إنجازك القرآني بجودة فائقة في ملفات التطبيق',
+            context: context,
+          );
+        }
       }
     } catch (e) {
       debugPrint('Error saving card: $e');
-      Get.snackbar('خطأ', 'تعذر حفظ البطاقة في الجهاز', snackPosition: SnackPosition.BOTTOM);
+      if (context.mounted) {
+        AppSnackbar.show(
+          'خطأ',
+          'تعذر حفظ البطاقة في الجهاز',
+          context: context,
+        );
+      }
     } finally {
       isExporting.value = false;
     }

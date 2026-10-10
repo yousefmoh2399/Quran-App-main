@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../../core/data/models/surah_entity.dart';
 import '../../../../core/data/repositories/quran_repository.dart';
 import '../../../../core/services/app_haptics_service.dart';
+import '../../../../core/util/app_snackbar.dart';
 import '../../data/models/hifz_test_models.dart';
 import '../../data/models/mutashabihat_entry.dart';
 import '../../data/services/hifz_question_generator.dart';
@@ -182,10 +183,9 @@ class HifzTesterController extends GetxController {
       );
 
       if (generated.isEmpty) {
-        Get.snackbar(
+        AppSnackbar.show(
           'تنبيه',
           'تعذر إنشاء أسئلة للنطاق المحدد، يرجى اختيار سورة أخرى أو نطاق أوسع',
-          snackPosition: SnackPosition.BOTTOM,
         );
         isLoading.value = false;
         return;
@@ -210,10 +210,9 @@ class HifzTesterController extends GetxController {
       viewState.value = HifzViewState.testing;
     } catch (e) {
       debugPrint('Error starting Hifz test: $e');
-      Get.snackbar(
+      AppSnackbar.show(
         'خطأ',
         'حدث خطأ غير متوقع أثناء إعداد الاختبار',
-        snackPosition: SnackPosition.BOTTOM,
       );
     } finally {
       isLoading.value = false;

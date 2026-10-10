@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_radius.dart';
 import '../../../../core/design/app_spacing.dart';
@@ -102,13 +103,17 @@ class _ArQiblaCameraViewState extends State<ArQiblaCameraView>
       if (mounted) {
         setState(() {
           _isCameraInitialized = true;
+          _cameraError = false;
         });
       }
     } catch (e) {
       if (mounted) {
+        final isDenied = e is CameraException && (e.code == 'CameraAccessDenied' || e.code == 'CameraAccessRestricted');
         setState(() {
           _cameraError = true;
-          _cameraErrorMessage = 'تعذر تشغيل الكاميرا: $e';
+          _cameraErrorMessage = isDenied
+              ? 'تم رفض إذن الكاميرا. يرجى السماح به من الإعدادات للرؤية المعززة.'
+              : 'تعذر تشغيل الكاميرا: $e';
         });
       }
     }
@@ -307,15 +312,34 @@ class _ArQiblaCameraViewState extends State<ArQiblaCameraView>
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32),
                 child: Text(
-                  'تنبيه: الكاميرا غير مفعلة، تعمل البوصلة ومؤشرات الواقع المعزز بكفاءة تامة.',
+                  _cameraErrorMessage.contains('إذن')
+                      ? _cameraErrorMessage
+                      : 'تنبيه: الكاميرا غير مفعلة، تعمل البوصلة ومؤشرات الواقع المعزز بكفاءة تامة.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontFamily: AppTypography.uiFont,
                     color: Colors.white70,
                     fontSize: 12,
                   ),
                 ),
               ),
+              if (_cameraError && _cameraErrorMessage.contains('إذن')) ...[
+                const SizedBox(height: 14),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colors.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: AppRadius.borderMd),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  ),
+                  icon: const Icon(Icons.settings_rounded, size: 18),
+                  label: const Text(
+                    'فتح إعدادات الجهاز لمنح الإذن',
+                    style: TextStyle(fontFamily: AppTypography.uiFont, fontSize: 13, fontWeight: FontWeight.bold),
+                  ),
+                  onPressed: () => openAppSettings(),
+                ),
+              ],
             ],
           ],
         ),

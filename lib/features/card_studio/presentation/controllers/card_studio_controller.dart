@@ -10,6 +10,7 @@ import '../../../../core/data/models/ayah_entity.dart';
 import '../../../../core/data/models/surah_entity.dart';
 import '../../../../core/data/repositories/quran_repository.dart';
 import '../../../../core/services/app_haptics_service.dart';
+import '../../../../core/util/app_snackbar.dart';
 import '../../../../core/util/share_helper.dart';
 import '../../../azkar/data/smart_azkar_service.dart';
 import '../../../home/data/models/daily_tadabbur_model.dart';
@@ -239,10 +240,10 @@ class CardStudioController extends GetxController {
       }
     } catch (e) {
       debugPrint('Error generating card image: $e');
-      Get.snackbar(
+      AppSnackbar.show(
         'تنبيه',
         'تعذر إنشاء الصورة، يرجى المحاولة ثانية',
-        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.orange.shade800,
       );
     } finally {
       isExporting.value = false;
@@ -269,17 +270,25 @@ class CardStudioController extends GetxController {
         final file = File('${dir.path}/$fileName');
         await file.writeAsBytes(pngBytes);
 
-        Get.snackbar(
-          'تم حفظ الصورة بنجاح ✅',
-          'تم حفظ البطاقة بجودة فائقة في مجلد التطبيق',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: const Color(0xFF0F5C4A),
-          colorText: Colors.white,
-          duration: const Duration(seconds: 3),
-        );
+        if (context.mounted) {
+          AppSnackbar.show(
+            'تم حفظ الصورة بنجاح ✅',
+            'تم حفظ البطاقة بجودة فائقة في مجلد التطبيق',
+            context: context,
+            backgroundColor: const Color(0xFF0F5C4A),
+            duration: const Duration(seconds: 3),
+          );
+        }
       }
     } catch (e) {
-      Get.snackbar('خطأ', 'تعذر حفظ الصورة: $e', snackPosition: SnackPosition.BOTTOM);
+      if (context.mounted) {
+        AppSnackbar.show(
+          'خطأ',
+          'تعذر حفظ الصورة: $e',
+          context: context,
+          backgroundColor: Colors.red.shade800,
+        );
+      }
     } finally {
       isExporting.value = false;
     }
@@ -290,10 +299,9 @@ class CardStudioController extends GetxController {
       text: '${mainText.value}\n${subtitleText.value}\n— تطبيق تقرّب',
     ));
     AppHaptics.selection();
-    Get.snackbar(
+    AppSnackbar.show(
       'تم النسخ',
       'تم نسخ النص إلى الحافظة',
-      snackPosition: SnackPosition.BOTTOM,
       duration: const Duration(seconds: 2),
     );
   }

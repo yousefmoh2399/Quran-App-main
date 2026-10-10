@@ -5,6 +5,7 @@ import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_radius.dart';
 import '../../../../core/design/app_typography.dart';
 import '../../../../core/services/app_haptics_service.dart';
+import '../../../../core/util/app_snackbar.dart';
 import '../../data/models/khatma_circle_model.dart';
 import '../../data/services/khatma_circles_service.dart';
 import '../controllers/khatma_circles_controller.dart';
@@ -266,10 +267,10 @@ class _KhatmaQrScannerViewState extends State<KhatmaQrScannerView>
     if (confirmed == true && mounted) {
       await _circlesController.importOrUpdateCircle(circle);
       if (!mounted) return;
-      Get.snackbar(
+      AppSnackbar.show(
         'تم الانضمام بنجاح ✅',
         'تمت مزامنة ختمة "${circle.title}" في جهازك بنجاح',
-        snackPosition: SnackPosition.BOTTOM,
+        context: context,
       );
       Navigator.of(context).pop();
       Get.to(() => KhatmaCircleDetailView(circleId: circle.id));
@@ -447,20 +448,20 @@ class _KhatmaQrScannerViewState extends State<KhatmaQrScannerView>
       final success = await _circlesController.applyMemberProgressFromQr(data);
       if (!mounted) return;
       if (success) {
-        Get.snackbar(
+        AppSnackbar.show(
           'تم تحديث الإنجاز بنجاح 🎉',
           'تم تسجيل إتمام ($memberName) للأجزاء المحددة في الختمة',
-          snackPosition: SnackPosition.BOTTOM,
+          context: context,
         );
         Navigator.of(context).pop();
         if (targetCircle != null) {
           Get.to(() => KhatmaCircleDetailView(circleId: targetCircle.id));
         }
       } else {
-        Get.snackbar(
+        AppSnackbar.show(
           'تنبيه',
           'لم يتم العثور على الختمة في جهازك، يرجى مسح رمز الختمة الشامل أولاً',
-          snackPosition: SnackPosition.BOTTOM,
+          context: context,
         );
         setState(() => _isProcessing = false);
       }

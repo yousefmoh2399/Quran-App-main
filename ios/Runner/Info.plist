@@ -30,6 +30,10 @@
 	<string>نحتاج إذن تحديد الموقع لتحديد اتجاه القِبلة وحساب مواقيت الصلاة بدقة لموقعك الحالي. / We need your location to calculate accurate prayer times and determine the Qiblah direction.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>نحتاج إذن الكاميرا لعرض اتجاه القبلة بالواقع المعزز ومسح رموز QR لختمات القرآن العائلية. / Camera permission is required for the AR Qiblah view and scanning Family Khatma QR codes.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>نحتاج إذن الوصول إلى الصور لحفظ ومشاركة بطاقات الآيات القرآنية والأذكار المصممة وإحصائيات القراءة. / Photo library access is required to save and share designed Quran and Azkar cards.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>نحتاج إذن إضافة الصور لحفظ بطاقات الآيات والأذكار المصممة مباشرة في ألبوم الصور بجهازك. / Permission is required to save Quran cards directly to your Photos library.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>CFBundleLocalizations</key>

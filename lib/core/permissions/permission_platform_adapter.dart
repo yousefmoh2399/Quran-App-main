@@ -23,7 +23,8 @@ class LivePermissionPlatformAdapter implements PermissionPlatformAdapter {
     if (Platform.isAndroid) return true;
     if (Platform.isIOS) {
       return type == AppPermissionType.location ||
-          type == AppPermissionType.notification;
+          type == AppPermissionType.notification ||
+          type == AppPermissionType.camera;
     }
     return false;
   }
@@ -57,6 +58,17 @@ class LivePermissionPlatformAdapter implements PermissionPlatformAdapter {
                 : AppPermissionStatus.denied;
           }
           final status = await Permission.notification.status;
+          if (!kIsWeb && Platform.isIOS && status.isDenied) {
+            final prefs = await SharedPreferences.getInstance();
+            final wasRequested = prefs.getBool('$_requestedPrefix${type.name}') ?? false;
+            if (wasRequested) {
+              return AppPermissionStatus.permanentlyDenied;
+            }
+          }
+          return _mapPermissionHandlerStatus(status, type: type);
+
+        case AppPermissionType.camera:
+          final status = await Permission.camera.status;
           if (!kIsWeb && Platform.isIOS && status.isDenied) {
             final prefs = await SharedPreferences.getInstance();
             final wasRequested = prefs.getBool('$_requestedPrefix${type.name}') ?? false;
@@ -143,6 +155,13 @@ class LivePermissionPlatformAdapter implements PermissionPlatformAdapter {
           }
           return _mapPermissionHandlerStatus(status, type: type);
 
+        case AppPermissionType.camera:
+          final status = await Permission.camera.request();
+          if (!kIsWeb && Platform.isIOS && status.isDenied) {
+            return AppPermissionStatus.permanentlyDenied;
+          }
+          return _mapPermissionHandlerStatus(status, type: type);
+
         case AppPermissionType.exactAlarm:
           if (!kIsWeb && Platform.isAndroid) {
             await _bridge.invokeMethod('requestScheduleExactAlarm');
@@ -205,6 +224,8 @@ class LivePermissionPlatformAdapter implements PermissionPlatformAdapter {
           case AppPermissionType.fullScreenIntent:
             await _bridge.invokeMethod('openFullScreenIntentSettings');
             return true;
+          case AppPermissionType.camera:
+            return await openAppSettings();
         }
       }
       return await openAppSettings();

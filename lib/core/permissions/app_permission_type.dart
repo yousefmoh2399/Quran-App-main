@@ -5,7 +5,8 @@ enum AppPermissionType {
   notification,
   exactAlarm,
   batteryOptimization,
-  fullScreenIntent;
+  fullScreenIntent,
+  camera;
 
   String get title {
     switch (this) {
@@ -19,6 +20,8 @@ enum AppPermissionType {
         return 'استثناء توفير البطارية';
       case AppPermissionType.fullScreenIntent:
         return 'تنبيه ملء الشاشة للأذان';
+      case AppPermissionType.camera:
+        return 'الكاميرا';
     }
   }
 
@@ -34,6 +37,8 @@ enum AppPermissionType {
         return 'للسماح للأذان بالعمل دون أن يُوقفه نظام توفير الطاقة عند قفل الشاشة.';
       case AppPermissionType.fullScreenIntent:
         return 'لعرض شاشة الأذان مباشرة فوق شاشة القفل عند دخول وقت الصلاة (Android 14+).';
+      case AppPermissionType.camera:
+        return 'مطلوبة لعرض اتجاه القبلة بالواقع المعزز ومسح رموز QR للختمات العائلية.';
     }
   }
 
@@ -49,6 +54,8 @@ enum AppPermissionType {
         return Icons.battery_charging_full_outlined;
       case AppPermissionType.fullScreenIntent:
         return Icons.fullscreen_outlined;
+      case AppPermissionType.camera:
+        return Icons.camera_alt_outlined;
     }
   }
 
@@ -61,6 +68,7 @@ enum AppPermissionType {
         return true;
       case AppPermissionType.location:
       case AppPermissionType.notification:
+      case AppPermissionType.camera:
         return false;
     }
   }
