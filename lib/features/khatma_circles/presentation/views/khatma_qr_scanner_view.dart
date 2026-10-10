@@ -268,7 +268,7 @@ class _KhatmaQrScannerViewState extends State<KhatmaQrScannerView>
       if (!mounted) return;
       Get.snackbar(
         'تم الانضمام بنجاح ✅',
-        'تمت مزامنة ختمة "${circle.title}" في جهازك أوفلاين',
+        'تمت مزامنة ختمة "${circle.title}" في جهازك بنجاح',
         snackPosition: SnackPosition.BOTTOM,
       );
       Navigator.of(context).pop();
@@ -522,7 +522,7 @@ class _KhatmaQrScannerViewState extends State<KhatmaQrScannerView>
             onPressed: () => Navigator.of(context).pop(),
           ),
           title: const Text(
-            'مسح رمز QR أوفلاين',
+            'مسح رمز QR',
             style: TextStyle(
               fontFamily: AppTypography.uiFont,
               color: Colors.white,
@@ -638,7 +638,7 @@ class _KhatmaQrScannerViewState extends State<KhatmaQrScannerView>
                         ),
                         SizedBox(height: 4),
                         Text(
-                          'يدعم مسح ختمة جديدة بالكامل أو مسح إنجاز عضو لتحديث أجزائه أوفلاين',
+                          'يدعم مسح ختمة جديدة بالكامل أو مسح إنجاز عضو لتحديث أجزائه مباشرة',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: AppTypography.uiFont,

@@ -276,11 +276,11 @@ class _UmrahHubViewState extends State<UmrahHubView> {
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.wifi_off_rounded, color: colors.textMuted, size: 20),
+                      Icon(Icons.verified_user_rounded, color: colors.primary, size: 20),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'رفيق المعتمر يعمل أوفلاين بالكامل دون اتصال بالإنترنت ودون استهلاك للبيانات.',
+                          'رفيق المعتمر يعمل بأعلى درجات الخصوصية وحفظ البيانات أثناء أداء المناسك.',
                           style: TextStyle(
                             fontFamily: AppTypography.uiFont,
                             fontSize: 12 * fontScale,

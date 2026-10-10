@@ -92,7 +92,7 @@ class ReadingAnalyticsController extends GetxController {
 
         await Share.shareXFiles(
           [xFile],
-          text: '📊 إنجازي في تلاوة القرآن الكريم: $pages صفحة | سلسلة $streak يوم متواصل 🔥\nعبر تطبيق تقرّب (بدون إنترنت)',
+          text: '📊 إنجازي في تلاوة القرآن الكريم: $pages صفحة | سلسلة $streak يوم متواصل 🔥\nعبر تطبيق تقرّب',
           sharePositionOrigin: shareOrigin,
         );
       }
@@ -160,7 +160,7 @@ class ReadingAnalyticsController extends GetxController {
 🌅 وقت الذروة المفضل: $peak
 
 قال النبي ﷺ: «اقْرَءُوا الْقُرْآنَ فَإِنَّهُ يَأْتِي يَوْمَ الْقِيَامَةِ شَفِيعًا لِأَصْحَابِهِ»
-عبر تطبيق تقرّب (بدون إنترنت)
+عبر تطبيق تقرّب
 ''';
 
     Share.share(text.trim());

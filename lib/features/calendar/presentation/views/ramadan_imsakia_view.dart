@@ -182,7 +182,7 @@ class _RamadanImsakiaViewState extends State<RamadanImsakiaView> {
                       ),
                       const SizedBox(height: 6),
                       const Text(
-                        'مواقيت الإمساك والإفطار والصلوات محسوبة محلياً بنسبة 100% بدون إنترنت',
+                        'مواقيت الإمساك والإفطار والصلوات محسوبة بدقة فلكية معتمدة',
                         style: TextStyle(color: Colors.white70, fontSize: 12),
                         textAlign: TextAlign.center,
                       ),

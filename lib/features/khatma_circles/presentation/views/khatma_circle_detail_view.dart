@@ -94,7 +94,7 @@ class _KhatmaCircleDetailViewState extends State<KhatmaCircleDetailView> {
                   KhatmaQrDisplayDialog.show(
                     context,
                     title: circle.title,
-                    subtitle: 'امسح هذا الرمز من هاتف أي شخص آخر للانضمام ومزامنة الأجزاء أوفلاين',
+                    subtitle: 'امسح هذا الرمز من هاتف أي شخص آخر للانضمام ومزامنة الأجزاء مباشرة',
                     payload: p,
                     type: KhatmaQrType.circleFull,
                   );
@@ -237,7 +237,7 @@ class _KhatmaCircleDetailViewState extends State<KhatmaCircleDetailView> {
                                 KhatmaQrDisplayDialog.show(
                                   context,
                                   title: circle.title,
-                                  subtitle: 'امسح هذا الرمز من هاتف أي شخص آخر للانضمام ومزامنة الأجزاء أوفلاين',
+                                  subtitle: 'امسح هذا الرمز من هاتف أي شخص آخر للانضمام ومزامنة الأجزاء مباشرة',
                                   payload: p,
                                   type: KhatmaQrType.circleFull,
                                 );

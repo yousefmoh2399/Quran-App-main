@@ -345,11 +345,11 @@ class ReadingAchievementCardWidget extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      'تطبيق تقرّب (بدون إنترنت)',
+                      'تطبيق تقرّب',
                       style: TextStyle(
                         fontFamily: AppTypography.uiFont,
                         color: const Color(0xFFD4AF37).withOpacity(0.85),
-                        fontSize: 10.5,
+                        fontSize: 11,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

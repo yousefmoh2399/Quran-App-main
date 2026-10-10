@@ -250,7 +250,7 @@ class _KhatmaCirclesListViewState extends State<KhatmaCirclesListView> {
                               KhatmaQrDisplayDialog.show(
                                 context,
                                 title: circle.title,
-                                subtitle: 'امسح هذا الرمز من هاتف أي شخص آخر للانضمام للختمة أوفلاين',
+                                subtitle: 'امسح هذا الرمز من هاتف أي شخص آخر للانضمام للختمة مباشرة',
                                 payload: payload,
                                 type: KhatmaQrType.circleFull,
                               );

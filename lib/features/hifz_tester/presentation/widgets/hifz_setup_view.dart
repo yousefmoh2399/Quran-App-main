@@ -155,7 +155,7 @@ class HifzSetupView extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'أداة متقدمة مخصصة للحفاظ والكتاتيب لاختبار ثبات الآيات، إكمال الفراغات، وضبط المتشابهات بدون إنترنت.',
+                  'أداة متقدمة مخصصة للحفاظ والكتاتيب لاختبار ثبات الآيات، إكمال الفراغات، وضبط المتشابهات القرآنية.',
                   style: TextStyle(
                     fontSize: 12,
                     color: isDark ? Colors.white70 : Colors.black87,

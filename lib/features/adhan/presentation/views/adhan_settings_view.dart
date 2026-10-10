@@ -287,7 +287,7 @@ class AdhanSettingsView extends StatelessWidget {
                     items: const [
                       DropdownMenuItem(
                         value: 'default',
-                        child: Text('الأذان المعتمد الكامل (مدمج بدون إنترنت)'),
+                        child: Text('الأذان المعتمد الكامل (صوت ندي عالي الجودة)'),
                       ),
                     ],
                     onChanged: (val) {

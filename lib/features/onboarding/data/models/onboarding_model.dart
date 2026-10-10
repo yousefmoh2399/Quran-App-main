@@ -19,7 +19,7 @@ final List<OnBoardingModel> onboardingData = [
     badge: 'القرآن والتفسير',
     title: 'تلاوة عطرة وتدبر لكتاب الله',
     description:
-        'اقرأ المصحف الشريف بخط واضح مع التفسير الميسر لكل آية، أوفلاين بالكامل دون الحاجة لاتصال بالإنترنت.',
+        'اقرأ المصحف الشريف بخط عثماني واضح مع التفسير الميسر لكل آية في كل وقت وحين.',
     image: AssetsData.json_5,
   ),
   const OnBoardingModel(

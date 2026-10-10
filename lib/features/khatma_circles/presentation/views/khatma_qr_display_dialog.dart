@@ -183,13 +183,13 @@ class KhatmaQrDisplayDialog extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.wifi_off_rounded, size: 16, color: Colors.teal),
+                    const Icon(Icons.sync_rounded, size: 16, color: Colors.teal),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         type == KhatmaQrType.circleFull
-                            ? 'امسح هذا الرمز من هاتف أي شخص آخر عبر زر "مسح QR" للانضمام للختمة أوفلاين تماماً.'
-                            : 'امسح هذا الرمز من هاتف منظم الختمة لتحديث إتمامك للأجزاء مباشرة دون إنترنت.',
+                            ? 'امسح هذا الرمز من هاتف أي شخص آخر عبر زر "مسح QR" للانضمام للختمة ومزامنتها مباشرة.'
+                            : 'امسح هذا الرمز من هاتف منظم الختمة لتحديث إتمامك للأجزاء مباشرة وبكل سهولة.',
                         style: TextStyle(
                           fontFamily: AppTypography.uiFont,
                           fontSize: 11,
