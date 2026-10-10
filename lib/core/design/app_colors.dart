@@ -24,6 +24,8 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
   });
 
   bool get isDark => bg.computeLuminance() < 0.2;
+  Color get textSecondary => textMuted;
+  Color get surfaceCard => isDark ? const Color(0xFF1F2B26) : surface;
 
   /// Light theme palette
   static const light = AppColorsExtension(

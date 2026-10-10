@@ -58,6 +58,31 @@ class HomeQuickShortcuts extends StatelessWidget {
       route: AppRoutes.readingAnalytics,
     ),
     _ShortcutItem(
+      title: 'الرقية الشرعية',
+      icon: Icons.healing_rounded,
+      route: AppRoutes.ruqyah,
+    ),
+    _ShortcutItem(
+      title: 'السيرة النبوية',
+      icon: Icons.timeline_rounded,
+      route: AppRoutes.seerah,
+    ),
+    _ShortcutItem(
+      title: 'غِراس الجنة',
+      icon: Icons.park_rounded,
+      route: AppRoutes.spiritualMilestones,
+    ),
+    _ShortcutItem(
+      title: 'الطب النبوي',
+      icon: Icons.eco_rounded,
+      route: AppRoutes.propheticMedicine,
+    ),
+    _ShortcutItem(
+      title: 'الصلوات الخاصة',
+      icon: Icons.accessibility_new_rounded,
+      route: AppRoutes.specialPrayers,
+    ),
+    _ShortcutItem(
       title: 'القبلة',
       icon: Icons.explore_rounded,
       route: AppRoutes.qiblah,

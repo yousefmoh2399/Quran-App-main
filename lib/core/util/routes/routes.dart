@@ -72,6 +72,11 @@ import 'package:quran_app_android/features/traveler_companion/presentation/views
 import 'package:quran_app_android/features/reading_analytics/presentation/views/reading_analytics_view.dart';
 import 'package:quran_app_android/features/qiblah/presentation/views/ar_qibla_camera_view.dart';
 import 'package:quran_app_android/features/zakat_calculator/presentation/views/zakat_calculator_view.dart';
+import 'package:quran_app_android/features/ruqyah/presentation/views/ruqyah_view.dart';
+import 'package:quran_app_android/features/seerah/presentation/views/seerah_view.dart';
+import 'package:quran_app_android/features/spiritual_milestones/presentation/views/spiritual_milestones_view.dart';
+import 'package:quran_app_android/features/prophetic_medicine/presentation/views/prophetic_medicine_view.dart';
+import 'package:quran_app_android/features/special_prayers/presentation/views/special_prayers_view.dart';
 
 class AppRoutes {
   static List<GetPage> routes = [
@@ -498,6 +503,36 @@ class AppRoutes {
       transition: Transition.cupertino,
       transitionDuration: kTransitionDuration,
     ),
+    GetPage(
+      name: ruqyah,
+      page: () => const RuqyahView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: seerah,
+      page: () => const SeerahView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: spiritualMilestones,
+      page: () => const SpiritualMilestonesView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: propheticMedicine,
+      page: () => const PropheticMedicineView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
+    GetPage(
+      name: specialPrayers,
+      page: () => const SpecialPrayersView(),
+      transition: Transition.cupertino,
+      transitionDuration: kTransitionDuration,
+    ),
     if (kDebugMode) ...[
       GetPage(
         name: adhanDebug,
@@ -585,4 +620,9 @@ class AppRoutes {
   static String readingAnalytics = '/readingAnalytics';
   static String arQibla = '/arQibla';
   static String zakatCalculator = '/zakatCalculator';
+  static String ruqyah = '/ruqyah';
+  static String seerah = '/seerah';
+  static String spiritualMilestones = '/spiritualMilestones';
+  static String propheticMedicine = '/propheticMedicine';
+  static String specialPrayers = '/specialPrayers';
 }

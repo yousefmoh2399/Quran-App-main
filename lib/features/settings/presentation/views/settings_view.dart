@@ -111,7 +111,55 @@ class SettingsView extends StatelessWidget {
               ],
             ),
 
-            // 2. التذكيرات
+            // 2. معالم وعلوم إيمانية
+            SettingsGroupCard(
+              title: 'معالم وعلوم إيمانية',
+              icon: Icons.menu_book_rounded,
+              children: [
+                SettingsTile(
+                  icon: Icons.healing_rounded,
+                  iconColor: const Color(0xFF0F5C4A),
+                  title: 'الرقية الشرعية التفاعلية الموجهة',
+                  subtitle: 'رقية موجهة بلمس الشاشة، عداد التكرار، واهتزاز هادئ للتركيز',
+                  trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
+                  onTap: () => Get.toNamed(AppRoutes.ruqyah),
+                ),
+                SettingsTile(
+                  icon: Icons.timeline_rounded,
+                  iconColor: const Color(0xFFD4AF37),
+                  title: 'الخط الزمني للسيرة النبوية العطرة',
+                  subtitle: 'محطات السيرة التفاعلية، أبطال المواقف، ويوم في حياة النبي ﷺ',
+                  trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
+                  onTap: () => Get.toNamed(AppRoutes.seerah),
+                ),
+                SettingsTile(
+                  icon: Icons.park_rounded,
+                  iconColor: const Color(0xFF2E7D32),
+                  title: 'ميزان الحسنات وغِراس الجنة التراكمي',
+                  subtitle: 'سجل الأذكار مدى الحياة، شجرة في الجنة لكل 1,000 ذكر، وأوسمة الإنجاز',
+                  trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
+                  onTap: () => Get.toNamed(AppRoutes.spiritualMilestones),
+                ),
+                SettingsTile(
+                  icon: Icons.eco_rounded,
+                  iconColor: const Color(0xFF1B5E20),
+                  title: 'الطب النبوي والأغذية القرآنية',
+                  subtitle: 'موسوعة الأغذية، الإعجاز العلمي المثبت، ووصفات منزلية كالتلبينة',
+                  trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
+                  onTap: () => Get.toNamed(AppRoutes.propheticMedicine),
+                ),
+                SettingsTile(
+                  icon: Icons.accessibility_new_rounded,
+                  iconColor: colors.primary,
+                  title: 'دليل الصلوات الخاصة خطوة بخطوة',
+                  subtitle: 'صلاة الجنازة بالتكبيرات الأربع، الاستخارة، الكسوف، التوبة، وأحكام السجدات',
+                  trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
+                  onTap: () => Get.toNamed(AppRoutes.specialPrayers),
+                ),
+              ],
+            ),
+
+            // 3. التذكيرات
             SettingsGroupCard(
               title: 'التذكيرات والتنبيهات',
               icon: Icons.notifications_active_rounded,
@@ -233,9 +281,9 @@ class SettingsView extends StatelessWidget {
                       'مصحف المدينة (مجمع الملك فهد) • التفسير الميسر • موطأ مالك',
                 ),
                 const SettingsTile(
-                  icon: Icons.wifi_off_rounded,
-                  title: 'وضع التشغيل',
-                  subtitle: 'يعمل بالكامل دون الحاجة للاتصال بالإنترنت',
+                  icon: Icons.offline_pin_rounded,
+                  title: 'الاعتمادية والخصوصية',
+                  subtitle: 'بياناتك وعباداتك محفوظة محلياً على جهازك بأعلى درجات الأمان والسرعة',
                 ),
                 if (kDebugMode)
                   SettingsTile(
