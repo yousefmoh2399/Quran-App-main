@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_radius.dart';
 import '../../../../core/design/app_typography.dart';
+import '../../../../core/services/app_haptics_service.dart';
 import '../../data/models/salary_zakat_model.dart';
 
 class CharitySuggestionCard extends StatelessWidget {
@@ -26,7 +27,7 @@ class CharitySuggestionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.appColors;
 
-    // Calculate currently active monthly charity
+    // Calculate active monthly amount
     final double activeMonthlyAmount;
     switch (selectedChoice) {
       case 1:
@@ -54,9 +55,9 @@ class CharitySuggestionCard extends StatelessWidget {
         border: Border.all(color: const Color(0xFFD4AF37).withOpacity(0.35), width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -67,12 +68,13 @@ class CharitySuggestionCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD4AF37).withOpacity(0.15),
+                  color: const Color(0xFFD4AF37).withOpacity(0.14),
                   borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
-                child: const Icon(Icons.volunteer_activism_rounded, color: Color(0xFFB8860B), size: 24),
+                child: const Icon(Icons.volunteer_activism_rounded, color: Color(0xFFB8860B), size: 22),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -88,8 +90,9 @@ class CharitySuggestionCard extends StatelessWidget {
                         color: colors.text,
                       ),
                     ),
+                    const SizedBox(height: 2),
                     Text(
-                      'الصدقة لا تشترط نصاباً وتُبارك القليل وتدفع البلاء',
+                      'الصدقة لا تشترط نصاباً، وتُبارك القليل وتدفع البلاء',
                       style: TextStyle(
                         fontFamily: AppTypography.uiFont,
                         fontSize: 11.5,
@@ -101,39 +104,38 @@ class CharitySuggestionCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
 
-          // Prophetic Guidance Box
+          // Prophetic Hadith Quote
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
             decoration: BoxDecoration(
-              color: const Color(0xFFFBF8F0),
+              color: const Color(0xFFD4AF37).withOpacity(0.07),
               borderRadius: BorderRadius.circular(AppRadius.md),
-              border: Border.all(color: const Color(0xFFE8D8B8)),
+              border: Border.all(color: const Color(0xFFD4AF37).withOpacity(0.2)),
             ),
             child: Row(
-              children: const [
-                Icon(Icons.format_quote_rounded, color: Color(0xFF8B6B1B), size: 20),
-                SizedBox(width: 8),
+              children: [
+                const Icon(Icons.auto_awesome_rounded, color: Color(0xFFB8860B), size: 16),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'قال رسول الله ﷺ: «مَا نَقَصَتْ صَدَقَةٌ مِنْ مَالٍ، وَمَا زَادَ اللَّهُ عَبْدًا بِعَفْوٍ إِلَّا عِزًّا»',
+                    'قال رسول الله ﷺ: «مَا نَقَصَتْ صَدَقَةٌ مِنْ مَالٍ»',
                     style: TextStyle(
                       fontFamily: AppTypography.uiFont,
                       fontSize: 12,
-                      color: Color(0xFF4A3E1B),
+                      color: colors.text,
                       fontWeight: FontWeight.w600,
-                      height: 1.45,
                     ),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
 
           Text(
-            'مقترحات صدقة شهرية يسيرة من مرتبك:',
+            'اختر نسبة صدقة شهرية يسيرة من دخلك:',
             style: TextStyle(
               fontFamily: AppTypography.uiFont,
               fontSize: 13,
@@ -141,82 +143,111 @@ class CharitySuggestionCard extends StatelessWidget {
               color: colors.text,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
 
-          // Suggestion 1: 1% of salary
+          // 3 Balanced Proportion Tiles (Equal Height & Equal Styling)
           _buildSuggestionTile(
             colors: colors,
             choiceId: 1,
+            badge: '1%',
             title: 'صدقة التيسير (1% من المرتب)',
+            subtitle: 'مبلغ يسير جداً لا يُثقل نفقاتك',
             amount: result.suggestedCharity1Percent > 0 ? result.suggestedCharity1Percent : 30.0,
-            subtitle: 'مبلغ يسير جداً لا يُثقل نفقاتك ويُدخل السرور على محتاج',
           ),
           const SizedBox(height: 8),
 
-          // Suggestion 2: 2% of salary
           _buildSuggestionTile(
             colors: colors,
             choiceId: 2,
+            badge: '2%',
             title: 'صدقة النماء والبركة (2% من المرتب)',
+            subtitle: 'قليل دائم خيرٌ من كثير منقطع',
             amount: result.suggestedCharity2Percent > 0 ? result.suggestedCharity2Percent : 60.0,
-            subtitle: 'قليل دائم خيرٌ من كثير منقطع لزيادة الرزق ودفع السوء',
           ),
           const SizedBox(height: 8),
 
-          // Suggestion 3: 2.5% of salary
           _buildSuggestionTile(
             colors: colors,
             choiceId: 3,
-            title: 'صدقة ربع العُشر المستحبة (2.5%)',
+            badge: '2.5%',
+            title: 'صدقة ربع العُشر المستحبة',
+            subtitle: 'تطوع مبارك يُماثل نسبة الزكاة',
             amount: result.suggestedCharity2HalfPercent > 0 ? result.suggestedCharity2HalfPercent : 75.0,
-            subtitle: 'تطوع مبارك تقتدي فيه بنسبة الزكاة محبةً لله وتطهيراً للمال',
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
 
-          // Quick preset buttons
+          // Equal-sized Preset Quick Amount Buttons
           Text(
-            'أو حدد مبلغاً شهرياً يسيراً تجود به نفسك:',
-            style: TextStyle(fontSize: 12, color: colors.textMuted, fontWeight: FontWeight.w600),
+            'أو حدد مبلغاً شهرياً ثابتاً تجود به نفسك:',
+            style: TextStyle(
+              fontFamily: AppTypography.uiFont,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: colors.text,
+            ),
           ),
           const SizedBox(height: 8),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [20.0, 50.0, 100.0, 200.0, 500.0].map((amt) {
-                final isSelected = selectedChoice == 4 && customAmount == amt;
-                return Padding(
-                  padding: const EdgeInsets.only(left: 8),
-                  child: ChoiceChip(
-                    label: Text('${amt.toStringAsFixed(0)} جـ'),
-                    selected: isSelected,
-                    selectedColor: colors.primary,
-                    labelStyle: TextStyle(
-                      color: isSelected ? Colors.white : colors.text,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
+
+          // 5 EQUAL SIZED BUTTONS in a balanced Row (No scrolling, exact same size!)
+          Row(
+            children: [20.0, 50.0, 100.0, 200.0, 500.0].map((amt) {
+              final isSelected = selectedChoice == 4 && customAmount == amt;
+
+              return Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 3),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        AppHaptics.selection();
+                        onSelectChoice(4);
+                        onCustomAmountChanged(amt);
+                      },
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: isSelected ? colors.primary : colors.bg,
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                          border: Border.all(
+                            color: isSelected ? colors.primary : colors.divider.withOpacity(0.5),
+                            width: isSelected ? 1.5 : 1.0,
+                          ),
+                        ),
+                        alignment: Alignment.center,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: Text(
+                              '${amt.toStringAsFixed(0)} جـ',
+                              style: TextStyle(
+                                fontFamily: AppTypography.uiFont,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: isSelected ? Colors.white : colors.text,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                    onSelected: (_) {
-                      onCustomAmountChanged(amt);
-                    },
                   ),
-                );
-              }).toList(),
-            ),
+                ),
+              );
+            }).toList(),
           ),
           const SizedBox(height: 16),
 
-          // Impact calculation card
+          // Monthly vs Annual Impact Card
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  colors.primary.withOpacity(0.08),
-                  colors.primary.withOpacity(0.02),
-                ],
-              ),
+              color: colors.bg,
               borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(color: colors.primary.withOpacity(0.18)),
+              border: Border.all(color: colors.divider.withOpacity(0.4)),
             ),
             child: Column(
               children: [
@@ -226,7 +257,11 @@ class CharitySuggestionCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         'صدقتك المقترحة شهرياً:',
-                        style: TextStyle(fontFamily: AppTypography.uiFont, fontSize: 12.5, color: colors.text),
+                        style: TextStyle(
+                          fontFamily: AppTypography.uiFont,
+                          fontSize: 12.5,
+                          color: colors.text,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -248,7 +283,11 @@ class CharitySuggestionCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         'أثر الصدقة التراكمي في العام:',
-                        style: TextStyle(fontFamily: AppTypography.uiFont, fontSize: 12.5, color: colors.textMuted),
+                        style: TextStyle(
+                          fontFamily: AppTypography.uiFont,
+                          fontSize: 12,
+                          color: colors.textMuted,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -256,7 +295,7 @@ class CharitySuggestionCard extends StatelessWidget {
                       '${yearlyTotal.toStringAsFixed(0)} وحدة في السنة 🌟',
                       style: const TextStyle(
                         fontFamily: AppTypography.uiFont,
-                        fontSize: 14,
+                        fontSize: 13.5,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFFB8860B),
                       ),
@@ -268,22 +307,28 @@ class CharitySuggestionCard extends StatelessWidget {
           ),
           const SizedBox(height: 14),
 
-          // Schedule Monthly Reminder Action
-          ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: colors.primary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-            ),
-            onPressed: onOpenReminders,
-            icon: const Icon(Icons.alarm_on_rounded, size: 20),
-            label: const Text(
-              'ضبط تذكير شهري بالصدقة في التطبيق',
-              style: TextStyle(
-                fontFamily: AppTypography.uiFont,
-                fontWeight: FontWeight.bold,
-                fontSize: 13,
+          // Action Button: Schedule Monthly Reminder
+          SizedBox(
+            height: 48,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colors.primary,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+              ),
+              onPressed: () {
+                AppHaptics.selection();
+                onOpenReminders();
+              },
+              icon: const Icon(Icons.alarm_on_rounded, size: 18),
+              label: const Text(
+                'ضبط تذكير شهري بالصدقة في التطبيق',
+                style: TextStyle(
+                  fontFamily: AppTypography.uiFont,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
               ),
             ),
           ),
@@ -295,37 +340,56 @@ class CharitySuggestionCard extends StatelessWidget {
   Widget _buildSuggestionTile({
     required AppColorsExtension colors,
     required int choiceId,
+    required String badge,
     required String title,
-    required double amount,
     required String subtitle,
+    required double amount,
   }) {
     final isSelected = selectedChoice == choiceId;
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        onTap: () => onSelectChoice(choiceId),
-        child: Container(
-          padding: const EdgeInsets.all(12),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        onTap: () {
+          AppHaptics.selection();
+          onSelectChoice(choiceId);
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
             color: isSelected ? colors.primary.withOpacity(0.08) : colors.bg,
-            borderRadius: BorderRadius.circular(AppRadius.md),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
             border: Border.all(
-              color: isSelected ? colors.primary : colors.divider.withOpacity(0.6),
+              color: isSelected ? colors.primary : colors.divider.withOpacity(0.4),
               width: isSelected ? 1.5 : 1.0,
             ),
           ),
           child: Row(
             children: [
-              Radio<int>(
-                value: choiceId,
-                groupValue: selectedChoice,
-                activeColor: colors.primary,
-                onChanged: (val) {
-                  if (val != null) onSelectChoice(val);
-                },
+              // Badge
+              Container(
+                width: 40,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: isSelected ? colors.primary : colors.divider.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  badge,
+                  style: TextStyle(
+                    fontFamily: AppTypography.uiFont,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.bold,
+                    color: isSelected ? Colors.white : colors.text,
+                  ),
+                ),
               ),
+              const SizedBox(width: 12),
+
+              // Title & Subtitle
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -339,7 +403,7 @@ class CharitySuggestionCard extends StatelessWidget {
                         color: colors.text,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 1),
                     Text(
                       subtitle,
                       style: TextStyle(
@@ -352,14 +416,24 @@ class CharitySuggestionCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
+
+              // Amount
               Text(
                 '${amount.toStringAsFixed(0)} جـ',
                 style: TextStyle(
                   fontFamily: AppTypography.uiFont,
-                  fontSize: 14.5,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: isSelected ? colors.primary : const Color(0xFFB8860B),
                 ),
+              ),
+              const SizedBox(width: 8),
+
+              // Radio / Check icon
+              Icon(
+                isSelected ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+                size: 20,
+                color: isSelected ? colors.primary : colors.divider,
               ),
             ],
           ),

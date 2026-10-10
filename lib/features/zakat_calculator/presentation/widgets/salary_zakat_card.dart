@@ -31,34 +31,49 @@ class SalaryZakatCard extends StatelessWidget {
 
   Widget _buildEmptyPromptCard(AppColorsExtension colors) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: colors.primary.withOpacity(0.15)),
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        border: Border.all(color: colors.primary.withOpacity(0.18)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(
         children: [
-          Icon(Icons.account_balance_wallet_rounded, size: 40, color: colors.primary),
-          const SizedBox(height: 10),
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: colors.primary.withOpacity(0.1),
+            ),
+            child: Icon(Icons.account_balance_wallet_rounded, size: 28, color: colors.primary),
+          ),
+          const SizedBox(height: 12),
           Text(
             'حاسبة زكاة المرتب والمدخرات',
             style: TextStyle(
               fontFamily: AppTypography.uiFont,
-              fontSize: 16,
+              fontSize: 16.5,
               fontWeight: FontWeight.bold,
               color: colors.text,
             ),
           ),
           const SizedBox(height: 6),
           Text(
-            'أدخل قيمة مرتبك أو مدخراتك وسعر جرام الذهب لتحديد ما إذا بلغت النصاب الشرعي أم لا، واحتساب الزكاة أو مقترح الصدقة الشهرية المناسب.',
+            'أدخل قيمة مرتبك أو مدخراتك وسعر جرام الذهب لتحديد ما إذا بلغت النصاب الشرعي أم لا، واحتساب الزكاة الواجبة أو مقترح الصدقة الشهرية المناسب.',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: AppTypography.uiFont,
               fontSize: 12.5,
               color: colors.textMuted,
-              height: 1.5,
+              height: 1.55,
             ),
           ),
         ],
@@ -68,10 +83,10 @@ class SalaryZakatCard extends StatelessWidget {
 
   Widget _buildObligatoryZakatCard(AppColorsExtension colors) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF09261E), Color(0xFF144D3E)],
+          colors: [Color(0xFF09291E), Color(0xFF134839)],
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
         ),
@@ -79,7 +94,7 @@ class SalaryZakatCard extends StatelessWidget {
         border: Border.all(color: const Color(0xFFD4AF37), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF09261E).withOpacity(0.3),
+            color: const Color(0xFF09291E).withOpacity(0.25),
             blurRadius: 12,
             offset: const Offset(0, 5),
           ),
@@ -88,40 +103,81 @@ class SalaryZakatCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Header Badge & Copy Button
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                child: Row(
-                  children: const [
-                    Icon(Icons.verified_rounded, color: Color(0xFFD4AF37), size: 22),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'بلغ مالك النصاب الشرعي',
-                        style: TextStyle(
-                          fontFamily: AppTypography.uiFont,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFFE8D08D),
-                        ),
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFD4AF37).withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(AppRadius.full),
+                        border: Border.all(color: const Color(0xFFD4AF37).withOpacity(0.6)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Icon(Icons.verified_rounded, color: Color(0xFFE8D08D), size: 16),
+                          SizedBox(width: 6),
+                          Text(
+                            'بلغ مالك النصاب الشرعي',
+                            style: TextStyle(
+                              fontFamily: AppTypography.uiFont,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFFE8D08D),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ),
-              IconButton(
-                visualDensity: VisualDensity.compact,
-                icon: const Icon(Icons.copy_rounded, color: Colors.white70, size: 20),
-                onPressed: onCopy,
-                tooltip: 'نسخ النتيجة',
+              const SizedBox(width: 8),
+              InkWell(
+                onTap: onCopy,
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(Icons.copy_rounded, color: Colors.white, size: 14),
+                      SizedBox(width: 4),
+                      Text(
+                        'نسخ',
+                        style: TextStyle(
+                          fontFamily: AppTypography.uiFont,
+                          fontSize: 11.5,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
+
           const Text(
             'مقدار الزكاة الواجب إخراجها شرعاً (2.5% = ربع العُشر):',
-            style: TextStyle(color: Colors.white70, fontSize: 13),
+            style: TextStyle(
+              fontFamily: AppTypography.uiFont,
+              color: Colors.white70,
+              fontSize: 12.5,
+            ),
           ),
           const SizedBox(height: 6),
           Row(
@@ -134,6 +190,7 @@ class SalaryZakatCard extends StatelessWidget {
                   child: Text(
                     result.zakatDue.toStringAsFixed(2),
                     style: const TextStyle(
+                      fontFamily: AppTypography.uiFont,
                       color: Color(0xFFD4AF37),
                       fontSize: 34,
                       fontWeight: FontWeight.bold,
@@ -145,15 +202,22 @@ class SalaryZakatCard extends StatelessWidget {
               const SizedBox(width: 8),
               const Text(
                 'وحدة نقدية',
-                style: TextStyle(color: Colors.white70, fontSize: 14),
+                style: TextStyle(
+                  fontFamily: AppTypography.uiFont,
+                  color: Colors.white70,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 14),
+
+          // Breakdown metrics
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.2),
+              color: Colors.black.withOpacity(0.25),
               borderRadius: BorderRadius.circular(AppRadius.md),
               border: Border.all(color: Colors.white12),
             ),
@@ -161,18 +225,18 @@ class SalaryZakatCard extends StatelessWidget {
               children: [
                 _buildMetricRow(
                   'صافي الوعاء الخاضع للزكاة:',
-                  '${result.netWealthSubjectToZakat.toStringAsFixed(0)} جـ',
+                  '${result.netWealthSubjectToZakat.toStringAsFixed(0)} وحدة',
                 ),
                 const SizedBox(height: 6),
                 _buildMetricRow(
-                  'قيمة النصاب (${result.goldKarat.nisabGrams.toStringAsFixed(1)} جم ذهب):',
-                  '${result.nisabThresholdAmount.toStringAsFixed(0)} جـ',
+                  'قيمة النصاب الشرعي (${result.goldKarat.nisabGrams.toStringAsFixed(1)} جم):',
+                  '${result.nisabThresholdAmount.toStringAsFixed(0)} وحدة',
                 ),
                 const SizedBox(height: 6),
                 _buildMetricRow(
                   'الفائض المتجاوز للنصاب:',
-                  '+${(result.netWealthSubjectToZakat - result.nisabThresholdAmount).toStringAsFixed(0)} جـ',
-                  valueColor: Colors.greenAccent,
+                  '+${(result.netWealthSubjectToZakat - result.nisabThresholdAmount).toStringAsFixed(0)} وحدة',
+                  valueColor: const Color(0xFF81C784),
                 ),
               ],
             ),
@@ -182,6 +246,7 @@ class SalaryZakatCard extends StatelessWidget {
             '«خُذْ مِنْ أَمْوَالِهِمْ صَدَقَةً تُطَهِّرُهُمْ وَتُزَكِّيهِم بِهَا وَصَلِّ عَلَيْهِمْ إِنَّ صَلَاتَكَ سَكَنٌ لَّهُمْ» [التوبة: 103]',
             textAlign: TextAlign.center,
             style: const TextStyle(
+              fontFamily: AppTypography.uiFont,
               color: Colors.white60,
               fontSize: 11.5,
               height: 1.5,
@@ -197,131 +262,163 @@ class SalaryZakatCard extends StatelessWidget {
     final progress = result.nisabProgressPercentage;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            const Color(0xFF1E3A5F),
-            const Color(0xFF162E4A),
-          ],
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-        ),
+        color: colors.surface,
         borderRadius: BorderRadius.circular(AppRadius.xl),
-        border: Border.all(color: Colors.teal.shade300.withOpacity(0.4), width: 1.5),
+        border: Border.all(color: const Color(0xFF2E7D32).withOpacity(0.35), width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.12),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Header Badge & Copy Button
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                child: Row(
-                  children: const [
-                    Icon(Icons.spa_rounded, color: Colors.tealAccent, size: 22),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'المال دون النصاب الشرعي',
-                        style: TextStyle(
-                          fontFamily: AppTypography.uiFont,
-                          fontSize: 14.5,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2E7D32).withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(AppRadius.full),
+                        border: Border.all(color: const Color(0xFF2E7D32).withOpacity(0.3)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Icon(Icons.check_circle_rounded, color: Color(0xFF2E7D32), size: 16),
+                          SizedBox(width: 5),
+                          Text(
+                            'المال دون النصاب الشرعي',
+                            style: TextStyle(
+                              fontFamily: AppTypography.uiFont,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF2E7D32),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ),
-              IconButton(
-                visualDensity: VisualDensity.compact,
-                icon: const Icon(Icons.copy_rounded, color: Colors.white70, size: 20),
-                onPressed: onCopy,
-                tooltip: 'نسخ النتيجة',
+              const SizedBox(width: 8),
+              InkWell(
+                onTap: onCopy,
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: colors.primary.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.copy_rounded, color: colors.primary, size: 14),
+                      const SizedBox(width: 4),
+                      Text(
+                        'نسخ',
+                        style: TextStyle(
+                          fontFamily: AppTypography.uiFont,
+                          fontSize: 11.5,
+                          color: colors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
+
+          // Friendly, comforting message
+          Text(
+            'لا تجب عليك الزكاة شرعاً بحمد الله',
+            style: TextStyle(
+              fontFamily: AppTypography.uiFont,
+              fontSize: 15.5,
+              fontWeight: FontWeight.bold,
+              color: colors.text,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'مرتبك أو مدخراتك (${result.amountEntered.toStringAsFixed(0)} وحدة) أقل من النصاب الشرعي المحدد بـ (${result.nisabThresholdAmount.toStringAsFixed(0)} وحدة)، وهو ما يعادل ${result.goldKarat.nisabGrams.toStringAsFixed(1)} جرام ذهب.\n\nالشريعة الإسلامية لا تكلف نفساً إلا وسعها ولا زكاة عليك، ولكن يمكنك إخراج صدقة تطوعية يسيرة بالقدر الذي يناسبك لزيادة البركة.',
+            style: TextStyle(
+              fontFamily: AppTypography.uiFont,
+              fontSize: 12.5,
+              color: colors.textMuted,
+              height: 1.55,
+            ),
+          ),
+          const SizedBox(height: 14),
+
+          // Nisab Progress Bar
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.08),
+              color: colors.bg,
               borderRadius: BorderRadius.circular(AppRadius.md),
+              border: Border.all(color: colors.divider.withOpacity(0.4)),
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Row(
-                  children: const [
-                    Icon(Icons.info_outline_rounded, color: Colors.tealAccent, size: 18),
-                    SizedBox(width: 8),
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
                     Expanded(
                       child: Text(
-                        'لا تجب عليك الزكاة شرعاً بحمد الله',
+                        'المتبقي لبلوغ النصاب: +${result.shortfallToNisab.toStringAsFixed(0)} وحدة',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontFamily: AppTypography.uiFont,
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          fontSize: 12,
+                          color: colors.text,
+                          fontWeight: FontWeight.w600,
                         ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${(progress * 100).toStringAsFixed(0)}%',
+                      style: TextStyle(
+                        fontFamily: AppTypography.uiFont,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: colors.primary,
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 6),
-                Text(
-                  'مرتبك أو مدخراتك (${result.amountEntered.toStringAsFixed(0)} جـ) أقل من قيمة النصاب الشرعي البالغ (${result.nisabThresholdAmount.toStringAsFixed(0)} جـ)، وهو ما يعادل ${result.goldKarat.nisabGrams.toStringAsFixed(1)} جرام ذهب. الشريعة الإسلامية لا تكلف نفساً إلا وسعها، ولا زكاة عليك.',
-                  style: const TextStyle(
-                    fontFamily: AppTypography.uiFont,
-                    color: Colors.white70,
-                    fontSize: 12,
-                    height: 1.55,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(AppRadius.full),
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    minHeight: 7,
+                    backgroundColor: colors.divider.withOpacity(0.3),
+                    valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
                   ),
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: 14),
-          // Nisab Progress
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      'المتبقي لبلوغ النصاب: ${result.shortfallToNisab.toStringAsFixed(0)} جـ',
-                      style: const TextStyle(fontSize: 12, color: Colors.white70),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${(progress * 100).toStringAsFixed(0)}%',
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.tealAccent),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  minHeight: 7,
-                  backgroundColor: Colors.white12,
-                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.tealAccent),
-                ),
-              ),
-            ],
           ),
         ],
       ),
@@ -335,13 +432,18 @@ class SalaryZakatCard extends StatelessWidget {
         Expanded(
           child: Text(
             label,
-            style: const TextStyle(color: Colors.white70, fontSize: 12),
+            style: const TextStyle(
+              fontFamily: AppTypography.uiFont,
+              color: Colors.white70,
+              fontSize: 12,
+            ),
           ),
         ),
         const SizedBox(width: 8),
         Text(
           value,
           style: TextStyle(
+            fontFamily: AppTypography.uiFont,
             color: valueColor,
             fontSize: 12.5,
             fontWeight: FontWeight.bold,
