@@ -150,38 +150,47 @@ class _NextPrayerCardState extends State<NextPrayerCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Row(
                       children: [
-                        Row(
-                          children: [
-                            Image.asset(
-                              'assets/images/icon_3d_prayer_clock.png',
-                              width: 22,
-                              height: 22,
-                              fit: BoxFit.contain,
-                              errorBuilder: (_, __, ___) => Icon(
-                                Icons.access_time_filled_rounded,
-                                size: 18,
-                                color: colors.accent,
-                              ),
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: colors.primary.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          padding: const EdgeInsets.all(4),
+                          child: Image.asset(
+                            'assets/images/icon_3d_prayer_clock.png',
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, __, ___) => Icon(
+                              Icons.access_time_filled_rounded,
+                              size: 24,
+                              color: colors.accent,
                             ),
-                            AppSpacing.horizontalXs,
-                            Text(
-                              'الصلاة القادمة',
-                              style: textTheme.labelMedium?.copyWith(
-                                color: colors.textMuted,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                        AppSpacing.verticalXs,
-                        Text(
-                          _prayerNameArabic(nextPrayer),
-                          style: textTheme.headlineMedium?.copyWith(
-                            color: colors.primary,
-                            fontWeight: FontWeight.bold,
+                        AppSpacing.horizontalSm,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'الصلاة القادمة',
+                                style: textTheme.labelMedium?.copyWith(
+                                  color: colors.textMuted,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              AppSpacing.verticalXs,
+                              Text(
+                                _prayerNameArabic(nextPrayer),
+                                style: textTheme.headlineMedium?.copyWith(
+                                  color: colors.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -248,10 +257,34 @@ class _NextPrayerCardState extends State<NextPrayerCard> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
-                            item.$4,
-                            size: 16,
-                            color: isCurrentNext ? colors.primary : colors.textMuted,
+                          Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: isCurrentNext
+                                  ? colors.primary.withOpacity(0.18)
+                                  : colors.surface,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: isCurrentNext
+                                    ? colors.primary.withOpacity(0.4)
+                                    : colors.divider.withOpacity(0.4),
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.03),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: Icon(
+                                item.$4,
+                                size: 19,
+                                color: isCurrentNext ? colors.primary : colors.textMuted,
+                              ),
+                            ),
                           ),
                           AppSpacing.verticalXs,
                           Text(

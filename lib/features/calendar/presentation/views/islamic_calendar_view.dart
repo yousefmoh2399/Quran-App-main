@@ -182,40 +182,71 @@ class _IslamicCalendarViewState extends State<IslamicCalendarView> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'اليوم المبارك',
-                style: TextStyle(color: Colors.white.withOpacity(0.85), fontSize: 13),
-              ),
-              if (event != null)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    event.title,
-                    style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
-                  ),
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.18),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
                 ),
+                padding: const EdgeInsets.all(4),
+                child: Image.asset(
+                  'assets/images/icon_3d_calendar.png',
+                  fit: BoxFit.contain,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'اليوم المبارك',
+                          style: TextStyle(color: Colors.white.withOpacity(0.85), fontSize: 13),
+                        ),
+                        if (event != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              event.title,
+                              style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${today.hDay} $monthName ${today.hYear} هـ',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: AppTypography.decorativeFont,
+                      ),
+                    ),
+                    Text(
+                      'الموافق: ${now.day}/${now.month}/${now.year} م',
+                      style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
             ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '${today.hDay} $monthName ${today.hYear} هـ',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              fontFamily: AppTypography.decorativeFont,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'الموافق: ${now.day}/${now.month}/${now.year} م',
-            style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 13),
           ),
           if (fastingAdvice != null) ...[
             const SizedBox(height: 12),

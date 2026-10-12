@@ -14,6 +14,25 @@ import 'package:quran_app_android/features/azkar/presentation/view_model/azkar_v
 class AzkarView extends StatelessWidget {
   const AzkarView({super.key});
 
+  String _getAzkar3DIcon(String category) {
+    if (category.contains('صباح') || category.contains('مساء')) {
+      return 'assets/images/icon_3d_lantern.png';
+    }
+    if (category.contains('صلاة') || category.contains('أذان') || category.contains('مسجد') || category.contains('وضوء')) {
+      return 'assets/images/icon_3d_prayer_clock.png';
+    }
+    if (category.contains('سفر') || category.contains('ركوب') || category.contains('دابة')) {
+      return 'assets/images/icon_3d_travel.png';
+    }
+    if (category.contains('قرآن')) {
+      return 'assets/images/icon_3d_quran.png';
+    }
+    if (category.contains('تسبيح') || category.contains('استغفار')) {
+      return 'assets/images/icon_3d_tasbeeh.png';
+    }
+    return 'assets/images/icon_3d_praying_hands.png';
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
@@ -104,24 +123,22 @@ class AzkarView extends StatelessWidget {
                             },
                             child: Row(
                               children: [
-                                // Number/Count badge
+                                // 3D Category Icon
                                 Container(
                                   width: 44,
                                   height: 44,
                                   decoration: BoxDecoration(
-                                    color: colors.primary.withOpacity(0.1),
-                                    borderRadius: AppRadius.borderMd,
-                                    border: Border.all(
-                                      color: colors.primary.withOpacity(0.2),
-                                    ),
+                                    color: colors.primary.withOpacity(0.08),
+                                    borderRadius: BorderRadius.circular(14),
                                   ),
-                                  child: Center(
-                                    child: Text(
-                                      '$count',
-                                      style: textTheme.labelMedium?.copyWith(
-                                        color: colors.primary,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                  padding: const EdgeInsets.all(4),
+                                  child: Image.asset(
+                                    _getAzkar3DIcon(item.category ?? ''),
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (_, __, ___) => Icon(
+                                      Icons.spa_rounded,
+                                      color: colors.primary,
+                                      size: 22,
                                     ),
                                   ),
                                 ),
@@ -149,6 +166,21 @@ class AzkarView extends StatelessWidget {
                                         ),
                                       ),
                                     ],
+                                  ),
+                                ),
+                                AppSpacing.horizontalSm,
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: colors.primary.withOpacity(0.08),
+                                    borderRadius: BorderRadius.circular(AppRadius.full),
+                                  ),
+                                  child: Text(
+                                    '$count',
+                                    style: textTheme.labelSmall?.copyWith(
+                                      color: colors.primary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
                                 AppSpacing.horizontalSm,

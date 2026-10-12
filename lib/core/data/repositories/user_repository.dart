@@ -915,26 +915,62 @@ class UserRepository {
     final stats = await getReadingStats();
     final totalPages = stats['totalPages'] ?? 0;
     final totalDays = stats['totalDays'] ?? 0;
+    final streak = stats['streak'] ?? 0;
+    final effectiveStreak = streak > totalDays ? streak : totalDays;
 
+    // Stage 1
     if (totalPages >= 1) await unlockAchievement('first_page');
-    if (totalDays >= 3) await unlockAchievement('streak_3');
-    if (totalDays >= 7) await unlockAchievement('streak_7');
-    if (totalDays >= 30) await unlockAchievement('streak_30');
+    if (effectiveStreak >= 2) await unlockAchievement('streak_2');
+    if (effectiveStreak >= 3) await unlockAchievement('streak_3');
+    if (totalPages >= 20) await unlockAchievement('pages_20');
+
+    // Stage 2
+    if (effectiveStreak >= 7) await unlockAchievement('streak_7');
+    if (totalPages >= 100) await unlockAchievement('pages_100');
+
+    final db = await _db;
+    try {
+      final commuteLogsCount = Sqflite.firstIntValue(
+            await db.rawQuery('SELECT COUNT(*) FROM commute_wird_log'),
+          ) ?? 0;
+      if (commuteLogsCount >= 1) await unlockAchievement('commute_reader');
+    } catch (_) {}
 
     // Check prayer achievement
     final today = _formatDate(DateTime.now());
     final todayPrayers = await getPrayerLogsForDate(today);
-    if (todayPrayers.length >= 5 && todayPrayers.values.every((p) => p.status == PrayerStatus.onTime || p.status == PrayerStatus.jamaah)) {
+    if (todayPrayers.length >= 5 &&
+        todayPrayers.values.every((p) =>
+            p.status == PrayerStatus.onTime ||
+            p.status == PrayerStatus.jamaah)) {
       await unlockAchievement('prayers_day');
     }
 
+    // Stage 3
+    if (effectiveStreak >= 30) await unlockAchievement('streak_30');
+    if (totalPages >= 300) await unlockAchievement('pages_300');
+    if (effectiveStreak >= 40) await unlockAchievement('streak_40');
+
     // Check fasting achievement
-    final db = await _db;
-    final fastingCount = Sqflite.firstIntValue(await db.rawQuery('SELECT COUNT(*) FROM fasting_logs WHERE completed = 1')) ?? 0;
-    if (fastingCount >= 1) await unlockAchievement('fasting_day');
+    try {
+      final fastingCount = Sqflite.firstIntValue(
+            await db.rawQuery('SELECT COUNT(*) FROM fasting_logs WHERE completed = 1'),
+          ) ?? 0;
+      if (fastingCount >= 1) await unlockAchievement('fasting_day');
+    } catch (_) {}
+
+    // Stage 4
+    if (effectiveStreak >= 100) await unlockAchievement('streak_100');
+    if (totalPages >= 604) await unlockAchievement('pages_604');
+    if (effectiveStreak >= 365) await unlockAchievement('quran_year');
 
     final plan = await getWirdPlan();
-    if (plan != null && (plan.streak >= 30 || plan.lastCompletedDate != null && plan.startPage == 1 && plan.streak > 10)) {
+    if (totalPages >= 604 ||
+        (plan != null &&
+            (plan.streak >= 30 ||
+                (plan.lastCompletedDate != null &&
+                    plan.startPage == 1 &&
+                    plan.streak > 10)))) {
       await unlockAchievement('first_khatma');
     }
   }

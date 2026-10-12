@@ -209,6 +209,7 @@ class LockScreenBannerService {
         nextPrayerTimeStr = fTime(nextTime);
 
         prayerTimesMap['fajr'] = fTime(pt.fajr);
+        prayerTimesMap['shuruq'] = fTime(pt.sunrise);
         prayerTimesMap['dhuhr'] = fTime(pt.dhuhr);
         prayerTimesMap['asr'] = fTime(pt.asr);
         prayerTimesMap['maghrib'] = fTime(pt.maghrib);
@@ -299,10 +300,21 @@ class LockScreenBannerService {
       collapsedText = '$cityName  •  $hijriLine';
     }
 
-    // Construct Structured HTML Content for Expanded Android Notification
+    // Construct Structured Content for Expanded Android Notification
     final plainBuffer = StringBuffer();
 
-    if (model.showAllPrayers && allPrayersPlainLine1.isNotEmpty) {
+    if (model.showAllPrayers && prayerTimesMap.isNotEmpty) {
+      final f = prayerTimesMap['fajr'] ?? '';
+      final d = prayerTimesMap['dhuhr'] ?? '';
+      final a = prayerTimesMap['asr'] ?? '';
+      final m = prayerTimesMap['maghrib'] ?? '';
+      final i = prayerTimesMap['isha'] ?? '';
+
+      plainBuffer.writeln('🕌 مواقيت الصلاة اليوم ($cityName):');
+      plainBuffer.writeln('   الفجر $f  │  الظهر $d  │  العصر $a');
+      plainBuffer.writeln('   المغرب $m  │  العشاء $i');
+      plainBuffer.writeln('');
+    } else if (model.showAllPrayers && allPrayersPlainLine1.isNotEmpty) {
       plainBuffer.writeln('مواقيت الصلاة اليوم:');
       plainBuffer.writeln('   $allPrayersPlainLine1');
       plainBuffer.writeln('   $allPrayersPlainLine2');
@@ -310,19 +322,19 @@ class LockScreenBannerService {
     }
 
     if (model.showWirdProgress && wirdLine.isNotEmpty) {
-      plainBuffer.writeln('الورد: $wirdLine');
+      plainBuffer.writeln('📖 الورد: $wirdLine');
     }
 
     if (model.showDailyZikr && zikrLine.isNotEmpty) {
-      plainBuffer.writeln('ذكر الوقت: «$zikrLine»');
+      plainBuffer.writeln('📿 ذكر الوقت: «$zikrLine»');
     }
 
     if (model.showHijriDate && hijriLine.isNotEmpty) {
-      plainBuffer.writeln(hijriLine);
+      plainBuffer.writeln('📅 $hijriLine');
     }
 
     if (plainBuffer.isEmpty) {
-      plainBuffer.writeln('ألا بذكر الله تطمئن القلوب');
+      plainBuffer.writeln('«ألا بذكر الله تطمئن القلوب»');
     }
 
     final allPrayersUnified = '$allPrayersPlainLine1 • $allPrayersPlainLine2';
@@ -417,10 +429,48 @@ class LockScreenBannerService {
       }
     }
 
+    // Format structured text for native Android notification
+    final htmlBuffer = StringBuffer();
+    if (model.showNextPrayer && data.nextPrayerCountdown.isNotEmpty) {
+      htmlBuffer.writeln('⏳ <b>الوقت المتبقي:</b> ${data.nextPrayerCountdown}<br/>');
+    }
+
+    if (model.showAllPrayers && data.prayerTimesMap.isNotEmpty) {
+      final pMap = data.prayerTimesMap;
+      final f = pMap['fajr'] ?? '';
+      final d = pMap['dhuhr'] ?? '';
+      final a = pMap['asr'] ?? '';
+      final m = pMap['maghrib'] ?? '';
+      final i = pMap['isha'] ?? '';
+
+      htmlBuffer.writeln('🕌 <b>مواقيت الصلاة (${data.cityName}):</b><br/>');
+      htmlBuffer.writeln('الفجر <b>$f</b>  │  الظهر <b>$d</b>  │  العصر <b>$a</b><br/>');
+      htmlBuffer.writeln('المغرب <b>$m</b>  │  العشاء <b>$i</b><br/><br/>');
+    } else if (model.showAllPrayers && data.allPrayersLine1.isNotEmpty) {
+      htmlBuffer.writeln('<b>مواقيت الصلاة:</b><br/>${data.allPrayersLine1}<br/>${data.allPrayersLine2}<br/><br/>');
+    }
+
+    if (model.showWirdProgress && data.wirdLine.isNotEmpty) {
+      htmlBuffer.writeln('📖 <b>الورد:</b> ${data.wirdLine}<br/>');
+    }
+
+    if (model.showDailyZikr && data.zikrLine.isNotEmpty) {
+      htmlBuffer.writeln('📿 <b>ذكر الوقت:</b> «${data.zikrLine}»<br/>');
+    }
+
+    if (model.showHijriDate && data.hijriLine.isNotEmpty) {
+      htmlBuffer.writeln('📅 <b>التاريخ:</b> ${data.hijriLine}');
+    }
+
+    final String finalNotificationHtml = htmlBuffer.isEmpty
+        ? '«ألا بذكر الله تطمئن القلوب»'
+        : htmlBuffer.toString().trim();
+
     final androidDetails = AndroidNotificationDetails(
       'prayer_banner_channel_v2',
       'شريط مواقيت الصلاة وشاشة القفل',
-      channelDescription: 'عرض دائم وأنيق لمواقيت الصلاة، الورد القرآني، والأذكار على شاشة القفل',
+      channelDescription:
+          'عرض دائم وأنيق لمواقيت الصلاة، الورد القرآني، والأذكار على شاشة القفل',
       importance: Importance.defaultImportance,
       priority: Priority.defaultPriority,
       ongoing: true,
@@ -428,23 +478,23 @@ class LockScreenBannerService {
       showWhen: false,
       icon: 'icon',
       largeIcon: const DrawableResourceAndroidBitmap('icon'),
-      color: const Color(0xFF1B4D3E),
-      colorized: true,
+      color: const Color(0xFF0F5C4A), // Taqarrab Brand Emerald
+      colorized: false,
       category: AndroidNotificationCategory.status,
       visibility: NotificationVisibility.public,
-      subText: data.subText,
-      styleInformation: pngBytes != null
-          ? BigPictureStyleInformation(
-              ByteArrayAndroidBitmap(pngBytes),
-              contentTitle: data.title,
-              summaryText: data.summaryText,
-              hideExpandedLargeIcon: true,
-            )
-          : BigTextStyleInformation(
-              data.plainContentText,
-              contentTitle: data.title,
-              summaryText: data.summaryText,
-            ),
+      subText: 'تقرّب • ${data.cityName}',
+      styleInformation: BigTextStyleInformation(
+        finalNotificationHtml,
+        htmlFormatBigText: true,
+        contentTitle: model.showNextPrayer && data.nextPrayerName.isNotEmpty
+            ? '<b>🕌 الصلاة القادمة: ${data.nextPrayerName} (${data.nextPrayerTimeStr})</b>'
+            : '<b>تطبيق تقرّب</b>',
+        htmlFormatContentTitle: true,
+        summaryText: model.showNextPrayer && data.nextPrayerCountdown.isNotEmpty
+            ? '${data.nextPrayerCountdown} • ${data.cityName}'
+            : data.cityName,
+        htmlFormatSummaryText: true,
+      ),
       actions: actions.isNotEmpty ? actions : null,
     );
 

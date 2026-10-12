@@ -47,8 +47,8 @@ class SettingsView extends StatelessWidget {
               icon: Icons.auto_awesome_rounded,
               children: [
                 SettingsTile(
-                  icon: Icons.fact_check_rounded,
-                  imageAsset: 'assets/images/icon_3d_prayer_clock.png',
+                  icon: Icons.checklist_rounded,
+                  iconColor: const Color(0xFF0F5C4A),
                   title: 'سجل الصلوات وقضاء الفوائت',
                   subtitle: 'تسجيل الصلوات اليومية ونسب الالتزام',
                   onTap: () => Get.toNamed(AppRoutes.prayerTracker),
@@ -70,7 +70,7 @@ class SettingsView extends StatelessWidget {
                   onTap: () => Get.toNamed(AppRoutes.ramadanHub),
                 ),
                 SettingsTile(
-                  icon: Icons.calculate_rounded,
+                  icon: Icons.account_balance_wallet_rounded,
                   iconColor: const Color(0xFF1B5E20),
                   title: 'حاسبة الزكاة والراتب والصدقات',
                   subtitle: 'حساب زكاة المرتب وسعر الذهب، زكاة المال، ومقترح الصدقة التلقائي',
@@ -111,7 +111,8 @@ class SettingsView extends StatelessWidget {
                 ),
                 SettingsTile(
                   icon: Icons.military_tech_rounded,
-                  imageAsset: 'assets/images/icon_3d_card_studio.png',
+                  imageAsset: 'assets/images/icon_3d_khatma_circles.png',
+                  iconColor: const Color(0xFFD4AF37),
                   title: 'إنجازاتي وأوسمة القراءة',
                   subtitle: 'متابعة الختمات وأيام الالتزام المستمر',
                   onTap: () => Get.toNamed(AppRoutes.achievements),
@@ -144,7 +145,6 @@ class SettingsView extends StatelessWidget {
                 ),
                 SettingsTile(
                   icon: Icons.park_rounded,
-                  imageAsset: 'assets/images/icon_3d_tasbeeh.png',
                   iconColor: const Color(0xFF2E7D32),
                   title: 'ميزان الحسنات وغِراس الجنة التراكمي',
                   subtitle: 'سجل الأذكار مدى الحياة، شجرة في الجنة لكل 1,000 ذكر، وأوسمة الإنجاز',
@@ -153,8 +153,7 @@ class SettingsView extends StatelessWidget {
                 ),
                 SettingsTile(
                   icon: Icons.eco_rounded,
-                  imageAsset: 'assets/images/icon_3d_praying_hands.png',
-                  iconColor: const Color(0xFF1B5E20),
+                  iconColor: const Color(0xFF33691E),
                   title: 'الطب النبوي والأغذية القرآنية',
                   subtitle: 'موسوعة الأغذية، الإعجاز العلمي المثبت، ووصفات منزلية كالتلبينة',
                   trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
@@ -162,8 +161,7 @@ class SettingsView extends StatelessWidget {
                 ),
                 SettingsTile(
                   icon: Icons.accessibility_new_rounded,
-                  imageAsset: 'assets/images/icon_3d_prayer_clock.png',
-                  iconColor: colors.primary,
+                  iconColor: const Color(0xFF00796B),
                   title: 'دليل الصلوات الخاصة خطوة بخطوة',
                   subtitle: 'صلاة الجنازة بالتكبيرات الأربع، الاستخارة، الكسوف، التوبة، وأحكام السجدات',
                   trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
@@ -179,7 +177,7 @@ class SettingsView extends StatelessWidget {
               children: [
                 SettingsTile(
                   icon: Icons.alarm_on_rounded,
-                  iconColor: colors.primary,
+                  iconColor: const Color(0xFFD4AF37),
                   title: 'تذكيراتي',
                   subtitle: 'الورد اليومي، ورد المواصلات، الصدقة الشهرية، والأذكار',
                   trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
@@ -187,7 +185,7 @@ class SettingsView extends StatelessWidget {
                 ),
                 SettingsTile(
                   icon: Icons.music_note_rounded,
-                  iconColor: colors.primary,
+                  iconColor: const Color(0xFF7B1FA2),
                   title: 'أصوات ونغمات التنبيهات',
                   subtitle: 'تخصيص رنين الإشعارات (الورد، الأذكار، الصدقة) أو توحيدها',
                   trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
@@ -203,26 +201,29 @@ class SettingsView extends StatelessWidget {
               children: [
                 SettingsTile(
                   icon: Icons.mosque_outlined,
+                  imageAsset: 'assets/images/icon_3d_prayer_clock.png',
                   title: 'مواقيت الصلاة اليوم',
                   subtitle: 'متابعة العد التنازلي والمواقيت الكاملة',
                   onTap: () => Get.toNamed(AppRoutes.adhan),
                 ),
                 SettingsTile(
                   icon: Icons.tune_rounded,
+                  iconColor: const Color(0xFF00838F),
                   title: 'إعدادات الأذان والمؤذن والمواقيت',
                   subtitle: 'طريقة الحساب، المذهب، أصوات المؤذنين، وتعديل الدقائق',
                   onTap: () => Get.toNamed(AppRoutes.adhanSettings),
                 ),
                 SettingsTile(
                   icon: Icons.screen_lock_portrait_rounded,
-                  iconColor: colors.primary,
+                  iconColor: const Color(0xFF3F51B5),
                   title: 'بانر شاشة القفل والإشعارات',
                   subtitle: 'تثبيت بانر دائم بمواقيت الصلاة، الورد، والذكر وتخصيص ما يظهر فيه',
                   trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
                   onTap: () => Get.toNamed(AppRoutes.lockScreenBannerSettings),
                 ),
                 SettingsTile(
-                  icon: Icons.security_rounded,
+                  icon: Icons.verified_user_rounded,
+                  iconColor: const Color(0xFF1976D2),
                   title: 'حالة الصلاحيات والتنبيهات',
                   subtitle: 'فحص أذونات الموقع، الإشعارات، والمنبهات في الخلفية',
                   onTap: () => Get.toNamed(AppRoutes.permissionsStatus),
@@ -230,6 +231,7 @@ class SettingsView extends StatelessWidget {
                 if (kDebugMode)
                   SettingsTile(
                     icon: Icons.bug_report_outlined,
+                    iconColor: const Color(0xFFE65100),
                     title: 'فحص جدولة الأذان والتنبيهات',
                     subtitle: 'جدول الـ 7 أيام واختبار التنبيه التجريبي',
                     onTap: () => Get.toNamed(AppRoutes.adhanDebug),
@@ -247,6 +249,7 @@ class SettingsView extends StatelessWidget {
               children: [
                 SettingsTile(
                   icon: Icons.cloud_sync_rounded,
+                  iconColor: const Color(0xFF0288D1),
                   title: 'النسخ الاحتياطي والاستعادة',
                   subtitle: 'تصدير واستيراد العلامات والورد وسجل الصلوات كملف آمن',
                   onTap: () => Get.toNamed(AppRoutes.backupRestore),
@@ -277,36 +280,42 @@ class SettingsView extends StatelessWidget {
                 ),
                 SettingsTile(
                   icon: Icons.info_rounded,
+                  iconColor: const Color(0xFF0F5C4A),
                   title: 'عن التطبيق والمطور',
                   subtitle: 'معلومات الترخيص والمراجع ومشاركة الأجر',
                   onTap: () => Get.toNamed(AppRoutes.aboutApp),
                 ),
                 SettingsTile(
                   icon: Icons.privacy_tip_rounded,
+                  iconColor: const Color(0xFF455A64),
                   title: 'سياسة الخصوصية والأمان',
                   subtitle: 'تطبيق محلي تماماً بدون تتبع أو جمع أي بيانات',
                   onTap: () => Get.toNamed(AppRoutes.privacyPolicy),
                 ),
                 const SettingsTile(
-                  icon: Icons.verified_outlined,
+                  icon: Icons.menu_book_rounded,
+                  iconColor: Color(0xFF8D6E63),
                   title: 'مصادر النصوص والبيانات',
                   subtitle:
                       'مصحف المدينة (مجمع الملك فهد) • التفسير الميسر • موطأ مالك',
                 ),
                 const SettingsTile(
-                  icon: Icons.offline_pin_rounded,
+                  icon: Icons.security_rounded,
+                  iconColor: Color(0xFF2E7D32),
                   title: 'الاعتمادية والخصوصية',
                   subtitle: 'بياناتك وعباداتك محفوظة محلياً على جهازك بأعلى درجات الأمان والسرعة',
                 ),
                 if (kDebugMode)
                   SettingsTile(
                     icon: Icons.palette_outlined,
+                    iconColor: const Color(0xFFE91E63),
                     title: 'معرض مكونات التصميم',
                     subtitle: 'استعراض الألوان والرموز والمكونات المرئية',
                     onTap: () => Get.to(() => const DesignGalleryView()),
                   ),
                 const SettingsTile(
                   icon: Icons.phonelink_setup_rounded,
+                  iconColor: Color(0xFF546E7A),
                   title: 'إصدار التطبيق',
                   subtitle: '1.1.0 (الإصدار الشامل)',
                 ),

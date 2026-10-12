@@ -323,10 +323,19 @@ class _PropheticMedicineViewState extends State<PropheticMedicineView> {
                   // Title row
                   Row(
                     children: [
-                      CircleAvatar(
-                        radius: 18,
-                        backgroundColor: colors.primary.withOpacity(0.12),
-                        child: Icon(food.icon, size: 18, color: colors.primary),
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: colors.primary.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        padding: const EdgeInsets.all(4),
+                        child: Image.asset(
+                          'assets/images/icon_3d_praying_hands.png',
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) => Icon(food.icon, size: 22, color: colors.primary),
+                        ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
@@ -577,10 +586,19 @@ class _PropheticMedicineViewState extends State<PropheticMedicineView> {
             children: [
               Row(
                 children: [
-                  CircleAvatar(
-                    radius: 16,
-                    backgroundColor: colors.primary.withOpacity(0.12),
-                    child: Icon(Icons.soup_kitchen_rounded, size: 16, color: colors.primary),
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: colors.primary.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.all(4),
+                    child: Image.asset(
+                      'assets/images/icon_3d_hadith.png',
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => Icon(Icons.soup_kitchen_rounded, size: 20, color: colors.primary),
+                    ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(

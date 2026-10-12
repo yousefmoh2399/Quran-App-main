@@ -232,7 +232,13 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.mosque_rounded, size: 16, color: colors.primary),
+                    Image.asset(
+                      'assets/images/icon_3d_qiblah.png',
+                      width: 22,
+                      height: 22,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => Icon(Icons.mosque_rounded, size: 16, color: colors.primary),
+                    ),
                     AppSpacing.horizontalXs,
                     Flexible(
                       child: Text(
@@ -508,21 +514,27 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Container(
-                            padding: AppSpacing.paddingXs,
+                            width: 44,
+                            height: 44,
+                            padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
-                              color: colors.primary,
+                              color: isAligned ? colors.primary : colors.accent,
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: colors.primary.withOpacity(0.3),
-                                  blurRadius: 8,
+                                  color: (isAligned ? colors.primary : colors.accent).withOpacity(0.4),
+                                  blurRadius: 10,
                                 ),
                               ],
                             ),
-                            child: const Icon(
-                              Icons.navigation_rounded,
-                              color: Colors.white,
-                              size: 28,
+                            child: Image.asset(
+                              'assets/images/icon_3d_qiblah.png',
+                              fit: BoxFit.contain,
+                              errorBuilder: (_, __, ___) => const Icon(
+                                Icons.navigation_rounded,
+                                color: Colors.white,
+                                size: 24,
+                              ),
                             ),
                           ),
                           AppSpacing.verticalXs,
@@ -530,7 +542,7 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
                             width: 4,
                             height: 50,
                             decoration: BoxDecoration(
-                              color: colors.primary,
+                              color: isAligned ? colors.primary : colors.accent,
                               borderRadius: AppRadius.borderFull,
                             ),
                           ),
@@ -613,19 +625,33 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
                         child: Column(
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(8),
+                              width: 44,
+                              height: 44,
+                              padding: const EdgeInsets.all(4),
                               decoration: BoxDecoration(
-                                color: isAligned ? colors.primary : colors.accent,
+                                color: (isAligned ? colors.primary : colors.accent).withOpacity(0.2),
                                 shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: isAligned ? colors.primary : colors.accent,
+                                  width: 1.5,
+                                ),
                                 boxShadow: [
                                   BoxShadow(
                                     color: (isAligned ? colors.primary : colors.accent)
-                                        .withOpacity(0.4),
+                                        .withOpacity(0.35),
                                     blurRadius: 10,
                                   ),
                                 ],
                               ),
-                              child: const Icon(Icons.mosque_rounded, size: 20, color: Colors.white),
+                              child: Image.asset(
+                                'assets/images/icon_3d_qiblah.png',
+                                fit: BoxFit.contain,
+                                errorBuilder: (_, __, ___) => const Icon(
+                                  Icons.mosque_rounded,
+                                  size: 20,
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
                             Container(
                               width: 3,

@@ -448,6 +448,60 @@ class FastingLog {
   }
 }
 
+/// Achievement Spiritual Stage Definition
+class AchievementStage {
+  final int number;
+  final String title;
+  final String subtitle;
+  final String quote;
+  final IconData icon;
+  final Color themeColor;
+
+  const AchievementStage({
+    required this.number,
+    required this.title,
+    required this.subtitle,
+    required this.quote,
+    required this.icon,
+    required this.themeColor,
+  });
+
+  static const List<AchievementStage> all = [
+    AchievementStage(
+      number: 1,
+      title: 'المرحلة الأولى: بداية النور',
+      subtitle: 'غرس بذرة الصحبة الأولى مع كتاب الله والالتزام اليومي',
+      quote: '«اقرؤوا القرآن فإنه يأتي يوم القيامة شفيعاً لأصحابه»',
+      icon: Icons.wb_twilight_rounded,
+      themeColor: Color(0xFF0F5C4A),
+    ),
+    AchievementStage(
+      number: 2,
+      title: 'المرحلة الثانية: الاستقامة وحمل الورد',
+      subtitle: 'تحويل القراءة إلى ورد راسخ والمحافظة على الصلوات',
+      quote: '«أحب الأعمال إلى الله أدومها وإن قل»',
+      icon: Icons.local_fire_department_rounded,
+      themeColor: Color(0xFFB8892B),
+    ),
+    AchievementStage(
+      number: 3,
+      title: 'المرحلة الثالثة: العزيمة والارتقاء',
+      subtitle: 'العيش في رحاب الآيات ومضاعفة النوافل والصيام',
+      quote: '«يقال لصاحب القرآن: اقرأ وارتقِ ورتل كما كنت ترتل في الدنيا»',
+      icon: Icons.auto_awesome_rounded,
+      themeColor: Color(0xFF2980B9),
+    ),
+    AchievementStage(
+      number: 4,
+      title: 'المرحلة الرابعة: تاج الإتقان وأهل القرآن',
+      subtitle: 'قمة الإنجاز؛ إتمام الختمات والمداومة الراسخة كالجبال',
+      quote: '«خيركم من تعلم القرآن وعلمه»',
+      icon: Icons.workspace_premium_rounded,
+      themeColor: Color(0xFF8E44AD),
+    ),
+  ];
+}
+
 /// Achievement Badge Definition
 class AchievementBadge {
   final String id;
@@ -455,6 +509,10 @@ class AchievementBadge {
   final String description;
   final IconData icon;
   final Color color;
+  final int stage;
+  final int targetValue;
+  final String metricType;
+  final String meaning;
 
   const AchievementBadge({
     required this.id,
@@ -462,15 +520,40 @@ class AchievementBadge {
     required this.description,
     required this.icon,
     required this.color,
+    this.stage = 1,
+    this.targetValue = 1,
+    this.metricType = 'special',
+    this.meaning = '',
   });
 
+  static List<AchievementBadge> forStage(int stageNumber) =>
+      all.where((b) => b.stage == stageNumber).toList();
+
   static const List<AchievementBadge> all = [
+    // ==========================================
+    // المرحلة 1: بداية النور (Stage 1)
+    // ==========================================
     AchievementBadge(
       id: 'first_page',
       title: 'فاتحة الخير',
       description: 'قراءة أول صفحة من كتاب الله',
       icon: Icons.menu_book_rounded,
       color: Color(0xFF0F5C4A),
+      stage: 1,
+      targetValue: 1,
+      metricType: 'pages',
+      meaning: 'خطوتك الأولى في ظلال القرآن، بركة تُشرق في يومك وقلبك.',
+    ),
+    AchievementBadge(
+      id: 'streak_2',
+      title: 'أولى الخطوات',
+      description: 'يومان متتاليان من القراءة المنتظمة',
+      icon: Icons.bolt_rounded,
+      color: Color(0xFF0288D1),
+      stage: 1,
+      targetValue: 2,
+      metricType: 'streak',
+      meaning: 'تأكيد العزم والانطلاق نحو عادة قرآنية يومية راسخة.',
     ),
     AchievementBadge(
       id: 'streak_3',
@@ -478,20 +561,36 @@ class AchievementBadge {
       description: '3 أيام متتالية من القراءة',
       icon: Icons.local_fire_department_rounded,
       color: Color(0xFFB8892B),
+      stage: 1,
+      targetValue: 3,
+      metricType: 'streak',
+      meaning: 'ثبات البدايات يعكس صدق الرغبة في التقرب لكتاب الله.',
     ),
+    AchievementBadge(
+      id: 'pages_20',
+      title: 'جزء النور',
+      description: 'قراءة 20 صفحة (جزء كامل من المصحف)',
+      icon: Icons.star_border_rounded,
+      color: Color(0xFF2E7D32),
+      stage: 1,
+      targetValue: 20,
+      metricType: 'pages',
+      meaning: 'إتمام جزء من القرآن، نور يتجدد ورفعة في الدرجات بإذن الله.',
+    ),
+
+    // ==========================================
+    // المرحلة 2: الاستقامة وحمل الورد (Stage 2)
+    // ==========================================
     AchievementBadge(
       id: 'streak_7',
       title: 'حامل الورد',
-      description: 'أسبوع كامل من المواظبة على الورد',
+      description: 'أسبوع كامل من المواظبة على الورد القرآني',
       icon: Icons.stars_rounded,
       color: Color(0xFF2980B9),
-    ),
-    AchievementBadge(
-      id: 'streak_30',
-      title: 'صاحب القرآن',
-      description: '30 يوماً من الصحبة المتواصلة',
-      icon: Icons.workspace_premium_rounded,
-      color: Color(0xFF8E44AD),
+      stage: 2,
+      targetValue: 7,
+      metricType: 'streak',
+      meaning: 'أسبوع كامل من الأنس بكلام الله دون انقطاع، علامة التوفيق.',
     ),
     AchievementBadge(
       id: 'prayers_day',
@@ -499,13 +598,21 @@ class AchievementBadge {
       description: 'تسجيل الصلوات الخمس في وقتها ليوم كامل',
       icon: Icons.mosque_rounded,
       color: Color(0xFF1E824C),
+      stage: 2,
+      targetValue: 5,
+      metricType: 'prayers',
+      meaning: '«إن الصلاة كانت على المؤمنين كتاباً موقوتاً»، قرة عين المؤمن.',
     ),
     AchievementBadge(
-      id: 'fasting_day',
-      title: 'صائم محتسب',
-      description: 'إتمام يوم صيام سنة أو فريضة',
-      icon: Icons.wb_twilight_rounded,
-      color: Color(0xFFD35400),
+      id: 'pages_100',
+      title: 'سياحة الروح',
+      description: 'قراءة 100 صفحة من القرآن الكريم',
+      icon: Icons.explore_rounded,
+      color: Color(0xFF00796B),
+      stage: 2,
+      targetValue: 100,
+      metricType: 'pages',
+      meaning: '100 صفحة في رصيدك الإيماني، زاد مضاعف وراحة للنفس.',
     ),
     AchievementBadge(
       id: 'commute_reader',
@@ -513,13 +620,106 @@ class AchievementBadge {
       description: 'إنجاز قراءة في ورد التنقل والمواصلات',
       icon: Icons.directions_transit_rounded,
       color: Color(0xFF16A085),
+      stage: 2,
+      targetValue: 1,
+      metricType: 'special',
+      meaning: 'استثمار الأوقات البينية وعمارة اللحظات بذكر الله.',
     ),
+
+    // ==========================================
+    // المرحلة 3: العزيمة والارتقاء (Stage 3)
+    // ==========================================
+    AchievementBadge(
+      id: 'streak_30',
+      title: 'صاحب القرآن',
+      description: '30 يوماً من الصحبة المتواصلة مع القرآن',
+      icon: Icons.workspace_premium_rounded,
+      color: Color(0xFF8E44AD),
+      stage: 3,
+      targetValue: 30,
+      metricType: 'streak',
+      meaning: 'شهر كامل من الصحبة الصادقة، أصبحت تلاوة القرآن جزءاً أصيلاً منك.',
+    ),
+    AchievementBadge(
+      id: 'fasting_day',
+      title: 'صائم محتسب',
+      description: 'إتمام يوم صيام سنة أو فريضة احتساباً لله',
+      icon: Icons.wb_twilight_rounded,
+      color: Color(0xFFD35400),
+      stage: 3,
+      targetValue: 1,
+      metricType: 'fasting',
+      meaning: 'الصوم والقرآن يشفعان للعبد يوم القيامة.',
+    ),
+    AchievementBadge(
+      id: 'pages_300',
+      title: 'نصف الطريق المضيء',
+      description: 'قراءة 300 صفحة (نصف القرآن الكريم)',
+      icon: Icons.brightness_high_rounded,
+      color: Color(0xFFD4AF37),
+      stage: 3,
+      targetValue: 300,
+      metricType: 'pages',
+      meaning: 'قطعت نصف طريق المصحف الشريف، ثبات وإصرار يُحمد.',
+    ),
+    AchievementBadge(
+      id: 'streak_40',
+      title: 'أربعينية الوفاء',
+      description: '40 يوماً متتالية من الوفاء بالعهد مع كتاب الله',
+      icon: Icons.verified_rounded,
+      color: Color(0xFF4527A0),
+      stage: 3,
+      targetValue: 40,
+      metricType: 'streak',
+      meaning: 'أربعون يوماً من الصدق، ترسيخ العبادة وثبات القلب على الهدى.',
+    ),
+
+    // ==========================================
+    // المرحلة 4: تاج الإتقان وأهل القرآن (Stage 4)
+    // ==========================================
     AchievementBadge(
       id: 'first_khatma',
       title: 'ختمة النور',
-      description: 'إتمام ختمة كاملة لكتاب الله المبارك',
+      description: 'إتمام ختمة كاملة مباركة لكتاب الله (604 صفحات)',
       icon: Icons.military_tech_rounded,
       color: Color(0xFFD9A036),
+      stage: 4,
+      targetValue: 604,
+      metricType: 'khatma',
+      meaning: '«عند ختم القرآن تنزل الرحمة»، هنيئاً لك تاج الوقار وشفاعة الآيات.',
+    ),
+    AchievementBadge(
+      id: 'streak_100',
+      title: 'ثبات الرواسي',
+      description: '100 يوم متتالية من الصحبة الراسخة',
+      icon: Icons.shield_rounded,
+      color: Color(0xFF303F9F),
+      stage: 4,
+      targetValue: 100,
+      metricType: 'streak',
+      meaning: 'مائة يوم من الاستقامة التي لا تلين، جعلك الله من أهل القرآن وخاصته.',
+    ),
+    AchievementBadge(
+      id: 'pages_604',
+      title: 'ربيع القلوب',
+      description: 'إتمام قراءة 604 صفحات موثقة بالكامل',
+      icon: Icons.favorite_rounded,
+      color: Color(0xFFC2185B),
+      stage: 4,
+      targetValue: 604,
+      metricType: 'pages',
+      meaning: 'قراءة كتاب الله دواء الصدور وجلاء الأحزان وبركة الأعمار.',
+    ),
+    AchievementBadge(
+      id: 'quran_year',
+      title: 'سفير الهدى',
+      description: 'عام كامل (365 يوماً) من العيش مع آيات الرحمن',
+      icon: Icons.diamond_rounded,
+      color: Color(0xFF00897B),
+      stage: 4,
+      targetValue: 365,
+      metricType: 'streak',
+      meaning: 'سنة كاملة من النور والبركة، رزقك الله حجة لك لا عليك.',
     ),
   ];
 }

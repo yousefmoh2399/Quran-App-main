@@ -166,10 +166,16 @@ class _AdhanHeroCardState extends State<AdhanHeroCard> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
-                            Icons.access_time_filled_rounded,
-                            size: 14,
-                            color: Colors.white,
+                          Image.asset(
+                            'assets/images/icon_3d_prayer_clock.png',
+                            width: 18,
+                            height: 18,
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, __, ___) => const Icon(
+                              Icons.access_time_filled_rounded,
+                              size: 14,
+                              color: Colors.white,
+                            ),
                           ),
                           AppSpacing.horizontalXs,
                           Text(
@@ -195,18 +201,44 @@ class _AdhanHeroCardState extends State<AdhanHeroCard> {
                     ),
                   ],
                 ),
-                AppSpacing.verticalLg,
+                AppSpacing.verticalMd,
 
-                // Next Prayer Title
-                Text(
-                  _prayerNameArabic(nextPrayer),
-                  style: TextStyle(
-                    fontFamily: AppTypography.decorativeFont,
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    height: 1.2,
-                  ),
+                // Next Prayer Title & 3D Icon Hero Row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.18),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.12),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      padding: const EdgeInsets.all(4),
+                      child: Image.asset(
+                        'assets/images/icon_3d_prayer_clock.png',
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      _prayerNameArabic(nextPrayer),
+                      style: TextStyle(
+                        fontFamily: AppTypography.decorativeFont,
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        height: 1.2,
+                      ),
+                    ),
+                  ],
                 ),
                 AppSpacing.verticalMd,
 

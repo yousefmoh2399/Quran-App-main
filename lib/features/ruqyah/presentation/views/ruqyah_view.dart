@@ -385,9 +385,14 @@ class _RuqyahViewState extends State<RuqyahView> {
                   children: [
                     Row(
                       children: [
-                        SizedBox(
-                          width: 24,
-                          height: 24,
+                        Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            color: colors.primary.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.all(4),
                           child: Image.asset(
                             item.source == RuqyahSource.quran
                                 ? 'assets/images/icon_3d_quran.png'
@@ -395,7 +400,7 @@ class _RuqyahViewState extends State<RuqyahView> {
                             fit: BoxFit.contain,
                           ),
                         ),
-                        const SizedBox(width: 6),
+                        const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(

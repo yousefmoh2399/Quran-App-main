@@ -105,13 +105,35 @@ class AdhanPrayerRow extends StatelessWidget {
             height: 44,
             decoration: BoxDecoration(
               color: iconBackgroundColor,
-              shape: BoxShape.circle,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: isNext ? colors.accent.withOpacity(0.4) : borderColor.withOpacity(0.3),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: (isNext ? colors.accent : colors.primary).withOpacity(0.08),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
-            child: Icon(
-              icon,
-              size: 22,
-              color: iconColor,
-            ),
+            padding: const EdgeInsets.all(5),
+            child: isNext
+                ? Image.asset(
+                    'assets/images/icon_3d_prayer_clock.png',
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => Icon(
+                      icon,
+                      size: 22,
+                      color: iconColor,
+                    ),
+                  )
+                : Icon(
+                    icon,
+                    size: 22,
+                    color: iconColor,
+                  ),
           ),
           AppSpacing.horizontalMd,
 

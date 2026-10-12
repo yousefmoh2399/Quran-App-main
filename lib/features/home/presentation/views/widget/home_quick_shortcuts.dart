@@ -137,21 +137,21 @@ class HomeQuickShortcuts extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Material(
-      color: isDark ? colors.surface : Colors.white,
+      color: colors.surface,
       borderRadius: BorderRadius.circular(20),
-      elevation: isDark ? 0 : 2,
-      shadowColor: Colors.black.withOpacity(0.05),
+      elevation: isDark ? 0 : 1.5,
+      shadowColor: isDark ? Colors.transparent : colors.textMuted.withOpacity(0.08),
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
         onTap: () => Get.toNamed(item.route),
         child: Container(
-          width: 86,
-          height: 92,
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+          width: 112,
+          height: 96,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isDark ? colors.divider : Colors.black.withOpacity(0.04),
+              color: colors.divider.withOpacity(isDark ? 0.6 : 0.45),
               width: 1,
             ),
           ),
@@ -172,16 +172,22 @@ class HomeQuickShortcuts extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 6),
-              Text(
-                item.title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: AppTypography.uiFont,
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w700,
-                  color: colors.text,
+              SizedBox(
+                width: double.infinity,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.center,
+                  child: Text(
+                    item.title,
+                    maxLines: 1,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: AppTypography.uiFont,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: colors.text,
+                    ),
+                  ),
                 ),
               ),
             ],
