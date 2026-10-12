@@ -267,12 +267,17 @@ class _MyRemindersViewState extends State<MyRemindersView> {
                         child: Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(10),
+                              padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
                                 color: const Color(0xFF1B4D3E).withOpacity(0.12),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: const Icon(Icons.music_note_rounded, color: Color(0xFF1B4D3E), size: 24),
+                              child: Image.asset(
+                                'assets/images/icon_3d_card_studio.png',
+                                width: 28,
+                                height: 28,
+                                fit: BoxFit.contain,
+                              ),
                             ),
                             const SizedBox(width: 14),
                             Expanded(
@@ -311,6 +316,7 @@ class _MyRemindersViewState extends State<MyRemindersView> {
                     id: 'wird_daily',
                     title: 'الورد اليومي',
                     icon: Icons.menu_book_rounded,
+                    imageAsset: 'assets/images/icon_3d_quran.png',
                     color: const Color(0xFF2E7D32),
                     defaultSubtitle: 'تذكير يومي في الساعة 08:00 مساءً',
                     onConfigure: () async {
@@ -326,6 +332,7 @@ class _MyRemindersViewState extends State<MyRemindersView> {
                     id: 'wird_commute',
                     title: 'ورد المواصلات',
                     icon: Icons.directions_bus_rounded,
+                    imageAsset: 'assets/images/icon_3d_travel.png',
                     color: const Color(0xFF00796B),
                     defaultSubtitle: 'مواعيد متعددة وصفحات مخصصة في الطريق',
                     onConfigure: () async {
@@ -341,6 +348,7 @@ class _MyRemindersViewState extends State<MyRemindersView> {
                     id: 'sadaqah_monthly',
                     title: 'الصدقة الشهرية',
                     icon: Icons.volunteer_activism_rounded,
+                    imageAsset: 'assets/images/icon_3d_praying_hands.png',
                     color: const Color(0xFFD32F2F),
                     defaultSubtitle: 'تذكير شهري (هجري / ميلادي) مع زر "تصدّقت"',
                     onConfigure: () async {
@@ -356,6 +364,7 @@ class _MyRemindersViewState extends State<MyRemindersView> {
                     id: 'azkar_periodic',
                     title: 'الأذكار الدورية',
                     icon: Icons.auto_awesome_rounded,
+                    imageAsset: 'assets/images/icon_3d_tasbeeh.png',
                     color: const Color(0xFFF57C00),
                     defaultSubtitle: 'تنبيهات أذكار متفرقة بساعات نشاط وهدوء الصلاة',
                     onConfigure: () async {
@@ -395,6 +404,7 @@ class _MyRemindersViewState extends State<MyRemindersView> {
     required String id,
     required String title,
     required IconData icon,
+    String? imageAsset,
     required Color color,
     required String defaultSubtitle,
     required VoidCallback onConfigure,
@@ -453,7 +463,9 @@ class _MyRemindersViewState extends State<MyRemindersView> {
               CircleAvatar(
                 radius: 22,
                 backgroundColor: color.withOpacity(0.15),
-                child: Icon(icon, color: color, size: 24),
+                child: imageAsset != null
+                    ? Image.asset(imageAsset, width: 26, height: 26, fit: BoxFit.contain)
+                    : Icon(icon, color: color, size: 24),
               ),
               const SizedBox(width: 14),
               Expanded(

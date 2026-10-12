@@ -60,14 +60,26 @@ class AzkarListView extends StatelessWidget {
             const Spacer(),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: MyText(
-                text: '${model.category}',
-                textStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                      fontFamily: 'BalooBhaijaan2',
-                      color: Colors.black87,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  MyText(
+                    text: '${model.category}',
+                    textStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          fontFamily: 'BalooBhaijaan2',
+                          color: Colors.black87,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                  ),
+                  const SizedBox(width: 8),
+                  Image.asset(
+                    'assets/images/icon_3d_tasbeeh.png',
+                    width: 32,
+                    height: 32,
+                    fit: BoxFit.contain,
+                  ),
+                ],
               ),
             ),
           ],

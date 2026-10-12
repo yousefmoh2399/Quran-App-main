@@ -90,17 +90,32 @@ class _ZakatCalculatorViewState extends State<ZakatCalculatorView>
               fontFamily: AppTypography.uiFont,
               fontSize: 12.5,
             ),
-            tabs: const [
+            tabs: [
               Tab(
-                icon: Icon(Icons.account_balance_wallet_rounded, size: 19),
+                icon: Image.asset(
+                  'assets/images/icon_3d_card_studio.png',
+                  width: 24,
+                  height: 24,
+                  fit: BoxFit.contain,
+                ),
                 text: 'زكاة المرتب',
               ),
               Tab(
-                icon: Icon(Icons.savings_rounded, size: 19),
+                icon: Image.asset(
+                  'assets/images/icon_3d_prayer_clock.png',
+                  width: 24,
+                  height: 24,
+                  fit: BoxFit.contain,
+                ),
                 text: 'زكاة المال والتجارة',
               ),
               Tab(
-                icon: Icon(Icons.volunteer_activism_rounded, size: 19),
+                icon: Image.asset(
+                  'assets/images/icon_3d_praying_hands.png',
+                  width: 24,
+                  height: 24,
+                  fit: BoxFit.contain,
+                ),
                 text: 'زكاة الفطر',
               ),
             ],

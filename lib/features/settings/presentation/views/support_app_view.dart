@@ -511,6 +511,7 @@ class _SupportAppViewState extends State<SupportAppView> {
         ),
         _buildPillarTile(
           icon: Icons.auto_stories_rounded,
+          imageAsset: 'assets/images/icon_3d_quran.png',
           color: const Color(0xFFD4AF37),
           title: 'تطوير ميزات جديدة ومصاحف معتمدة',
           description:
@@ -519,6 +520,7 @@ class _SupportAppViewState extends State<SupportAppView> {
         ),
         _buildPillarTile(
           icon: Icons.volunteer_activism_rounded,
+          imageAsset: 'assets/images/icon_3d_praying_hands.png',
           color: colors.primary,
           title: 'صدقة جارية ومشاركة للأجر',
           description:
@@ -531,6 +533,7 @@ class _SupportAppViewState extends State<SupportAppView> {
 
   Widget _buildPillarTile({
     required IconData icon,
+    String? imageAsset,
     required Color color,
     required String title,
     required String description,
@@ -548,12 +551,14 @@ class _SupportAppViewState extends State<SupportAppView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
               color: color.withOpacity(0.12),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: color, size: 20),
+            child: imageAsset != null
+                ? Image.asset(imageAsset, width: 22, height: 22, fit: BoxFit.contain)
+                : Icon(icon, color: color, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(

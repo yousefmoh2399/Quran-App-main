@@ -237,11 +237,23 @@ class _CardStudioViewState extends State<CardStudioView> with SingleTickerProvid
           fontWeight: FontWeight.bold,
           fontSize: 12.5,
         ),
-        tabs: const [
-          Tab(text: 'المحتوى', icon: Icon(Icons.edit_note_rounded, size: 18)),
-          Tab(text: 'الخلفية', icon: Icon(Icons.palette_outlined, size: 18)),
-          Tab(text: 'الإطار', icon: Icon(Icons.crop_free_rounded, size: 18)),
-          Tab(text: 'الخط والضبط', icon: Icon(Icons.text_fields_rounded, size: 18)),
+        tabs: [
+          Tab(
+            text: 'المحتوى',
+            icon: Image.asset('assets/images/icon_3d_card_studio.png', width: 20, height: 20, fit: BoxFit.contain),
+          ),
+          Tab(
+            text: 'الخلفية',
+            icon: Image.asset('assets/images/icon_3d_names99.png', width: 20, height: 20, fit: BoxFit.contain),
+          ),
+          Tab(
+            text: 'الإطار',
+            icon: Image.asset('assets/images/icon_3d_lantern.png', width: 20, height: 20, fit: BoxFit.contain),
+          ),
+          Tab(
+            text: 'الخط والضبط',
+            icon: Image.asset('assets/images/icon_3d_hadith.png', width: 20, height: 20, fit: BoxFit.contain),
+          ),
         ],
       ),
     );

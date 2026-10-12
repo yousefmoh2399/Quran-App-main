@@ -79,28 +79,93 @@ class HomeNavBar extends StatelessWidget {
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
           destinations: [
             NavigationDestination(
-              icon: Icon(Icons.mosque_outlined, color: colors.textMuted, size: 24),
-              selectedIcon: Icon(Icons.mosque_rounded, color: colors.primary, size: 24),
+              icon: Opacity(
+                opacity: 0.75,
+                child: Image.asset(
+                  'assets/images/icon_3d_qiblah.png',
+                  width: 25,
+                  height: 25,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              selectedIcon: Image.asset(
+                'assets/images/icon_3d_qiblah.png',
+                width: 28,
+                height: 28,
+                fit: BoxFit.contain,
+              ),
               label: 'الرئيسية',
             ),
             NavigationDestination(
-              icon: Icon(Icons.auto_stories_outlined, color: colors.textMuted, size: 24),
-              selectedIcon: Icon(Icons.auto_stories_rounded, color: colors.primary, size: 24),
+              icon: Opacity(
+                opacity: 0.75,
+                child: Image.asset(
+                  'assets/images/icon_3d_quran.png',
+                  width: 25,
+                  height: 25,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              selectedIcon: Image.asset(
+                'assets/images/icon_3d_quran.png',
+                width: 28,
+                height: 28,
+                fit: BoxFit.contain,
+              ),
               label: 'المصحف',
             ),
             NavigationDestination(
-              icon: Icon(Icons.auto_awesome_outlined, color: colors.textMuted, size: 24),
-              selectedIcon: Icon(Icons.auto_awesome_rounded, color: colors.primary, size: 24),
+              icon: Opacity(
+                opacity: 0.75,
+                child: Image.asset(
+                  'assets/images/icon_3d_tasbeeh.png',
+                  width: 25,
+                  height: 25,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              selectedIcon: Image.asset(
+                'assets/images/icon_3d_tasbeeh.png',
+                width: 28,
+                height: 28,
+                fit: BoxFit.contain,
+              ),
               label: 'الأذكار',
             ),
             NavigationDestination(
-              icon: Icon(Icons.bookmarks_outlined, color: colors.textMuted, size: 24),
-              selectedIcon: Icon(Icons.bookmarks_rounded, color: colors.primary, size: 24),
+              icon: Opacity(
+                opacity: 0.75,
+                child: Image.asset(
+                  'assets/images/icon_3d_khatma_circles.png',
+                  width: 25,
+                  height: 25,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              selectedIcon: Image.asset(
+                'assets/images/icon_3d_khatma_circles.png',
+                width: 28,
+                height: 28,
+                fit: BoxFit.contain,
+              ),
               label: 'علاماتي',
             ),
             NavigationDestination(
-              icon: Icon(Icons.widgets_outlined, color: colors.textMuted, size: 24),
-              selectedIcon: Icon(Icons.widgets_rounded, color: colors.primary, size: 24),
+              icon: Opacity(
+                opacity: 0.75,
+                child: Image.asset(
+                  'assets/images/icon_3d_card_studio.png',
+                  width: 25,
+                  height: 25,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              selectedIcon: Image.asset(
+                'assets/images/icon_3d_card_studio.png',
+                width: 28,
+                height: 28,
+                fit: BoxFit.contain,
+              ),
               label: 'المزيد',
             ),
           ],

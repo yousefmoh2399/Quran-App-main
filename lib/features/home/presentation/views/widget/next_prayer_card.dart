@@ -155,7 +155,17 @@ class _NextPrayerCardState extends State<NextPrayerCard> {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.access_time_filled_rounded, size: 18, color: colors.accent),
+                            Image.asset(
+                              'assets/images/icon_3d_prayer_clock.png',
+                              width: 22,
+                              height: 22,
+                              fit: BoxFit.contain,
+                              errorBuilder: (_, __, ___) => Icon(
+                                Icons.access_time_filled_rounded,
+                                size: 18,
+                                color: colors.accent,
+                              ),
+                            ),
                             AppSpacing.horizontalXs,
                             Text(
                               'الصلاة القادمة',

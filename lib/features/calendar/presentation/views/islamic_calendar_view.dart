@@ -435,12 +435,18 @@ class _IslamicCalendarViewState extends State<IslamicCalendarView> {
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    width: 40,
+                    height: 40,
+                    padding: const EdgeInsets.all(3),
                     decoration: BoxDecoration(
-                      color: ev.color.withOpacity(0.1),
+                      color: ev.color.withOpacity(0.08),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(ev.icon, color: ev.color, size: 22),
+                    child: Image.asset(
+                      'assets/images/icon_3d_calendar.png',
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => Icon(ev.icon, color: ev.color, size: 22),
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(

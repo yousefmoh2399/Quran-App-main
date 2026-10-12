@@ -142,12 +142,13 @@ class _BackupRestoreViewState extends State<BackupRestoreView> {
               child: Column(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: colors.primary.withOpacity(0.1),
-                      shape: BoxShape.circle,
+                    padding: const EdgeInsets.all(8),
+                    child: Image.asset(
+                      'assets/images/icon_3d_card_studio.png',
+                      width: 56,
+                      height: 56,
+                      fit: BoxFit.contain,
                     ),
-                    child: Icon(Icons.cloud_sync_rounded, size: 48, color: colors.primary),
                   ),
                   AppSpacing.verticalMd,
                   const Text(

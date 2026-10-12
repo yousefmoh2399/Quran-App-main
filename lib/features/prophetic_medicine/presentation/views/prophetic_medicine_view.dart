@@ -90,6 +90,7 @@ class _PropheticMedicineViewState extends State<PropheticMedicineView> {
             Expanded(
               child: _buildTabButton(
                 title: 'موسوعة الأغذية',
+                imageAsset: 'assets/images/icon_3d_quran.png',
                 icon: Icons.menu_book_rounded,
                 isSelected: currentTab == 0,
                 onTap: () => _controller.setTab(0),
@@ -100,6 +101,7 @@ class _PropheticMedicineViewState extends State<PropheticMedicineView> {
             Expanded(
               child: _buildTabButton(
                 title: 'وصفات منزلية مجربة',
+                imageAsset: 'assets/images/icon_3d_praying_hands.png',
                 icon: Icons.soup_kitchen_rounded,
                 isSelected: currentTab == 1,
                 onTap: () => _controller.setTab(1),
@@ -114,6 +116,7 @@ class _PropheticMedicineViewState extends State<PropheticMedicineView> {
 
   Widget _buildTabButton({
     required String title,
+    String? imageAsset,
     required IconData icon,
     required bool isSelected,
     required VoidCallback onTap,
@@ -131,11 +134,19 @@ class _PropheticMedicineViewState extends State<PropheticMedicineView> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 15,
-              color: isSelected ? Colors.white : colors.textSecondary,
-            ),
+            if (imageAsset != null)
+              Image.asset(
+                imageAsset,
+                width: 20,
+                height: 20,
+                fit: BoxFit.contain,
+              )
+            else
+              Icon(
+                icon,
+                size: 15,
+                color: isSelected ? Colors.white : colors.textSecondary,
+              ),
             const SizedBox(width: 5),
             Flexible(
               child: Text(

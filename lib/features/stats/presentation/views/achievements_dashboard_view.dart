@@ -101,11 +101,11 @@ class _AchievementsDashboardViewState extends State<AchievementsDashboardView> {
                         AppSpacing.verticalLg,
                         Row(
                           children: [
-                            _buildHeroStat('صفحة مقروءة', '$totalPages', Icons.menu_book_rounded),
+                            _buildHeroStat('صفحة مقروءة', '$totalPages', Icons.menu_book_rounded, imageAsset: 'assets/images/icon_3d_quran.png'),
                             const SizedBox(width: 12),
-                            _buildHeroStat('أيام متتالية', '$currentStreak', Icons.local_fire_department_rounded),
+                            _buildHeroStat('أيام متتالية', '$currentStreak', Icons.local_fire_department_rounded, imageAsset: 'assets/images/icon_3d_prayer_clock.png'),
                             const SizedBox(width: 12),
-                            _buildHeroStat('إجمالي الأيام', '$totalDays', Icons.calendar_month_rounded),
+                            _buildHeroStat('إجمالي الأيام', '$totalDays', Icons.calendar_month_rounded, imageAsset: 'assets/images/icon_3d_calendar.png'),
                           ],
                         ),
                       ],
@@ -216,7 +216,7 @@ class _AchievementsDashboardViewState extends State<AchievementsDashboardView> {
     );
   }
 
-  Widget _buildHeroStat(String title, String value, IconData icon) {
+  Widget _buildHeroStat(String title, String value, IconData icon, {String? imageAsset}) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
@@ -226,7 +226,9 @@ class _AchievementsDashboardViewState extends State<AchievementsDashboardView> {
         ),
         child: Column(
           children: [
-            Icon(icon, color: Colors.amber, size: 20),
+            imageAsset != null
+                ? Image.asset(imageAsset, width: 22, height: 22, fit: BoxFit.contain)
+                : Icon(icon, color: Colors.amber, size: 20),
             const SizedBox(height: 4),
             Text(
               value,

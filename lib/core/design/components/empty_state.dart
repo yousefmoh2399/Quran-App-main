@@ -7,6 +7,7 @@ import 'app_button.dart';
 /// Unified EmptyState component for empty lists, search results, bookmarks, etc.
 class EmptyState extends StatelessWidget {
   final IconData icon;
+  final String? imageAsset;
   final String title;
   final String message;
   final String? actionLabel;
@@ -15,6 +16,7 @@ class EmptyState extends StatelessWidget {
   const EmptyState({
     super.key,
     this.icon = Icons.inbox_outlined,
+    this.imageAsset,
     required this.title,
     required this.message,
     this.actionLabel,
@@ -33,16 +35,18 @@ class EmptyState extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(AppSpacing.xl),
+              padding: EdgeInsets.all(imageAsset != null ? AppSpacing.md : AppSpacing.xl),
               decoration: BoxDecoration(
                 color: colors.primary.withOpacity(0.08),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                icon,
-                size: 48,
-                color: colors.primary,
-              ),
+              child: imageAsset != null
+                  ? Image.asset(imageAsset!, width: 64, height: 64, fit: BoxFit.contain)
+                  : Icon(
+                      icon,
+                      size: 48,
+                      color: colors.primary,
+                    ),
             ),
             AppSpacing.verticalLg,
             Text(

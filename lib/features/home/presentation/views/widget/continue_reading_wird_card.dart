@@ -52,16 +52,23 @@ class ContinueReadingWirdCard extends StatelessWidget {
               child: Row(
                 children: [
                   Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: colors.primary.withOpacity(0.12),
-                      borderRadius: AppRadius.borderMd,
-                    ),
-                    child: Icon(
-                      Icons.menu_book_rounded,
-                      color: colors.primary,
-                      size: 22,
+                    width: 48,
+                    height: 48,
+                    padding: const EdgeInsets.all(2),
+                    child: Image.asset(
+                      'assets/images/icon_3d_quran.png',
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => Container(
+                        decoration: BoxDecoration(
+                          color: colors.primary.withOpacity(0.12),
+                          borderRadius: AppRadius.borderMd,
+                        ),
+                        child: Icon(
+                          Icons.menu_book_rounded,
+                          color: colors.primary,
+                          size: 22,
+                        ),
+                      ),
                     ),
                   ),
                   AppSpacing.horizontalMd,

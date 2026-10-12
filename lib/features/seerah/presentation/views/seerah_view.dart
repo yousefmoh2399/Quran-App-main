@@ -89,6 +89,7 @@ class _SeerahViewState extends State<SeerahView> {
             Expanded(
               child: _buildTabButton(
                 title: 'خط السيرة الزمني',
+                imageAsset: 'assets/images/icon_3d_hadith.png',
                 icon: Icons.timeline_rounded,
                 isSelected: currentTab == 0,
                 onTap: () => _controller.setTab(0),
@@ -99,6 +100,7 @@ class _SeerahViewState extends State<SeerahView> {
             Expanded(
               child: _buildTabButton(
                 title: 'يوم في حياته ﷺ',
+                imageAsset: 'assets/images/icon_3d_prayer_clock.png',
                 icon: Icons.wb_sunny_outlined,
                 isSelected: currentTab == 1,
                 onTap: () => _controller.setTab(1),
@@ -113,6 +115,7 @@ class _SeerahViewState extends State<SeerahView> {
 
   Widget _buildTabButton({
     required String title,
+    String? imageAsset,
     required IconData icon,
     required bool isSelected,
     required VoidCallback onTap,
@@ -122,7 +125,7 @@ class _SeerahViewState extends State<SeerahView> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppRadius.md),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
           color: isSelected ? colors.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(AppRadius.md),
@@ -130,11 +133,19 @@ class _SeerahViewState extends State<SeerahView> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 17,
-              color: isSelected ? Colors.white : colors.textSecondary,
-            ),
+            if (imageAsset != null)
+              Image.asset(
+                imageAsset,
+                width: 22,
+                height: 22,
+                fit: BoxFit.contain,
+              )
+            else
+              Icon(
+                icon,
+                size: 17,
+                color: isSelected ? Colors.white : colors.textSecondary,
+              ),
             const SizedBox(width: 6),
             Flexible(
               child: Text(
@@ -143,8 +154,8 @@ class _SeerahViewState extends State<SeerahView> {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontFamily: AppTypography.uiFont,
-                  fontSize: 13,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.bold,
                   color: isSelected ? Colors.white : colors.textSecondary,
                 ),
               ),

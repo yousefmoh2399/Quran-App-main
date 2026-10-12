@@ -87,14 +87,21 @@ class _RamadanKhatmaViewState extends State<RamadanKhatmaView> {
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          children: const [
-            Text(
+          children: [
+            Image.asset(
+              'assets/images/icon_3d_khatma_circles.png',
+              width: 76,
+              height: 76,
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(height: 12),
+            const Text(
               '«مَنْ قَرَأَ حَرْفًا مِنْ كِتَابِ اللَّهِ فَلَهُ بِهِ حَسَنَةٌ، وَالحَسَنَةُ بِعَشْرِ أَمْثَالِهَا»',
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.5),
             ),
-            SizedBox(height: 12),
-            Text(
+            const SizedBox(height: 12),
+            const Text(
               'تقبل الله طاعتكم وجعل القرآن العظيم ربيع قلوبكم ونور صدوركم',
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
@@ -159,7 +166,12 @@ class _RamadanKhatmaViewState extends State<RamadanKhatmaView> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.flag_rounded, color: colors.primary, size: 22),
+                      Image.asset(
+                        'assets/images/icon_3d_khatma_circles.png',
+                        width: 24,
+                        height: 24,
+                        fit: BoxFit.contain,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(

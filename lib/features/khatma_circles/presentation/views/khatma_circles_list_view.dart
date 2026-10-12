@@ -89,10 +89,11 @@ class _KhatmaCirclesListViewState extends State<KhatmaCirclesListView> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.auto_stories_rounded,
-                      size: 64,
-                      color: colors.primary.withOpacity(0.6),
+                    Image.asset(
+                      'assets/images/icon_3d_khatma_circles.png',
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.contain,
                     ),
                     const SizedBox(height: 16),
                     Text(
@@ -202,6 +203,13 @@ class _KhatmaCirclesListViewState extends State<KhatmaCirclesListView> {
               children: [
                 Row(
                   children: [
+                    Image.asset(
+                      'assets/images/icon_3d_khatma_circles.png',
+                      width: 28,
+                      height: 28,
+                      fit: BoxFit.contain,
+                    ),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         circle.title,

@@ -165,6 +165,7 @@ class _ReadingAnalyticsViewState extends State<ReadingAnalyticsView> {
                 icon: Icons.local_fire_department_rounded,
                 iconColor: Colors.orange.shade600,
                 bgColor: Colors.orange.withOpacity(0.09),
+                imageAsset: 'assets/images/icon_3d_prayer_clock.png',
                 colors: colors,
               ),
             ),
@@ -177,6 +178,7 @@ class _ReadingAnalyticsViewState extends State<ReadingAnalyticsView> {
                 icon: Icons.menu_book_rounded,
                 iconColor: colors.primary,
                 bgColor: colors.primary.withOpacity(0.09),
+                imageAsset: 'assets/images/icon_3d_quran.png',
                 colors: colors,
               ),
             ),
@@ -193,6 +195,7 @@ class _ReadingAnalyticsViewState extends State<ReadingAnalyticsView> {
                 icon: Icons.mosque_rounded,
                 iconColor: colors.accent,
                 bgColor: colors.accent.withOpacity(0.12),
+                imageAsset: 'assets/images/icon_3d_khatma_circles.png',
                 colors: colors,
               ),
             ),
@@ -205,6 +208,7 @@ class _ReadingAnalyticsViewState extends State<ReadingAnalyticsView> {
                 icon: Icons.timer_rounded,
                 iconColor: Colors.teal.shade600,
                 bgColor: Colors.teal.withOpacity(0.09),
+                imageAsset: 'assets/images/icon_3d_prayer_clock.png',
                 colors: colors,
               ),
             ),
@@ -221,6 +225,7 @@ class _ReadingAnalyticsViewState extends State<ReadingAnalyticsView> {
     required IconData icon,
     required Color iconColor,
     required Color bgColor,
+    String? imageAsset,
     required AppColorsExtension colors,
   }) {
     return Container(
@@ -233,12 +238,19 @@ class _ReadingAnalyticsViewState extends State<ReadingAnalyticsView> {
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
               color: bgColor,
               borderRadius: BorderRadius.circular(AppRadius.sm),
             ),
-            child: Icon(icon, size: 22, color: iconColor),
+            child: imageAsset != null
+                ? Image.asset(
+                    imageAsset,
+                    width: 26,
+                    height: 26,
+                    fit: BoxFit.contain,
+                  )
+                : Icon(icon, size: 22, color: iconColor),
           ),
           const SizedBox(width: 10),
           Expanded(

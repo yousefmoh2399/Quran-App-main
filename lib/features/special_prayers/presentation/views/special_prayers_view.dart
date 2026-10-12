@@ -234,10 +234,19 @@ class _SpecialPrayersViewState extends State<SpecialPrayersView> {
                   // Title row
                   Row(
                     children: [
-                      CircleAvatar(
-                        radius: 18,
-                        backgroundColor: colors.primary.withOpacity(0.12),
-                        child: Icon(prayer.icon, size: 18, color: colors.primary),
+                      Container(
+                        width: 38,
+                        height: 38,
+                        padding: const EdgeInsets.all(3),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: colors.primary.withOpacity(0.08),
+                        ),
+                        child: Image.asset(
+                          'assets/images/icon_3d_prayer_clock.png',
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) => Icon(prayer.icon, size: 18, color: colors.primary),
+                        ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(

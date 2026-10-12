@@ -121,6 +121,7 @@ class GoSettingsView extends StatelessWidget {
               const SizedBox(height: 40),
               EmptyState(
                 icon: icon,
+                imageAsset: 'assets/images/icon_3d_qiblah.png',
                 title: title,
                 message: message,
               ),

@@ -77,17 +77,23 @@ class _HomeHadithMemorizationCardState extends State<HomeHadithMemorizationCard>
           // Header Row
           Row(
             children: [
-              Container(
+              SizedBox(
                 width: 44,
                 height: 44,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0F5C4A).withOpacity(0.12),
-                  borderRadius: AppRadius.borderMd,
-                ),
-                child: const Icon(
-                  Icons.auto_stories_rounded,
-                  color: Color(0xFF0F5C4A),
-                  size: 22,
+                child: Image.asset(
+                  'assets/images/icon_3d_hadith.png',
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0F5C4A).withOpacity(0.12),
+                      borderRadius: AppRadius.borderMd,
+                    ),
+                    child: const Icon(
+                      Icons.auto_stories_rounded,
+                      color: Color(0xFF0F5C4A),
+                      size: 22,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 12),

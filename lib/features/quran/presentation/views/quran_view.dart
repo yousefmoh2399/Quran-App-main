@@ -263,7 +263,12 @@ class _QuranScreenState extends State<QuranScreen>
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.menu_book_rounded, size: 18),
+                          Image.asset(
+                            'assets/images/icon_3d_quran.png',
+                            width: 20,
+                            height: 20,
+                            fit: BoxFit.contain,
+                          ),
                           AppSpacing.horizontalXs,
                           Text('السور (${filteredSurahs.length})'),
                         ],
@@ -273,7 +278,12 @@ class _QuranScreenState extends State<QuranScreen>
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.format_list_numbered_rtl_rounded, size: 18),
+                          Image.asset(
+                            'assets/images/icon_3d_khatma_circles.png',
+                            width: 20,
+                            height: 20,
+                            fit: BoxFit.contain,
+                          ),
                           AppSpacing.horizontalXs,
                           Text('الأجزاء (${filteredJuz.length})'),
                         ],

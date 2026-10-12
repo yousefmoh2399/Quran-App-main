@@ -30,12 +30,13 @@ class DailyQuranWordCard extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: colors.accent.withValues(alpha: 0.15),
-                    shape: BoxShape.circle,
+                  padding: const EdgeInsets.all(4),
+                  child: Image.asset(
+                    'assets/images/icon_3d_quran.png',
+                    width: 32,
+                    height: 32,
+                    fit: BoxFit.contain,
                   ),
-                  child: Icon(Icons.menu_book_rounded, color: colors.accent, size: 20),
                 ),
                 const SizedBox(width: 10),
                 Expanded(

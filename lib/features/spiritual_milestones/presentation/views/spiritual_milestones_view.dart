@@ -127,6 +127,7 @@ class _SpiritualMilestonesViewState extends State<SpiritualMilestonesView> {
             Expanded(
               child: _buildTabButton(
                 title: 'بستان الغِراس',
+                imageAsset: 'assets/images/icon_3d_tasbeeh.png',
                 icon: Icons.park_outlined,
                 isSelected: currentTab == 0,
                 onTap: () => _controller.setTab(0),
@@ -137,6 +138,7 @@ class _SpiritualMilestonesViewState extends State<SpiritualMilestonesView> {
             Expanded(
               child: _buildTabButton(
                 title: 'الميزان التراكمي',
+                imageAsset: 'assets/images/icon_3d_prayer_clock.png',
                 icon: Icons.bar_chart_rounded,
                 isSelected: currentTab == 1,
                 onTap: () => _controller.setTab(1),
@@ -147,6 +149,7 @@ class _SpiritualMilestonesViewState extends State<SpiritualMilestonesView> {
             Expanded(
               child: _buildTabButton(
                 title: 'أوسمة الإنجاز',
+                imageAsset: 'assets/images/icon_3d_card_studio.png',
                 icon: Icons.military_tech_outlined,
                 isSelected: currentTab == 2,
                 onTap: () => _controller.setTab(2),
@@ -161,6 +164,7 @@ class _SpiritualMilestonesViewState extends State<SpiritualMilestonesView> {
 
   Widget _buildTabButton({
     required String title,
+    String? imageAsset,
     required IconData icon,
     required bool isSelected,
     required VoidCallback onTap,
@@ -178,11 +182,19 @@ class _SpiritualMilestonesViewState extends State<SpiritualMilestonesView> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 15,
-              color: isSelected ? Colors.white : colors.textSecondary,
-            ),
+            if (imageAsset != null)
+              Image.asset(
+                imageAsset,
+                width: 20,
+                height: 20,
+                fit: BoxFit.contain,
+              )
+            else
+              Icon(
+                icon,
+                size: 15,
+                color: isSelected ? Colors.white : colors.textSecondary,
+              ),
             const SizedBox(width: 4),
             Flexible(
               child: Text(

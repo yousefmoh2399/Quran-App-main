@@ -244,13 +244,11 @@ class _PostPrayerAzkarViewState extends State<PostPrayerAzkarView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: colors.primary.withOpacity(0.12),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.check_circle_rounded, size: 72, color: colors.primary),
+            Image.asset(
+              'assets/images/icon_3d_tasbeeh.png',
+              width: 88,
+              height: 88,
+              fit: BoxFit.contain,
             ),
             AppSpacing.verticalLg,
             const Text(

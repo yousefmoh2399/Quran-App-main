@@ -51,13 +51,18 @@ class _SmartZikrCardState extends State<SmartZikrCard> {
               Expanded(
                 child: Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: colors.primary.withOpacity(0.12),
-                        shape: BoxShape.circle,
+                    SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: Image.asset(
+                        'assets/images/icon_3d_tasbeeh.png',
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => Icon(
+                          _currentZikr.type.icon,
+                          color: colors.primary,
+                          size: 18,
+                        ),
                       ),
-                      child: Icon(_currentZikr.type.icon, color: colors.primary, size: 18),
                     ),
                     const SizedBox(width: 8),
                     Expanded(

@@ -96,14 +96,19 @@ class _TravelerCompanionViewState extends State<TravelerCompanionView>
                 fontWeight: FontWeight.w600,
                 fontSize: 12.0,
               ),
-              tabs: const [
+              tabs: [
                 Tab(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.timer_outlined, size: 15.0),
-                      SizedBox(width: 4),
-                      Text('مؤقت المسح'),
+                      Image.asset(
+                        'assets/images/icon_3d_prayer_clock.png',
+                        width: 18,
+                        height: 18,
+                        fit: BoxFit.contain,
+                      ),
+                      const SizedBox(width: 4),
+                      const Text('مؤقت المسح'),
                     ],
                   ),
                 ),
@@ -111,9 +116,14 @@ class _TravelerCompanionViewState extends State<TravelerCompanionView>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.menu_book_rounded, size: 15.0),
-                      SizedBox(width: 4),
-                      Text('دليل الرخص'),
+                      Image.asset(
+                        'assets/images/icon_3d_quran.png',
+                        width: 18,
+                        height: 18,
+                        fit: BoxFit.contain,
+                      ),
+                      const SizedBox(width: 4),
+                      const Text('دليل الرخص'),
                     ],
                   ),
                 ),
@@ -121,9 +131,14 @@ class _TravelerCompanionViewState extends State<TravelerCompanionView>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.favorite_outline_rounded, size: 15.0),
-                      SizedBox(width: 4),
-                      Text('أدعية السفر'),
+                      Image.asset(
+                        'assets/images/icon_3d_travel.png',
+                        width: 18,
+                        height: 18,
+                        fit: BoxFit.contain,
+                      ),
+                      const SizedBox(width: 4),
+                      const Text('أدعية السفر'),
                     ],
                   ),
                 ),

@@ -383,21 +383,36 @@ class _RuqyahViewState extends State<RuqyahView> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: colors.primary.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(AppRadius.sm),
-                      ),
-                      child: Text(
-                        item.source == RuqyahSource.quran ? 'آية قرآنية كريمة' : 'دعاء نبوي مأثور',
-                        style: TextStyle(
-                          fontFamily: AppTypography.uiFont,
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: colors.primary,
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: Image.asset(
+                            item.source == RuqyahSource.quran
+                                ? 'assets/images/icon_3d_quran.png'
+                                : 'assets/images/icon_3d_praying_hands.png',
+                            fit: BoxFit.contain,
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: colors.primary.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(AppRadius.sm),
+                          ),
+                          child: Text(
+                            item.source == RuqyahSource.quran ? 'آية قرآنية كريمة' : 'دعاء نبوي مأثور',
+                            style: TextStyle(
+                              fontFamily: AppTypography.uiFont,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: colors.primary,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     Text(
                       item.sourceReference,

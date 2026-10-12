@@ -32,16 +32,17 @@ class DailyTadabburCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: colors.primary.withOpacity(0.12),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.menu_book_rounded,
-                      color: colors.primary,
-                      size: 18,
+                  SizedBox(
+                    width: 26,
+                    height: 26,
+                    child: Image.asset(
+                      'assets/images/icon_3d_quran.png',
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => Icon(
+                        Icons.menu_book_rounded,
+                        color: colors.primary,
+                        size: 20,
+                      ),
                     ),
                   ),
                   AppSpacing.horizontalXs,

@@ -9,12 +9,14 @@ import 'package:quran_app_android/core/util/routes/routes.dart';
 class _SectionItem {
   final String title;
   final String subtitle;
+  final String imageAsset;
   final IconData icon;
   final String route;
 
   const _SectionItem({
     required this.title,
     required this.subtitle,
+    required this.imageAsset,
     required this.icon,
     required this.route,
   });
@@ -27,72 +29,84 @@ class HomeSectionsGrid extends StatelessWidget {
     _SectionItem(
       title: 'القرآن الكريم',
       subtitle: 'سور وأجزاء',
+      imageAsset: 'assets/images/icon_3d_quran.png',
       icon: Icons.menu_book_rounded,
       route: AppRoutes.quranScreen,
     ),
     _SectionItem(
       title: 'حصن المسلم',
       subtitle: 'أذكار وأدعية',
+      imageAsset: 'assets/images/icon_3d_praying_hands.png',
       icon: Icons.spa_rounded,
       route: AppRoutes.azkar,
     ),
     _SectionItem(
       title: 'مواقيت الصلاة',
       subtitle: 'الأذان والإقامة',
+      imageAsset: 'assets/images/icon_3d_prayer_clock.png',
       icon: Icons.access_time_rounded,
       route: AppRoutes.adhan,
     ),
     _SectionItem(
       title: 'اتجاه القبلة',
       subtitle: 'بوصلة الكعبة',
+      imageAsset: 'assets/images/icon_3d_qiblah.png',
       icon: Icons.explore_rounded,
       route: AppRoutes.qiblah,
     ),
     _SectionItem(
       title: 'الحديث النبوي',
       subtitle: 'موطأ مالك',
+      imageAsset: 'assets/images/icon_3d_hadith.png',
       icon: Icons.auto_stories_rounded,
       route: AppRoutes.sectionHadith,
     ),
     _SectionItem(
       title: 'أسماء الله الحسنى',
       subtitle: 'معاني وشروح',
+      imageAsset: 'assets/images/icon_3d_names99.png',
       icon: Icons.stars_rounded,
       route: AppRoutes.nameofAllah,
     ),
     _SectionItem(
       title: 'التفسير الميسر',
       subtitle: 'تفسير الآيات',
+      imageAsset: 'assets/images/icon_3d_quran.png',
       icon: Icons.library_books_rounded,
       route: AppRoutes.tafsser,
     ),
     _SectionItem(
       title: 'السبحة الإلكترونية',
       subtitle: 'عداد التسبيح',
+      imageAsset: 'assets/images/icon_3d_tasbeeh.png',
       icon: Icons.fingerprint_rounded,
       route: AppRoutes.pngTree,
     ),
     _SectionItem(
       title: 'علاماتي',
       subtitle: 'علامات ومحفوظات',
+      imageAsset: 'assets/images/icon_3d_khatma_circles.png',
       icon: Icons.bookmark_added_rounded,
       route: AppRoutes.bookmarks,
     ),
     _SectionItem(
       title: 'سجل الصلوات',
       subtitle: 'تسجيل وقضاء',
+      imageAsset: 'assets/images/icon_3d_prayer_clock.png',
       icon: Icons.fact_check_rounded,
       route: AppRoutes.prayerTracker,
     ),
     _SectionItem(
       title: 'التقويم الهجري',
       subtitle: 'مناسبات وصيام',
+      imageAsset: 'assets/images/icon_3d_calendar.png',
       icon: Icons.calendar_month_rounded,
       route: AppRoutes.islamicCalendar,
     ),
     _SectionItem(
       title: 'إنجازاتي',
       subtitle: 'شارات وأوسمة',
+      imageAsset: 'assets/images/icon_3d_card_studio.png',
       icon: Icons.military_tech_rounded,
       route: AppRoutes.achievements,
     ),
@@ -135,19 +149,23 @@ class HomeSectionsGrid extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Container(
-                          width: 42,
-                          height: 42,
+                          width: 44,
+                          height: 44,
                           decoration: BoxDecoration(
-                            color: colors.primary.withOpacity(0.12),
+                            color: colors.primary.withOpacity(0.08),
                             borderRadius: AppRadius.borderMd,
-                            border: Border.all(
-                              color: colors.primary.withOpacity(0.18),
-                            ),
                           ),
-                          child: Icon(
-                            item.icon,
-                            color: colors.primary,
-                            size: 22,
+                          child: Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: Image.asset(
+                              item.imageAsset,
+                              fit: BoxFit.contain,
+                              errorBuilder: (_, __, ___) => Icon(
+                                item.icon,
+                                color: colors.primary,
+                                size: 22,
+                              ),
+                            ),
                           ),
                         ),
                         Icon(

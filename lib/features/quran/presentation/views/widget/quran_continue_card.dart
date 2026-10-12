@@ -67,11 +67,12 @@ class QuranContinueReadingCard extends StatelessWidget {
                       color: Colors.white.withOpacity(0.18),
                       borderRadius: AppRadius.borderMd,
                     ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.auto_stories_rounded,
-                        color: Colors.white,
-                        size: 24,
+                    child: Center(
+                      child: Image.asset(
+                        'assets/images/icon_3d_quran.png',
+                        width: 32,
+                        height: 32,
+                        fit: BoxFit.contain,
                       ),
                     ),
                   ),

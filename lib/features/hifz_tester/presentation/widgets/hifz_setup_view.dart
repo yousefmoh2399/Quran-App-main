@@ -129,15 +129,12 @@ class HifzSetupView extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: colors.primary.withValues(alpha: 0.15),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.psychology_alt_rounded,
-              size: 32,
-              color: colors.primary,
+            padding: const EdgeInsets.all(4),
+            child: Image.asset(
+              'assets/images/icon_3d_hifz_tester.png',
+              width: 52,
+              height: 52,
+              fit: BoxFit.contain,
             ),
           ),
           const SizedBox(width: 14),

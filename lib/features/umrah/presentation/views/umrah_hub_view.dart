@@ -90,6 +90,7 @@ class _UmrahHubViewState extends State<UmrahHubView> {
                 _buildHubTile(
                   title: 'دليل مناسك العمرة خطوة بخطوة',
                   subtitle: 'الإحرام، الطواف، الركعتان، السعي، والحلق أو التقصير',
+                  imageAsset: 'assets/images/icon_3d_qiblah.png',
                   icon: Icons.auto_stories_rounded,
                   iconColor: primaryColor,
                   onTap: () => Get.toNamed(AppRoutes.umrahGuide, arguments: const {'guideId': 'umrah'}),
@@ -105,6 +106,7 @@ class _UmrahHubViewState extends State<UmrahHubView> {
                 _buildHubTile(
                   title: 'دليل مناسك الحج خطوة بخطوة',
                   subtitle: 'يوم التروية، عرفة، مزدلفة، يوم النحر، التشريق، وطواف الوداع',
+                  imageAsset: 'assets/images/icon_3d_qiblah.png',
                   icon: Icons.mosque_rounded,
                   iconColor: const Color(0xFF1B5E20),
                   onTap: () => Get.toNamed(AppRoutes.hajjGuide, arguments: const {'guideId': 'hajj'}),
@@ -120,6 +122,7 @@ class _UmrahHubViewState extends State<UmrahHubView> {
                 _buildHubTile(
                   title: 'عدّاد الطواف التفاعلي (7 أشواط)',
                   subtitle: 'طواف العمرة والقدوم والإفاضة والوداع والتطوع مع حفظ تلقائي',
+                  imageAsset: 'assets/images/icon_3d_tasbeeh.png',
                   icon: Icons.rotate_right_rounded,
                   iconColor: colors.accent,
                   onTap: () => Get.toNamed(AppRoutes.tawafCounter),
@@ -135,6 +138,7 @@ class _UmrahHubViewState extends State<UmrahHubView> {
                 _buildHubTile(
                   title: 'عدّاد السعي (الصفا والمروة)',
                   subtitle: 'سعي العمرة وسعي الحج وتنبيه الميلين الأخضرين مع حفظ تلقائي',
+                  imageAsset: 'assets/images/icon_3d_praying_hands.png',
                   icon: Icons.directions_walk_rounded,
                   iconColor: Colors.green.shade700,
                   onTap: () => Get.toNamed(AppRoutes.saiCounter),
@@ -150,6 +154,7 @@ class _UmrahHubViewState extends State<UmrahHubView> {
                 _buildHubTile(
                   title: 'أدعية وأذكار الحج والعمرة المأثورة',
                   subtitle: 'أدعية الطواف والسعي ويوم عرفة والتلبية مع عداد التكرار وحفظ النص',
+                  imageAsset: 'assets/images/icon_3d_praying_hands.png',
                   icon: Icons.menu_book_rounded,
                   iconColor: const Color(0xFFC5A059),
                   onTap: () => Get.toNamed(AppRoutes.hajjUmrahDuas),
@@ -165,6 +170,7 @@ class _UmrahHubViewState extends State<UmrahHubView> {
                 _buildHubTile(
                   title: 'محظورات الإحرام وأحكام الفدية',
                   subtitle: 'بيان شرعي مفصل لما يحرم على المحرم وأحكام الكفارات والأعذار',
+                  imageAsset: 'assets/images/icon_3d_hifz_tester.png',
                   icon: Icons.rule_rounded,
                   iconColor: Colors.teal.shade700,
                   onTap: () => Get.toNamed(AppRoutes.ihramProhibitions),
@@ -180,6 +186,7 @@ class _UmrahHubViewState extends State<UmrahHubView> {
                 _buildHubTile(
                   title: 'حقيبة وتجهيزات الحاج والمعتمر',
                   subtitle: 'قائمة تفاعلية لحقيبة السفر وملابس الإحرام والمستندات والسنن',
+                  imageAsset: 'assets/images/icon_3d_travel.png',
                   icon: Icons.checklist_rtl_rounded,
                   iconColor: Colors.indigo.shade600,
                   onTap: () => Get.toNamed(AppRoutes.pilgrimChecklist),
@@ -195,6 +202,7 @@ class _UmrahHubViewState extends State<UmrahHubView> {
                 _buildHubTile(
                   title: 'معالم الحرمين الشريفين وآداب الزيارة',
                   subtitle: 'دليل تفاعلي للكعبة والمقام والحجر والروضة الشريفة والبقيع والسنن والآداب',
+                  imageAsset: 'assets/images/icon_3d_qiblah.png',
                   icon: Icons.mosque_rounded,
                   iconColor: const Color(0xFFC5A059),
                   onTap: () => Get.toNamed(AppRoutes.landmarksGuide),
@@ -210,6 +218,7 @@ class _UmrahHubViewState extends State<UmrahHubView> {
                 _buildHubTile(
                   title: 'تقديرات أوقات الزحام بالحرم والمشاعر',
                   subtitle: 'أنماط استرشادية تقريبية لأفضل أوقات الطواف والسعي والمناسك',
+                  imageAsset: 'assets/images/icon_3d_prayer_clock.png',
                   icon: Icons.access_time_rounded,
                   iconColor: Colors.blue.shade700,
                   onTap: () => Get.toNamed(AppRoutes.umrahEstimates),
@@ -225,6 +234,7 @@ class _UmrahHubViewState extends State<UmrahHubView> {
                 _buildHubTile(
                   title: 'مساعد المسافر ورخص السفر',
                   subtitle: 'مؤقت المسح على الخفين، الجمع والقصر، وأدعية السفر',
+                  imageAsset: 'assets/images/icon_3d_travel.png',
                   icon: Icons.flight_takeoff_rounded,
                   iconColor: const Color(0xFF2E7D32),
                   onTap: () => Get.toNamed(AppRoutes.travelerCompanion),
@@ -240,6 +250,7 @@ class _UmrahHubViewState extends State<UmrahHubView> {
                 _buildHubTile(
                   title: 'يوميات وخواطر الرحلة',
                   subtitle: 'سجّل مشاعرك وأدعيتك محلياً مع البحث والتصنيف',
+                  imageAsset: 'assets/images/icon_3d_card_studio.png',
                   icon: Icons.edit_note_rounded,
                   iconColor: Colors.purple.shade700,
                   onTap: () => Get.toNamed(AppRoutes.umrahDiary),
@@ -255,6 +266,7 @@ class _UmrahHubViewState extends State<UmrahHubView> {
                 _buildHubTile(
                   title: 'المصادر والتدقيق الشرعي',
                   subtitle: 'بيان المصادر والمراجع وتواريخ التدقيق لكل محتوى',
+                  imageAsset: 'assets/images/icon_3d_quran.png',
                   icon: Icons.verified_user_rounded,
                   iconColor: colors.accent,
                   onTap: () => Get.toNamed(AppRoutes.umrahSources),
@@ -477,6 +489,7 @@ class _UmrahHubViewState extends State<UmrahHubView> {
   Widget _buildHubTile({
     required String title,
     required String subtitle,
+    String? imageAsset,
     required IconData icon,
     required Color iconColor,
     required VoidCallback onTap,
@@ -497,10 +510,27 @@ class _UmrahHubViewState extends State<UmrahHubView> {
         ),
         child: Row(
           children: [
-            CircleAvatar(
-              radius: isElderly ? 26 : 22,
-              backgroundColor: iconColor.withAlpha(25),
-              child: Icon(icon, color: iconColor, size: isElderly ? 26 : 22),
+            Container(
+              width: isElderly ? 52 : 44,
+              height: isElderly ? 52 : 44,
+              decoration: BoxDecoration(
+                color: iconColor.withAlpha(imageAsset != null ? 18 : 25),
+                shape: BoxShape.circle,
+              ),
+              child: imageAsset != null
+                  ? Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Image.asset(
+                        imageAsset,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => Icon(
+                          icon,
+                          color: iconColor,
+                          size: isElderly ? 26 : 22,
+                        ),
+                      ),
+                    )
+                  : Icon(icon, color: iconColor, size: isElderly ? 26 : 22),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(

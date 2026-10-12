@@ -61,11 +61,47 @@ class _RamadanDuasViewState extends State<RamadanDuasView> with SingleTickerProv
           labelColor: colors.primary,
           unselectedLabelColor: colors.textMuted,
           indicatorColor: colors.primary,
-          tabs: const [
-            Tab(text: 'أدعية الأيام الـ 30'),
-            Tab(text: 'العشر الأواخر وليلة القدر'),
-            Tab(text: 'دعاء القنوت والوتر'),
-            Tab(text: 'أذكار الصائم وسننه'),
+          tabs: [
+            Tab(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset('assets/images/icon_3d_calendar.png', width: 18, height: 18, fit: BoxFit.contain),
+                  const SizedBox(width: 6),
+                  const Text('أدعية الأيام الـ 30'),
+                ],
+              ),
+            ),
+            Tab(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset('assets/images/icon_3d_lantern.png', width: 18, height: 18, fit: BoxFit.contain),
+                  const SizedBox(width: 6),
+                  const Text('العشر الأواخر وليلة القدر'),
+                ],
+              ),
+            ),
+            Tab(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset('assets/images/icon_3d_praying_hands.png', width: 18, height: 18, fit: BoxFit.contain),
+                  const SizedBox(width: 6),
+                  const Text('دعاء القنوت والوتر'),
+                ],
+              ),
+            ),
+            Tab(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset('assets/images/icon_3d_tasbeeh.png', width: 18, height: 18, fit: BoxFit.contain),
+                  const SizedBox(width: 6),
+                  const Text('أذكار الصائم وسننه'),
+                ],
+              ),
+            ),
           ],
         ),
       ),

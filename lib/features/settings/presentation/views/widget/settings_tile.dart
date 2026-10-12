@@ -6,6 +6,7 @@ import 'package:quran_app_android/core/design/app_typography.dart';
 
 class SettingsTile extends StatelessWidget {
   final IconData icon;
+  final String? imageAsset;
   final String title;
   final String? subtitle;
   final Widget? trailing;
@@ -15,6 +16,7 @@ class SettingsTile extends StatelessWidget {
   const SettingsTile({
     super.key,
     required this.icon,
+    this.imageAsset,
     required this.title,
     this.subtitle,
     this.trailing,
@@ -43,14 +45,27 @@ class SettingsTile extends StatelessWidget {
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color: effectiveIconColor.withOpacity(0.12),
+                  color: effectiveIconColor.withOpacity(imageAsset != null ? 0.08 : 0.12),
                   borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
-                child: Icon(
-                  icon,
-                  size: 20,
-                  color: effectiveIconColor,
-                ),
+                child: imageAsset != null
+                    ? Padding(
+                        padding: const EdgeInsets.all(3.0),
+                        child: Image.asset(
+                          imageAsset!,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) => Icon(
+                            icon,
+                            size: 20,
+                            color: effectiveIconColor,
+                          ),
+                        ),
+                      )
+                    : Icon(
+                        icon,
+                        size: 20,
+                        color: effectiveIconColor,
+                      ),
               ),
               AppSpacing.horizontalMd,
               Expanded(

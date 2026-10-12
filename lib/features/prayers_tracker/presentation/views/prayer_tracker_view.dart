@@ -204,6 +204,13 @@ class _PrayerTrackerViewState extends State<PrayerTrackerView> {
       ),
       child: Row(
         children: [
+          Image.asset(
+            'assets/images/icon_3d_prayer_clock.png',
+            width: 44,
+            height: 44,
+            fit: BoxFit.contain,
+          ),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

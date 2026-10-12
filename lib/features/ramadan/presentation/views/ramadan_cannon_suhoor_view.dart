@@ -138,10 +138,15 @@ class _RamadanCannonSuhoorViewState extends State<RamadanCannonSuhoorView> {
                     children: [
                       Expanded(
                         child: Row(
-                          children: const [
-                            Icon(Icons.flare_rounded, color: Color(0xFFD4AF37), size: 24),
-                            SizedBox(width: 8),
-                            Expanded(
+                          children: [
+                            Image.asset(
+                              'assets/images/icon_3d_lantern.png',
+                              width: 28,
+                              height: 28,
+                              fit: BoxFit.contain,
+                            ),
+                            const SizedBox(width: 8),
+                            const Expanded(
                               child: Text(
                                 'مدفع الإفطار التفاعلي',
                                 overflow: TextOverflow.ellipsis,
@@ -207,7 +212,12 @@ class _RamadanCannonSuhoorViewState extends State<RamadanCannonSuhoorView> {
                       Expanded(
                         child: Row(
                           children: [
-                            Icon(Icons.alarm_on_rounded, color: colors.primary, size: 22),
+                            Image.asset(
+                              'assets/images/icon_3d_prayer_clock.png',
+                              width: 26,
+                              height: 26,
+                              fit: BoxFit.contain,
+                            ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(

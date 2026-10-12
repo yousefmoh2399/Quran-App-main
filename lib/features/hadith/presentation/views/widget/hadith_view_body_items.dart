@@ -62,7 +62,14 @@ class HadithViewBodyItems extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
                     ),
-              )
+              ),
+              const SizedBox(width: 8),
+              Image.asset(
+                'assets/images/icon_3d_hadith.png',
+                width: 32,
+                height: 32,
+                fit: BoxFit.contain,
+              ),
             ],
           ),
         ),

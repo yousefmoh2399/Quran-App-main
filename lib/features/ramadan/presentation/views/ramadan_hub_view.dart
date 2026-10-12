@@ -140,7 +140,12 @@ class _RamadanHubViewState extends State<RamadanHubView> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      const Icon(Icons.nights_stay_rounded, color: Color(0xFFD4AF37), size: 32),
+                      Image.asset(
+                        'assets/images/icon_3d_lantern.png',
+                        width: 44,
+                        height: 44,
+                        fit: BoxFit.contain,
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -237,10 +242,11 @@ class _RamadanHubViewState extends State<RamadanHubView> {
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.volunteer_activism_rounded,
-                    color: colors.isDark ? const Color(0xFFD4AF37) : const Color(0xFF09261E),
-                    size: 24,
+                  Image.asset(
+                    'assets/images/icon_3d_praying_hands.png',
+                    width: 28,
+                    height: 28,
+                    fit: BoxFit.contain,
                   ),
                   const SizedBox(width: 10),
                   Expanded(
@@ -318,6 +324,7 @@ class _RamadanHubViewState extends State<RamadanHubView> {
                     _buildMenuCard(
                       title: 'إمساكية رمضان الذكية',
                       subtitle: 'جدول الـ 30 يوماً ومواعيد الإمساك والإفطار',
+                      imageAsset: 'assets/images/icon_3d_calendar.png',
                       icon: Icons.calendar_month_rounded,
                       iconColor: Colors.teal,
                       badgeIcon: Icons.nights_stay_rounded,
@@ -326,6 +333,7 @@ class _RamadanHubViewState extends State<RamadanHubView> {
                     _buildMenuCard(
                       title: 'مخطط ختمة رمضان',
                       subtitle: 'متابعة الورد اليومي والصفحات والتقدم',
+                      imageAsset: 'assets/images/icon_3d_quran.png',
                       icon: Icons.auto_stories_rounded,
                       iconColor: Colors.amber.shade800,
                       badgeIcon: Icons.menu_book_rounded,
@@ -334,6 +342,7 @@ class _RamadanHubViewState extends State<RamadanHubView> {
                     _buildMenuCard(
                       title: 'مدفع الإفطار وتنبيه السحور',
                       subtitle: 'مدفع رمضان التراثي ومنبه وقت السحور',
+                      imageAsset: 'assets/images/icon_3d_lantern.png',
                       icon: Icons.notifications_active_rounded,
                       iconColor: Colors.deepOrange,
                       badgeIcon: Icons.flare_rounded,
@@ -342,6 +351,7 @@ class _RamadanHubViewState extends State<RamadanHubView> {
                     _buildMenuCard(
                       title: 'عدّاد صلاة التراويح',
                       subtitle: 'متابعة ركعات التراويح والشفع والوتر',
+                      imageAsset: 'assets/images/icon_3d_prayer_clock.png',
                       icon: Icons.fingerprint_rounded,
                       iconColor: Colors.indigo,
                       badgeIcon: Icons.accessibility_new_rounded,
@@ -350,6 +360,7 @@ class _RamadanHubViewState extends State<RamadanHubView> {
                     _buildMenuCard(
                       title: 'أدعية رمضان وليلة القدر',
                       subtitle: 'أدعية الأيام الـ 30 والعشر الأواخر والقنوت',
+                      imageAsset: 'assets/images/icon_3d_praying_hands.png',
                       icon: Icons.menu_book_rounded,
                       iconColor: Colors.purple,
                       badgeIcon: Icons.volunteer_activism_rounded,
@@ -358,6 +369,7 @@ class _RamadanHubViewState extends State<RamadanHubView> {
                     _buildMenuCard(
                       title: 'حاسبة الزكاة الذكية',
                       subtitle: 'حساب زكاة المرتب وسعر الذهب والمال ومقترح الصدقة',
+                      imageAsset: 'assets/images/icon_3d_card_studio.png',
                       icon: Icons.calculate_rounded,
                       iconColor: Colors.green.shade700,
                       badgeIcon: Icons.balance_rounded,
@@ -366,6 +378,7 @@ class _RamadanHubViewState extends State<RamadanHubView> {
                     _buildMenuCard(
                       title: 'ختمة العائلة الجماعية',
                       subtitle: 'توزيع الأجزاء الـ 30 ومتابعة الختمة مع الأسرة والأصدقاء',
+                      imageAsset: 'assets/images/icon_3d_khatma_circles.png',
                       icon: Icons.groups_rounded,
                       iconColor: const Color(0xFFB8860B),
                       badgeIcon: Icons.share_rounded,
@@ -384,6 +397,7 @@ class _RamadanHubViewState extends State<RamadanHubView> {
   Widget _buildMenuCard({
     required String title,
     required String subtitle,
+    String? imageAsset,
     required IconData icon,
     required Color iconColor,
     required IconData badgeIcon,
@@ -416,12 +430,20 @@ class _RamadanHubViewState extends State<RamadanHubView> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    width: 42,
+                    height: 42,
+                    padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: iconColor.withOpacity(0.12),
+                      color: iconColor.withOpacity(imageAsset != null ? 0.08 : 0.12),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Icon(icon, color: iconColor, size: 22),
+                    child: imageAsset != null
+                        ? Image.asset(
+                            imageAsset,
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, __, ___) => Icon(icon, color: iconColor, size: 22),
+                          )
+                        : Icon(icon, color: iconColor, size: 22),
                   ),
                   Icon(badgeIcon, color: iconColor.withOpacity(0.6), size: 18),
                 ],

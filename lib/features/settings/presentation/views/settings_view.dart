@@ -48,18 +48,21 @@ class SettingsView extends StatelessWidget {
               children: [
                 SettingsTile(
                   icon: Icons.fact_check_rounded,
+                  imageAsset: 'assets/images/icon_3d_prayer_clock.png',
                   title: 'سجل الصلوات وقضاء الفوائت',
                   subtitle: 'تسجيل الصلوات اليومية ونسب الالتزام',
                   onTap: () => Get.toNamed(AppRoutes.prayerTracker),
                 ),
                 SettingsTile(
                   icon: Icons.calendar_today_rounded,
+                  imageAsset: 'assets/images/icon_3d_calendar.png',
                   title: 'التقويم الهجري والمناسبات',
                   subtitle: 'المناسبات الإسلامية، صيام السنن، وتحويل التاريخ',
                   onTap: () => Get.toNamed(AppRoutes.islamicCalendar),
                 ),
                 SettingsTile(
                   icon: Icons.nightlight_round,
+                  imageAsset: 'assets/images/icon_3d_lantern.png',
                   iconColor: const Color(0xFFD4AF37),
                   title: 'واحة رمضان المبارك',
                   subtitle: 'الإمساكية، الختمة، مدفع الإفطار، التراويح، وحاسبة الزكاة',
@@ -76,6 +79,7 @@ class SettingsView extends StatelessWidget {
                 ),
                 SettingsTile(
                   icon: Icons.mosque_rounded,
+                  imageAsset: 'assets/images/icon_3d_qiblah.png',
                   iconColor: const Color(0xFF0F5C4A),
                   title: 'رفيق المعتمر (مناسك العمرة)',
                   subtitle: 'دليل الخطوات، عداد الطواف والسعي، الأدعية، ويوميات الرحلة',
@@ -84,6 +88,7 @@ class SettingsView extends StatelessWidget {
                 ),
                 SettingsTile(
                   icon: Icons.flight_takeoff_rounded,
+                  imageAsset: 'assets/images/icon_3d_travel.png',
                   iconColor: const Color(0xFF2E7D32),
                   title: 'مساعد المسافر ورخص السفر',
                   subtitle: 'مؤقت المسح على الخفين، دليل الجمع والقصر، وأدعية السفر',
@@ -92,18 +97,21 @@ class SettingsView extends StatelessWidget {
                 ),
                 SettingsTile(
                   icon: Icons.radio_button_checked_rounded,
+                  imageAsset: 'assets/images/icon_3d_tasbeeh.png',
                   title: 'أذكار ما بعد الصلاة المفروضة',
                   subtitle: 'التسبيح والتحميد والتكبير بعد الفريضة',
                   onTap: () => Get.toNamed(AppRoutes.postPrayerAzkar),
                 ),
                 SettingsTile(
                   icon: Icons.library_books_rounded,
+                  imageAsset: 'assets/images/icon_3d_quran.png',
                   title: 'التفسير الميسر',
                   subtitle: 'تفسير ومعاني آيات وسور القرآن الكريم',
                   onTap: () => Get.toNamed(AppRoutes.tafsser),
                 ),
                 SettingsTile(
                   icon: Icons.military_tech_rounded,
+                  imageAsset: 'assets/images/icon_3d_card_studio.png',
                   title: 'إنجازاتي وأوسمة القراءة',
                   subtitle: 'متابعة الختمات وأيام الالتزام المستمر',
                   onTap: () => Get.toNamed(AppRoutes.achievements),
@@ -118,6 +126,7 @@ class SettingsView extends StatelessWidget {
               children: [
                 SettingsTile(
                   icon: Icons.healing_rounded,
+                  imageAsset: 'assets/images/icon_3d_praying_hands.png',
                   iconColor: const Color(0xFF0F5C4A),
                   title: 'الرقية الشرعية التفاعلية الموجهة',
                   subtitle: 'رقية موجهة بلمس الشاشة، عداد التكرار، واهتزاز هادئ للتركيز',
@@ -126,6 +135,7 @@ class SettingsView extends StatelessWidget {
                 ),
                 SettingsTile(
                   icon: Icons.timeline_rounded,
+                  imageAsset: 'assets/images/icon_3d_hadith.png',
                   iconColor: const Color(0xFFD4AF37),
                   title: 'الخط الزمني للسيرة النبوية العطرة',
                   subtitle: 'محطات السيرة التفاعلية، أبطال المواقف، ويوم في حياة النبي ﷺ',
@@ -134,6 +144,7 @@ class SettingsView extends StatelessWidget {
                 ),
                 SettingsTile(
                   icon: Icons.park_rounded,
+                  imageAsset: 'assets/images/icon_3d_tasbeeh.png',
                   iconColor: const Color(0xFF2E7D32),
                   title: 'ميزان الحسنات وغِراس الجنة التراكمي',
                   subtitle: 'سجل الأذكار مدى الحياة، شجرة في الجنة لكل 1,000 ذكر، وأوسمة الإنجاز',
@@ -142,6 +153,7 @@ class SettingsView extends StatelessWidget {
                 ),
                 SettingsTile(
                   icon: Icons.eco_rounded,
+                  imageAsset: 'assets/images/icon_3d_praying_hands.png',
                   iconColor: const Color(0xFF1B5E20),
                   title: 'الطب النبوي والأغذية القرآنية',
                   subtitle: 'موسوعة الأغذية، الإعجاز العلمي المثبت، ووصفات منزلية كالتلبينة',
@@ -150,6 +162,7 @@ class SettingsView extends StatelessWidget {
                 ),
                 SettingsTile(
                   icon: Icons.accessibility_new_rounded,
+                  imageAsset: 'assets/images/icon_3d_prayer_clock.png',
                   iconColor: colors.primary,
                   title: 'دليل الصلوات الخاصة خطوة بخطوة',
                   subtitle: 'صلاة الجنازة بالتكبيرات الأربع، الاستخارة، الكسوف، التوبة، وأحكام السجدات',

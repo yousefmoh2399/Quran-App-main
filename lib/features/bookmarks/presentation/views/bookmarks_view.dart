@@ -65,7 +65,7 @@ class BookmarksView extends StatelessWidget {
                 fontWeight: FontWeight.normal,
                 fontSize: 12.5,
               ),
-              tabs: const [
+              tabs: [
                 Tab(
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
@@ -73,9 +73,13 @@ class BookmarksView extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.bookmark_rounded, size: 15.0),
-                        SizedBox(width: 4.0),
-                        Text('علامات'),
+                        Image.asset(
+                          'assets/images/icon_3d_quran.png',
+                          width: 17.0,
+                          height: 17.0,
+                        ),
+                        const SizedBox(width: 5.0),
+                        const Text('علامات'),
                       ],
                     ),
                   ),
@@ -87,9 +91,13 @@ class BookmarksView extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.workspace_premium_rounded, size: 15.0),
-                        SizedBox(width: 4.0),
-                        Text('محفوظاتي'),
+                        Image.asset(
+                          'assets/images/icon_3d_hifz_tester.png',
+                          width: 17.0,
+                          height: 17.0,
+                        ),
+                        const SizedBox(width: 5.0),
+                        const Text('محفوظاتي'),
                       ],
                     ),
                   ),
@@ -101,9 +109,13 @@ class BookmarksView extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.history_edu_rounded, size: 15.0),
-                        SizedBox(width: 4.0),
-                        Text('الورد وسجل القراءة'),
+                        Image.asset(
+                          'assets/images/icon_3d_prayer_clock.png',
+                          width: 17.0,
+                          height: 17.0,
+                        ),
+                        const SizedBox(width: 5.0),
+                        const Text('الورد وسجل القراءة'),
                       ],
                     ),
                   ),
@@ -115,9 +127,13 @@ class BookmarksView extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.auto_stories_rounded, size: 15.0),
-                        SizedBox(width: 4.0),
-                        Text('الأحاديث'),
+                        Image.asset(
+                          'assets/images/icon_3d_hadith.png',
+                          width: 17.0,
+                          height: 17.0,
+                        ),
+                        const SizedBox(width: 5.0),
+                        const Text('الأحاديث'),
                       ],
                     ),
                   ),
