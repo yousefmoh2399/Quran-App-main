@@ -220,4 +220,32 @@ class NativeAdhanBridge {
       return false;
     }
   }
+
+  /// Updates the native Android RemoteViews lock screen & notification banner with custom luxury colors.
+  static Future<bool> updateLockScreenBanner(Map<String, dynamic> data) async {
+    if (Platform.isIOS) {
+      return true;
+    }
+    try {
+      await _channel.invokeMethod('updateLockScreenBanner', data);
+      return true;
+    } catch (e) {
+      debugPrint('NativeAdhanBridge.updateLockScreenBanner error: $e');
+      return false;
+    }
+  }
+
+  /// Cancels the native Android lock screen banner notification.
+  static Future<bool> cancelLockScreenBanner() async {
+    if (Platform.isIOS) {
+      return true;
+    }
+    try {
+      await _channel.invokeMethod('cancelLockScreenBanner');
+      return true;
+    } catch (e) {
+      debugPrint('NativeAdhanBridge.cancelLockScreenBanner error: $e');
+      return false;
+    }
+  }
 }

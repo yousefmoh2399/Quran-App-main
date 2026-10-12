@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:adhan/adhan.dart';
@@ -207,6 +208,9 @@ class NotifyHelper {
 
   Future<void> cancelOngoingPrayerBanner() async {
     await flutterLocalNotificationsPlugin.cancel(prayerBannerNotificationId);
+    if (Platform.isAndroid) {
+      await NativeAdhanBridge.cancelLockScreenBanner();
+    }
   }
 
   Future<void> displayNotification() async {

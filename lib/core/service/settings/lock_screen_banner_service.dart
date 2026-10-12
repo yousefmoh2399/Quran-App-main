@@ -368,6 +368,9 @@ class LockScreenBannerService {
 
     if (!model.isEnabled) {
       await notify.cancelOngoingPrayerBanner();
+      if (Platform.isAndroid) {
+        await NativeAdhanBridge.cancelLockScreenBanner();
+      }
       _autoRefreshTimer?.cancel();
       debugPrint('🔔 [LockScreenBannerService] Lock screen banner disabled and cancelled.');
       return;
@@ -389,6 +392,41 @@ class LockScreenBannerService {
         ));
       }
     } catch (_) {}
+
+    // On Android, use the luxury native RemoteViews notification with custom colors & layout
+    if (Platform.isAndroid) {
+      try {
+        await notify.flutterLocalNotificationsPlugin.cancel(NotifyHelper.prayerBannerNotificationId);
+      } catch (_) {}
+
+      final pMap = data.prayerTimesMap;
+      final nativePayload = <String, dynamic>{
+        'isEnabled': model.isEnabled,
+        'cityName': data.cityName,
+        'hijriLine': data.hijriLine,
+        'nextPrayerName': data.nextPrayerName,
+        'nextPrayerTimeStr': data.nextPrayerTimeStr,
+        'nextPrayerCountdown': data.nextPrayerCountdown,
+        'fajr': pMap['fajr'] ?? '',
+        'dhuhr': pMap['dhuhr'] ?? '',
+        'asr': pMap['asr'] ?? '',
+        'maghrib': pMap['maghrib'] ?? '',
+        'isha': pMap['isha'] ?? '',
+        'actualNextPrayer': data.actualNextPrayer.name,
+        'wirdLine': data.wirdLine,
+        'zikrLine': data.zikrLine,
+        'showNextPrayer': model.showNextPrayer,
+        'showAllPrayers': model.showAllPrayers,
+        'showWirdProgress': model.showWirdProgress,
+        'showDailyZikr': model.showDailyZikr,
+        'showQuickActions': model.showQuickActions,
+      };
+
+      await NativeAdhanBridge.updateLockScreenBanner(nativePayload);
+      _startAutoRefreshTimer();
+      debugPrint('✅ [LockScreenBannerService] Native Android RemoteViews lock screen banner updated successfully.');
+      return;
+    }
 
     final actions = <AndroidNotificationAction>[];
     if (model.showQuickActions) {

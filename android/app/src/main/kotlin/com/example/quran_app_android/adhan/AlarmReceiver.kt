@@ -58,7 +58,8 @@ class AlarmReceiver : BroadcastReceiver() {
         try {
             if (!isTest) {
                 PrayerScheduler.scheduleRollingWindow(context)
-                Log.i("AlarmReceiver", "🔄 تم تجديد نافذة الـ 7 أيام بنجاح عقب إطلاق منبه $prayerName")
+                LockScreenBannerManager.updateWithNativeTimes(context)
+                Log.i("AlarmReceiver", "🔄 تم تجديد نافذة الـ 7 أيام وتحديث بانر شاشة القفل بنجاح عقب إطلاق منبه $prayerName")
             }
         } catch (e: Exception) {
             Log.e("AlarmReceiver", "⚠️ فشل تجديد نافذة الصلوات: ${e.message}")

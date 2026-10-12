@@ -21,6 +21,7 @@ class BootReceiver : BroadcastReceiver() {
                     if (NativePrayerManager.hasValidLocation(context)) {
                         val count = PrayerScheduler.scheduleRollingWindow(context)
                         Log.i("AdhanBootReceiver", "🕋 تمت إعادة جدولة $count صلاة بنجاح للـ 7 أيام القادمة بعد $action")
+                        LockScreenBannerManager.updateWithNativeTimes(context)
                     } else {
                         Log.w("AdhanBootReceiver", "⚠️ لم يتم العثور على موقع مسجل — في انتظار فتح المستخدم للتطبيق وتحديد موقعه.")
                     }

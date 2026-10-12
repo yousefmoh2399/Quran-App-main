@@ -222,6 +222,29 @@ object NativeAdhanBridge : MethodChannel.MethodCallHandler {
                 }
             }
 
+            "updateLockScreenBanner" -> {
+                try {
+                    val args = call.arguments as? Map<String, Any?>
+                    if (args != null) {
+                        LockScreenBannerManager.updateBanner(context, args)
+                        result.success(true)
+                    } else {
+                        result.error("INVALID_ARGS", "Expected Map<String, Any?>", null)
+                    }
+                } catch (e: Exception) {
+                    result.error("BANNER_UPDATE_ERROR", e.message, null)
+                }
+            }
+
+            "cancelLockScreenBanner" -> {
+                try {
+                    LockScreenBannerManager.cancelBanner(context)
+                    result.success(true)
+                } catch (e: Exception) {
+                    result.error("BANNER_CANCEL_ERROR", e.message, null)
+                }
+            }
+
             else -> result.notImplemented()
         }
     }
