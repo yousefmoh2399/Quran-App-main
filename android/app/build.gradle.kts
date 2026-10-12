@@ -46,7 +46,7 @@ android {
         applicationId = "com.taqarrab.quran"
         minSdk = flutter.minSdkVersion
         targetSdk = 36
-        versionCode = 4010
+        versionCode = 4011
         versionName = "1.0.1"
         compileOptions {
             isCoreLibraryDesugaringEnabled = true
