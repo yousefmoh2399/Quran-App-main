@@ -11,6 +11,7 @@ import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
 import 'package:quran_app_android/core/service/settings/notifications_services.dart';
 import 'package:quran_app_android/core/util/routes/routes.dart';
 import 'package:quran_app_android/features/adhan/presentation/controllers/adhan_settings_controller.dart';
+import 'package:quran_app_android/features/adhan/presentation/services/adhan_battery_permission_service.dart';
 import 'package:quran_app_android/features/adhan/presentation/view_model/adhan_view_model.dart';
 import 'package:quran_app_android/features/mushaf/presentation/utils/mushaf_utils.dart';
 
@@ -71,6 +72,12 @@ class AdhanSettingsView extends StatelessWidget {
               // iOS notification notice if on iOS
               if (Platform.isIOS) ...[
                 _buildIosNotice(colors),
+                AppSpacing.verticalMd,
+              ],
+
+              // Android Battery Optimization & Reliability Card
+              if (Platform.isAndroid) ...[
+                _buildAndroidBatteryCard(context, controller, colors),
                 AppSpacing.verticalMd,
               ],
 
@@ -1252,6 +1259,117 @@ class AdhanSettingsView extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _buildAndroidBatteryCard(
+    BuildContext context,
+    AdhanSettingsController controller,
+    dynamic colors,
+  ) {
+    return Obx(() {
+      final status = controller.reliabilityStatus.value;
+      if (status == null) return const SizedBox.shrink();
+
+      final isGood = status.isFullyConfigured;
+
+      return Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: AppRadius.borderLg,
+          border: Border.all(
+            color: isGood ? colors.primary.withOpacity(0.35) : Colors.amber.withOpacity(0.55),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: isGood ? colors.primary.withOpacity(0.12) : Colors.amber.withOpacity(0.14),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    isGood ? Icons.battery_charging_full_rounded : Icons.battery_alert_rounded,
+                    color: isGood ? colors.primary : Colors.amber,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isGood
+                            ? 'عمل الأذان في الخلفية: مثالي وغير مقيد ✅'
+                            : 'الأذان مقيد بموفر البطارية أو المنبهات ⚠️',
+                        style: TextStyle(
+                          fontFamily: AppTypography.uiFont,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13.5,
+                          color: colors.text,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        isGood
+                            ? 'التطبيق مستثنى من توفير البطارية وصلاحيات الأذان تعمل بأعلى دقة.'
+                            : 'لضمان انطلاق الأذان في وقته بدقة تامة، يرجى استثناء التطبيق من موفر البطارية.',
+                        style: TextStyle(
+                          fontFamily: AppTypography.uiFont,
+                          fontSize: 11.5,
+                          color: colors.textMuted,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (!isGood) ...[
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colors.primary,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    icon: const Icon(Icons.tune_rounded, size: 16),
+                    label: const Text(
+                      'ضبط استثناء البطارية الآن',
+                      style: TextStyle(
+                        fontFamily: AppTypography.uiFont,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12.5,
+                      ),
+                    ),
+                    onPressed: () => AdhanBatteryPermissionService.requestOptimalSettings(),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      );
+    });
   }
 
   String _sanitizeMethod(String method) {

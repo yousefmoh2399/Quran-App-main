@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:adhan/adhan.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -10,13 +12,57 @@ import 'package:quran_app_android/core/design/components/app_scaffold.dart';
 import 'package:quran_app_android/core/design/components/empty_state.dart';
 import 'package:quran_app_android/core/design/components/loading_skeleton.dart';
 import 'package:quran_app_android/core/util/routes/routes.dart';
+import 'package:quran_app_android/core/util/widgets/custom_toast.dart';
+import 'package:quran_app_android/features/adhan/presentation/services/adhan_battery_permission_service.dart';
 import 'package:quran_app_android/features/adhan/presentation/view_model/adhan_view_model.dart';
 import 'package:quran_app_android/features/adhan/presentation/views/widget/adhan_hero_card.dart';
 import 'package:quran_app_android/features/adhan/presentation/views/widget/adhan_location_bar.dart';
 import 'package:quran_app_android/features/adhan/presentation/views/widget/adhan_prayer_row.dart';
 
-class AdhanView extends StatelessWidget {
+class AdhanView extends StatefulWidget {
   const AdhanView({super.key});
+
+  @override
+  State<AdhanView> createState() => _AdhanViewState();
+}
+
+class _AdhanViewState extends State<AdhanView> with WidgetsBindingObserver {
+  bool _showBatteryPrompt = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _checkBatteryReliability();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkBatteryReliability();
+    }
+  }
+
+  Future<void> _checkBatteryReliability() async {
+    if (!Platform.isAndroid) return;
+    if (AdhanBatteryPermissionService.hasDismissedNoticeInSession) return;
+    final status = await AdhanBatteryPermissionService.checkStatus();
+    if (mounted) {
+      final wasPrompting = _showBatteryPrompt;
+      setState(() {
+        _showBatteryPrompt = !status.isFullyConfigured;
+      });
+      if (wasPrompting && status.isFullyConfigured) {
+        defaultToast(text: 'تم ضبط استثناء موفر البطارية بنجاح للأذان');
+      }
+    }
+  }
 
   PrayerItemStatus _getPrayerStatus(
     Prayer prayer,
@@ -78,7 +124,9 @@ class AdhanView extends StatelessWidget {
           ),
         ),
       ],
-      body: GetBuilder<AdhanViewModel>(
+      body: Stack(
+        children: [
+          GetBuilder<AdhanViewModel>(
         builder: (controller) {
           if (controller.isLoading.value && controller.prayerTimes == null) {
             return _buildLoadingState();
@@ -257,6 +305,134 @@ class AdhanView extends StatelessWidget {
             ),
           );
         },
+      ),
+      if (_showBatteryPrompt)
+        Positioned(
+          bottom: 16,
+          left: 16,
+          right: 16,
+          child: _buildFloatingBatteryPrompt(colors),
+        ),
+    ],
+  ),
+);
+}
+
+  Widget _buildFloatingBatteryPrompt(AppColorsExtension colors) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.amber.withOpacity(0.55), width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.12),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withOpacity(0.14),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.battery_alert_rounded,
+                  color: Colors.amber,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'لضمان انطلاق الأذان في وقته بدقة',
+                      style: TextStyle(
+                        fontFamily: AppTypography.uiFont,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13.5,
+                        color: colors.text,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'يحتاج التطبيق للاستثناء من توفير البطارية حتى لا يوقفه النظام في الخلفية.',
+                      style: TextStyle(
+                        fontFamily: AppTypography.uiFont,
+                        fontSize: 11.5,
+                        color: colors.textMuted,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              InkWell(
+                onTap: () {
+                  setState(() => _showBatteryPrompt = false);
+                  AdhanBatteryPermissionService.hasDismissedNoticeInSession = true;
+                },
+                borderRadius: BorderRadius.circular(14),
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Icon(Icons.close_rounded, size: 18, color: colors.textMuted),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                style: TextButton.styleFrom(
+                  foregroundColor: colors.textMuted,
+                  visualDensity: VisualDensity.compact,
+                ),
+                onPressed: () {
+                  setState(() => _showBatteryPrompt = false);
+                  AdhanBatteryPermissionService.hasDismissedNoticeInSession = true;
+                },
+                child: const Text(
+                  'لاحقاً',
+                  style: TextStyle(fontFamily: AppTypography.uiFont, fontSize: 12),
+                ),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colors.primary,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  visualDensity: VisualDensity.compact,
+                ),
+                icon: const Icon(Icons.tune_rounded, size: 16),
+                label: const Text(
+                  'ضبط الإعدادات الآن',
+                  style: TextStyle(
+                    fontFamily: AppTypography.uiFont,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12.5,
+                  ),
+                ),
+                onPressed: () => AdhanBatteryPermissionService.requestOptimalSettings(),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

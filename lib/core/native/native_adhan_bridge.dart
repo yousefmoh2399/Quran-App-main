@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../notifications/ios_prayer_scheduler.dart';
 import 'native_reminders_bridge.dart';
@@ -245,6 +246,71 @@ class NativeAdhanBridge {
       return true;
     } catch (e) {
       debugPrint('NativeAdhanBridge.cancelLockScreenBanner error: $e');
+      return false;
+    }
+  }
+
+  /// Checks whether battery optimizations are ignored (Unrestricted / Not optimized)
+  static Future<bool> isIgnoringBatteryOptimizations() async {
+    if (!Platform.isAndroid) return true;
+    try {
+      final res = await _channel.invokeMethod<bool>('isIgnoringBatteryOptimizations');
+      if (res != null) return res;
+    } catch (e) {
+      debugPrint('NativeAdhanBridge.isIgnoringBatteryOptimizations native error: $e');
+    }
+    try {
+      return await Permission.ignoreBatteryOptimizations.isGranted;
+    } catch (_) {
+      return true;
+    }
+  }
+
+  /// Requests to ignore battery optimizations for reliable background alarms
+  static Future<bool> requestIgnoreBatteryOptimizations() async {
+    if (!Platform.isAndroid) return true;
+    try {
+      final res = await _channel.invokeMethod<bool>('requestIgnoreBatteryOptimizations');
+      if (res == true) return true;
+    } catch (e) {
+      debugPrint('NativeAdhanBridge.requestIgnoreBatteryOptimizations native error: $e');
+    }
+    try {
+      final status = await Permission.ignoreBatteryOptimizations.request();
+      return status.isGranted;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Checks if exact alarms can be scheduled on Android 12+
+  static Future<bool> canScheduleExactAlarms() async {
+    if (!Platform.isAndroid) return true;
+    try {
+      final res = await _channel.invokeMethod<bool>('canScheduleExactAlarms');
+      if (res != null) return res;
+    } catch (e) {
+      debugPrint('NativeAdhanBridge.canScheduleExactAlarms native error: $e');
+    }
+    try {
+      return await Permission.scheduleExactAlarm.isGranted;
+    } catch (_) {
+      return true;
+    }
+  }
+
+  /// Opens exact alarm settings
+  static Future<bool> openExactAlarmSettings() async {
+    if (!Platform.isAndroid) return true;
+    try {
+      final res = await _channel.invokeMethod<bool>('openExactAlarmSettings');
+      if (res == true) return true;
+    } catch (e) {
+      debugPrint('NativeAdhanBridge.openExactAlarmSettings native error: $e');
+    }
+    try {
+      return await openAppSettings();
+    } catch (_) {
       return false;
     }
   }

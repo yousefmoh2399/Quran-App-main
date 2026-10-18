@@ -2,6 +2,8 @@ package com.example.quran_app_android.adhan
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
 import android.util.Log
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
@@ -134,6 +136,76 @@ object NativeAdhanBridge : MethodChannel.MethodCallHandler {
 
             "hasLocation" -> {
                 result.success(NativePrayerManager.hasValidLocation(context))
+            }
+
+            "isIgnoringBatteryOptimizations" -> {
+                val powerManager = context.getSystemService(Context.POWER_SERVICE) as? android.os.PowerManager
+                val isIgnoring = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                    powerManager?.isIgnoringBatteryOptimizations(context.packageName) ?: true
+                } else {
+                    true
+                }
+                result.success(isIgnoring)
+            }
+
+            "requestIgnoreBatteryOptimizations" -> {
+                try {
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                        val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                            data = Uri.parse("package:${context.packageName}")
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        context.startActivity(intent)
+                        result.success(true)
+                    } else {
+                        result.success(true)
+                    }
+                } catch (e: Exception) {
+                    try {
+                        val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS).apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        context.startActivity(intent)
+                        result.success(true)
+                    } catch (e2: Exception) {
+                        result.error("BATTERY_INTENT_ERROR", e2.message, null)
+                    }
+                }
+            }
+
+            "canScheduleExactAlarms" -> {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? android.app.AlarmManager
+                    result.success(alarmManager?.canScheduleExactAlarms() ?: true)
+                } else {
+                    result.success(true)
+                }
+            }
+
+            "openExactAlarmSettings" -> {
+                try {
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                        val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+                            data = Uri.parse("package:${context.packageName}")
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        context.startActivity(intent)
+                        result.success(true)
+                    } else {
+                        result.success(true)
+                    }
+                } catch (e: Exception) {
+                    try {
+                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = Uri.parse("package:${context.packageName}")
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        context.startActivity(intent)
+                        result.success(true)
+                    } catch (e2: Exception) {
+                        result.error("EXACT_ALARM_INTENT_ERROR", e2.message, null)
+                    }
+                }
             }
 
             "stopAdhan" -> {

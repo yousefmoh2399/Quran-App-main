@@ -3,9 +3,10 @@ import 'package:get/get.dart';
 import 'package:quran_app_android/core/native/native_adhan_bridge.dart';
 import 'package:quran_app_android/core/util/app_snackbar.dart';
 import 'package:quran_app_android/features/adhan/data/models/adhan_settings_model.dart';
+import 'package:quran_app_android/features/adhan/presentation/services/adhan_battery_permission_service.dart';
 import 'package:quran_app_android/features/adhan/presentation/view_model/adhan_view_model.dart';
 
-class AdhanSettingsController extends GetxController {
+class AdhanSettingsController extends GetxController with WidgetsBindingObserver {
   final Rx<AdhanSettingsModel> settings = const AdhanSettingsModel(
     latitude: 0.0,
     longitude: 0.0,
@@ -13,11 +14,33 @@ class AdhanSettingsController extends GetxController {
 
   final RxBool isLoading = true.obs;
   final RxBool isSaving = false.obs;
+  final Rx<AdhanReliabilityStatus?> reliabilityStatus = Rx<AdhanReliabilityStatus?>(null);
 
   @override
   void onInit() {
     super.onInit();
+    WidgetsBinding.instance.addObserver(this);
     loadSettings();
+    checkReliability();
+  }
+
+  @override
+  void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.onClose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      checkReliability();
+    }
+  }
+
+  Future<void> checkReliability() async {
+    try {
+      reliabilityStatus.value = await AdhanBatteryPermissionService.checkStatus();
+    } catch (_) {}
   }
 
   Future<void> loadSettings() async {

@@ -8,8 +8,8 @@ import 'package:quran_app_android/core/design/app_radius.dart';
 import 'package:quran_app_android/core/design/app_spacing.dart';
 import 'package:quran_app_android/core/design/app_typography.dart';
 import 'package:quran_app_android/core/design/components/app_card.dart';
-import 'package:quran_app_android/core/design/components/empty_state.dart';
 import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:quran_app_android/core/services/app_haptics_service.dart';
 import 'package:quran_app_android/core/util/routes/routes.dart';
 
@@ -37,8 +37,8 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
   static double _lastKnownHeading = 0.0;
   static bool _hasReceivedHeading = false;
 
-  Timer? _sensorTimeoutTimer;
-  bool _sensorUnavailable = false;
+  Timer? _slowSensorTimer;
+  bool _showSlowSensorNotice = false;
 
   late Animation<double> animation;
   double begin = 0.0;
@@ -50,12 +50,12 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
     super.initState();
     animation = Tween<double>(begin: begin, end: begin).animate(widget.animationController);
 
-    // If running on simulator or device without heading updates within 2 seconds,
-    // fallback gracefully to showing calculated Qiblah angle rather than infinite loading spinner.
-    _sensorTimeoutTimer = Timer(const Duration(milliseconds: 2000), () {
+    // If heading is not received within 3.5 seconds (slow sensor or Sensors Off),
+    // show an informative bottom notice without stopping the compass or blocking the screen.
+    _slowSensorTimer = Timer(const Duration(milliseconds: 3500), () {
       if (!_hasReceivedHeading && mounted) {
         setState(() {
-          _sensorUnavailable = true;
+          _showSlowSensorNotice = true;
         });
       }
     });
@@ -63,7 +63,7 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
 
   @override
   void dispose() {
-    _sensorTimeoutTimer?.cancel();
+    _slowSensorTimer?.cancel();
     super.dispose();
   }
 
@@ -75,43 +75,11 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
     return StreamBuilder<CompassEvent>(
       stream: FlutterCompass.events,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting &&
-            !_hasReceivedHeading &&
-            !_sensorUnavailable) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: 36,
-                  height: 36,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
-                  ),
-                ),
-                AppSpacing.verticalMd,
-                Text(
-                  'جاري قراءة مستشعر البوصلة...',
-                  style: textTheme.bodyMedium?.copyWith(color: colors.textMuted),
-                ),
-              ],
-            ),
-          );
-        }
-
-        if (snapshot.hasError && !_hasReceivedHeading && !_sensorUnavailable) {
-          return const EmptyState(
-            icon: Icons.error_outline_rounded,
-            title: 'خطأ في قراءة البوصلة',
-            message: 'تأكد من وجود مستشعر البوصلة في جهازك وتفعيله',
-          );
-        }
-
         final compassEvent = snapshot.data;
         if (compassEvent?.heading != null) {
           _lastKnownHeading = compassEvent!.heading!;
           _hasReceivedHeading = true;
+          _showSlowSensorNotice = false;
         }
 
         final double currentHeading = _hasReceivedHeading ? _lastKnownHeading : 0.0;
@@ -253,31 +221,45 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
                 ),
               ),
               AppSpacing.verticalMd,
+              // Status indicator or Sensors Off / Calibration advice banner
               if (!_hasReceivedHeading) ...[
-                Container(
-                  margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: colors.primary.withOpacity(0.08),
-                    borderRadius: AppRadius.borderMd,
-                    border: Border.all(color: colors.primary.withOpacity(0.25)),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.explore_outlined, size: 20, color: colors.primary),
-                      AppSpacing.horizontalSm,
-                      Expanded(
-                        child: Text(
-                          'المستشعر المغناطيسي غير متوفر على المحاكي. تم توجيه السهم نحو زاوية القبلة لموقعك (${widget.qiblaDirection.toInt()}° بالنسبة للشمال).',
-                          style: textTheme.bodySmall?.copyWith(
-                            color: colors.primary,
-                            fontWeight: FontWeight.w600,
+                if (_showSlowSensorNotice)
+                  _buildSensorsOffNotice(colors)
+                else
+                  Container(
+                    margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: colors.primary.withOpacity(0.08),
+                      borderRadius: AppRadius.borderFull,
+                      border: Border.all(color: colors.primary.withOpacity(0.2)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
                           ),
                         ),
-                      ),
-                    ],
+                        AppSpacing.horizontalSm,
+                        Flexible(
+                          child: Text(
+                            'جاري الاتصال بمستشعر البوصلة وتحديد الاتجاه...',
+                            style: TextStyle(
+                              fontFamily: AppTypography.uiFont,
+                              fontSize: 12,
+                              color: colors.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
               ],
               if (_hasReceivedHeading && compassEvent?.accuracy != null && compassEvent!.accuracy! > 15) ...[
                 Container(
@@ -694,6 +676,104 @@ class _QiblahStreamBuilderState extends State<QiblahStreamBuilder> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSensorsOffNotice(AppColorsExtension colors) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: AppRadius.borderLg,
+        border: Border.all(color: Colors.amber.withOpacity(0.4), width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withOpacity(0.14),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.sensors_off_rounded, color: Colors.amber, size: 20),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'مستشعرات البوصلة متوقفة أو بطيئة',
+                  style: TextStyle(
+                    fontFamily: AppTypography.uiFont,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: colors.text,
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'إذا لم تتحرك البوصلة مع دوران هاتفك، يُرجى التأكد من عدم تفعيل زر «إيقاف المستشعرات - Sensors Off» في لوحة الإعدادات السريعة بهاتفك، أو تدوير الهاتف في الهواء على شكل رقم 8 (∞) لمعايرة الحساس.',
+            style: TextStyle(
+              fontFamily: AppTypography.uiFont,
+              fontSize: 12,
+              color: colors.textMuted,
+              height: 1.45,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'البوصلة تواصل البحث في الخلفية...',
+                style: TextStyle(
+                  fontFamily: AppTypography.uiFont,
+                  fontSize: 11,
+                  color: colors.textMuted,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+              TextButton.icon(
+                style: TextButton.styleFrom(
+                  foregroundColor: colors.primary,
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  visualDensity: VisualDensity.compact,
+                ),
+                icon: const Icon(Icons.settings_rounded, size: 16),
+                label: const Text(
+                  'إعدادات الهاتف',
+                  style: TextStyle(
+                    fontFamily: AppTypography.uiFont,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12.5,
+                  ),
+                ),
+                onPressed: () => openAppSettings(),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
