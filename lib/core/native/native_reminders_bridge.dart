@@ -33,7 +33,7 @@ class NativeRemindersBridge {
 
   /// Fetches a single reminder by ID.
   static Future<Map<String, dynamic>?> getReminder(String id) async {
-    if (Platform.isIOS) {
+    if (isIOS) {
       debugPrint('📱 [iOS NativeRemindersBridge] getReminder($id) called.');
       return IosReminderNotificationScheduler.instance.getReminder(id);
     }
@@ -49,7 +49,7 @@ class NativeRemindersBridge {
 
   /// Inserts or updates a reminder and recalculates schedule.
   static Future<bool> saveReminder(Map<String, dynamic> reminder) async {
-    if (Platform.isIOS) {
+    if (isIOS) {
       debugPrint('📱 [iOS NativeRemindersBridge] saveReminder called.');
       return IosReminderNotificationScheduler.instance.saveReminder(reminder);
     }
@@ -64,7 +64,7 @@ class NativeRemindersBridge {
 
   /// Toggles the enabled state of a reminder.
   static Future<bool> toggleReminder(String id, bool enabled) async {
-    if (Platform.isIOS) {
+    if (isIOS) {
       debugPrint('📱 [iOS NativeRemindersBridge] toggleReminder($id, $enabled) called.');
       return IosReminderNotificationScheduler.instance.toggleReminder(id, enabled);
     }
@@ -82,7 +82,7 @@ class NativeRemindersBridge {
 
   /// Deletes a reminder.
   static Future<bool> deleteReminder(String id) async {
-    if (Platform.isIOS) {
+    if (isIOS) {
       debugPrint('📱 [iOS NativeRemindersBridge] deleteReminder($id) called.');
       return IosReminderNotificationScheduler.instance.deleteReminder(id);
     }
@@ -97,7 +97,7 @@ class NativeRemindersBridge {
 
   /// Forces recalculation and scheduling of reminders.
   static Future<bool> rescheduleAll() async {
-    if (Platform.isIOS) {
+    if (isIOS) {
       debugPrint('📱 [iOS NativeRemindersBridge] rescheduleAll called.');
       return IosReminderNotificationScheduler.instance.rescheduleAll();
     }
@@ -112,7 +112,7 @@ class NativeRemindersBridge {
 
   /// Immediately triggers a reminder notification for testing.
   static Future<bool> testTriggerReminder(String id) async {
-    if (Platform.isIOS) {
+    if (isIOS) {
       debugPrint('📱 [iOS NativeRemindersBridge] testTriggerReminder($id) called.');
       return IosReminderNotificationScheduler.instance.testTriggerReminder(id);
     }
@@ -127,7 +127,7 @@ class NativeRemindersBridge {
 
   /// Retrieves list of upcoming alarms and cancellation statuses for debug view.
   static Future<List<Map<String, dynamic>>> getUpcomingAlarms() async {
-    if (Platform.isIOS) {
+    if (isIOS) {
       return [];
     }
     try {
@@ -142,7 +142,7 @@ class NativeRemindersBridge {
 
   /// Marks today's daily wird as completed so the reminder is cancelled/suppressed.
   static Future<bool> markWirdCompleted({String? date}) async {
-    if (Platform.isIOS) {
+    if (isIOS) {
       debugPrint('📱 [iOS NativeRemindersBridge] markWirdCompleted called.');
       return IosReminderNotificationScheduler.instance.markWirdCompleted(date: date);
     }

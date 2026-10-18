@@ -56,6 +56,21 @@ class AdhanAlertActivity : AppCompatActivity() {
 
         // 2. Parse intent parameters
         val prayerKey = intent.getStringExtra("prayer_key") ?: "fajr"
+        val settings = NativePrayerManager.getSettings(this)
+        val isPrayerEnabled = when (prayerKey.lowercase()) {
+            "fajr" -> settings.fajrEnabled && settings.fajrMode != "silent"
+            "dhuhr" -> settings.dhuhrEnabled && settings.dhuhrMode != "silent"
+            "asr" -> settings.asrEnabled && settings.asrMode != "silent"
+            "maghrib" -> settings.maghribEnabled && settings.maghribMode != "silent"
+            "isha" -> settings.ishaEnabled && settings.ishaMode != "silent"
+            else -> true
+        }
+        if (!isPrayerEnabled) {
+            Log.i(TAG, "🚫 AdhanAlertActivity: صلاة $prayerKey معطلة — إنهاء الشاشة فوراً.")
+            finish()
+            return
+        }
+
         val prayerName = intent.getStringExtra("prayer_name") ?: "الصلاة"
         val cityName = intent.getStringExtra("city_name") ?: ""
         val scheduledMillis = intent.getLongExtra("scheduled_millis", System.currentTimeMillis())

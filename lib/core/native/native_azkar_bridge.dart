@@ -11,9 +11,11 @@ class NativeAzkarBridge {
   static const MethodChannel _channel = MethodChannel('native_azkar_bridge');
   static const String _prefsKey = 'ios_azkar_settings';
 
+  static bool get isIOS => Platform.isIOS || !Platform.isAndroid;
+
   /// Saves settings and reschedules periodic azkar.
   static Future<bool> saveSettings(Map<String, dynamic> settings) async {
-    if (Platform.isIOS) {
+    if (isIOS) {
       debugPrint('📱 [iOS NativeAzkarBridge] saveSettings: $settings');
       try {
         final prefs = await SharedPreferences.getInstance();
@@ -86,7 +88,7 @@ class NativeAzkarBridge {
 
   /// Retrieves current native azkar settings.
   static Future<Map<String, dynamic>?> getSettings() async {
-    if (Platform.isIOS) {
+    if (isIOS) {
       try {
         final prefs = await SharedPreferences.getInstance();
         final str = prefs.getString(_prefsKey);

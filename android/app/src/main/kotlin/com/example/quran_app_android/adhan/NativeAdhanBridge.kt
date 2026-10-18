@@ -1,6 +1,7 @@
 package com.example.quran_app_android.adhan
 
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
@@ -135,6 +136,19 @@ object NativeAdhanBridge : MethodChannel.MethodCallHandler {
                 result.success(NativePrayerManager.hasValidLocation(context))
             }
 
+            "stopAdhan" -> {
+                try {
+                    val stopIntent = Intent(context, AdhanService::class.java).apply {
+                        action = AdhanService.ACTION_STOP_ADHAN
+                    }
+                    context.startService(stopIntent)
+                    result.success(true)
+                } catch (e: Exception) {
+                    Log.w(TAG, "Error stopping adhan service: ${e.message}")
+                    result.success(false)
+                }
+            }
+
             // Legacy compatibility
             "schedulePrayerTimes", "scheduleDailyReset" -> {
                 val count = PrayerScheduler.scheduleRollingWindow(context)
@@ -210,17 +224,6 @@ object NativeAdhanBridge : MethodChannel.MethodCallHandler {
                 }
             }
 
-            "stopAdhan" -> {
-                try {
-                    val stopIntent = android.content.Intent(context, AdhanService::class.java).apply {
-                        action = AdhanService.ACTION_STOP_ADHAN
-                    }
-                    context.startService(stopIntent)
-                    result.success(true)
-                } catch (e: Exception) {
-                    result.error("STOP_ADHAN_ERROR", e.message, null)
-                }
-            }
 
             "updateLockScreenBanner" -> {
                 try {

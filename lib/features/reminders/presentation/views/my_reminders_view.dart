@@ -3,10 +3,14 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:quran_app_android/core/design/app_colors.dart';
+import 'package:quran_app_android/core/design/app_radius.dart';
+import 'package:quran_app_android/core/design/app_typography.dart';
+import 'package:quran_app_android/core/design/responsive.dart';
 import 'package:quran_app_android/core/native/native_reminders_bridge.dart';
 import 'package:quran_app_android/core/util/app_snackbar.dart';
-import 'package:quran_app_android/core/design/responsive.dart';
 import 'package:quran_app_android/core/util/routes/routes.dart';
+import 'package:quran_app_android/features/mushaf/presentation/utils/mushaf_utils.dart';
 
 class MyRemindersView extends StatefulWidget {
   const MyRemindersView({super.key});
@@ -35,10 +39,12 @@ class _MyRemindersViewState extends State<MyRemindersView> {
       list = await NativeRemindersBridge.getAllReminders();
     }
 
-    setState(() {
-      _reminders = list;
-      _isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        _reminders = list;
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _seedDefaults() async {
@@ -144,258 +150,313 @@ class _MyRemindersViewState extends State<MyRemindersView> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final primaryColor = const Color(0xFF1B4D3E);
+    final colors = context.appColors;
 
     return Scaffold(
+      backgroundColor: colors.bg,
       appBar: AppBar(
-        title: const Text('تذكيراتي', style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: colors.surface,
+        elevation: 0,
+        title: Text(
+          'تذكيراتي',
+          style: TextStyle(
+            fontFamily: AppTypography.uiFont,
+            fontWeight: FontWeight.bold,
+            color: colors.text,
+          ),
+        ),
         centerTitle: true,
+        iconTheme: IconThemeData(color: colors.text),
         actions: [
           IconButton(
-            icon: const Icon(Icons.music_note_rounded),
+            icon: Icon(Icons.music_note_rounded, color: colors.primary),
             tooltip: 'أصوات التنبيهات',
             onPressed: () => Get.toNamed(AppRoutes.notificationSoundsSettings),
           ),
-          IconButton(
-            icon: const Icon(Icons.history_rounded),
-            tooltip: 'سجل الصدقات',
-            onPressed: () => Get.toNamed('/sadaqahLogs'),
+          PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert_rounded, color: colors.textMuted),
+            color: colors.surface,
+            onSelected: (val) {
+              if (val == 'debug') Get.toNamed('/remindersDebug');
+              if (val == 'logs') Get.toNamed('/sadaqahLogs');
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'logs',
+                child: Text('سجل الصدقات', style: TextStyle(fontFamily: AppTypography.uiFont, color: colors.text)),
+              ),
+              if (kDebugMode)
+                PopupMenuItem(
+                  value: 'debug',
+                  child: Text('فحص التذكيرات (Debug)', style: TextStyle(fontFamily: AppTypography.uiFont, color: colors.text)),
+                ),
+            ],
           ),
-          if (kDebugMode)
-            IconButton(
-              icon: const Icon(Icons.bug_report_outlined),
-              tooltip: 'فحص التذكيرات القادمة',
-              onPressed: () => Get.toNamed('/remindersDebug'),
-            ),
         ],
       ),
       body: MaxWidthContainer(
         child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
+            ? Center(child: CircularProgressIndicator(color: colors.primary))
             : RefreshIndicator(
-              onRefresh: _loadReminders,
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  // Header Info Card
+                color: colors.primary,
+                onRefresh: _loadReminders,
+                child: ListView(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+                  children: [
+                    // 1. Header Info Card
+                    _buildHeaderBanner(colors),
+
+                    const SizedBox(height: 14),
+
+                    // 2. Notification Sounds Customization Card
+                    _buildSoundsNavCard(colors),
+
+                    const SizedBox(height: 18),
+
+                    // Section Title
+                    Row(
+                      children: [
+                        Icon(Icons.alarm_on_rounded, size: 18, color: colors.primary),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'التذكيرات الرئيسية',
+                            style: TextStyle(
+                              fontFamily: AppTypography.uiFont,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14.5,
+                              color: colors.text,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+
+                    // 3. Daily Wird Card
+                    _buildReminderCard(
+                      id: 'wird_daily',
+                      title: 'الورد اليومي',
+                      icon: Icons.menu_book_rounded,
+                      imageAsset: 'assets/images/icon_3d_quran.png',
+                      color: colors.primary,
+                      defaultSubtitle: 'تذكير يومي في الساعة ٠٨:٠٠ مساءً',
+                      onConfigure: () async {
+                        await Get.toNamed('/wirdSettings');
+                        _loadReminders();
+                      },
+                      colors: colors,
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    // 4. Commute Wird Card
+                    _buildReminderCard(
+                      id: 'wird_commute',
+                      title: 'ورد المواصلات',
+                      icon: Icons.directions_bus_rounded,
+                      imageAsset: 'assets/images/icon_3d_travel.png',
+                      color: const Color(0xFF00796B),
+                      defaultSubtitle: 'مواعيد متعددة وصفحات مخصصة في الطريق',
+                      onConfigure: () async {
+                        await Get.toNamed('/commuteWirdSettings');
+                        _loadReminders();
+                      },
+                      colors: colors,
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    // 5. Monthly Sadaqah Card
+                    _buildReminderCard(
+                      id: 'sadaqah_monthly',
+                      title: 'الصدقة الشهرية',
+                      icon: Icons.volunteer_activism_rounded,
+                      imageAsset: 'assets/images/icon_3d_praying_hands.png',
+                      color: const Color(0xFFD32F2F),
+                      defaultSubtitle: 'تذكير شهري (هجري / ميلادي) مع زر "تصدّقت"',
+                      onConfigure: () async {
+                        await Get.toNamed('/sadaqahSettings');
+                        _loadReminders();
+                      },
+                      colors: colors,
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    // 6. Periodic Azkar Card
+                    _buildReminderCard(
+                      id: 'azkar_periodic',
+                      title: 'الأذكار الدورية',
+                      icon: Icons.auto_awesome_rounded,
+                      imageAsset: 'assets/images/icon_3d_tasbeeh.png',
+                      color: const Color(0xFFF57C00),
+                      defaultSubtitle: 'تنبيهات أذكار متفرقة بساعات نشاط وهدوء الصلاة',
+                      onConfigure: () async {
+                        await Get.toNamed(AppRoutes.azkarNotificationsSettings);
+                        _loadReminders();
+                      },
+                      colors: colors,
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // 7. Fast Actions Tile
+                    _buildRescheduleTile(colors),
+
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
+      ),
+    );
+  }
+
+  Widget _buildHeaderBanner(dynamic colors) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: AppRadius.borderLg,
+        border: Border.all(color: colors.primary.withOpacity(0.22), width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: colors.primary.withOpacity(0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.notifications_active_rounded, color: colors.primary, size: 24),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'محرك التذكيرات الموحد',
+                  style: TextStyle(
+                    fontFamily: AppTypography.uiFont,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15.5,
+                    color: colors.text,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  'تذكيرات ذكية وموفرة للبطارية مع فحص تلقائي لأداء الورد وإلغاء ذكي للتنبيه إذا أتممته.',
+                  style: TextStyle(
+                    fontFamily: AppTypography.uiFont,
+                    fontSize: 12,
+                    color: colors.textMuted,
+                    height: 1.35,
+                  ),
+                ),
+                if (Platform.isIOS) ...[
+                  const SizedBox(height: 8),
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: isDark
-                            ? [const Color(0xFF14382D), const Color(0xFF0F2B22)]
-                            : [const Color(0xFFE8F5E9), const Color(0xFFC8E6C9)],
-                      ),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: primaryColor.withOpacity(0.2),
-                      ),
+                      color: Colors.amber.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.amber.withOpacity(0.4)),
                     ),
                     child: Row(
                       children: [
-                        CircleAvatar(
-                          radius: 24,
-                          backgroundColor: primaryColor.withOpacity(0.15),
-                          child: Icon(Icons.notifications_active_rounded, color: isDark ? const Color(0xFF81C784) : primaryColor),
-                        ),
-                        const SizedBox(width: 14),
+                        const Icon(Icons.info_outline_rounded, size: 15, color: Colors.amber),
+                        const SizedBox(width: 6),
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'محرك التذكيرات الموحد',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: isDark ? Colors.white : Colors.black87,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'تذكيرات ذكية موفرة للبطارية مع فحص تلقائي لأداء الورد قبل الإشعار.',
-                                style: TextStyle(
-                                  fontSize: 12.5,
-                                  color: isDark ? Colors.white70 : Colors.black54,
-                                ),
-                              ),
-                              if (Platform.isIOS) ...[
-                                const SizedBox(height: 8),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                  decoration: BoxDecoration(
-                                    color: Colors.amber.withOpacity(0.15),
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(color: Colors.amber.withOpacity(0.4)),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      const Icon(Icons.info_outline_rounded, size: 16, color: Colors.amber),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          'ملاحظة لـ iOS: التذكير لا يُلغى تلقائياً لو قرأت والتطبيق مغلق، بل يتم تحديثه وإلغاؤه فور فتحك للتطبيق. الحد الأقصى للمجدول 64 إشعاراً تُجدد تلقائياً.',
-                                          style: TextStyle(
-                                            fontSize: 11.0,
-                                            color: isDark ? Colors.amber.shade200 : Colors.amber.shade900,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ],
+                          child: Text(
+                            'ملاحظة لـ iOS: يتم تحديث التذكيرات تلقائياً فور فتح التطبيق لتوفير الطاقة.',
+                            style: TextStyle(
+                              fontFamily: AppTypography.uiFont,
+                              fontSize: 11,
+                              color: colors.isDark ? Colors.amber.shade200 : Colors.amber.shade900,
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-                  // Notification Sounds Customization Card
-                  Card(
-                    elevation: 1,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(16),
-                      onTap: () => Get.toNamed(AppRoutes.notificationSoundsSettings),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF1B4D3E).withOpacity(0.12),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Image.asset(
-                                'assets/images/icon_3d_card_studio.png',
-                                width: 28,
-                                height: 28,
-                                fit: BoxFit.contain,
-                              ),
-                            ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'أصوات ونغمات التنبيهات',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 15,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 3),
-                                  Text(
-                                    'تخصيص نغمة لكل تذكير أو نغمة موحدة مع الاستماع للتجربة',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: theme.textTheme.bodySmall?.color,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey),
-                          ],
-                        ),
-                      ),
+  Widget _buildSoundsNavCard(dynamic colors) {
+    return InkWell(
+      borderRadius: AppRadius.borderLg,
+      onTap: () => Get.toNamed(AppRoutes.notificationSoundsSettings),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: AppRadius.borderLg,
+          border: Border.all(color: colors.divider),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: colors.primary.withOpacity(0.10),
+                borderRadius: AppRadius.borderMd,
+              ),
+              child: Image.asset(
+                'assets/images/icon_3d_card_studio.png',
+                width: 26,
+                height: 26,
+                fit: BoxFit.contain,
+                errorBuilder: (_, __, ___) => Icon(
+                  Icons.music_note_rounded,
+                  color: colors.primary,
+                  size: 24,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'أصوات ونغمات التنبيهات',
+                    style: TextStyle(
+                      fontFamily: AppTypography.uiFont,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14.5,
+                      color: colors.text,
                     ),
                   ),
-
-                  const SizedBox(height: 20),
-
-                  // 1. Daily Wird Card
-                  _buildReminderCard(
-                    id: 'wird_daily',
-                    title: 'الورد اليومي',
-                    icon: Icons.menu_book_rounded,
-                    imageAsset: 'assets/images/icon_3d_quran.png',
-                    color: const Color(0xFF2E7D32),
-                    defaultSubtitle: 'تذكير يومي في الساعة 08:00 مساءً',
-                    onConfigure: () async {
-                      await Get.toNamed('/wirdSettings');
-                      _loadReminders();
-                    },
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // 2. Commute Wird Card
-                  _buildReminderCard(
-                    id: 'wird_commute',
-                    title: 'ورد المواصلات',
-                    icon: Icons.directions_bus_rounded,
-                    imageAsset: 'assets/images/icon_3d_travel.png',
-                    color: const Color(0xFF00796B),
-                    defaultSubtitle: 'مواعيد متعددة وصفحات مخصصة في الطريق',
-                    onConfigure: () async {
-                      await Get.toNamed('/commuteWirdSettings');
-                      _loadReminders();
-                    },
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // 3. Monthly Sadaqah Card
-                  _buildReminderCard(
-                    id: 'sadaqah_monthly',
-                    title: 'الصدقة الشهرية',
-                    icon: Icons.volunteer_activism_rounded,
-                    imageAsset: 'assets/images/icon_3d_praying_hands.png',
-                    color: const Color(0xFFD32F2F),
-                    defaultSubtitle: 'تذكير شهري (هجري / ميلادي) مع زر "تصدّقت"',
-                    onConfigure: () async {
-                      await Get.toNamed('/sadaqahSettings');
-                      _loadReminders();
-                    },
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // 4. Periodic Azkar Card
-                  _buildReminderCard(
-                    id: 'azkar_periodic',
-                    title: 'الأذكار الدورية',
-                    icon: Icons.auto_awesome_rounded,
-                    imageAsset: 'assets/images/icon_3d_tasbeeh.png',
-                    color: const Color(0xFFF57C00),
-                    defaultSubtitle: 'تنبيهات أذكار متفرقة بساعات نشاط وهدوء الصلاة',
-                    onConfigure: () async {
-                      await Get.toNamed(AppRoutes.azkarNotificationsSettings);
-                      _loadReminders();
-                    },
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Fast Actions Tile
-                  ListTile(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    tileColor: isDark ? const Color(0xFF1E2622) : const Color(0xFFF1F5F2),
-                    leading: const Icon(Icons.sync_rounded, color: Color(0xFF1B4D3E)),
-                    title: const Text('إعادة مزامنة وجدولة كافة التذكيرات', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                    subtitle: const Text('حساب أقرب تذكير فورياً وضبط المنظومة', style: TextStyle(fontSize: 12)),
-                    onTap: () async {
-                      await NativeRemindersBridge.rescheduleAll();
-                      if (context.mounted) {
-                        AppSnackbar.show(
-                          'تمت المزامنة',
-                          'تمت إعادة جدولة كافة التذكيرات بدقة',
-                          context: context,
-                        );
-                      }
-                    },
+                  const SizedBox(height: 2),
+                  Text(
+                    'تخصيص نغمة لكل تذكير أو نغمة موحدة مع الاستماع للتجربة',
+                    style: TextStyle(
+                      fontFamily: AppTypography.uiFont,
+                      fontSize: 11.5,
+                      color: colors.textMuted,
+                    ),
                   ),
                 ],
               ),
             ),
+            Icon(Icons.arrow_forward_ios_rounded, size: 14, color: colors.textMuted),
+          ],
+        ),
       ),
     );
   }
@@ -408,6 +469,7 @@ class _MyRemindersViewState extends State<MyRemindersView> {
     required Color color,
     required String defaultSubtitle,
     required VoidCallback onConfigure,
+    required dynamic colors,
   }) {
     final reminder = _getReminder(id);
     final isEnabled = reminder != null && (reminder['enabled'] == 1 || reminder['enabled'] == true);
@@ -417,57 +479,66 @@ class _MyRemindersViewState extends State<MyRemindersView> {
       try {
         final schedule = jsonDecode(reminder['schedule_json'] as String) as Map<String, dynamic>;
         if (id == 'wird_daily') {
-          final h = schedule['hour'] ?? 20;
-          final m = (schedule['minute'] ?? 0).toString().padLeft(2, '0');
+          final h = (schedule['hour'] as num?)?.toInt() ?? 20;
+          final m = (schedule['minute'] as num?)?.toInt() ?? 0;
           final period = h >= 12 ? 'م' : 'ص';
           final displayH = h > 12 ? h - 12 : (h == 0 ? 12 : h);
-          subtitle = 'الساعة $displayH:$m $period • يلغى تلقائياً لو قُرئ الورد';
+          final mTens = m ~/ 10;
+          final mUnits = m % 10;
+          subtitle = 'الساعة ${toArabicDigits(displayH)}:${toArabicDigits(mTens)}${toArabicDigits(mUnits)} $period • يلغى تلقائياً لو قُرئ الورد';
         } else if (id == 'wird_commute') {
-          final h = schedule['hour'] ?? 7;
-          final m = (schedule['minute'] ?? 30).toString().padLeft(2, '0');
-          final p = schedule['target_pages'] ?? 3;
+          final h = (schedule['hour'] as num?)?.toInt() ?? 7;
+          final m = (schedule['minute'] as num?)?.toInt() ?? 30;
+          final p = (schedule['target_pages'] as num?)?.toInt() ?? 3;
           final period = h >= 12 ? 'م' : 'ص';
           final displayH = h > 12 ? h - 12 : (h == 0 ? 12 : h);
-          subtitle = '$displayH:$m $period • $p صفحات • وضع مواصلات خاص';
+          final mTens = m ~/ 10;
+          final mUnits = m % 10;
+          subtitle = '${toArabicDigits(displayH)}:${toArabicDigits(mTens)}${toArabicDigits(mUnits)} $period • ${toArabicDigits(p)} صفحات • وضع مواصلات خاص';
         } else if (id == 'sadaqah_monthly') {
           final cal = schedule['calendar'] == 'hijri' ? 'هجري' : 'ميلادي';
           final dayType = schedule['day_type'];
+          final dayVal = (schedule['day'] as num?)?.toInt() ?? 25;
           final dayDesc = dayType == 'last_working_day'
               ? 'آخر يوم عمل'
-              : (dayType == 'last_thursday' ? 'آخر خميس' : 'يوم ${schedule['day']}');
+              : (dayType == 'last_thursday' ? 'آخر خميس' : 'يوم ${toArabicDigits(dayVal)}');
           subtitle = '$dayDesc من كل شهر $cal • زر "تصدّقت" مباشر';
         } else if (id == 'azkar_periodic') {
-          final interval = schedule['interval_minutes'] ?? 60;
-          subtitle = 'كل $interval دقيقة • يتوقف أثناء النوم والصلاة';
+          final interval = (schedule['interval_minutes'] as num?)?.toInt() ?? 60;
+          subtitle = 'كل ${toArabicDigits(interval)} دقيقة • يتوقف أثناء النوم والصلاة';
         }
       } catch (_) {}
     }
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: isEnabled ? color.withOpacity(0.3) : Colors.transparent,
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: AppRadius.borderLg,
+        border: Border.all(
+          color: isEnabled ? color.withOpacity(0.35) : colors.divider,
+          width: isEnabled ? 1.3 : 1.0,
         ),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: AppRadius.borderLg,
         onTap: onConfigure,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           child: Row(
             children: [
-              CircleAvatar(
-                radius: 22,
-                backgroundColor: color.withOpacity(0.15),
+              Container(
+                width: 44,
+                height: 44,
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: isEnabled ? color.withOpacity(0.12) : colors.textMuted.withOpacity(0.10),
+                  shape: BoxShape.circle,
+                ),
                 child: imageAsset != null
-                    ? Image.asset(imageAsset, width: 26, height: 26, fit: BoxFit.contain)
-                    : Icon(icon, color: color, size: 24),
+                    ? Image.asset(imageAsset, fit: BoxFit.contain, errorBuilder: (_, __, ___) => Icon(icon, color: isEnabled ? color : colors.textMuted, size: 22))
+                    : Icon(icon, color: isEnabled ? color : colors.textMuted, size: 22),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -475,32 +546,75 @@ class _MyRemindersViewState extends State<MyRemindersView> {
                     Text(
                       title,
                       style: TextStyle(
+                        fontFamily: AppTypography.uiFont,
                         fontWeight: FontWeight.bold,
-                        fontSize: 15.5,
-                        color: isDark ? Colors.white : Colors.black87,
+                        fontSize: 15,
+                        color: isEnabled ? colors.text : colors.textMuted,
                       ),
                     ),
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 2),
                     Text(
                       subtitle,
                       style: TextStyle(
-                        fontSize: 12,
-                        color: isDark ? Colors.white60 : Colors.black54,
+                        fontFamily: AppTypography.uiFont,
+                        fontSize: 11.5,
+                        color: isEnabled ? colors.textMuted : colors.textMuted.withOpacity(0.7),
                       ),
                     ),
                   ],
                 ),
               ),
-              Switch(
+              Switch.adaptive(
                 value: isEnabled,
                 activeColor: color,
                 onChanged: (val) => _toggleReminder(id, val),
               ),
               const SizedBox(width: 4),
-              const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
+              Icon(Icons.arrow_forward_ios_rounded, size: 13, color: colors.textMuted),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildRescheduleTile(dynamic colors) {
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: AppRadius.borderMd,
+        border: Border.all(color: colors.divider),
+      ),
+      child: ListTile(
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.borderMd),
+        leading: Icon(Icons.sync_rounded, color: colors.primary),
+        title: Text(
+          'إعادة مزامنة وجدولة كافة التذكيرات',
+          style: TextStyle(
+            fontFamily: AppTypography.uiFont,
+            fontWeight: FontWeight.w600,
+            fontSize: 13.5,
+            color: colors.text,
+          ),
+        ),
+        subtitle: Text(
+          'حساب أقرب تذكير فورياً وضبط المنظومة',
+          style: TextStyle(
+            fontFamily: AppTypography.uiFont,
+            fontSize: 11.5,
+            color: colors.textMuted,
+          ),
+        ),
+        onTap: () async {
+          await NativeRemindersBridge.rescheduleAll();
+          if (mounted) {
+            AppSnackbar.show(
+              'تمت المزامنة',
+              'تمت إعادة جدولة كافة التذكيرات بدقة',
+              context: context,
+            );
+          }
+        },
       ),
     );
   }

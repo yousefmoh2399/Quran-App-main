@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -64,6 +65,23 @@ class IosReminderNotificationScheduler {
       'commute_morning': {
         'id': 'commute_morning',
         'type': 'commute',
+        'schedule_json': jsonEncode({
+          'hour': 7,
+          'minute': 30,
+          'days': [1, 2, 3, 4, 5],
+          'target_pages': 3,
+          'count_towards_main': true,
+        }),
+        'payload_json': jsonEncode({
+          'title': 'ورد المواصلات',
+          'body': 'استثمر طريقك في تلاوة القرآن وتزكية وقتك.',
+        }),
+        'enabled': 0,
+        'last_triggered': 0,
+      },
+      'wird_commute': {
+        'id': 'wird_commute',
+        'type': 'wird_commute',
         'schedule_json': jsonEncode({
           'hour': 7,
           'minute': 30,
@@ -318,6 +336,7 @@ class IosReminderNotificationScheduler {
 
   /// Cancels all reminder notification IDs defined in the budget.
   Future<void> cancelAllReminderNotifications() async {
+    if (!Platform.isIOS) return;
     for (final id in NotificationBudget.getAllWirdIds()) {
       try { await notificationsPlugin.cancel(id); } catch (_) {}
     }
@@ -332,6 +351,7 @@ class IosReminderNotificationScheduler {
 
   /// Schedules next 7 days for Daily Wird (IDs 2000..2006).
   Future<void> _scheduleWird(Map<String, dynamic> reminder, DateTime now) async {
+    if (!Platform.isIOS) return;
     Map<String, dynamic> sched = {};
     if (reminder['schedule_json'] is String) {
       sched = jsonDecode(reminder['schedule_json'] as String) as Map<String, dynamic>;
@@ -381,6 +401,7 @@ class IosReminderNotificationScheduler {
 
   /// Schedules next 7 days for Commute reminder (IDs 2100..2106).
   Future<void> _scheduleTransit(Map<String, dynamic> reminder, DateTime now) async {
+    if (!Platform.isIOS) return;
     Map<String, dynamic> sched = {};
     if (reminder['schedule_json'] is String) {
       sched = jsonDecode(reminder['schedule_json'] as String) as Map<String, dynamic>;
@@ -457,6 +478,7 @@ class IosReminderNotificationScheduler {
   /// Uses [RemindersCalendarCalc.getNextGregorianMonthlyTrigger] to strictly
   /// guarantee correct month-end clamping (28/29/30/31).
   Future<void> _scheduleSadaqah(Map<String, dynamic> reminder, DateTime now) async {
+    if (!Platform.isIOS) return;
     Map<String, dynamic> sched = {};
     if (reminder['schedule_json'] is String) {
       sched = jsonDecode(reminder['schedule_json'] as String) as Map<String, dynamic>;
@@ -506,6 +528,7 @@ class IosReminderNotificationScheduler {
 
   /// Schedules up to 8 periodic rotating daytime Azkar slots (IDs 2300..2307).
   Future<void> _schedulePeriodicAzkar(Map<String, dynamic> reminder, DateTime now) async {
+    if (!Platform.isIOS) return;
     Map<String, dynamic> sched = {};
     if (reminder['schedule_json'] is String) {
       sched = jsonDecode(reminder['schedule_json'] as String) as Map<String, dynamic>;
@@ -562,6 +585,7 @@ class IosReminderNotificationScheduler {
   /// Cancels today's Daily Wird notification when the user reads their wird with the app open,
   /// and reschedules future ones.
   Future<bool> markWirdCompleted({String? date}) async {
+    if (!Platform.isIOS) return true;
     try {
       final todayWirdId = NotificationBudget.getWirdId(0);
       await notificationsPlugin.cancel(todayWirdId);
@@ -574,6 +598,7 @@ class IosReminderNotificationScheduler {
   }
 
   Future<bool> markCommuteCompleted({required String slotId, String? date}) async {
+    if (!Platform.isIOS) return true;
     try {
       final todayTransitId = NotificationBudget.getTransitId(0);
       await notificationsPlugin.cancel(todayTransitId);
@@ -619,6 +644,7 @@ class IosReminderNotificationScheduler {
   }
 
   Future<bool> testTriggerReminder(String id) async {
+    if (!Platform.isIOS) return true;
     try {
       final soundFile = await _getSoundForType(id);
       final isSilent = soundFile == 'SILENT';

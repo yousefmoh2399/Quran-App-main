@@ -75,6 +75,22 @@ class AdhanService : Service(), AudioManager.OnAudioFocusChangeListener {
             ACTION_START_ADHAN -> {
                 val prayerKey = intent?.getStringExtra("prayer_key") ?: "fajr"
                 val prayerName = intent?.getStringExtra("prayer_name") ?: "الصلاة"
+
+                val settings = NativePrayerManager.getSettings(this)
+                val isPrayerEnabled = when (prayerKey.lowercase()) {
+                    "fajr" -> settings.fajrEnabled && settings.fajrMode != "silent"
+                    "dhuhr" -> settings.dhuhrEnabled && settings.dhuhrMode != "silent"
+                    "asr" -> settings.asrEnabled && settings.asrMode != "silent"
+                    "maghrib" -> settings.maghribEnabled && settings.maghribMode != "silent"
+                    "isha" -> settings.ishaEnabled && settings.ishaMode != "silent"
+                    else -> true
+                }
+                if (!isPrayerEnabled) {
+                    Log.i(TAG, "🚫 AdhanService: صلاة $prayerKey معطلة في الإعدادات — إيقاف الخدمة فوراً.")
+                    stopSelf()
+                    return START_NOT_STICKY
+                }
+
                 currentPrayerKey = prayerKey
                 currentPrayerName = prayerName
                 val adhanSound = intent?.getStringExtra("adhan_sound") ?: "default"

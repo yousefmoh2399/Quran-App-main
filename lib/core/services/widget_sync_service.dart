@@ -28,6 +28,7 @@ class WidgetSyncService {
     required int lastPage,
     String planTitle = 'الورد اليومي',
   }) async {
+    if (!Platform.isAndroid && !Platform.isIOS) return;
     try {
       await HomeWidget.setAppGroupId(appGroupId);
 
@@ -64,6 +65,7 @@ class WidgetSyncService {
     required String nextPrayerTime,
     required String cityName,
   }) async {
+    if (!Platform.isAndroid && !Platform.isIOS) return;
     try {
       await HomeWidget.setAppGroupId(appGroupId);
 
@@ -90,6 +92,7 @@ class WidgetSyncService {
     required String iftarTime,
     required String dailyDua,
   }) async {
+    if (!Platform.isAndroid && !Platform.isIOS) return;
     try {
       await HomeWidget.setAppGroupId(appGroupId);
 

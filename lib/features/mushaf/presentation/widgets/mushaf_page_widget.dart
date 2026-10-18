@@ -127,45 +127,51 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
   @override
   Widget build(BuildContext context) {
     Widget buildLivePage(bool fontReady) {
-      final pageContent = Container(
-        color: widget.theme.pageBg,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            CustomPaint(
-              painter: MushafFramePainter(
-                theme: widget.theme,
-                isRightPage: widget.isRightPage,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  left: 20.0,
-                  right: 20.0,
-                  top: 18.0,
-                  bottom: 14.0,
+      final pageContent = MediaQuery(
+        data: MediaQuery.of(context).copyWith(
+          textScaler: TextScaler.noScaling,
+          boldText: false,
+        ),
+        child: Container(
+          color: widget.theme.pageBg,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              CustomPaint(
+                painter: MushafFramePainter(
+                  theme: widget.theme,
+                  isRightPage: widget.isRightPage,
                 ),
-                child: Column(
-                  children: [
-                    // Top Header
-                    _buildHeader(context),
-                    const SizedBox(height: 6.0),
-                    // Lines Area
-                    Expanded(
-                      child: fontReady
-                          ? _buildLinesList(context)
-                          : _buildFontLoadingIndicator(context),
-                    ),
-                    const SizedBox(height: 4.0),
-                    // Bottom Footer
-                    _buildFooter(context),
-                  ],
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    left: 20.0,
+                    right: 20.0,
+                    top: 18.0,
+                    bottom: 14.0,
+                  ),
+                  child: Column(
+                    children: [
+                      // Top Header
+                      _buildHeader(context),
+                      const SizedBox(height: 6.0),
+                      // Lines Area
+                      Expanded(
+                        child: fontReady
+                            ? _buildLinesList(context)
+                            : _buildFontLoadingIndicator(context),
+                      ),
+                      const SizedBox(height: 4.0),
+                      // Bottom Footer
+                      _buildFooter(context),
+                    ],
+                  ),
                 ),
               ),
-            ),
 
-            // Corner Silk Ribbons (Bookmarked and/or Memorized)
-            ..._buildRibbons(),
-          ],
+              // Corner Silk Ribbons (Bookmarked and/or Memorized)
+              ..._buildRibbons(),
+            ],
+          ),
         ),
       );
 
@@ -259,9 +265,11 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontFamily: AppTypography.decorativeFont,
+                fontFamilyFallback: AppTypography.fallbackFonts,
                 fontSize: 14.5,
                 fontWeight: FontWeight.bold,
                 color: widget.theme.headerFooterColor,
+                locale: const Locale('ar'),
               ),
             ),
           ),
@@ -275,9 +283,11 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
               textAlign: TextAlign.end,
               style: TextStyle(
                 fontFamily: AppTypography.decorativeFont,
+                fontFamilyFallback: AppTypography.fallbackFonts,
                 fontSize: 13.0,
                 fontWeight: FontWeight.w600,
                 color: widget.theme.headerFooterColor,
+                locale: const Locale('ar'),
               ),
             ),
           ),
@@ -359,8 +369,10 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
               'صفحة ${toArabicDigits(widget.page.pageNumber)} من ٦٠٤ ($percentStr%)',
               style: TextStyle(
                 fontFamily: AppTypography.uiFont,
+                fontFamilyFallback: AppTypography.fallbackFonts,
                 fontSize: 10.5,
                 color: widget.theme.headerFooterColor.withOpacity(0.75),
+                locale: const Locale('ar'),
               ),
             ),
             // Page number ornamental
@@ -368,10 +380,12 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
               'ـ ${toArabicDigits(widget.page.pageNumber)} ـ',
               style: TextStyle(
                 fontFamily: AppTypography.decorativeFont,
+                fontFamilyFallback: AppTypography.fallbackFonts,
                 fontSize: 14.5,
                 fontWeight: FontWeight.bold,
                 color: widget.theme.headerFooterColor,
                 letterSpacing: 1.0,
+                locale: const Locale('ar'),
               ),
             ),
             // Juz counter
@@ -379,8 +393,10 @@ class _MushafPageWidgetState extends State<MushafPageWidget> {
               'الجزء ${toArabicDigits(widget.page.juzNumber)}',
               style: TextStyle(
                 fontFamily: AppTypography.uiFont,
+                fontFamilyFallback: AppTypography.fallbackFonts,
                 fontSize: 10.5,
                 color: widget.theme.headerFooterColor.withOpacity(0.75),
+                locale: const Locale('ar'),
               ),
             ),
           ],

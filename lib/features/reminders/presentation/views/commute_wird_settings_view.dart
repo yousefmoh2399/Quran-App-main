@@ -1,9 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:quran_app_android/core/design/app_colors.dart';
+import 'package:quran_app_android/core/design/app_radius.dart';
+import 'package:quran_app_android/core/design/app_typography.dart';
 import 'package:quran_app_android/core/design/responsive.dart';
 import 'package:quran_app_android/core/native/native_reminders_bridge.dart';
 import 'package:quran_app_android/core/util/app_snackbar.dart';
+import 'package:quran_app_android/features/mushaf/presentation/utils/mushaf_utils.dart';
 import 'package:quran_app_android/features/reminders/data/commute_wird_repository.dart';
 
 class CommuteSlot {
@@ -95,12 +99,15 @@ class _CommuteWirdSettingsViewState extends State<CommuteWirdSettingsView> {
       } catch (_) {}
     }
 
-    setState(() => _isLoading = false);
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _saveSettings() async {
-    // Primary slot time for backward compat
-    final primarySlot = _slots.isNotEmpty ? _slots.first : CommuteSlot(id: 'morning', title: 'الصباح', hour: 7, minute: 30, targetPages: 3);
+    final primarySlot = _slots.isNotEmpty
+        ? _slots.first
+        : CommuteSlot(id: 'morning', title: 'الصباح', hour: 7, minute: 30, targetPages: 3);
 
     final scheduleMap = {
       'hour': primarySlot.hour,
@@ -164,307 +171,665 @@ class _CommuteWirdSettingsViewState extends State<CommuteWirdSettingsView> {
     }
   }
 
+  String _formatSlotTime(int hour, int minute) {
+    final period = hour >= 12 ? 'م' : 'ص';
+    final displayH = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+    final minuteTens = minute ~/ 10;
+    final minuteUnits = minute % 10;
+    return '${toArabicDigits(displayH)}:${toArabicDigits(minuteTens)}${toArabicDigits(minuteUnits)} $period';
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final primary = const Color(0xFF1B4D3E);
+    final colors = context.appColors;
 
     return Scaffold(
+      backgroundColor: colors.bg,
       appBar: AppBar(
-        title: const Text('ورد المواصلات', style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: colors.surface,
+        elevation: 0,
+        title: Text(
+          'ورد المواصلات',
+          style: TextStyle(
+            fontFamily: AppTypography.uiFont,
+            fontWeight: FontWeight.bold,
+            color: colors.text,
+          ),
+        ),
         centerTitle: true,
+        iconTheme: IconThemeData(color: colors.text),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator(color: colors.primary))
           : MaxWidthContainer(
               child: ListView(
-                padding: const EdgeInsets.all(16),
-              children: [
-                // Streak & Progress Card
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: isDark
-                          ? [const Color(0xFF14382D), const Color(0xFF0F2B22)]
-                          : [const Color(0xFFE8F5E9), const Color(0xFFC8E6C9)],
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Column(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+                children: [
+                  // 1. Streak & Progress Banner Card
+                  _buildHeaderCard(colors),
+
+                  const SizedBox(height: 14),
+
+                  // 2. Master Enable Card
+                  _buildMasterToggleCard(colors),
+
+                  const SizedBox(height: 12),
+
+                  // 3. Count Towards Main Wird Card
+                  _buildCountTowardsMainCard(colors),
+
+                  const SizedBox(height: 14),
+
+                  // 4. Days Selection Card
+                  _buildDaysSelectionCard(colors),
+
+                  const SizedBox(height: 14),
+
+                  // 5. Commute Slots List Card
+                  _buildSlotsCard(colors),
+
+                  const SizedBox(height: 20),
+
+                  // 6. Primary Save Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: colors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(borderRadius: AppRadius.borderMd),
+                      ),
+                      onPressed: _saveSettings,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Row(
-                            children: [
-                              const Icon(Icons.local_fire_department_rounded, color: Colors.orange, size: 24),
-                              const SizedBox(width: 4),
-                              Text(
-                                '${_state?.streak ?? 0}',
+                          const Icon(Icons.check_circle_rounded, size: 20),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: const Text(
+                                'حفظ المواعيد والجدولة',
                                 style: TextStyle(
+                                  fontFamily: AppTypography.uiFont,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 26,
-                                  color: isDark ? const Color(0xFF81C784) : primary,
+                                  fontSize: 15.5,
                                 ),
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: 2),
-                          const Text('أيام متتالية', style: TextStyle(fontSize: 12)),
-                        ],
-                      ),
-                      Container(width: 1, height: 40, color: Colors.grey.withOpacity(0.3)),
-                      Column(
-                        children: [
-                          Text(
-                            'صـ ${_state?.currentPage ?? 1}',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 24,
-                              color: isDark ? const Color(0xFF81C784) : primary,
                             ),
                           ),
-                          const SizedBox(height: 2),
-                          const Text('الموضع الحالي للورد', style: TextStyle(fontSize: 12)),
                         ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  // 7. Open Mushaf in Commute Mode Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: colors.primary,
+                        side: BorderSide(color: colors.primary, width: 1.2),
+                        padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 16),
+                        shape: RoundedRectangleBorder(borderRadius: AppRadius.borderMd),
+                      ),
+                      onPressed: () {
+                        final primarySlot = _slots.isNotEmpty
+                            ? _slots.first
+                            : CommuteSlot(id: 'morning', title: 'الصباح', hour: 7, minute: 30, targetPages: 3);
+                        Get.toNamed('/mushaf', arguments: {
+                          'commute_mode': true,
+                          'page': _state?.currentPage ?? 1,
+                          'target_pages': primarySlot.targetPages,
+                          'slot_id': primarySlot.id,
+                          'count_towards_main': _countTowardsMain,
+                        })?.then((_) => _loadSettings());
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.menu_book_rounded, size: 20),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: const Text(
+                                'فتح المصحف الآن في "وضع المواصلات"',
+                                style: TextStyle(
+                                  fontFamily: AppTypography.uiFont,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14.5,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
+    );
+  }
+
+  Widget _buildHeaderCard(dynamic colors) {
+    final streak = _state?.streak ?? 0;
+    final page = _state?.currentPage ?? 1;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: AppRadius.borderLg,
+        border: Border.all(color: colors.primary.withOpacity(0.22), width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // 3D Travel Icon
+          Container(
+            width: 54,
+            height: 54,
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: colors.primary.withOpacity(0.10),
+              borderRadius: AppRadius.borderMd,
+            ),
+            child: Image.asset(
+              'assets/images/icon_3d_travel.png',
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => Icon(
+                Icons.directions_bus_rounded,
+                color: colors.primary,
+                size: 32,
+              ),
+            ),
+          ),
+          const SizedBox(width: 14),
+
+          // Progress statistics
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.local_fire_department_rounded, color: Colors.orange, size: 20),
+                          const SizedBox(width: 3),
+                          Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                toArabicDigits(streak),
+                                style: TextStyle(
+                                  fontFamily: AppTypography.uiFont,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                  color: colors.text,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          'أيام متتالية',
+                          style: TextStyle(
+                            fontFamily: AppTypography.uiFont,
+                            fontSize: 11,
+                            color: colors.textMuted,
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
-
-                const SizedBox(height: 16),
-
-                // Enable Switch
-                Card(
-                  elevation: 1,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  child: SwitchListTile(
-                    title: const Text('تفعيل تذكير ورد المواصلات', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                    subtitle: const Text('فتح المصحف تلقائياً على آخر صفحة بوضع مواصلات مريح'),
-                    value: _enabled,
-                    activeColor: primary,
-                    onChanged: (val) {
-                      setState(() => _enabled = val);
-                      _saveSettings();
-                    },
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Count Towards Main Option
-                Card(
-                  elevation: 1,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  child: SwitchListTile(
-                    title: const Text('احتسبه من الورد الأساسي', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                    subtitle: const Text('عند إتمام قراءة صفحات المواصلات، تُضاف تلقائياً لتقدم وردك وسجل القراءة اليومي'),
-                    value: _countTowardsMain,
-                    activeColor: primary,
-                    onChanged: (val) => setState(() => _countTowardsMain = val),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Days Selection Card
-                Card(
-                  elevation: 1,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('أيام التذكير الأسبوعية', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                        const SizedBox(height: 10),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: _dayNames.entries.map((entry) {
-                            final isSel = _activeDays.contains(entry.key);
-                            return FilterChip(
-                              label: Text(entry.value),
-                              selected: isSel,
-                              selectedColor: primary.withOpacity(0.2),
-                              checkmarkColor: primary,
-                              onSelected: (selected) {
-                                setState(() {
-                                  if (selected) {
-                                    _activeDays.add(entry.key);
-                                  } else {
-                                    if (_activeDays.length > 1) {
-                                      _activeDays.remove(entry.key);
-                                    }
-                                  }
-                                });
-                              },
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Slots / Multi-time Card
-                Card(
-                  elevation: 1,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Wrap(
-                          alignment: WrapAlignment.spaceBetween,
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            const Text(
-                              'مواعيد وفترات الطريق اليومية',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                            ),
-                            FilledButton.tonalIcon(
-                              style: FilledButton.styleFrom(
-                                visualDensity: VisualDensity.standard,
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                              ),
-                              icon: const Icon(Icons.add_rounded, size: 18),
-                              label: const Text(
-                                'إضافة موعد',
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                              ),
-                              onPressed: _addSlot,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-
-                        ..._slots.asMap().entries.map((entry) {
-                          final idx = entry.key;
-                          final slot = entry.value;
-                          final period = slot.hour >= 12 ? 'م' : 'ص';
-                          final displayH = slot.hour > 12 ? slot.hour - 12 : (slot.hour == 0 ? 12 : slot.hour);
-                          final timeStr = '$displayH:${slot.minute.toString().padLeft(2, '0')} $period';
-
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: isDark ? const Color(0xFF1E2622) : const Color(0xFFF6F9F7),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.grey.withOpacity(0.2)),
-                            ),
-                            child: Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: TextFormField(
-                                        initialValue: slot.title,
-                                        decoration: const InputDecoration(
-                                          border: InputBorder.none,
-                                          isDense: true,
-                                          contentPadding: EdgeInsets.zero,
-                                        ),
-                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                                        onChanged: (val) => slot.title = val,
-                                      ),
-                                    ),
-                                    if (_slots.length > 1)
-                                      IconButton(
-                                        icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
-                                        onPressed: () => setState(() => _slots.removeAt(idx)),
-                                      ),
-                                  ],
+                Container(width: 1, height: 36, color: colors.divider),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.auto_stories_rounded, color: colors.primary, size: 17),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                'صـ ${toArabicDigits(page)}',
+                                style: TextStyle(
+                                  fontFamily: AppTypography.uiFont,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 17,
+                                  color: colors.text,
                                 ),
-                                const Divider(height: 16),
-                                Wrap(
-                                  alignment: WrapAlignment.spaceBetween,
-                                  crossAxisAlignment: WrapCrossAlignment.center,
-                                  spacing: 8,
-                                  runSpacing: 8,
-                                  children: [
-                                    OutlinedButton.icon(
-                                      icon: const Icon(Icons.access_time_rounded, size: 16),
-                                      label: Text(timeStr),
-                                      onPressed: () => _editSlotTime(slot),
-                                    ),
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Text('الهدف: ', style: TextStyle(fontSize: 13)),
-                                        DropdownButton<int>(
-                                          value: slot.targetPages,
-                                          underline: const SizedBox(),
-                                          items: [1, 2, 3, 4, 5, 6, 8, 10]
-                                              .map((p) => DropdownMenuItem(value: p, child: Text('$p صفحات')))
-                                              .toList(),
-                                          onChanged: (val) {
-                                            if (val != null) setState(() => slot.targetPages = val);
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ],
+                              ),
                             ),
-                          );
-                        }),
-                      ],
-                    ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          'الموضع الحالي للورد',
+                          style: TextStyle(
+                            fontFamily: AppTypography.uiFont,
+                            fontSize: 11,
+                            color: colors.textMuted,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // Save Button
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  icon: const Icon(Icons.check_circle_outline_rounded),
-                  label: const Text('حفظ الإعدادات وجدولة المواعيد', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  onPressed: _saveSettings,
-                ),
-
-                const SizedBox(height: 12),
-
-                // Test Trigger & Open Mushaf Commute Mode
-                OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  icon: const Icon(Icons.menu_book_rounded),
-                  label: const Text('فتح المصحف الآن في "وضع المواصلات"'),
-                  onPressed: () {
-                    final primarySlot = _slots.isNotEmpty
-                        ? _slots.first
-                        : CommuteSlot(id: 'morning', title: 'الصباح', hour: 7, minute: 30, targetPages: 3);
-                    Get.toNamed('/mushaf', arguments: {
-                      'commute_mode': true,
-                      'page': _state?.currentPage ?? 1,
-                      'target_pages': primarySlot.targetPages,
-                      'slot_id': primarySlot.id,
-                      'count_towards_main': _countTowardsMain,
-                    })?.then((_) => _loadSettings());
-                  },
                 ),
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMasterToggleCard(dynamic colors) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: AppRadius.borderLg,
+        border: Border.all(color: colors.divider),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(9),
+            decoration: BoxDecoration(
+              color: colors.primary.withOpacity(0.10),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.notifications_active_rounded, color: colors.primary, size: 20),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'تفعيل تذكير ورد المواصلات',
+                  style: TextStyle(
+                    fontFamily: AppTypography.uiFont,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14.5,
+                    color: colors.text,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'فتح المصحف تلقائياً على موضعك في أوقات الطريق المحددة',
+                  style: TextStyle(
+                    fontFamily: AppTypography.uiFont,
+                    fontSize: 11.5,
+                    color: colors.textMuted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Switch.adaptive(
+            value: _enabled,
+            activeColor: colors.primary,
+            onChanged: (val) {
+              setState(() => _enabled = val);
+              _saveSettings();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCountTowardsMainCard(dynamic colors) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: AppRadius.borderLg,
+        border: Border.all(color: colors.divider),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(9),
+            decoration: BoxDecoration(
+              color: colors.accent.withOpacity(0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.track_changes_rounded, color: colors.accent, size: 20),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'احتسابه ضمن الورد الأساسي',
+                  style: TextStyle(
+                    fontFamily: AppTypography.uiFont,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14.5,
+                    color: colors.text,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'إضافة صفحات قراءة المواصلات تلقائياً لتقدمك اليومي',
+                  style: TextStyle(
+                    fontFamily: AppTypography.uiFont,
+                    fontSize: 11.5,
+                    color: colors.textMuted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Switch.adaptive(
+            value: _countTowardsMain,
+            activeColor: colors.primary,
+            onChanged: (val) => setState(() => _countTowardsMain = val),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDaysSelectionCard(dynamic colors) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: AppRadius.borderLg,
+        border: Border.all(color: colors.divider),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.calendar_today_rounded, size: 17, color: colors.primary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'أيام التذكير الأسبوعية',
+                  style: TextStyle(
+                    fontFamily: AppTypography.uiFont,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13.5,
+                    color: colors.text,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: _dayNames.entries.map((entry) {
+              final isSel = _activeDays.contains(entry.key);
+              return FilterChip(
+                label: Text(entry.value),
+                selected: isSel,
+                showCheckmark: false,
+                backgroundColor: colors.surface,
+                selectedColor: colors.primary.withOpacity(0.18),
+                side: BorderSide(
+                  color: isSel ? colors.primary : colors.divider,
+                  width: isSel ? 1.4 : 0.8,
+                ),
+                labelStyle: TextStyle(
+                  fontFamily: AppTypography.uiFont,
+                  fontSize: 12,
+                  fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
+                  color: isSel ? colors.primary : colors.text,
+                ),
+                onSelected: (selected) {
+                  setState(() {
+                    if (selected) {
+                      _activeDays.add(entry.key);
+                    } else {
+                      if (_activeDays.length > 1) {
+                        _activeDays.remove(entry.key);
+                      }
+                    }
+                  });
+                },
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSlotsCard(dynamic colors) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: AppRadius.borderLg,
+        border: Border.all(color: colors.divider),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.schedule_rounded, size: 17, color: colors.primary),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      'مواعيد وفترات الطريق اليومية',
+                      style: TextStyle(
+                        fontFamily: AppTypography.uiFont,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13.5,
+                        color: colors.text,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colors.primary.withOpacity(0.12),
+                  foregroundColor: colors.primary,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  shape: RoundedRectangleBorder(borderRadius: AppRadius.borderSm),
+                ),
+                icon: const Icon(Icons.add_rounded, size: 16),
+                label: const Text(
+                  'إضافة فترة',
+                  style: TextStyle(
+                    fontFamily: AppTypography.uiFont,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+                onPressed: _addSlot,
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          ..._slots.asMap().entries.map((entry) {
+            final idx = entry.key;
+            final slot = entry.value;
+            final timeStr = _formatSlotTime(slot.hour, slot.minute);
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: colors.bg,
+                borderRadius: AppRadius.borderMd,
+                border: Border.all(color: colors.divider),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          initialValue: slot.title,
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            isDense: true,
+                            contentPadding: EdgeInsets.zero,
+                            hintText: 'اسم الفترة (مثال: طريق الذهاب)',
+                            hintStyle: TextStyle(
+                              fontFamily: AppTypography.uiFont,
+                              fontSize: 14,
+                              color: colors.textMuted,
+                            ),
+                          ),
+                          style: TextStyle(
+                            fontFamily: AppTypography.uiFont,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14.5,
+                            color: colors.text,
+                          ),
+                          onChanged: (val) => slot.title = val,
+                        ),
+                      ),
+                      if (_slots.length > 1)
+                        InkWell(
+                          onTap: () => setState(() => _slots.removeAt(idx)),
+                          borderRadius: BorderRadius.circular(16),
+                          child: Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: Icon(Icons.delete_outline_rounded, color: colors.error, size: 18),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const Divider(height: 14),
+                  Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      InkWell(
+                        onTap: () => _editSlotTime(slot),
+                        borderRadius: AppRadius.borderSm,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: colors.surface,
+                            borderRadius: AppRadius.borderSm,
+                            border: Border.all(color: colors.primary.withOpacity(0.35)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.access_time_rounded, size: 15, color: colors.primary),
+                              const SizedBox(width: 6),
+                              Text(
+                                timeStr,
+                                style: TextStyle(
+                                  fontFamily: AppTypography.uiFont,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12.5,
+                                  color: colors.text,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'الهدف: ',
+                            style: TextStyle(
+                              fontFamily: AppTypography.uiFont,
+                              fontSize: 12.5,
+                              color: colors.textMuted,
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: colors.surface,
+                              borderRadius: AppRadius.borderSm,
+                              border: Border.all(color: colors.divider),
+                            ),
+                            child: DropdownButton<int>(
+                              value: slot.targetPages,
+                              underline: const SizedBox(),
+                              isDense: true,
+                              dropdownColor: colors.surface,
+                              icon: Icon(Icons.arrow_drop_down_rounded, color: colors.primary),
+                              items: [1, 2, 3, 4, 5, 6, 8, 10]
+                                  .map((p) => DropdownMenuItem(
+                                        value: p,
+                                        child: Text(
+                                          '${toArabicDigits(p)} صفحات',
+                                          style: TextStyle(
+                                            fontFamily: AppTypography.uiFont,
+                                            fontSize: 12,
+                                            color: colors.text,
+                                          ),
+                                        ),
+                                      ))
+                                  .toList(),
+                              onChanged: (val) {
+                                if (val != null) setState(() => slot.targetPages = val);
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
     );
   }
 }

@@ -45,7 +45,7 @@ class AdhanSettingsController extends GetxController {
     }
   }
 
-  Future<void> saveSettings() async {
+  Future<void> saveSettings({bool showFeedback = false}) async {
     isSaving.value = true;
     try {
       final success = await NativeAdhanBridge.saveSettings(settings.value.toMap());
@@ -53,18 +53,78 @@ class AdhanSettingsController extends GetxController {
         if (Get.isRegistered<AdhanViewModel>()) {
           final adhanVM = Get.find<AdhanViewModel>();
           await adhanVM.recalculateWithSettings(settings.value);
+          await adhanVM.syncOngoingPrayerBanner();
         }
-        AppSnackbar.show(
-          'تم حفظ الإعدادات',
-          'تم تحديث مواقيت الصلاة وجدولة الـ 7 أيام القادمة بنجاح',
-          backgroundColor: const Color(0xFF0F5C4A),
-        );
+        if (showFeedback) {
+          AppSnackbar.show(
+            'تم حفظ الإعدادات',
+            'تم تحديث مواقيت الصلاة وجدولة الـ 7 أيام القادمة بنجاح',
+            backgroundColor: const Color(0xFF0F5C4A),
+          );
+        }
       }
     } catch (e) {
       debugPrint('Error saving adhan settings: $e');
     } finally {
       isSaving.value = false;
     }
+  }
+
+  final RxBool isDetectingLocation = false.obs;
+
+  Future<void> detectCurrentLocation() async {
+    isDetectingLocation.value = true;
+    try {
+      if (Get.isRegistered<AdhanViewModel>()) {
+        final adhanVM = Get.find<AdhanViewModel>();
+        await adhanVM.getCurrentLocation();
+        if (adhanVM.latitude != null && adhanVM.longitude != null &&
+            !(adhanVM.latitude == 0.0 && adhanVM.longitude == 0.0)) {
+          settings.value = settings.value.copyWith(
+            latitude: adhanVM.latitude!,
+            longitude: adhanVM.longitude!,
+            cityName: adhanVM.cityName,
+          );
+          await saveSettings(showFeedback: true);
+          return;
+        }
+      }
+      AppSnackbar.show(
+        'تنبيه الموقع',
+        'يرجى التأكد من تفعيل خدمة الموقع (GPS) ومنح الإذن للتطبيق',
+        backgroundColor: Colors.amber.shade900,
+      );
+    } catch (e) {
+      debugPrint('Location detection error: $e');
+      AppSnackbar.show(
+        'خطأ في الموقع',
+        'تعذر الوصول إلى الموقع الحالي، يرجى اختياره يدوياً',
+        backgroundColor: Colors.red.shade800,
+      );
+    } finally {
+      isDetectingLocation.value = false;
+    }
+  }
+
+  void resetOffset(String prayerKey) {
+    switch (prayerKey) {
+      case 'fajr':
+        settings.value = settings.value.copyWith(fajrOffset: 0);
+        break;
+      case 'dhuhr':
+        settings.value = settings.value.copyWith(dhuhrOffset: 0);
+        break;
+      case 'asr':
+        settings.value = settings.value.copyWith(asrOffset: 0);
+        break;
+      case 'maghrib':
+        settings.value = settings.value.copyWith(maghribOffset: 0);
+        break;
+      case 'isha':
+        settings.value = settings.value.copyWith(ishaOffset: 0);
+        break;
+    }
+    saveSettings(showFeedback: false);
   }
 
   void updateCalculationMethod(String method) {

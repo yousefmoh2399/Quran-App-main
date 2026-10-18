@@ -3,10 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quran_app_android/core/data/models/user_models.dart';
 import 'package:quran_app_android/core/data/repositories/user_repository.dart';
+import 'package:quran_app_android/core/design/app_colors.dart';
+import 'package:quran_app_android/core/design/app_radius.dart';
+import 'package:quran_app_android/core/design/app_typography.dart';
 import 'package:quran_app_android/core/design/responsive.dart';
 import 'package:quran_app_android/core/native/native_reminders_bridge.dart';
 import 'package:quran_app_android/core/util/app_snackbar.dart';
 import 'package:quran_app_android/features/home/presentation/view_model/home_view_model.dart';
+import 'package:quran_app_android/features/mushaf/presentation/utils/mushaf_utils.dart';
 
 class WirdReminderSettingsView extends StatefulWidget {
   const WirdReminderSettingsView({super.key});
@@ -43,7 +47,7 @@ class _WirdReminderSettingsViewState extends State<WirdReminderSettingsView> {
         }
       }
     } else {
-      // Default template
+      // Default template for display; persistent save occurs when user presses save
       final range = UserRepository.calculateWirdRange(
         type: WirdType.pagesPerDay,
         target: 10,
@@ -59,9 +63,10 @@ class _WirdReminderSettingsViewState extends State<WirdReminderSettingsView> {
         endPage: range['endPage']!,
         streak: 0,
       );
-      await _userRepo.saveWirdPlan(_plan!);
     }
-    setState(() => _isLoading = false);
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _pickTime() async {
@@ -76,7 +81,8 @@ class _WirdReminderSettingsViewState extends State<WirdReminderSettingsView> {
 
   Future<void> _saveSettings() async {
     if (_plan == null) return;
-    final timeStr = '${_reminderTime.hour.toString().padLeft(2, '0')}:${_reminderTime.minute.toString().padLeft(2, '0')}';
+    final timeStr =
+        '${_reminderTime.hour.toString().padLeft(2, '0')}:${_reminderTime.minute.toString().padLeft(2, '0')}';
     final updated = _plan!.copyWith(
       reminderTime: timeStr,
       enabled: _enabled,
@@ -110,156 +116,412 @@ class _WirdReminderSettingsViewState extends State<WirdReminderSettingsView> {
     }
   }
 
+  String _formatReminderTime(TimeOfDay time) {
+    final period = time.period == DayPeriod.am ? 'ص' : 'م';
+    final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
+    final minuteTens = time.minute ~/ 10;
+    final minuteUnits = time.minute % 10;
+    return '${toArabicDigits(hour)}:${toArabicDigits(minuteTens)}${toArabicDigits(minuteUnits)} $period';
+  }
+
   @override
   Widget build(BuildContext context) {
-    final primary = const Color(0xFF1B4D3E);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colors = context.appColors;
 
     return Scaffold(
+      backgroundColor: colors.bg,
       appBar: AppBar(
-        title: const Text('تذكير الورد اليومي', style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: colors.surface,
+        elevation: 0,
+        title: Text(
+          'تذكير الورد اليومي',
+          style: TextStyle(
+            fontFamily: AppTypography.uiFont,
+            fontWeight: FontWeight.bold,
+            color: colors.text,
+          ),
+        ),
         centerTitle: true,
+        iconTheme: IconThemeData(color: colors.text),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator(color: colors.primary))
           : MaxWidthContainer(
               child: ListView(
-                padding: const EdgeInsets.all(16),
-              children: [
-                // Info Card
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: isDark
-                          ? [const Color(0xFF14382D), const Color(0xFF0F2B22)]
-                          : [const Color(0xFFE8F5E9), const Color(0xFFC8E6C9)],
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+                children: [
+                  // 1. Streak & Target Pages Header Card
+                  _buildHeaderCard(colors),
+
+                  const SizedBox(height: 14),
+
+                  // 2. Master Enable Card
+                  _buildMasterToggleCard(colors),
+
+                  const SizedBox(height: 14),
+
+                  // 3. Time Selection Card
+                  _buildTimeCard(colors),
+
+                  const SizedBox(height: 14),
+
+                  // 4. Smart Cancellation Info Banner
+                  _buildSmartCancellationBadge(colors),
+
+                  const SizedBox(height: 22),
+
+                  // 5. Save Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: colors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(borderRadius: AppRadius.borderMd),
+                      ),
+                      icon: const Icon(Icons.check_circle_rounded, size: 20),
+                      label: const Text(
+                        'حفظ التفضيلات وجدولة التذكير',
+                        style: TextStyle(
+                          fontFamily: AppTypography.uiFont,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15.5,
+                        ),
+                      ),
+                      onPressed: _saveSettings,
                     ),
-                    borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+
+                  const SizedBox(height: 10),
+
+                  // 6. Test Trigger Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: colors.primary,
+                        side: BorderSide(color: colors.primary, width: 1.2),
+                        padding: const EdgeInsets.symmetric(vertical: 13),
+                        shape: RoundedRectangleBorder(borderRadius: AppRadius.borderMd),
+                      ),
+                      icon: const Icon(Icons.notification_important_rounded, size: 20),
+                      label: const Text(
+                        'تجربة إشعار الورد اليومي الآن',
+                        style: TextStyle(
+                          fontFamily: AppTypography.uiFont,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14.5,
+                        ),
+                      ),
+                      onPressed: () async {
+                        await NativeRemindersBridge.testTriggerReminder('wird_daily');
+                        if (context.mounted) {
+                          AppSnackbar.show(
+                            'تم إرسال الإشعار',
+                            'تفقّد لوحة الإشعارات واضغط عليه للفتح المباشر على المصحف',
+                            context: context,
+                          );
+                        }
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
+    );
+  }
+
+  Widget _buildHeaderCard(dynamic colors) {
+    final streak = _plan?.streak ?? 0;
+    final startP = _plan?.startPage ?? 1;
+    final endP = _plan?.endPage ?? 10;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: AppRadius.borderLg,
+        border: Border.all(color: colors.primary.withOpacity(0.22), width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // 3D Quran Icon
+          Container(
+            width: 54,
+            height: 54,
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: colors.primary.withOpacity(0.10),
+              borderRadius: AppRadius.borderMd,
+            ),
+            child: Image.asset(
+              'assets/images/icon_3d_quran.png',
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => Icon(
+                Icons.menu_book_rounded,
+                color: colors.primary,
+                size: 32,
+              ),
+            ),
+          ),
+          const SizedBox(width: 14),
+
+          // Statistics
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
                     children: [
-                      Column(
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Row(
-                            children: [
-                              const Icon(Icons.local_fire_department_rounded, color: Colors.orange, size: 24),
-                              const SizedBox(width: 4),
-                              Text(
-                                '${_plan?.streak ?? 0}',
+                          const Icon(Icons.local_fire_department_rounded, color: Colors.orange, size: 20),
+                          const SizedBox(width: 3),
+                          Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                toArabicDigits(streak),
                                 style: TextStyle(
+                                  fontFamily: AppTypography.uiFont,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 26,
-                                  color: isDark ? const Color(0xFF81C784) : primary,
+                                  fontSize: 20,
+                                  color: colors.text,
                                 ),
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: 2),
-                          const Text('أيام متتالية', style: TextStyle(fontSize: 12)),
-                        ],
-                      ),
-                      Container(width: 1, height: 40, color: Colors.grey.withOpacity(0.3)),
-                      Column(
-                        children: [
-                          Text(
-                            'صـ ${_plan?.startPage ?? 1} - ${_plan?.endPage ?? 10}',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 22,
-                              color: isDark ? const Color(0xFF81C784) : primary,
                             ),
                           ),
-                          const SizedBox(height: 2),
-                          const Text('ورد اليوم المستهدف', style: TextStyle(fontSize: 12)),
                         ],
+                      ),
+                      const SizedBox(height: 2),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          'أيام متتالية',
+                          style: TextStyle(
+                            fontFamily: AppTypography.uiFont,
+                            fontSize: 11,
+                            color: colors.textMuted,
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
-
-                const SizedBox(height: 16),
-
-                // Enable Switch Card
-                Card(
-                  elevation: 1,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  child: SwitchListTile(
-                    title: const Text('تفعيل تذكير الورد اليومي', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                    subtitle: const Text('يلغى الإشعار تلقائياً إذا أتممت قراءة وردك اليوم قبل حلول الموعد'),
-                    value: _enabled,
-                    activeColor: primary,
-                    onChanged: (val) {
-                      setState(() => _enabled = val);
-                      _saveSettings();
-                    },
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Time Selection Card
-                Card(
-                  elevation: 1,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  child: ListTile(
-                    leading: const Icon(Icons.access_time_rounded, color: Color(0xFF1B4D3E)),
-                    title: const Text('وقت التذكير اليومي', style: TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text(
-                      '${_reminderTime.hour > 12 ? _reminderTime.hour - 12 : (_reminderTime.hour == 0 ? 12 : _reminderTime.hour)}:${_reminderTime.minute.toString().padLeft(2, '0')} ${_reminderTime.hour >= 12 ? 'م' : 'ص'}',
-                    ),
-                    trailing: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primary.withOpacity(0.12),
-                        foregroundColor: primary,
-                        elevation: 0,
+                Container(width: 1, height: 36, color: colors.divider),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.auto_stories_rounded, color: colors.primary, size: 17),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                'صـ ${toArabicDigits(startP)} - ${toArabicDigits(endP)}',
+                                style: TextStyle(
+                                  fontFamily: AppTypography.uiFont,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: colors.text,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      onPressed: _pickTime,
-                      child: const Text('تغيير'),
-                    ),
+                      const SizedBox(height: 2),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          'ورد اليوم المستهدف',
+                          style: TextStyle(
+                            fontFamily: AppTypography.uiFont,
+                            fontSize: 11,
+                            color: colors.textMuted,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // Save Button
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  icon: const Icon(Icons.check_circle_outline_rounded),
-                  label: const Text('حفظ التفضيلات وجدولة التذكير', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  onPressed: _saveSettings,
-                ),
-
-                const SizedBox(height: 12),
-
-                // Test Trigger
-                OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  icon: const Icon(Icons.notification_important_rounded),
-                  label: const Text('تجربة إشعار الورد اليومي الآن'),
-                  onPressed: () async {
-                    await NativeRemindersBridge.testTriggerReminder('wird_daily');
-                    if (context.mounted) {
-                      AppSnackbar.show(
-                        'تم إرسال الإشعار',
-                        'تفقّد لوحة الإشعارات واضغط عليه للفتح المباشر على المصحف',
-                        context: context,
-                      );
-                    }
-                  },
                 ),
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMasterToggleCard(dynamic colors) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: AppRadius.borderLg,
+        border: Border.all(color: colors.divider),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(9),
+            decoration: BoxDecoration(
+              color: colors.primary.withOpacity(0.10),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.notifications_active_rounded, color: colors.primary, size: 20),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'تفعيل تذكير الورد اليومي',
+                  style: TextStyle(
+                    fontFamily: AppTypography.uiFont,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14.5,
+                    color: colors.text,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'إشعار يومي منتظم يذكّرك بوردك القرآني وتلاوته',
+                  style: TextStyle(
+                    fontFamily: AppTypography.uiFont,
+                    fontSize: 11.5,
+                    color: colors.textMuted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Switch.adaptive(
+            value: _enabled,
+            activeColor: colors.primary,
+            onChanged: (val) {
+              setState(() => _enabled = val);
+              _saveSettings();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimeCard(dynamic colors) {
+    final timeStr = _formatReminderTime(_reminderTime);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: AppRadius.borderLg,
+        border: Border.all(color: colors.divider),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(9),
+            decoration: BoxDecoration(
+              color: colors.primary.withOpacity(0.10),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.access_time_rounded, color: colors.primary, size: 20),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'وقت التذكير اليومي',
+                  style: TextStyle(
+                    fontFamily: AppTypography.uiFont,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14.5,
+                    color: colors.text,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  timeStr,
+                  style: TextStyle(
+                    fontFamily: AppTypography.uiFont,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: colors.primary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colors.primary.withOpacity(0.12),
+              foregroundColor: colors.primary,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              shape: RoundedRectangleBorder(borderRadius: AppRadius.borderSm),
+            ),
+            onPressed: _pickTime,
+            child: const Text(
+              'تغيير',
+              style: TextStyle(
+                fontFamily: AppTypography.uiFont,
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSmartCancellationBadge(dynamic colors) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: colors.primary.withOpacity(0.08),
+        borderRadius: AppRadius.borderMd,
+        border: Border.all(color: colors.primary.withOpacity(0.20)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.check_circle_outline_rounded, size: 18, color: colors.primary),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'إلغاء ذكي تلقائي: إذا أتممت قراءة وردك القرآني اليومي عبر التطبيق قبل حلول موعد الإشعار، يتم إلغاء التنبيه تلقائياً لذلك اليوم لمنع أي إزعاج.',
+              style: TextStyle(
+                fontFamily: AppTypography.uiFont,
+                fontSize: 12,
+                color: colors.text,
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

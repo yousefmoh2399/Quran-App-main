@@ -65,14 +65,44 @@ class AlarmReceiver : BroadcastReceiver() {
             Log.e("AlarmReceiver", "⚠️ فشل تجديد نافذة الصلوات: ${e.message}")
         }
 
-        // 3. التحقق من وضع التنبيه
-        if (notificationMode == "silent") {
+        // 3. التحقق المباشر والصارم من إعدادات الصلاة الحالية المخزنة
+        var effectiveMode = notificationMode
+        if (!isTest) {
+            val settings = NativePrayerManager.getSettings(context)
+            val isEnabled = when (prayerKey.lowercase()) {
+                "fajr" -> settings.fajrEnabled
+                "dhuhr" -> settings.dhuhrEnabled
+                "asr" -> settings.asrEnabled
+                "maghrib" -> settings.maghribEnabled
+                "isha" -> settings.ishaEnabled
+                else -> true
+            }
+
+            effectiveMode = when (prayerKey.lowercase()) {
+                "fajr" -> settings.fajrMode
+                "dhuhr" -> settings.dhuhrMode
+                "asr" -> settings.asrMode
+                "maghrib" -> settings.maghribMode
+                "isha" -> settings.ishaMode
+                else -> notificationMode
+            }
+
+            if (!isEnabled || effectiveMode == "silent") {
+                Log.i(
+                    "AlarmReceiver",
+                    "🚫 صلاة $prayerName ($prayerKey) معطّلة حالياً في الإعدادات (enabled=$isEnabled, mode=$effectiveMode) — إلغاء التنبيه وعدم تشغيل الأذان نهائياً."
+                )
+                return
+            }
+        }
+
+        if (effectiveMode == "silent") {
             Log.i("AlarmReceiver", "صلاة $prayerName مضبوطة على وضع صامت — تم تخطي التنبيه.")
             return
         }
 
         // 4. إذا كان الوضع "تنبيه فقط" بدون أذان كامل
-        if (notificationMode == "notification_only") {
+        if (effectiveMode == "notification_only") {
             showSimplePrayerNotification(context, prayerKey, prayerName, cityName)
             return
         }

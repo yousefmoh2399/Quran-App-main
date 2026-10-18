@@ -59,6 +59,30 @@ object PrayerScheduler {
         var scheduledCount = 0
         var skippedCount = 0
 
+        val activeCodes = rollingPrayers.filter { it.timeMillis > now }.map { it.requestCode }.toSet()
+
+        // إلغاء أي منبه لصلاة تم تعطيلها أو ضبطها على صامت من نظام AlarmManager فوراً
+        for (dayOffset in 0 until 8) {
+            for (prayerIndex in 1..5) {
+                val slotCode = 20000 + (dayOffset * 10) + prayerIndex
+                if (slotCode !in activeCodes) {
+                    try {
+                        val cancelIntent = Intent(context, AlarmReceiver::class.java)
+                        val pending = PendingIntent.getBroadcast(
+                            context,
+                            slotCode,
+                            cancelIntent,
+                            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                        )
+                        alarmManager.cancel(pending)
+                        pending.cancel()
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Error cancelling inactive alarm slot $slotCode: ${e.message}")
+                    }
+                }
+            }
+        }
+
         for (prayer in rollingPrayers) {
             val intent = Intent(context, AlarmReceiver::class.java).apply {
                 putExtra("prayer_key", prayer.prayerKey)
