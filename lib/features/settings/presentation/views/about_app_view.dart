@@ -21,7 +21,7 @@ class AboutAppView extends StatelessWidget {
     return Scaffold(
       backgroundColor: colors.bg,
       appBar: AppBar(
-        title: const Text('عن التطبيق والمصادر'),
+        title: const Text('عن التطبيق والمطور'),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -67,7 +67,7 @@ class AboutAppView extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'الإصدار 1.0.0 • رفيقك اليومي إلى الله',
+                    'الإصدار 1.0.2 • رفيقك اليومي إلى الله',
                     style: TextStyle(fontSize: 12, color: colors.textMuted),
                   ),
                 ],
@@ -75,9 +75,118 @@ class AboutAppView extends StatelessWidget {
             ),
             AppSpacing.verticalXl,
 
-            // Mission Statement
+            // Developer Card
             AppCard(
               variant: AppCardVariant.elevated,
+              padding: AppSpacing.paddingLg,
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              colors.primary,
+                              colors.primary.withOpacity(0.75),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: colors.primary.withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.code_rounded,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'تطوير وبرمجة',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: colors.primary,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            const Text(
+                              'Yousef M@hamed',
+                              style: TextStyle(
+                                fontFamily: AppTypography.uiFont,
+                                fontSize: 17,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'مطور تطبيقات الهواتف الذكية (Mobile App Developer)',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: colors.textMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: colors.bg,
+                      borderRadius: AppRadius.borderSm,
+                      border: Border.all(color: colors.divider.withOpacity(0.6)),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.volunteer_activism_rounded,
+                          size: 15,
+                          color: Color(0xFFD4AF37),
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            'نسألكم الدعاء بظهر الغيب ولوالديّ بالمغفرة والرحمة • صدقة جارية',
+                            style: TextStyle(
+                              fontFamily: AppTypography.decorativeFont,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: colors.textMuted,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            AppSpacing.verticalMd,
+
+            // Mission Statement
+            AppCard(
+              variant: AppCardVariant.flat,
               padding: AppSpacing.paddingLg,
               child: Column(
                 children: [

@@ -282,7 +282,7 @@ class SettingsView extends StatelessWidget {
                   icon: Icons.info_rounded,
                   iconColor: const Color(0xFF0F5C4A),
                   title: 'عن التطبيق والمطور',
-                  subtitle: 'معلومات الترخيص والمراجع ومشاركة الأجر',
+                  subtitle: 'المطور: Yousef M@hamed • المراجع ومشاركة الأجر',
                   onTap: () => Get.toNamed(AppRoutes.aboutApp),
                 ),
                 SettingsTile(
