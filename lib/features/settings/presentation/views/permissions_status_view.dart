@@ -1,3 +1,4 @@
+﻿import 'package:quran_app_android/features/adhan/presentation/widgets/battery_optimization_guide_dialog.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -145,6 +146,13 @@ class _PermissionsStatusViewState extends State<PermissionsStatusView> {
                   type: type,
                   status: statuses[type] ?? AppPermissionStatus.denied,
                   onAction: () async {
+                    if (type == AppPermissionType.batteryOptimization) {
+                      await BatteryOptimizationGuideDialog.show(context, onSettingsCompleted: () {
+                        _refresh();
+                      });
+                      await _refresh();
+                      return;
+                    }
                     final current = statuses[type];
                     if (current?.isPermanentlyDenied == true) {
                       await _service.openSettings(type);
@@ -256,19 +264,33 @@ class _PermissionsStatusViewState extends State<PermissionsStatusView> {
                         ),
                       ),
                       const SizedBox(height: AppSpacing.md),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        alignment: WrapAlignment.end,
                         children: [
                           OutlinedButton.icon(
                             onPressed: () async {
-                              await _service.openVendorAutoStart();
+                              await BatteryOptimizationGuideDialog.show(context, onSettingsCompleted: () {
+                                _refresh();
+                              });
                             },
                             style: OutlinedButton.styleFrom(
                               visualDensity: VisualDensity.compact,
-                              foregroundColor: colors.accent,
+                              foregroundColor: colors.primary,
+                            ),
+                            icon: const Icon(Icons.help_outline_rounded, size: 16),
+                            label: const Text('دليل ضبط هاتفك خطوة بخطوة 📱'),
+                          ),
+                          FilledButton.tonalIcon(
+                            onPressed: () async {
+                              await _service.openVendorAutoStart();
+                            },
+                            style: FilledButton.styleFrom(
+                              visualDensity: VisualDensity.compact,
                             ),
                             icon: const Icon(Icons.power_settings_new, size: 16),
-                            label: const Text('إعدادات التشغيل التلقائي'),
+                            label: const Text('فتح الضبط التلقائي'),
                           ),
                         ],
                       ),

@@ -1,4 +1,4 @@
-package com.example.quran_app_android.permissions
+﻿package com.example.quran_app_android.permissions
 
 import android.app.Activity
 import android.app.AlarmManager
@@ -240,8 +240,8 @@ object PermissionsBridge {
                     ctx.startActivity(intent)
                 }
                 Build.MANUFACTURER.contains("samsung", true) -> {
-                    val intent = Intent("com.samsung.android.sm.ACTION_BATTERY")
-                    ctx.startActivity(intent)
+                    // على أجهزة سامسونج الحديثة، فتح تفاصيل التطبيق مباشرة يتيح للمستخدم الضغط على "البطارية" واختيار "غير مقيّد"
+                    openAppDetails(ctx)
                 }
                 else -> {
                     // fallback على صفحة التطبيق العادية

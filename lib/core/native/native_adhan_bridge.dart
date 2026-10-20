@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -313,5 +313,41 @@ class NativeAdhanBridge {
     } catch (_) {
       return false;
     }
+  }
+
+  /// Retrieves device hardware details (manufacturer, brand, model, sdkInt) for brand-specific guides
+  static Future<Map<String, dynamic>?> getDeviceInfo() async {
+    if (!Platform.isAndroid) return null;
+    try {
+      final res = await _channel.invokeMethod<Map>('getDeviceInfo');
+      return res != null ? Map<String, dynamic>.from(res) : null;
+    } catch (e) {
+      debugPrint('NativeAdhanBridge.getDeviceInfo error: $e');
+      return null;
+    }
+  }
+
+  /// Opens the application info / details settings page directly
+  static Future<bool> openAppDetailsSettings() async {
+    if (!Platform.isAndroid) return await openAppSettings();
+    try {
+      final res = await _channel.invokeMethod<bool>('openAppDetailsSettings');
+      if (res == true) return true;
+    } catch (e) {
+      debugPrint('NativeAdhanBridge.openAppDetailsSettings native error: $e');
+    }
+    return await openAppSettings();
+  }
+
+  /// Opens the vendor-specific autostart or battery management settings
+  static Future<bool> openAutoStartSettings() async {
+    if (!Platform.isAndroid) return false;
+    try {
+      final res = await _channel.invokeMethod<bool>('openAutoStartSettings');
+      if (res == true) return true;
+    } catch (e) {
+      debugPrint('NativeAdhanBridge.openAutoStartSettings native error: $e');
+    }
+    return await openAppSettings();
   }
 }

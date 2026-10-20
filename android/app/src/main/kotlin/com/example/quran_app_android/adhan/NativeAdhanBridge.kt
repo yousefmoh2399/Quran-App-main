@@ -1,4 +1,4 @@
-package com.example.quran_app_android.adhan
+﻿package com.example.quran_app_android.adhan
 
 import android.content.Context
 import android.content.Intent
@@ -219,6 +219,69 @@ object NativeAdhanBridge : MethodChannel.MethodCallHandler {
                     Log.w(TAG, "Error stopping adhan service: ${e.message}")
                     result.success(false)
                 }
+            }
+            "getDeviceInfo" -> {
+                result.success(
+                    mapOf(
+                        "manufacturer" to android.os.Build.MANUFACTURER,
+                        "brand" to android.os.Build.BRAND,
+                        "model" to android.os.Build.MODEL,
+                        "sdkInt" to android.os.Build.VERSION.SDK_INT
+                    )
+                )
+            }
+
+            "openAppDetailsSettings" -> {
+                try {
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = Uri.parse("package:${context.packageName}")
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    context.startActivity(intent)
+                    result.success(true)
+                } catch (e: Exception) {
+                    result.error("APP_DETAILS_ERROR", e.message, null)
+                }
+            }
+
+            "openAutoStartSettings" -> {
+                val oemIntents = listOf(
+                    // Xiaomi / Poco / Redmi
+                    Intent().setClassName("com.miui.securitycenter", "com.miui.permcenter.autostart.AutoStartManagementActivity"),
+                    // Oppo / Realme / OnePlus
+                    Intent("oppo.intent.action.OPPO_AUTO_START").setClassName("com.coloros.safecenter", "com.coloros.safecenter.startupapp.StartupAppListActivity"),
+                    Intent().setClassName("com.coloros.safecenter", "com.coloros.safecenter.permission.startup.StartupAppListActivity"),
+                    // Huawei / Honor
+                    Intent().setClassName("com.huawei.systemmanager", "com.huawei.systemmanager.appcontrol.activity.StartupAppControlActivity"),
+                    Intent().setClassName("com.huawei.systemmanager", "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity"),
+                    Intent().setClassName("com.huawei.systemmanager", "com.huawei.systemmanager.optimize.bootstart.BootStartActivity"),
+                    // Vivo / iQOO
+                    Intent().setClassName("com.iqoo.secure", "com.iqoo.secure.ui.phoneoptimize.AddWhiteListActivity"),
+                    Intent().setClassName("com.vivo.permissionmanager", "com.vivo.permissionmanager.activity.BgStartUpManagerActivity")
+                )
+
+                var launched = false
+                for (intent in oemIntents) {
+                    try {
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        context.startActivity(intent)
+                        launched = true
+                        break
+                    } catch (_: Exception) {}
+                }
+
+                if (!launched) {
+                    try {
+                        val fallback = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = Uri.parse("package:${context.packageName}")
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        context.startActivity(fallback)
+                        launched = true
+                    } catch (_: Exception) {}
+                }
+
+                result.success(launched)
             }
 
             // Legacy compatibility

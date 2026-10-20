@@ -1,3 +1,4 @@
+﻿import 'package:quran_app_android/features/adhan/presentation/widgets/battery_optimization_guide_dialog.dart';
 import 'dart:io';
 
 import 'package:adhan/adhan.dart';
@@ -428,7 +429,11 @@ class _AdhanViewState extends State<AdhanView> with WidgetsBindingObserver {
                     fontSize: 12.5,
                   ),
                 ),
-                onPressed: () => AdhanBatteryPermissionService.requestOptimalSettings(),
+                onPressed: () {
+                  BatteryOptimizationGuideDialog.show(context, onSettingsCompleted: () {
+                    _checkBatteryReliability();
+                  });
+                },
               ),
             ],
           ),

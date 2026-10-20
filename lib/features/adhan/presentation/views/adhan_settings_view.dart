@@ -1,3 +1,4 @@
+﻿import 'package:quran_app_android/features/adhan/presentation/widgets/battery_optimization_guide_dialog.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,6 @@ import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
 import 'package:quran_app_android/core/service/settings/notifications_services.dart';
 import 'package:quran_app_android/core/util/routes/routes.dart';
 import 'package:quran_app_android/features/adhan/presentation/controllers/adhan_settings_controller.dart';
-import 'package:quran_app_android/features/adhan/presentation/services/adhan_battery_permission_service.dart';
 import 'package:quran_app_android/features/adhan/presentation/view_model/adhan_view_model.dart';
 import 'package:quran_app_android/features/mushaf/presentation/utils/mushaf_utils.dart';
 
@@ -1338,11 +1338,32 @@ class AdhanSettingsView extends StatelessWidget {
                 ),
               ],
             ),
-            if (!isGood) ...[
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (isGood)
+                  TextButton.icon(
+                    style: TextButton.styleFrom(
+                      foregroundColor: colors.primary,
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    icon: const Icon(Icons.info_outline_rounded, size: 16),
+                    label: const Text(
+                      'شرح خطوات هاتفك 📱',
+                      style: TextStyle(
+                        fontFamily: AppTypography.uiFont,
+                        fontSize: 12.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    onPressed: () {
+                      BatteryOptimizationGuideDialog.show(context, onSettingsCompleted: () {
+                        controller.checkReliability();
+                      });
+                    },
+                  )
+                else
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: colors.primary,
@@ -1354,18 +1375,21 @@ class AdhanSettingsView extends StatelessWidget {
                     ),
                     icon: const Icon(Icons.tune_rounded, size: 16),
                     label: const Text(
-                      'ضبط استثناء البطارية الآن',
+                      'ضبط استثناء البطارية (دليل هاتفك) 📱',
                       style: TextStyle(
                         fontFamily: AppTypography.uiFont,
                         fontWeight: FontWeight.bold,
                         fontSize: 12.5,
                       ),
                     ),
-                    onPressed: () => AdhanBatteryPermissionService.requestOptimalSettings(),
+                    onPressed: () {
+                      BatteryOptimizationGuideDialog.show(context, onSettingsCompleted: () {
+                        controller.checkReliability();
+                      });
+                    },
                   ),
-                ],
-              ),
-            ],
+              ],
+            ),
           ],
         ),
       );
