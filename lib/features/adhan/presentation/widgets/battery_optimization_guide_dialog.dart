@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:quran_app_android/core/design/app_colors.dart';
 import 'package:quran_app_android/core/design/app_radius.dart';
@@ -162,6 +162,7 @@ class _BatteryOptimizationGuideDialogState extends State<BatteryOptimizationGuid
                     // Device Brand Header Badge
                     Center(
                       child: Container(
+                        constraints: BoxConstraints(maxWidth: size.width - 48),
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                         decoration: BoxDecoration(
                           color: colors.primary.withOpacity(0.12),
@@ -177,13 +178,17 @@ class _BatteryOptimizationGuideDialogState extends State<BatteryOptimizationGuid
                               color: colors.primary,
                             ),
                             const SizedBox(width: 8),
-                            Text(
-                              'هاتفك: ${_brandInfo?.displayName ?? "Android"}',
-                              style: TextStyle(
-                                fontFamily: AppTypography.uiFont,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: colors.primary,
+                            Flexible(
+                              child: Text(
+                                'هاتفك: ${_brandInfo?.displayName ?? "Android"}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontFamily: AppTypography.uiFont,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: colors.primary,
+                                ),
                               ),
                             ),
                           ],

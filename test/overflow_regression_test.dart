@@ -20,6 +20,7 @@ import 'package:quran_app_android/features/reminders/presentation/views/wird_rem
 import 'package:quran_app_android/features/reminders/presentation/views/sadaqah_settings_view.dart';
 import 'package:quran_app_android/features/azkar/presentation/views/azkar_notifications_settings_view.dart';
 import 'package:quran_app_android/features/reminders/presentation/views/my_reminders_view.dart';
+import 'package:quran_app_android/features/adhan/presentation/widgets/battery_optimization_guide_dialog.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -452,6 +453,19 @@ void main() {
       expect(find.text('الأذكار الدورية'), findsOneWidget);
 
       await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -500));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    });
+    testWidgets('BatteryOptimizationGuideDialog renders adaptively on 300dp small phone and textScale 1.4 without overflow', (WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(300, 600));
+      await tester.pumpWidget(
+        buildTestWidget(
+          child: const BatteryOptimizationGuideDialog(),
+          width: 300,
+          height: 600,
+          textScale: 1.4,
+        ),
+      );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });

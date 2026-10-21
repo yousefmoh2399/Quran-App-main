@@ -57,7 +57,7 @@ class DeviceBrandGuideService {
     if (!Platform.isAndroid) {
       _cachedInfo = const BrandGuideInfo(
         brandKey: DeviceBrandKey.other,
-        displayName: 'أجهزة Apple iOS',
+        displayName: 'أبل (Apple iOS)',
         rawManufacturer: 'Apple',
         model: 'iPhone / iPad',
         summaryTip: 'نظام iOS يدير دقة المواعيد تلقائياً عند منح إذن الإشعارات',
@@ -108,7 +108,7 @@ class DeviceBrandGuideService {
       case DeviceBrandKey.samsung:
         return BrandGuideInfo(
           brandKey: key,
-          displayName: 'هواتف سامسونج (Samsung Galaxy)',
+          displayName: 'سامسونج (Samsung)',
           rawManufacturer: rawMfr,
           model: model.isNotEmpty ? model : 'Galaxy',
           summaryTip: 'اختر (غير مقيّد / Unrestricted) ليعمل الأذان وشاشتك مقفلة',
@@ -140,7 +140,7 @@ class DeviceBrandGuideService {
       case DeviceBrandKey.xiaomi:
         return BrandGuideInfo(
           brandKey: key,
-          displayName: 'هواتف شاومي وريدمي (Xiaomi / Redmi / POCO)',
+          displayName: 'شاومي (Xiaomi / Redmi)',
           rawManufacturer: rawMfr,
           model: model.isNotEmpty ? model : 'Redmi / POCO',
           summaryTip: 'فعّل (التشغيل التلقائي) واجعل موفر البطارية (بلا قيود)',
@@ -173,7 +173,7 @@ class DeviceBrandGuideService {
       case DeviceBrandKey.oppo:
         return BrandGuideInfo(
           brandKey: key,
-          displayName: 'هواتف أوبو وريلمي (Oppo / Realme / OnePlus)',
+          displayName: 'أوبو وريلمي (Oppo / Realme)',
           rawManufacturer: rawMfr,
           model: model.isNotEmpty ? model : 'Realme / Oppo',
           summaryTip: 'السماح بالنشاط في الخلفية وبدء التشغيل التلقائي',
@@ -206,7 +206,7 @@ class DeviceBrandGuideService {
       case DeviceBrandKey.huawei:
         return BrandGuideInfo(
           brandKey: key,
-          displayName: 'هواتف هواوي وهونر (Huawei / Honor)',
+          displayName: 'هواوي وهونر (Huawei / Honor)',
           rawManufacturer: rawMfr,
           model: model.isNotEmpty ? model : 'Honor / Huawei',
           summaryTip: 'اختر (إدارة يدوية) وفعّل كافة خيارات التشغيل في الخلفية',
@@ -238,7 +238,7 @@ class DeviceBrandGuideService {
       case DeviceBrandKey.vivo:
         return BrandGuideInfo(
           brandKey: key,
-          displayName: 'هواتف فيفو (Vivo / iQOO)',
+          displayName: 'فيفو (Vivo / iQOO)',
           rawManufacturer: rawMfr,
           model: model.isNotEmpty ? model : 'Vivo',
           summaryTip: 'السماح باستمرار استهلاك طاقة الخلفية عالي',
@@ -270,7 +270,7 @@ class DeviceBrandGuideService {
       case DeviceBrandKey.other:
         return BrandGuideInfo(
           brandKey: key,
-          displayName: 'أجهزة أندرويد (Google Pixel / Motorola / أجهزة أخرى)',
+          displayName: 'أجهزة أندرويد (Android)',
           rawManufacturer: rawMfr,
           model: model.isNotEmpty ? model : 'Android',
           summaryTip: 'اختر (غير مقيّد / Unrestricted) لاستخدام البطارية',
