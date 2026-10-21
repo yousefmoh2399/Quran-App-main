@@ -12,6 +12,7 @@ import 'package:quran_app_android/core/service/settings/SettingsServices.dart';
 import 'package:quran_app_android/core/service/settings/lock_screen_banner_service.dart';
 import 'package:quran_app_android/core/util/app_snackbar.dart';
 import 'package:quran_app_android/features/adhan/data/models/adhan_settings_model.dart';
+import 'package:quran_app_android/features/adhan/presentation/services/offline_city_resolver.dart';
 import 'package:quran_app_android/features/quran/presentation/view_model/quran_screen_model_details.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -61,6 +62,18 @@ class AdhanViewModel extends GetxController {
         latitude = currentSettings!.latitude;
         longitude = currentSettings!.longitude;
         cityName = currentSettings!.cityName;
+
+        // If stored city name is empty, resolve it offline immediately
+        if (cityName.trim().isEmpty) {
+          final resolved = OfflineCityResolver.resolve(latitude!, longitude!);
+          cityName = resolved.displayName;
+          currentSettings = currentSettings!.copyWith(
+            cityName: cityName,
+            calculationMethod: resolved.isEgypt ? 'EGYPTIAN' : currentSettings!.calculationMethod,
+          );
+          await NativeAdhanBridge.saveSettings(currentSettings!.toMap());
+        }
+
         isLocationRequired.value = false;
         await recalculatePrayerTimes();
       }
@@ -80,7 +93,7 @@ class AdhanViewModel extends GetxController {
         final req = await Permission.location.request();
         if (!req.isGranted) {
           if (latitude == null || longitude == null) {
-            isLocationRequired.value = true;
+            _fallbackToCairo();
           }
           return;
         }
@@ -88,7 +101,7 @@ class AdhanViewModel extends GetxController {
     } on PlatformException catch (e) {
       debugPrint('⚠️ Location permission request in progress or busy: $e');
       if (latitude == null || longitude == null) {
-        isLocationRequired.value = true;
+        _fallbackToCairo();
       }
       return;
     } catch (e) {
@@ -98,32 +111,42 @@ class AdhanViewModel extends GetxController {
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       if (latitude == null || longitude == null) {
-        isLocationRequired.value = true;
+        _fallbackToCairo();
       }
       return;
     }
 
     Position? position;
+
+    // 1. First, check if there is an instant cached location (prevents Oppo & slow phone hangs)
+    try {
+      final lastKnown = await Geolocator.getLastKnownPosition();
+      if (lastKnown != null) {
+        position = lastKnown;
+      }
+    } catch (_) {}
+
+    // 2. Try fetching fresh GPS coordinates with an aggressive 6s timeout
     try {
       position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.medium,
-          timeLimit: Duration(seconds: 10),
+          timeLimit: Duration(seconds: 6),
         ),
       );
     } catch (e) {
-      debugPrint('Standard location failed ($e), falling back to native Android LocationManager (Huawei / Non-GMS support)...');
-      if (defaultTargetPlatform == TargetPlatform.android) {
+      debugPrint('Standard location failed/timed out ($e), trying native LocationManager fallback...');
+      if (position == null && defaultTargetPlatform == TargetPlatform.android) {
         try {
           position = await Geolocator.getCurrentPosition(
             locationSettings: AndroidSettings(
               accuracy: LocationAccuracy.medium,
               forceLocationManager: true,
-              timeLimit: const Duration(seconds: 12),
+              timeLimit: const Duration(seconds: 6),
             ),
           );
         } catch (e2) {
-          debugPrint('Native LocationManager also failed ($e2)');
+          debugPrint('Native LocationManager also failed/timed out ($e2)');
         }
       }
     }
@@ -136,6 +159,10 @@ class AdhanViewModel extends GetxController {
       longitude = position.longitude;
       isLocationRequired.value = false;
 
+      // Resolve nearest city & governorate offline
+      final resolved = OfflineCityResolver.resolve(position.latitude, position.longitude);
+      cityName = resolved.displayName;
+
       // Check distance moved (> 50 km = 50,000 meters)
       if (prevLat != null && prevLng != null && prevLat != 0.0 && prevLng != 0.0) {
         final distance = Geolocator.distanceBetween(prevLat, prevLng, position.latitude, position.longitude);
@@ -143,7 +170,7 @@ class AdhanViewModel extends GetxController {
           debugPrint('User moved > 50km ($distance m). Updating location and rolling window!');
           AppSnackbar.show(
             'تحديث الموقع',
-            'تم رصد انتقال جغرافي جديد وتحديث مواقيت الصلاة تلقائياً',
+            'تم رصد انتقال جغرافي جديد إلى $cityName وتحديث المواقيت تلقائياً',
             backgroundColor: const Color(0xFF0F5C4A),
             duration: const Duration(seconds: 3),
           );
@@ -152,23 +179,18 @@ class AdhanViewModel extends GetxController {
 
       await saveLocation(latitude!, longitude!, cityName);
     } else {
-      if (latitude == null || longitude == null) {
-        // Try last known position
-        try {
-          final last = await Geolocator.getLastKnownPosition();
-          if (last != null) {
-            latitude = last.latitude;
-            longitude = last.longitude;
-            isLocationRequired.value = false;
-            await saveLocation(latitude!, longitude!, cityName);
-          } else {
-            isLocationRequired.value = true;
-          }
-        } catch (_) {
-          isLocationRequired.value = true;
-        }
+      if (latitude == null || longitude == null || (latitude == 0.0 && longitude == 0.0)) {
+        _fallbackToCairo();
       }
     }
+  }
+
+  void _fallbackToCairo() {
+    latitude = 30.0444;
+    longitude = 31.2357;
+    cityName = 'القاهرة، مصر';
+    isLocationRequired.value = false;
+    saveLocation(latitude!, longitude!, cityName);
   }
 
   /// Sets location manually (e.g. from user city picker) without silent fallback.
@@ -182,15 +204,29 @@ class AdhanViewModel extends GetxController {
   }
 
   Future<void> saveLocation(double lat, double lng, String city) async {
+    String finalCity = city;
+    if (finalCity.trim().isEmpty) {
+      final resolved = OfflineCityResolver.resolve(lat, lng);
+      finalCity = resolved.displayName;
+    }
+    cityName = finalCity;
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble('lat', lat);
     await prefs.setDouble('lng', lng);
-    await prefs.setString('cityName', city);
+    await prefs.setString('cityName', finalCity);
+
+    // If coordinates resolve to Egypt, ensure calculation method is EGYPTIAN
+    final resolved = OfflineCityResolver.resolve(lat, lng);
+    final calculationMethod = (currentSettings != null && currentSettings!.calculationMethod.isNotEmpty)
+        ? (resolved.isEgypt ? 'EGYPTIAN' : currentSettings!.calculationMethod)
+        : (resolved.isEgypt ? 'EGYPTIAN' : resolved.recommendedMethod);
 
     final updated = (currentSettings ?? const AdhanSettingsModel(latitude: 0, longitude: 0)).copyWith(
       latitude: lat,
       longitude: lng,
-      cityName: city,
+      cityName: finalCity,
+      calculationMethod: calculationMethod,
     );
     currentSettings = updated;
 

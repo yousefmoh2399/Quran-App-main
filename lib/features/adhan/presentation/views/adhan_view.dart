@@ -1,4 +1,4 @@
-﻿import 'package:quran_app_android/features/adhan/presentation/widgets/battery_optimization_guide_dialog.dart';
+import 'package:quran_app_android/features/adhan/presentation/widgets/battery_optimization_guide_dialog.dart';
 import 'dart:io';
 
 import 'package:adhan/adhan.dart';
@@ -224,6 +224,7 @@ class _AdhanViewState extends State<AdhanView> with WidgetsBindingObserver {
                 AdhanLocationBar(
                   isDefaultLocation: controller.isDefaultLocation,
                   isLoading: controller.isLoading.value,
+                  cityName: controller.cityName,
                   onRefreshLocation: () => controller.getCurrentLocation(),
                 ),
 

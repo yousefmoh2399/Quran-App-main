@@ -9,18 +9,23 @@ import 'package:quran_app_android/core/design/components/app_card.dart';
 class AdhanLocationBar extends StatelessWidget {
   final bool isDefaultLocation;
   final bool isLoading;
+  final String? cityName;
   final VoidCallback onRefreshLocation;
 
   const AdhanLocationBar({
     super.key,
     required this.isDefaultLocation,
     required this.isLoading,
+    this.cityName,
     required this.onRefreshLocation,
   });
 
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
+    final displayTitle = (cityName != null && cityName!.trim().isNotEmpty)
+        ? cityName!
+        : (isDefaultLocation ? 'القاهرة، مصر' : 'الموقع الجغرافي المحدد');
 
     return AppCard(
       variant: AppCardVariant.outlined,
@@ -54,13 +59,17 @@ class AdhanLocationBar extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Text(
-                          isDefaultLocation ? 'القاهرة، مصر' : 'الموقع الجغرافي المحدد',
-                          style: TextStyle(
-                            fontFamily: AppTypography.uiFont,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: colors.text,
+                        Flexible(
+                          child: Text(
+                            displayTitle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontFamily: AppTypography.uiFont,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: colors.text,
+                            ),
                           ),
                         ),
                         if (isDefaultLocation) ...[
@@ -89,7 +98,7 @@ class AdhanLocationBar extends StatelessWidget {
                     ),
                     AppSpacing.verticalXs,
                     Text(
-                      'الهيئة المصرية للمساحة • المذهب الشافعي',
+                      'الهيئة المصرية للمساحة • مذهب الجمهور',
                       style: TextStyle(
                         fontFamily: AppTypography.uiFont,
                         fontSize: 11,

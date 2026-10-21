@@ -1,4 +1,4 @@
-﻿import 'package:quran_app_android/features/adhan/presentation/widgets/battery_optimization_guide_dialog.dart';
+import 'package:quran_app_android/features/adhan/presentation/widgets/battery_optimization_guide_dialog.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -396,16 +396,23 @@ class AdhanSettingsView extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
+                _buildCityChip(controller, 'القاهرة', 30.0444, 31.2357, settings.cityName, colors),
+                _buildCityChip(controller, 'الإسكندرية', 31.2001, 29.9187, settings.cityName, colors),
+                _buildCityChip(controller, 'المنصورة', 31.0409, 31.3785, settings.cityName, colors),
+                _buildCityChip(controller, 'طنطا', 30.7865, 31.0004, settings.cityName, colors),
+                _buildCityChip(controller, 'الزقازيق', 30.5877, 31.5020, settings.cityName, colors),
+                _buildCityChip(controller, 'أسيوط', 27.1783, 31.1859, settings.cityName, colors),
+                _buildCityChip(controller, 'سوهاج', 26.5569, 31.6948, settings.cityName, colors),
+                _buildCityChip(controller, 'بورسعيد', 31.2653, 32.3019, settings.cityName, colors),
+                _buildCityChip(controller, 'السويس', 29.9668, 32.5498, settings.cityName, colors),
+                _buildCityChip(controller, 'أسوان', 24.0889, 32.8998, settings.cityName, colors),
                 _buildCityChip(controller, 'مكة المكرمة', 21.3891, 39.8579, settings.cityName, colors),
                 _buildCityChip(controller, 'المدينة المنورة', 24.5247, 39.5692, settings.cityName, colors),
                 _buildCityChip(controller, 'القدس الشريف', 31.7683, 35.2137, settings.cityName, colors),
-                _buildCityChip(controller, 'القاهرة', 30.0444, 31.2357, settings.cityName, colors),
-                _buildCityChip(controller, 'الإسكندرية', 31.2001, 29.9187, settings.cityName, colors),
                 _buildCityChip(controller, 'الرياض', 24.7136, 46.6753, settings.cityName, colors),
                 _buildCityChip(controller, 'دبي', 25.2048, 55.2708, settings.cityName, colors),
-                _buildCityChip(controller, 'المنصورة', 31.0409, 31.3785, settings.cityName, colors),
-                _buildCityChip(controller, 'طرابلس', 32.8872, 13.1913, settings.cityName, colors),
                 _buildCityChip(controller, 'عمّان', 31.9454, 35.9284, settings.cityName, colors),
+                _buildCityChip(controller, 'طرابلس', 32.8872, 13.1913, settings.cityName, colors),
               ],
             ),
           ),
@@ -1115,7 +1122,34 @@ class AdhanSettingsView extends StatelessWidget {
               color: colors.text,
             ),
           ),
-          const SizedBox(height: 8.0),
+          const SizedBox(height: 6.0),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+            decoration: BoxDecoration(
+              color: Colors.amber.withOpacity(0.1),
+              borderRadius: AppRadius.borderMd,
+              border: Border.all(color: Colors.amber.withOpacity(0.3)),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.info_outline_rounded, size: 16, color: Colors.amber.shade800),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'المعمول به في مساجد مصر ومعظم الدول العربية هو «جمهور الفقهاء». في «المذهب الحنفي» يدخل وقت العصر متأخراً بنحو 50 دقيقة (عند بلوغ الظل مثليه).',
+                    style: TextStyle(
+                      fontFamily: AppTypography.uiFont,
+                      fontSize: 11.0,
+                      color: colors.text,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10.0),
 
           LayoutBuilder(
             builder: (context, constraints) {
@@ -1134,7 +1168,11 @@ class AdhanSettingsView extends StatelessWidget {
                       title: 'المذهب الحنفي',
                       subtitle: 'الإمام أبو حنيفة (الظل مثليه)',
                       isSelected: !isShafi,
-                      onTap: () => controller.updateMadhab('HANAFI'),
+                      onTap: () {
+                        if (isShafi) {
+                          _confirmHanafiSwitch(context, controller, colors);
+                        }
+                      },
                       colors: colors,
                     ),
                   ],
@@ -1157,7 +1195,11 @@ class AdhanSettingsView extends StatelessWidget {
                       title: 'المذهب الحنفي',
                       subtitle: 'الإمام أبو حنيفة (الظل مثليه)',
                       isSelected: !isShafi,
-                      onTap: () => controller.updateMadhab('HANAFI'),
+                      onTap: () {
+                        if (isShafi) {
+                          _confirmHanafiSwitch(context, controller, colors);
+                        }
+                      },
                       colors: colors,
                     ),
                   ),
@@ -1409,5 +1451,75 @@ class AdhanSettingsView extends StatelessWidget {
       'SINGAPORE',
     ];
     return valid.contains(method.toUpperCase()) ? method.toUpperCase() : 'EGYPTIAN';
+  }
+  void _confirmHanafiSwitch(
+    BuildContext context,
+    AdhanSettingsController controller,
+    dynamic colors,
+  ) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.borderLg),
+        backgroundColor: colors.surface,
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.amber.shade800, size: 24),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'تأكيد تغيير مذهب العصر',
+                style: TextStyle(
+                  fontFamily: AppTypography.uiFont,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15.5,
+                  color: colors.text,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          'في المذهب الحنفي، لا يدخل وقت صلاة العصر إلا عندما يصير ظل كل شيء مثليه، مما يجعل موعد أذان العصر متأخراً بنحو 45 إلى 55 دقيقة مقارنة بالمساجد والأذان الرسمي في مصر ومعظم الدول العربية.\n\nهل ترغب بالتأكيد في التحويل للمذهب الحنفي؟',
+          style: TextStyle(
+            fontFamily: AppTypography.uiFont,
+            fontSize: 12.5,
+            color: colors.text,
+            height: 1.5,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(
+              'إلغاء (البقاء على الجمهور)',
+              style: TextStyle(
+                fontFamily: AppTypography.uiFont,
+                fontWeight: FontWeight.bold,
+                color: colors.textMuted,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: AppRadius.borderMd),
+            ),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              controller.updateMadhab('HANAFI');
+            },
+            child: const Text(
+              'تأكيد التحويل',
+              style: TextStyle(
+                fontFamily: AppTypography.uiFont,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

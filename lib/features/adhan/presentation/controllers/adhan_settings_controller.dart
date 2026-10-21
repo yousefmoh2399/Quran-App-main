@@ -4,6 +4,7 @@ import 'package:quran_app_android/core/native/native_adhan_bridge.dart';
 import 'package:quran_app_android/core/util/app_snackbar.dart';
 import 'package:quran_app_android/features/adhan/data/models/adhan_settings_model.dart';
 import 'package:quran_app_android/features/adhan/presentation/services/adhan_battery_permission_service.dart';
+import 'package:quran_app_android/features/adhan/presentation/services/offline_city_resolver.dart';
 import 'package:quran_app_android/features/adhan/presentation/view_model/adhan_view_model.dart';
 
 class AdhanSettingsController extends GetxController with WidgetsBindingObserver {
@@ -48,15 +49,23 @@ class AdhanSettingsController extends GetxController with WidgetsBindingObserver
     try {
       final map = await NativeAdhanBridge.getSettings();
       if (map != null && map['latitude'] != null) {
-        settings.value = AdhanSettingsModel.fromMap(map);
+        var s = AdhanSettingsModel.fromMap(map);
+        // If city name is missing, resolve it offline
+        if (s.cityName.trim().isEmpty && s.latitude != 0.0 && s.longitude != 0.0) {
+          final res = OfflineCityResolver.resolve(s.latitude, s.longitude);
+          s = s.copyWith(cityName: res.displayName);
+        }
+        settings.value = s;
       } else {
         // Fetch from AdhanViewModel if available
         if (Get.isRegistered<AdhanViewModel>()) {
           final adhanVM = Get.find<AdhanViewModel>();
           if (adhanVM.latitude != null && adhanVM.longitude != null) {
+            final res = OfflineCityResolver.resolve(adhanVM.latitude!, adhanVM.longitude!);
             settings.value = settings.value.copyWith(
               latitude: adhanVM.latitude!,
               longitude: adhanVM.longitude!,
+              cityName: adhanVM.cityName.isNotEmpty ? adhanVM.cityName : res.displayName,
             );
           }
         }
@@ -103,12 +112,20 @@ class AdhanSettingsController extends GetxController with WidgetsBindingObserver
         await adhanVM.getCurrentLocation();
         if (adhanVM.latitude != null && adhanVM.longitude != null &&
             !(adhanVM.latitude == 0.0 && adhanVM.longitude == 0.0)) {
+          final res = OfflineCityResolver.resolve(adhanVM.latitude!, adhanVM.longitude!);
+          final resolvedCity = adhanVM.cityName.isNotEmpty ? adhanVM.cityName : res.displayName;
           settings.value = settings.value.copyWith(
             latitude: adhanVM.latitude!,
             longitude: adhanVM.longitude!,
-            cityName: adhanVM.cityName,
+            cityName: resolvedCity,
+            calculationMethod: res.isEgypt ? 'EGYPTIAN' : settings.value.calculationMethod,
           );
-          await saveSettings(showFeedback: true);
+          await saveSettings(showFeedback: false);
+          AppSnackbar.show(
+            'تم تحديد موقعك بدقة',
+            'تم ضبط موقعك على: $resolvedCity واحتساب المواقيت بدقة',
+            backgroundColor: const Color(0xFF0F5C4A),
+          );
           return;
         }
       }
@@ -121,7 +138,7 @@ class AdhanSettingsController extends GetxController with WidgetsBindingObserver
       debugPrint('Location detection error: $e');
       AppSnackbar.show(
         'خطأ في الموقع',
-        'تعذر الوصول إلى الموقع الحالي، يرجى اختياره يدوياً',
+        'تعذر الوصول إلى الموقع الحالي، يرجى اختياره يدوياً من القائمة',
         backgroundColor: Colors.red.shade800,
       );
     } finally {
@@ -244,12 +261,21 @@ class AdhanSettingsController extends GetxController with WidgetsBindingObserver
   }
 
   void setCity(String cityName, double lat, double lng) {
+    final res = OfflineCityResolver.resolve(lat, lng);
+    final calcMethod = res.isEgypt ? 'EGYPTIAN' : res.recommendedMethod;
+
     settings.value = settings.value.copyWith(
       cityName: cityName,
       latitude: lat,
       longitude: lng,
+      calculationMethod: calcMethod,
     );
     saveSettings();
+    AppSnackbar.show(
+      'تم تحديد المدينة',
+      'تم ضبط المواقيت لمدينة $cityName بنجاح',
+      backgroundColor: const Color(0xFF0F5C4A),
+    );
   }
 
   final isPlayingTestAdhan = false.obs;
