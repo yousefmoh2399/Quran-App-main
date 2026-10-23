@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+﻿import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quran_app_android/core/design/app_colors.dart';
@@ -317,7 +317,7 @@ class SettingsView extends StatelessWidget {
                   icon: Icons.phonelink_setup_rounded,
                   iconColor: Color(0xFF546E7A),
                   title: 'إصدار التطبيق',
-                  subtitle: '1.1.0 (الإصدار الشامل)',
+                  subtitle: '1.0.3 (الإصدار المحدث)',
                 ),
               ],
             ),

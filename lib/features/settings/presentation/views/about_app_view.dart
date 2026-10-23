@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/util/routes/routes.dart';
@@ -67,7 +67,7 @@ class AboutAppView extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'الإصدار 1.0.2 • رفيقك اليومي إلى الله',
+                    'الإصدار 1.0.3 • رفيقك اليومي إلى الله',
                     style: TextStyle(fontSize: 12, color: colors.textMuted),
                   ),
                 ],
